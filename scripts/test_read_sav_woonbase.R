@@ -239,3 +239,4 @@ cat(sprintf("\n═════════════════════�
 cat(sprintf("  Results: %d passed, %d failed\n", .n_pass, .n_fail))
 cat(sprintf("══════════════════════════════\n"))
 if (.n_fail == 0L) cat("  All tests passed!\n") else cat("  Some tests FAILED — check output above.\n")
+

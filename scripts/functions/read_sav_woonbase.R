@@ -139,6 +139,13 @@ suppressPackageStartupMessages({
   haven::labelled(iv, labels = mapping$labels, label = var_label)
 }
 
+# Label column in-place only if it is still present in dt (no-op otherwise)
+.lbl_if <- function(dt, col, mapping, var_label = NULL) {
+  if (col %in% names(dt))
+    set(dt, j = col, value = .lbl(dt[[col]], mapping, var_label))
+  invisible(dt)
+}
+
 
 # ── CBS population parameters ─────────────────────────────────────────────────
 
@@ -182,26 +189,52 @@ suppressPackageStartupMessages({
 
 #' Fetch Dutch population parameters from CBS StatLine via cbsodataR.
 #' Falls back to hardcoded 2023 values if the API is unavailable.
+#'
+#' Tables used:
+#'   37230ned  – Bevolkingsontwikkeling; regio           (population on 1 Jan)
+#'   71486ned  – Huishoudens; samenstelling, grootte, regio (HH counts + TYPHH)
+#'
+#' NOTE: cbsodataR v1.x named-argument dimension filters (e.g. RegioS = "NL01")
+#' fail when combined on the CBS OData endpoint.  We therefore fetch the full
+#' annual table and apply all dimension filters in R.
 woonbase_cbs_params <- function(year = 2023L) {
   result <- tryCatch({
     if (!requireNamespace("cbsodataR", quietly = TRUE))
       stop("cbsodataR not installed")
 
-    # Population on 1 January (table 37230ned)
-    pop <- cbsodataR::cbs_get_data(
-      "37230ned",
-      Geslacht = "T001038", Leeftijd = "10000",
-      Regio = "NL01", Perioden = paste0(year, "JJ00"),
-      select = c("Perioden","BevolkingOp1Januari_1"))
-    n_pers <- as.integer(pop$BevolkingOp1Januari_1[[1]])
+    yr_code <- paste0(year, "JJ00")
 
-    # Households (table 71488ned)
-    hh <- cbsodataR::cbs_get_data(
-      "71488ned",
-      Regio = "NL01", Perioden = paste0(year, "JJ00"),
-      select = c("Perioden","Huishoudenssamenstelling","TotaalHuishoudens_1"))
-    total_row <- hh[grepl("T001070|totaal", tolower(hh$Huishoudenssamenstelling)), ]
-    n_hh <- if (nrow(total_row) > 0L) as.integer(total_row$TotaalHuishoudens_1[[1]] * 1000L) else NA_integer_
+    # ---- Population on 1 January (table 37230ned) ----------------------------
+    # Column: BevolkingAanHetBeginVanDePeriode_1 (absolute count, not thousands)
+    pop_all <- cbsodataR::cbs_get_data("37230ned", Perioden = yr_code)
+    pop <- pop_all[trimws(pop_all$RegioS) == "NL01", ]
+    if (nrow(pop) == 0L) stop("37230ned: no NL01 row found for year ", year)
+    n_pers <- as.integer(pop$BevolkingAanHetBeginVanDePeriode_1[[1]])
+
+    # ---- Households: count + TYPHH proportions (table 71486ned) --------------
+    # Particuliere huishoudens; samenstelling en grootte, regio
+    # Dimension LeeftijdReferentiepersoon == "10000" is the all-ages total row.
+    hh_all <- cbsodataR::cbs_get_data("71486ned", Perioden = yr_code)
+    hh <- hh_all[trimws(hh_all$RegioS) == "NL01" &
+                 trimws(hh_all$LeeftijdReferentiepersoon) == "10000", ]
+    if (nrow(hh) == 0L) stop("71486ned: no NL01/totaal row found for year ", year)
+
+    n_hh <- as.integer(hh$TotaalParticuliereHuishoudens_1[[1]])
+
+    # Map 71486ned columns to TYPHH codes (particuliere HH only; excl type 8/9)
+    hh_1  <- as.numeric(hh$Eenpersoonshuishouden_2[[1]])          # Type 1
+    hh_2  <- as.numeric(hh$k_0Kinderen_7[[1]])                    # Type 2 (niet-geh paar z.k.)
+    hh_3  <- as.numeric(hh$k_0Kinderen_12[[1]])                   # Type 3 (geh paar z.k.)
+    hh_4  <- as.numeric(hh$TotaalNietGehuwdeParen_6[[1]]) - hh_2  # Type 4 (niet-geh paar m.k.)
+    hh_5  <- as.numeric(hh$TotaalGehuwdeParen_11[[1]])  - hh_3    # Type 5 (geh paar m.k.)
+    hh_6  <- as.numeric(hh$TotaalEenouderhuishoudens_16[[1]])      # Type 6
+    hh_7  <- as.numeric(hh$OverigHuishouden_20[[1]])               # Type 7
+
+    hh_tot_known <- hh_1 + hh_2 + hh_3 + hh_4 + hh_5 + hh_6 + hh_7
+
+    # Type 8 (institutioneel) is not in 71486ned; keep 2023 estimate and rescale
+    typhh_raw <- c("1"=hh_1,"2"=hh_2,"3"=hh_3,"4"=hh_4,"5"=hh_5,"6"=hh_6,"7"=hh_7)
+    typhh_p8  <- c(typhh_raw / hh_tot_known * (1 - 0.014), "8" = 0.014)
 
     if (anyNA(c(n_pers, n_hh))) stop("missing values in CBS response")
 
@@ -209,6 +242,7 @@ woonbase_cbs_params <- function(year = 2023L) {
     p$n_persons <- n_pers
     p$n_hh      <- n_hh
     p$n_obj     <- round(n_hh * 1.035)
+    p$typhh_p   <- typhh_p8
     message(sprintf("CBS population %d: %s persons, %s households",
                     year, format(n_pers, big.mark=","), format(n_hh, big.mark=",")))
     p
@@ -222,37 +256,30 @@ woonbase_cbs_params <- function(year = 2023L) {
 
 # ── Low-level ID generators ───────────────────────────────────────────────────
 
-.seq_id  <- function(n, w)    formatC(seq_len(n), width = w, flag = "0")
+# Option B: sprintf is ~3-5x faster than formatC for zero-padded integers
+.seq_id  <- function(n, w)    sprintf(paste0("%0", w, "d"), seq_len(n))
 .rand_id <- function(n, w) {
   # For widths ≤ 9 use sample.int for uniqueness; wider: combine two ranges
   if (w <= 9L) {
-    formatC(sample.int(10^w - 1L, n, replace = FALSE), width = w, flag = "0")
+    sprintf(paste0("%0", w, "d"), sample.int(10^w - 1L, n, replace = FALSE))
   } else {
     h <- ceiling(w / 2L)
-    paste0(formatC(sample.int(10^h - 1L, n, replace = TRUE), width = h, flag = "0"),
-           formatC(sample.int(10^(w-h) - 1L, n, replace = TRUE), width = w-h, flag = "0"))
+    paste0(sprintf(paste0("%0", h,   "d"), sample.int(10^h       - 1L, n, replace = TRUE)),
+           sprintf(paste0("%0", w-h, "d"), sample.int(10^(w - h) - 1L, n, replace = TRUE)))
   }
 }
 .rcat    <- function(n, v, p = NULL) sample(v, n, replace = TRUE, prob = p)
-.yyyymmdd <- function(d) format(d, "%Y%m%d")
+# Option C: avoid format.Date S3 dispatch overhead; POSIXlt decomposition + sprintf is faster
+.yyyymmdd <- function(d) {
+  lt <- as.POSIXlt(d)
+  sprintf("%04d%02d%02d", lt$year + 1900L, lt$mon + 1L, lt$mday)
+}
 .rdate   <- function(n, from, to)
   as.Date(sample(as.integer(from):as.integer(to), n, replace = TRUE), origin = "1970-01-01")
 
 
 # ── Spine generation ──────────────────────────────────────────────────────────
 
-.wb_plhh_for_hh <- function(typhh, hh_size, n_kids) {
-  switch(typhh,
-    "1" = "2",
-    "2" = rep("3", 2L),
-    "3" = rep("4", 2L),
-    "4" = c("5","5", rep("1", n_kids)),
-    "5" = c("6","6", rep("1", n_kids)),
-    "6" = c("7",     rep("1", n_kids)),
-    "7" = c("8",     rep("9", hh_size - 1L)),
-    "8" = rep("10", hh_size)
-  )
-}
 
 .wb_build_spine <- function(n_persons, params, seed, year) {
   set.seed(seed)
@@ -324,26 +351,48 @@ woonbase_cbs_params <- function(year = 2023L) {
     default = 0L)]
   setkey(dt_hh, HUISHOUDNR)
 
-  # ---- Persons ----------------------------------------------------------------
-  rows <- mapply(function(hh_id, typhh, hh_size, n_kids) {
-    plhh <- .wb_plhh_for_hh(typhh, hh_size, n_kids)
-    n    <- length(plhh)
-    is_kid  <- plhh == "1"
-    is_inst <- typhh == "8"
-    birth_yr <- ifelse(is_kid, year - sample(0:17, n, replace=TRUE),
-                  ifelse(is_inst, year - sample(20:85, n, replace=TRUE),
-                         year - sample(20:75, n, replace=TRUE)))
-    ref_flag <- c(if (is_inst) "9" else "1", rep(if (is_inst) "9" else "0", n-1L))
-    bs <- ifelse(plhh %in% c("4","6"), .rcat(n, c("H","P"), c(0.90,0.10)),
-           ifelse(plhh == "1", "O",
-             .rcat(n, c("O","H","S","W"), c(0.55,0.30,0.08,0.07))))
-    data.table(HUISHOUDNR=hh_id, PLHH=plhh, REFPERSOONHH=ref_flag,
-               GBAGeboorteJaar=birth_yr, GBABurgerlijkeStaat=bs,
-               GBAGeslachtsAanduiding=.rcat(n, names(params$geslacht_p), params$geslacht_p))
-  }, dt_hh$HUISHOUDNR, dt_hh$TYPHH, dt_hh$HHSize, dt_hh$NKids, SIMPLIFY=FALSE)
-
-  dt_pers <- rbindlist(rows)
+  # ---- Persons (vectorized) ---------------------------------------------------
+  # Expand: repeat each HH row once per person it contains
+  dt_pers <- dt_hh[rep(seq_len(N_HH), times = dt_hh$HHSize)]
+  dt_pers[, rank := rowid(HUISHOUDNR)]
   N_PERS_actual <- nrow(dt_pers)
+
+  # PLHH (positie in huishouden) derived from TYPHH and rank within household
+  dt_pers[, PLHH := fcase(
+    TYPHH == "1",                       "2",   # alleenstaande
+    TYPHH == "2",                       "3",   # niet-geh paar z.k.
+    TYPHH == "3",                       "4",   # geh paar z.k.
+    TYPHH == "4" & rank <= 2L,          "5",   # niet-geh paar m.k. — partners
+    TYPHH == "5" & rank <= 2L,          "6",   # geh paar m.k. — partners
+    TYPHH %in% c("4","5") & rank > 2L,  "1",   # kinderen
+    TYPHH == "6" & rank == 1L,          "7",   # eenouder
+    TYPHH == "6" & rank > 1L,           "1",   # kinderen
+    TYPHH == "7" & rank == 1L,          "8",   # ref overig huishouden
+    TYPHH == "7" & rank > 1L,           "9",   # overig lid
+    TYPHH == "8",                       "10"   # institutioneel lid
+  )]
+
+  # Reference person: first in non-institutional HH; all institutional = "9"
+  dt_pers[, REFPERSOONHH := fcase(
+    TYPHH == "8",  "9",
+    rank == 1L,    "1",
+    default =      "0"
+  )]
+
+  # Option D: subset-then-sample; avoids generating N_PERS_actual values per
+  # branch that fcase() would eagerly evaluate even for non-matching rows.
+
+  # Birth year by person role
+  dt_pers[,           GBAGeboorteJaar := year - sample(20L:75L, .N, replace = TRUE)]
+  dt_pers[PLHH == "1", GBAGeboorteJaar := year - sample(0L:17L,  .N, replace = TRUE)]
+  dt_pers[TYPHH == "8", GBAGeboorteJaar := year - sample(20L:85L, .N, replace = TRUE)]
+
+  # Civil status by position in household
+  dt_pers[,                          GBABurgerlijkeStaat := .rcat(.N, c("O","H","S","W"), c(0.55,0.30,0.08,0.07))]
+  dt_pers[PLHH %in% c("4","6"),     GBABurgerlijkeStaat := .rcat(.N, c("H","P"), c(0.90,0.10))]
+  dt_pers[PLHH == "1",              GBABurgerlijkeStaat := "O"]
+
+  dt_pers[, GBAGeslachtsAanduiding := .rcat(N_PERS_actual, names(params$geslacht_p), params$geslacht_p)]
   dt_pers[, RINPERSOON  := .rand_id(N_PERS_actual, 9L)]
   dt_pers[, RINPERSOONS := "R"]
   dt_pers[, AanvangWoonduur := .yyyymmdd(.rdate(N_PERS_actual, as.Date("2010-01-01"), jan1))]
@@ -361,18 +410,16 @@ woonbase_cbs_params <- function(year = 2023L) {
   dt_pers[, Indicator_PersoonIsAanwezig1Jan            := .rcat(N_PERS_actual, c("0","1"), c(0.01,0.99))]
   dt_pers[, Indicator_PersoonIsAanwezig31Dec           := .rcat(N_PERS_actual, c("0","1"), c(0.01,0.99))]
 
-  # Join HH fields onto persons
-  dt_pers <- merge(dt_pers,
-    dt_hh[, .(HUISHOUDNR, TYPHH, IMPUTATIECODEHH, DATUMAANVANGHH, RINOBJECTNUMMER, SOORTOBJECTNUMMER)],
-    by="HUISHOUDNR")
+  # Drop internal HH expansion columns not needed on persons
+  dt_pers[, c("HHSize", "NKids", "rank") := NULL]
 
-  # Actual household size (may differ slightly from target due to expansion)
+  # Household sizes from the expanded person table
   hh_sz <- dt_pers[, .(
     AantalPersonenPerHuishouden = .N,
     AantalKinderenPerHuishouden = sum(PLHH == "1")
-  ), by=HUISHOUDNR]
-  dt_pers <- merge(dt_pers, hh_sz, by="HUISHOUDNR")
-  dt_hh   <- merge(dt_hh,   hh_sz, by="HUISHOUDNR")
+  ), by = HUISHOUDNR]
+  dt_pers <- merge(dt_pers, hh_sz, by = "HUISHOUDNR")
+  dt_hh   <- merge(dt_hh,   hh_sz, by = "HUISHOUDNR")
   setkey(dt_pers, RINPERSOON)
 
   # Join spatial/characteristic object columns onto persons
@@ -385,8 +432,8 @@ woonbase_cbs_params <- function(year = 2023L) {
              "VBOOppervlakteKlasse","WOZWaardeObjectBAGKlasse"), "31Dec"))
   dt_pers <- merge(dt_pers, dt_obj[, ..obj_join_cols], by="RINOBJECTNUMMER")
 
-  # Reference person per household (first row per HUISHOUDNR in dt_pers)
-  dt_ref <- dt_pers[, .SD[1L], by=HUISHOUDNR]
+  # Option E: .I[1L] extracts row indices without copying .SD per group (~5x faster)
+  dt_ref <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1]
   dt_ref[, LeeftijdRefPersoon := as.integer(year - GBAGeboorteJaar)]
 
   # Build spine$hh: HH + ref-person + object data, one row per HUISHOUDNR
@@ -464,7 +511,7 @@ woonbase_cbs_params <- function(year = 2023L) {
 
 # ── File assembly ─────────────────────────────────────────────────────────────
 
-.wb_assemble <- function(file_type, spine) {
+.wb_assemble <- function(file_type, spine, col_q = NULL) {
 
   p  <- spine$pers
   h  <- spine$hh
@@ -472,6 +519,18 @@ woonbase_cbs_params <- function(year = 2023L) {
   yr <- spine$year
   j1 <- .yyyymmdd(spine$jan1)
   d31<- .yyyymmdd(spine$dec31)
+
+  # Trim dt to only the requested columns; no-op when col_q is NULL.
+  .subset_cols <- function(dt) {
+    if (is.null(col_q) || rlang::quo_is_null(col_q)) return(dt)
+    sel <- tryCatch(
+      names(tidyselect::eval_select(col_q, dt)),
+      error = function(e) {
+        cs <- eval(rlang::quo_get_expr(col_q))
+        intersect(as.character(cs), names(dt))
+      })
+    dt[, sel, with = FALSE]
+  }
 
   switch(file_type,
 
@@ -486,12 +545,13 @@ woonbase_cbs_params <- function(year = 2023L) {
                   BEGINGELDIGHEID=j1, EINDGELDIGHEID=d31,
                   REDENBEGINGELDIGHEID=.rcat(.N, REDEN_B, REDEN_P),
                   REDENEINDGELDIGHEID="NVT")]
-      dt[, TYPHH          := .lbl(TYPHH, .M$TYPHH, "Type huishouden")]
-      dt[, PLHH           := .lbl(PLHH,  .M$PLHH,  "Plaats in huishouden")]
-      dt[, REFPERSOONHH   := .lbl(REFPERSOONHH, .M$REFPERSOONHH, "Referentiepersoon")]
-      dt[, IMPUTATIECODEHH:= .lbl(IMPUTATIECODEHH, .M$IMPUTATIECODEHH, "Huishouden geimputeerd")]
-      dt[, INVOORRAAD     := .lbl(INVOORRAAD, .M$INVOORRAAD, "In de voorraad")]
-      dt[, VBOVOORRAADTYPE:= .lbl(VBOVOORRAADTYPE, .M$VBOVOORRAADTYPE, "Voorraadtype VBO")]
+      dt <- .subset_cols(dt)
+      .lbl_if(dt, "TYPHH",           .M$TYPHH,           "Type huishouden")
+      .lbl_if(dt, "PLHH",            .M$PLHH,            "Plaats in huishouden")
+      .lbl_if(dt, "REFPERSOONHH",    .M$REFPERSOONHH,    "Referentiepersoon")
+      .lbl_if(dt, "IMPUTATIECODEHH", .M$IMPUTATIECODEHH, "Huishouden geimputeerd")
+      .lbl_if(dt, "INVOORRAAD",      .M$INVOORRAAD,      "In de voorraad")
+      .lbl_if(dt, "VBOVOORRAADTYPE", .M$VBOVOORRAADTYPE, "Voorraadtype VBO")
       dt
     },
 
@@ -507,11 +567,10 @@ woonbase_cbs_params <- function(year = 2023L) {
                   RINOBJECTNUMMER1Jan=RINOBJECTNUMMER, RINOBJECTNUMMER31Dec=RINOBJECTNUMMER,
                   SOORTOBJECTNUMMER1Jan=SOORTOBJECTNUMMER, SOORTOBJECTNUMMER31Dec=SOORTOBJECTNUMMER,
                   AanvangWoonduur1Jan=AanvangWoonduur, AanvangWoonduur31Dec=AanvangWoonduur)]
+      dt <- .subset_cols(dt)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("GBAGeslachtsAanduiding",sfx),
-            value=.lbl(dt[[paste0("GBAGeslachtsAanduiding",sfx)]], .M$GESLACHT, "Geslachtsaanduiding GBA"))
-        set(dt, j=paste0("PLHH",sfx),
-            value=.lbl(dt[[paste0("PLHH",sfx)]], .M$PLHH, "Plaats in het huishouden"))
+        .lbl_if(dt, paste0("GBAGeslachtsAanduiding",sfx), .M$GESLACHT, "Geslachtsaanduiding GBA")
+        .lbl_if(dt, paste0("PLHH",sfx), .M$PLHH, "Plaats in het huishouden")
       }
       dt
     },
@@ -528,13 +587,11 @@ woonbase_cbs_params <- function(year = 2023L) {
                   AantalKinderenPerHuishouden31Dec=AantalKinderenPerHuishouden,
                   AantalPersonenPerHuishouden1Jan=AantalPersonenPerHuishouden,
                   AantalPersonenPerHuishouden31Dec=AantalPersonenPerHuishouden)]
+      dt <- .subset_cols(dt)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("TYPHH",sfx),
-            value=.lbl(dt[[paste0("TYPHH",sfx)]], .M$TYPHH, "Type huishouden"))
-        set(dt, j=paste0("IMPUTATIECODEHH",sfx),
-            value=.lbl(dt[[paste0("IMPUTATIECODEHH",sfx)]], .M$IMPUTATIECODEHH, "Huishouden geimputeerd"))
-        set(dt, j=paste0("RefPersoonHH",sfx),
-            value=.lbl(dt[[paste0("RefPersoonHH",sfx)]], .M$REFPERSOONHH, "Referentiepersoon"))
+        .lbl_if(dt, paste0("TYPHH",sfx), .M$TYPHH, "Type huishouden")
+        .lbl_if(dt, paste0("IMPUTATIECODEHH",sfx), .M$IMPUTATIECODEHH, "Huishouden geimputeerd")
+        .lbl_if(dt, paste0("RefPersoonHH",sfx), .M$REFPERSOONHH, "Referentiepersoon")
       }
       dt
     },
@@ -551,19 +608,15 @@ woonbase_cbs_params <- function(year = 2023L) {
                   VBOOppervlakte1Jan, VBOOppervlakte31Dec,
                   WOZWaardeObjectBAG1Jan, WOZWaardeObjectBAG31Dec,
                   VBOStatus1Jan, VBOStatus31Dec)]
+      dt <- .subset_cols(dt)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("VSLSoort",sfx),
-            value=.lbl(dt[[paste0("VSLSoort",sfx)]], .M$VSLSOORT, "Soort VSL"))
-        set(dt, j=paste0("VBOWoningType",sfx),
-            value=.lbl(dt[[paste0("VBOWoningType",sfx)]], .M$WONINGTYPE, "Woningtype VBO"))
-        set(dt, j=paste0("VBOStatus",sfx),
-            value=.lbl(dt[[paste0("VBOStatus",sfx)]], .M$VBOSTATUS, "Status VBO"))
+        .lbl_if(dt, paste0("VSLSoort",sfx), .M$VSLSOORT, "Soort VSL")
+        .lbl_if(dt, paste0("VBOWoningType",sfx), .M$WONINGTYPE, "Woningtype VBO")
+        .lbl_if(dt, paste0("VBOStatus",sfx), .M$VBOSTATUS, "Status VBO")
       }
       # Indicator_VBOIsNieuwbouw has only 1Jan and JJJJ-1 variants in this file
-      set(dt, j="Indicator_VBOIsNieuwbouw1Jan",
-          value=.lbl(dt[["Indicator_VBOIsNieuwbouw1Jan"]], .M$INDICATOR, "VBO is nieuwbouw"))
-      set(dt, j="Indicator_VBOIsNieuwbouwJJJJ-1",
-          value=.lbl(dt[["Indicator_VBOIsNieuwbouwJJJJ-1"]], .M$INDICATOR, "VBO is nieuwbouw (vorig jaar)"))
+      .lbl_if(dt, "Indicator_VBOIsNieuwbouw1Jan", .M$INDICATOR, "VBO is nieuwbouw")
+      .lbl_if(dt, "Indicator_VBOIsNieuwbouwJJJJ-1", .M$INDICATOR, "VBO is nieuwbouw (vorig jaar)")
       dt
     },
 
@@ -592,22 +645,20 @@ woonbase_cbs_params <- function(year = 2023L) {
                   VBOWoningType1Jan, VBOWoningType31Dec, VBOBouwJaarKlasse1Jan, VBOBouwJaarKlasse31Dec,
                   VBOOppervlakteKlasse1Jan, VBOOppervlakteKlasse31Dec,
                   WOZWaardeObjectBAGKlasse1Jan, WOZWaardeObjectBAGKlasse31Dec)]
+      dt <- .subset_cols(dt)
       ind_cols <- grep("^Indicator_", names(dt), value=TRUE)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("PLHH",sfx),   value=.lbl(dt[[paste0("PLHH",sfx)]],   .M$PLHH,    "Plaats in het huishouden"))
-        set(dt, j=paste0("TYPHH",sfx),  value=.lbl(dt[[paste0("TYPHH",sfx)]],  .M$TYPHH,   "Type huishouden"))
-        set(dt, j=paste0("GBAGeslachtsAanduiding",sfx),
-            value=.lbl(dt[[paste0("GBAGeslachtsAanduiding",sfx)]], .M$GESLACHT,"Geslachtsaanduiding GBA"))
-        set(dt, j=paste0("IMPUTATIECODEHH",sfx),
-            value=.lbl(dt[[paste0("IMPUTATIECODEHH",sfx)]], .M$IMPUTATIECODEHH,"Huishouden geimputeerd"))
-        set(dt, j=paste0("RefPersoonHH",sfx),
-            value=.lbl(dt[[paste0("RefPersoonHH",sfx)]], .M$REFPERSOONHH,"Referentiepersoon"))
-        set(dt, j=paste0("VSLSoort",sfx), value=.lbl(dt[[paste0("VSLSoort",sfx)]], .M$VSLSOORT,"Soort VSL"))
-        set(dt, j=paste0("VBOWoningType",sfx),  value=.lbl(dt[[paste0("VBOWoningType",sfx)]], .M$WONINGTYPE,"Woningtype VBO"))
-        set(dt, j=paste0("VBOBouwJaarKlasse",sfx), value=.lbl(dt[[paste0("VBOBouwJaarKlasse",sfx)]], .M$BOUWJAARKLASSE,"Bouwjaarklass VBO"))
-        set(dt, j=paste0("VBOOppervlakteKlasse",sfx), value=.lbl(dt[[paste0("VBOOppervlakteKlasse",sfx)]], .M$OPPKLASSE,"Oppervlakteklasse VBO"))
-        set(dt, j=paste0("WOZWaardeObjectBAGKlasse",sfx), value=.lbl(dt[[paste0("WOZWaardeObjectBAGKlasse",sfx)]], .M$WOZKLASSE,"WOZ waardeklasse"))
-        set(dt, j=paste0("TypeEigenaar",sfx), value=.lbl(dt[[paste0("TypeEigenaar",sfx)]], .M$TYPEIGENAAR,"Type eigenaar"))
+        .lbl_if(dt, paste0("PLHH",sfx),   .M$PLHH,    "Plaats in het huishouden")
+        .lbl_if(dt, paste0("TYPHH",sfx),  .M$TYPHH,   "Type huishouden")
+        .lbl_if(dt, paste0("GBAGeslachtsAanduiding",sfx), .M$GESLACHT, "Geslachtsaanduiding GBA")
+        .lbl_if(dt, paste0("IMPUTATIECODEHH",sfx), .M$IMPUTATIECODEHH, "Huishouden geimputeerd")
+        .lbl_if(dt, paste0("RefPersoonHH",sfx), .M$REFPERSOONHH, "Referentiepersoon")
+        .lbl_if(dt, paste0("VSLSoort",sfx), .M$VSLSOORT, "Soort VSL")
+        .lbl_if(dt, paste0("VBOWoningType",sfx), .M$WONINGTYPE, "Woningtype VBO")
+        .lbl_if(dt, paste0("VBOBouwJaarKlasse",sfx), .M$BOUWJAARKLASSE, "Bouwjaarklass VBO")
+        .lbl_if(dt, paste0("VBOOppervlakteKlasse",sfx), .M$OPPKLASSE, "Oppervlakteklasse VBO")
+        .lbl_if(dt, paste0("WOZWaardeObjectBAGKlasse",sfx), .M$WOZKLASSE, "WOZ waardeklasse")
+        .lbl_if(dt, paste0("TypeEigenaar",sfx), .M$TYPEIGENAAR, "Type eigenaar")
       }
       for (ic in ind_cols)
         set(dt, j=ic, value=.lbl(dt[[ic]], .M$INDICATOR, gsub("_"," ",ic)))
@@ -639,25 +690,19 @@ woonbase_cbs_params <- function(year = 2023L) {
                   VBOWoningType1Jan, VBOWoningType31Dec,
                   TypeEigenaar1Jan, TypeEigenaar31Dec,
                   Indicator_HHIsAanwezig1Jan="1", Indicator_HHIsAanwezig31Dec="1")]
+      dt <- .subset_cols(dt)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("TYPHH",sfx), value=.lbl(dt[[paste0("TYPHH",sfx)]], .M$TYPHH,"Type huishouden"))
-        set(dt, j=paste0("IMPUTATIECODEHH",sfx),
-            value=.lbl(dt[[paste0("IMPUTATIECODEHH",sfx)]], .M$IMPUTATIECODEHH,"Huishouden geimputeerd"))
-        set(dt, j=paste0("PLHHRefPersoon",sfx),
-            value=.lbl(dt[[paste0("PLHHRefPersoon",sfx)]], .M$PLHH,"Plaats ref persoon"))
-        set(dt, j=paste0("GBAGeslachtsaanduidingRefPersoon",sfx),
-            value=.lbl(dt[[paste0("GBAGeslachtsaanduidingRefPersoon",sfx)]], .M$GESLACHT,"Geslacht ref persoon"))
-        set(dt, j=paste0("VSLSoort",sfx), value=.lbl(dt[[paste0("VSLSoort",sfx)]], .M$VSLSOORT,"Soort VSL"))
-        set(dt, j=paste0("WOZWaardeObjectBAGKlasse",sfx),
-            value=.lbl(dt[[paste0("WOZWaardeObjectBAGKlasse",sfx)]], .M$WOZKLASSE,"WOZ waardeklasse"))
-        set(dt, j=paste0("VBOBouwJaarKlasse",sfx),
-            value=.lbl(dt[[paste0("VBOBouwJaarKlasse",sfx)]], .M$BOUWJAARKLASSE,"Bouwjaarklass VBO"))
-        set(dt, j=paste0("VBOOppervlakteKlasse",sfx),
-            value=.lbl(dt[[paste0("VBOOppervlakteKlasse",sfx)]], .M$OPPKLASSE,"Oppervlakteklasse VBO"))
-        set(dt, j=paste0("VBOWoningType",sfx), value=.lbl(dt[[paste0("VBOWoningType",sfx)]], .M$WONINGTYPE,"Woningtype VBO"))
-        set(dt, j=paste0("TypeEigenaar",sfx), value=.lbl(dt[[paste0("TypeEigenaar",sfx)]], .M$TYPEIGENAAR,"Type eigenaar"))
-        set(dt, j=paste0("Indicator_HHIsAanwezig",sfx),
-            value=.lbl(dt[[paste0("Indicator_HHIsAanwezig",sfx)]], .M$INDICATOR,"HH aanwezig"))
+        .lbl_if(dt, paste0("TYPHH",sfx), .M$TYPHH, "Type huishouden")
+        .lbl_if(dt, paste0("IMPUTATIECODEHH",sfx), .M$IMPUTATIECODEHH, "Huishouden geimputeerd")
+        .lbl_if(dt, paste0("PLHHRefPersoon",sfx), .M$PLHH, "Plaats ref persoon")
+        .lbl_if(dt, paste0("GBAGeslachtsaanduidingRefPersoon",sfx), .M$GESLACHT, "Geslacht ref persoon")
+        .lbl_if(dt, paste0("VSLSoort",sfx), .M$VSLSOORT, "Soort VSL")
+        .lbl_if(dt, paste0("WOZWaardeObjectBAGKlasse",sfx), .M$WOZKLASSE, "WOZ waardeklasse")
+        .lbl_if(dt, paste0("VBOBouwJaarKlasse",sfx), .M$BOUWJAARKLASSE, "Bouwjaarklass VBO")
+        .lbl_if(dt, paste0("VBOOppervlakteKlasse",sfx), .M$OPPKLASSE, "Oppervlakteklasse VBO")
+        .lbl_if(dt, paste0("VBOWoningType",sfx), .M$WONINGTYPE, "Woningtype VBO")
+        .lbl_if(dt, paste0("TypeEigenaar",sfx), .M$TYPEIGENAAR, "Type eigenaar")
+        .lbl_if(dt, paste0("Indicator_HHIsAanwezig",sfx), .M$INDICATOR, "HH aanwezig")
       }
       dt
     },
@@ -697,19 +742,18 @@ woonbase_cbs_params <- function(year = 2023L) {
                    Indicator_VSLIsAanwezig1Jan, Indicator_VSLIsAanwezig31Dec,
                    Indicator_VBOIsGesloopt, Indicator_VSLIsOntrokken,
                    Indicator_VBOIsTransformatie, Indicator_VBOIsNieuwbouw, Indicator_VSLIsNieuw)]
+      dt <- .subset_cols(dt)
       ind_cols <- grep("^Indicator_", names(dt), value=TRUE)
       for (sfx in c("1Jan","31Dec")) {
-        set(dt, j=paste0("VSLSoort",sfx), value=.lbl(dt[[paste0("VSLSoort",sfx)]], .M$VSLSOORT,"Soort VSL"))
-        set(dt, j=paste0("VBOWoningType",sfx),  value=.lbl(dt[[paste0("VBOWoningType",sfx)]], .M$WONINGTYPE,"Woningtype VBO"))
-        set(dt, j=paste0("VBOBouwJaarKlasse",sfx), value=.lbl(dt[[paste0("VBOBouwJaarKlasse",sfx)]], .M$BOUWJAARKLASSE,"Bouwjaarklass VBO"))
-        set(dt, j=paste0("VBOOppervlakteKlasse",sfx), value=.lbl(dt[[paste0("VBOOppervlakteKlasse",sfx)]], .M$OPPKLASSE,"Oppervlakteklasse VBO"))
-        set(dt, j=paste0("WOZWaardeObjectBAGKlasse",sfx), value=.lbl(dt[[paste0("WOZWaardeObjectBAGKlasse",sfx)]], .M$WOZKLASSE,"WOZ waardeklasse"))
-        set(dt, j=paste0("TypeEigenaar",sfx), value=.lbl(dt[[paste0("TypeEigenaar",sfx)]], .M$TYPEIGENAAR,"Type eigenaar"))
-        set(dt, j=paste0("TYPHH",sfx), value=.lbl(dt[[paste0("TYPHH",sfx)]], .M$TYPHH,"Type huishouden"))
-        set(dt, j=paste0("AantalPersonenPerVSLKlasse",sfx),
-            value=.lbl(dt[[paste0("AantalPersonenPerVSLKlasse",sfx)]], .M$PERSKLASSE,"Aantal personen per VSL klasse"))
-        set(dt, j=paste0("AantalHuishoudensPerVSLKlasse",sfx),
-            value=.lbl(dt[[paste0("AantalHuishoudensPerVSLKlasse",sfx)]], .M$HHKLASSE,"Aantal HH per VSL klasse"))
+        .lbl_if(dt, paste0("VSLSoort",sfx), .M$VSLSOORT, "Soort VSL")
+        .lbl_if(dt, paste0("VBOWoningType",sfx), .M$WONINGTYPE, "Woningtype VBO")
+        .lbl_if(dt, paste0("VBOBouwJaarKlasse",sfx), .M$BOUWJAARKLASSE, "Bouwjaarklass VBO")
+        .lbl_if(dt, paste0("VBOOppervlakteKlasse",sfx), .M$OPPKLASSE, "Oppervlakteklasse VBO")
+        .lbl_if(dt, paste0("WOZWaardeObjectBAGKlasse",sfx), .M$WOZKLASSE, "WOZ waardeklasse")
+        .lbl_if(dt, paste0("TypeEigenaar",sfx), .M$TYPEIGENAAR, "Type eigenaar")
+        .lbl_if(dt, paste0("TYPHH",sfx), .M$TYPHH, "Type huishouden")
+        .lbl_if(dt, paste0("AantalPersonenPerVSLKlasse",sfx), .M$PERSKLASSE, "Aantal personen per VSL klasse")
+        .lbl_if(dt, paste0("AantalHuishoudensPerVSLKlasse",sfx), .M$HHKLASSE, "Aantal HH per VSL klasse")
       }
       for (ic in ind_cols)
         set(dt, j=ic, value=.lbl(dt[[ic]], .M$INDICATOR, gsub("_"," ",ic)))
@@ -775,11 +819,11 @@ read_sav <- function(file,
                      seed         = 42L,
                      ...) {
 
+  col_q     <- enquo(col_select)
   file_type <- .wb_parse_file(file)
 
   # ── Fall through to haven for non-Woonbase files ──────────────────────────
   if (is.null(file_type)) {
-    col_q <- enquo(col_select)
     return(haven::read_sav(file, encoding=encoding, user_na=user_na,
                            col_select=!!col_q, skip=skip, n_max=n_max,
                            .name_repair=.name_repair, ...))
@@ -802,8 +846,8 @@ read_sav <- function(file,
     }
   }
 
-  # ── Assemble the requested file ──────────────────────────────────────────
-  dt <- .wb_assemble(file_type, .wb$spine)
+  # ── Assemble the requested file (col_select applied inside) ─────────────
+  dt <- .wb_assemble(file_type, .wb$spine, col_q = col_q)
 
   # ── Apply skip and n_max ─────────────────────────────────────────────────
   if (skip > 0L) {
@@ -811,19 +855,6 @@ read_sav <- function(file,
   }
   if (!is.infinite(n_max) && n_max < nrow(dt)) {
     dt <- dt[seq_len(as.integer(n_max))]
-  }
-
-  # ── Apply col_select (tidyselect or character) ───────────────────────────
-  col_q <- enquo(col_select)
-  if (!quo_is_null(col_q)) {
-    sel <- tryCatch(
-      names(tidyselect::eval_select(col_q, dt)),
-      error = function(e) {
-        # Fall back: interpret as character vector
-        cs <- eval(quo_get_expr(col_q))
-        intersect(as.character(cs), names(dt))
-      })
-    dt <- dt[, sel, with=FALSE]
   }
 
   # ── Return as tibble (matches haven::read_sav output class) ─────────────
