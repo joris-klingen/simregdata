@@ -21,7 +21,6 @@ sim_mdata/
 ├── output/figures/                   # Generated plots (gitignored)
 ├── scripts/
 │   ├── 000_project_init.R            # Shared package loads + directory setup
-│   ├── 010_import_micro_meta.R       # ODISSEI Dataverse metadata download
 │   ├── 030_analyse_woonbase.R        # 6 plots + 2 maps from joined Woonbase files
 │   ├── 031_housing_type_timeseries.R # Housing stock composition 2016–2024
 │   ├── 090_test_woonbase_import.R    # Phase timing + profvis flame graph

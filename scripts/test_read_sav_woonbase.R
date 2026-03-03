@@ -4,7 +4,7 @@
 
 source("scripts/functions/read_sav_woonbase.R")
 
-# ── Test helpers ---------------------------------------------------------------
+# Test helpers ----
 
 .n_pass <- 0L
 .n_fail <- 0L
@@ -22,7 +22,7 @@ ok <- function(cond, msg) {
 section <- function(title) cat(sprintf("\n── %s ──\n", title))
 
 
-# ── 1. Spine initialisation ---------------------------------------------------
+# Spine initialisation ----
 
 section("1. Spine initialisation")
 
@@ -48,7 +48,7 @@ ok(n_hh   >= 1500L,  "household count is plausible")
 ok(n_obj  == n_hh,   "object count equals household count")
 
 
-# ── 2. File name parsing -------------------------------------------------------
+# File name parsing ----
 
 section("2. File name parsing (various name formats)")
 
@@ -79,7 +79,7 @@ ok(is.null(.wb_parse_file("some_other_file.sav")), "non-Woonbase file -> NULL")
 ok(is.null(.wb_parse_file("/path/to/GBA2023.sav")), "GBA file -> NULL (no false match)")
 
 
-# ── 3. All seven file assemblers -----------------------------------------------
+# All seven file assemblers ----
 
 section("3. All seven file assemblers return non-empty tibbles")
 
@@ -103,7 +103,7 @@ for (f in file_keys) {
 }
 
 
-# ── 4. haven::labelled columns ------------------------------------------------
+# haven::labelled columns ----
 
 section("4. Categorical columns are haven::labelled integers")
 
@@ -130,7 +130,7 @@ check_labelled(results$populatie_hh,   "TYPHH1Jan",      "populatie_hh")
 check_labelled(results$populatie_obj,  "VSLSoort1Jan",   "populatie_obj")
 
 
-# ── 5. n_max and skip --------------------------------------------------------
+# n_max and skip ----
 
 section("5. n_max and skip")
 
@@ -143,7 +143,7 @@ ok(!identical(dt_100$RINPERSOON[1], dt_skip$RINPERSOON[1]),
    "skip shifts the starting row (different first RINPERSOON)")
 
 
-# ── 6. col_select (tidyselect) ------------------------------------------------
+# col_select (tidyselect) ----
 
 section("6. col_select")
 
@@ -163,7 +163,7 @@ dt_chr <- read_sav("woonbasekenmerkenhuis2023",
 ok(ncol(dt_chr) == 2L,  "col_select character vector: 2 columns")
 
 
-# ── 7. Cross-file join consistency -------------------------------------------
+# Cross-file join consistency ----
 
 section("7. Cross-file join consistency (shared spine IDs)")
 
@@ -192,7 +192,7 @@ ok(nrow(joined2) > 0L,
    sprintf("RINPERSOON join (sleutel ↔ populatie_pers): %d rows", nrow(joined2)))
 
 
-# ── 8. Uniqueness of key IDs -------------------------------------------------
+# Uniqueness of key IDs ----
 
 section("8. Uniqueness of key IDs")
 
@@ -201,7 +201,7 @@ ok(anyDuplicated(.wb$spine$hh$HUISHOUDNR)    == 0L, "HUISHOUDNR unique in spine"
 ok(anyDuplicated(.wb$spine$obj$RINOBJECTNUMMER) == 0L, "RINOBJECTNUMMER unique in spine")
 
 
-# ── 9. Value distribution sanity checks --------------------------------------
+# Value distribution sanity checks ----
 
 section("9. Value distribution sanity checks")
 
@@ -220,7 +220,7 @@ ok(is.numeric(woz),                           "kenmerken_obj: WOZWaardeObjectBAG
 ok(median(woz, na.rm=TRUE) > 50000,           "kenmerken_obj: median WOZ > 50k")
 
 
-# ── 10. woonbase_reset --------------------------------------------------------
+# woonbase_reset ----
 
 section("10. woonbase_reset clears cache")
 
@@ -233,7 +233,7 @@ ok(!is.null(.wb$spine),  "spine auto-rebuilt on read_sav after reset")
 ok(nrow(dt_auto) == 50L, "auto-init + n_max=50 returns 50 rows")
 
 
-# ── Summary -------------------------------------------------------------------
+# Summary ----
 
 cat(sprintf("\n══════════════════════════════\n"))
 cat(sprintf("  Results: %d passed, %d failed\n", .n_pass, .n_fail))

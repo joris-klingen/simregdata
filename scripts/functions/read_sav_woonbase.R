@@ -29,7 +29,7 @@ suppressPackageStartupMessages({
 })
 
 
-# ── Session cache ─────────────────────────────────────────────────────────────
+# Session cache ----
 
 .wb <- new.env(parent = emptyenv())
 .wb$spine  <- NULL   # list(pers, hh, obj)
@@ -38,7 +38,7 @@ suppressPackageStartupMessages({
 .wb$seed   <- NULL
 
 
-# ── Codelist mappings ─────────────────────────────────────────────────────────
+# Codelist mappings ----
 # Each entry: list(c2i = char→int lookup, labels = named int for haven::labelled)
 # c2i maps the character codes stored in the spine → integers for labelled class.
 # labels maps human-readable label → integer (goes into the haven labels attribute).
@@ -147,7 +147,7 @@ suppressPackageStartupMessages({
 }
 
 
-# ── CBS population parameters ─────────────────────────────────────────────────
+# CBS population parameters ----
 
 # Hardcoded 2023 figures (CBS StatLine; used as fallback)
 .wb_fallback <- function(year = 2023L) {
@@ -254,14 +254,18 @@ woonbase_cbs_params <- function(year = 2023L) {
 }
 
 
-# ── Low-level ID generators ───────────────────────────────────────────────────
+# Low-level ID generators ----
 
 # Option B: sprintf is ~3-5x faster than formatC for zero-padded integers
 .seq_id  <- function(n, w)    sprintf(paste0("%0", w, "d"), seq_len(n))
 .rand_id <- function(n, w) {
-  # For widths ≤ 9 use sample.int for uniqueness; wider: combine two ranges
+  # For widths ≤ 9 use sample.int; wider: combine two ranges
   if (w <= 9L) {
-    sprintf(paste0("%0", w, "d"), sample.int(10^w - 1L, n, replace = FALSE))
+    pool <- 10^w - 1L
+    unique <- n <= pool
+    if (!unique)
+      warning(sprintf(".rand_id: n=%d > pool=%d for width %d; IDs will not be unique", n, pool, w))
+    sprintf(paste0("%0", w, "d"), sample.int(pool, n, replace = !unique))
   } else {
     h <- ceiling(w / 2L)
     paste0(sprintf(paste0("%0", h,   "d"), sample.int(10^h       - 1L, n, replace = TRUE)),
@@ -278,7 +282,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   as.Date(sample(as.integer(from):as.integer(to), n, replace = TRUE), origin = "1970-01-01")
 
 
-# ── Spine generation ──────────────────────────────────────────────────────────
+# Spine generation ----
 
 
 .wb_build_spine <- function(n_persons, params, seed, year) {
@@ -478,7 +482,7 @@ woonbase_cbs_params <- function(year = 2023L) {
 }
 
 
-# ── File name parsing ─────────────────────────────────────────────────────────
+# File name parsing ----
 
 # Recognised file types (normalised to a key)
 .WB_FILES <- c(
@@ -509,7 +513,7 @@ woonbase_cbs_params <- function(year = 2023L) {
 }
 
 
-# ── File assembly ─────────────────────────────────────────────────────────────
+# File assembly ----
 
 .wb_assemble <- function(file_type, spine, col_q = NULL) {
 
@@ -721,9 +725,9 @@ woonbase_cbs_params <- function(year = 2023L) {
                    PandID1Jan, PandID31Dec,
                    VSLSoort1Jan, VSLSoort31Dec,
                    HUISHOUDNR1Jan=HUISHOUDNR, HUISHOUDNR31Dec=HUISHOUDNR,
-                   DATUMAANVANGHH1jan=DATUMAANVANGHH, DATUMAANVANGHH31Dec=DATUMAANVANGHH,
-                   RINPERSOONS_Ref1jan=RINPERSOONS_Ref2, RINPERSOONS_Ref31Dec=RINPERSOONS_Ref2,
-                   RINPERSOON_Ref1jan=RINPERSOON_Ref2,  RINPERSOON_Ref31Dec=RINPERSOON_Ref2,
+                   DATUMAANVANGHH1Jan=DATUMAANVANGHH, DATUMAANVANGHH31Dec=DATUMAANVANGHH,
+                   RINPERSOONS_Ref1Jan=RINPERSOONS_Ref2, RINPERSOONS_Ref31Dec=RINPERSOONS_Ref2,
+                   RINPERSOON_Ref1Jan=RINPERSOON_Ref2,  RINPERSOON_Ref31Dec=RINPERSOON_Ref2,
                    VBOWoningType1Jan, VBOWoningType31Dec,
                    VBOBouwJaarKlasse1Jan, VBOBouwJaarKlasse31Dec,
                    VBOOppervlakteKlasse1Jan, VBOOppervlakteKlasse31Dec,
@@ -763,7 +767,7 @@ woonbase_cbs_params <- function(year = 2023L) {
 }
 
 
-# ── Exported helpers ──────────────────────────────────────────────────────────
+# Exported helpers ----
 
 #' Pre-build the Woonbase spine and cache it for the session.
 #' Call this once before using read_sav() on Woonbase files.
@@ -786,7 +790,7 @@ woonbase_init <- function(year = 2023L, n = NULL, seed = 42L) {
 woonbase_reset <- function() { .wb$spine <- NULL; invisible(NULL) }
 
 
-# ── Main read_sav wrapper ─────────────────────────────────────────────────────
+# Main read_sav wrapper ----
 
 #' Read a CBS Woonbase file (synthetic) or any other .sav file (via haven).
 #'
@@ -822,14 +826,14 @@ read_sav <- function(file,
   col_q     <- enquo(col_select)
   file_type <- .wb_parse_file(file)
 
-  # ── Fall through to haven for non-Woonbase files ──────────────────────────
+  # Fall through to haven for non-Woonbase files
   if (is.null(file_type)) {
     return(haven::read_sav(file, encoding=encoding, user_na=user_na,
                            col_select=!!col_q, skip=skip, n_max=n_max,
                            .name_repair=.name_repair, ...))
   }
 
-  # ── Auto-initialise spine if needed ─────────────────────────────────────
+  # Auto-initialise spine if needed
   if (is.null(.wb$spine) || (!is.null(.wb$year) && .wb$year != year)) {
     if (is.infinite(n_max)) {
       message("n_max = Inf: fetching CBS population count for ", year, " and generating full spine.")
@@ -846,10 +850,10 @@ read_sav <- function(file,
     }
   }
 
-  # ── Assemble the requested file (col_select applied inside) ─────────────
+  # Assemble the requested file (col_select applied inside)
   dt <- .wb_assemble(file_type, .wb$spine, col_q = col_q)
 
-  # ── Apply skip and n_max ─────────────────────────────────────────────────
+  # Apply skip and n_max
   if (skip > 0L) {
     dt <- dt[seq_len(nrow(dt)) > min(skip, nrow(dt))]
   }
@@ -857,6 +861,6 @@ read_sav <- function(file,
     dt <- dt[seq_len(as.integer(n_max))]
   }
 
-  # ── Return as tibble (matches haven::read_sav output class) ─────────────
+  # Return as tibble (matches haven::read_sav output class)
   as_tibble(dt)
 }

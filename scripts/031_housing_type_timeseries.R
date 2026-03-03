@@ -23,7 +23,7 @@ theme_set(
 )
 
 
-# ── 1. Load Woonbase per year ──────────────────────────────────────────────────
+# Load Woonbase per year ----
 
 years <- 2016:2024
 message("Loading Woonbase for years ", min(years), "-", max(years), " ...")
@@ -34,7 +34,7 @@ message("Loading Woonbase for years ", min(years), "-", max(years), " ...")
 
 dt_list <- lapply(years, function(yr) {
 
-  woonbase_init(year = yr, n = 200000L, seed = 42L)
+  woonbase_init(year = yr, n = NULL, seed = 42L)
 
   dt <- as.data.table(read_sav(
     "woonbasepopulatieperso",
@@ -58,12 +58,12 @@ dt <- rbindlist(dt_list)
 message("  ", format(nrow(dt), big.mark = ","), " dwelling observations loaded")
 
 
-# ── 2. Aggregate to counts per year and type ───────────────────────────────────
+# Aggregate to counts per year and type ----
 
 dt_agg <- dt[, .N, by = .(year, woningtype)]
 
 
-# ── 3. Plot ────────────────────────────────────────────────────────────────────
+# Plot ----
 
 KLEUREN <- c("#004699", "#6cbd74", "#bed200", "#ff9100", "#009dec")
 

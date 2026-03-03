@@ -20,6 +20,7 @@ source("scripts/functions/read_sav_woonbase.R")
 
 dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
 
+YEAR  <- 2023L
 BLUE  <- "#2166AC"
 theme_set(
   theme_minimal(base_size = 11) +
@@ -29,12 +30,12 @@ theme_set(
 )
 
 
-# ── 1. Initialise spine ───────────────────────────────────────────────────────
+# Initialise spine ----
 
-woonbase_init(year = 2023L, n = 100000L, seed = 42L)
+woonbase_init(year = YEAR, n = 100000L, seed = 42L)
 
 
-# ── 2. Load files into data.table ─────────────────────────────────────────────
+# Load files into data.table ----
 
 message("Loading Woonbase files …")
 
@@ -74,7 +75,7 @@ dt_ko <- as.data.table(read_sav(
 ))
 
 
-# ── 3. Joins by reference ─────────────────────────────────────────────────────
+# Joins by reference ----
 
 message("Joining …")
 
@@ -96,7 +97,7 @@ dt_pp[
 #     RINPERSOON in kenmerken_hh identifies the household reference person.
 dt_kh[
   dt_kp[, .(RINPERSOON,
-            leeftijd_ref = 2023L - as.integer(GBAGeboorteJaar1Jan),
+            leeftijd_ref = YEAR - as.integer(GBAGeboorteJaar1Jan),
             geslacht_ref = as_factor(GBAGeslachtsAanduiding1Jan))],
   on  = "RINPERSOON",
   `:=`(leeftijd_ref = i.leeftijd_ref,
@@ -104,7 +105,7 @@ dt_kh[
 ]
 
 # 3c. Derive analysis columns (factor labels + age in years).
-dt_pp[, leeftijd     := 2023L - as.integer(GBAGeboorteJaar1Jan)]
+dt_pp[, leeftijd     := YEAR - as.integer(GBAGeboorteJaar1Jan)]
 dt_pp[, typhh_f      := as_factor(TYPHH1Jan)]
 dt_pp[, eigenaar_f   := as_factor(TypeEigenaar1Jan)]
 dt_pp[, woningtype_f := as_factor(VBOWoningType1Jan)]
@@ -124,7 +125,7 @@ setkey(dt_pp, RINOBJECTNUMMER1Jan)
 dt_obj <- dt_pp[, .SD[1L], by = RINOBJECTNUMMER1Jan]
 
 
-# ── 4. Plots ──────────────────────────────────────────────────────────────────
+# Plots ----
 
 message("Plotting …")
 
@@ -134,7 +135,7 @@ p1 <- ggplot(dt_pp[leeftijd >= 0 & leeftijd <= 100],
   geom_histogram(binwidth = 5, fill = BLUE, colour = "white", linewidth = 0.25) +
   scale_x_continuous(breaks = seq(0, 100, 10)) +
   labs(title    = "Leeftijdsverdeling bevolking",
-       subtitle = "Personen in Woonbase, 1 januari 2023",
+       subtitle = paste0("Personen in Woonbase, 1 januari ", YEAR),
        x = "Leeftijd (jaren)", y = "Aantal personen")
 
 print(p1)
@@ -154,7 +155,7 @@ p2 <- ggplot(hh_type_cnt,
                      labels = \(x) paste0(x, "%")) +
   scale_fill_brewer(palette = "Set2") +
   labs(title    = "Samenstelling huishoudens",
-       subtitle = "Aandeel per type, 1 januari 2023 (n huishoudens)",
+       subtitle = paste0("Aandeel per type, 1 januari ", YEAR),
        x = NULL, y = "Aandeel (%)")
 
 print(p2)
@@ -174,7 +175,7 @@ p3 <- ggplot(p3_data, aes(x = eigenaar_f, y = WOZ_exact / 1e3, fill = eigenaar_f
   scale_y_continuous(labels = \(x) paste0("\u20ac", x, "k")) +
   scale_fill_brewer(palette = "Set2") +
   labs(title    = "WOZ-waarde naar type eigenaar",
-       subtitle = "Woonruimten (één rij per VBO), 1 januari 2023",
+       subtitle = paste0("Woonruimten (één rij per VBO), 1 januari ", YEAR),
        x = NULL, y = "WOZ-waarde") +
   theme(legend.position   = "none",
         axis.text.x       = element_text(angle = 15, hjust = 1))
@@ -195,7 +196,7 @@ p4 <- ggplot(p4_data,
   geom_boxplot(outlier.alpha = 0.15, colour = "grey35", linewidth = 0.5) +
   scale_fill_brewer(palette = "Set1") +
   labs(title    = "Woonoppervlak naar woningtype",
-       subtitle = "Verblijfsobjecten, 1 januari 2023",
+       subtitle = paste0("Verblijfsobjecten, 1 januari ", YEAR),
        x = NULL, y = "Woonoppervlak (m\u00b2)") +
   theme(legend.position = "none",
         axis.text.x     = element_text(angle = 20, hjust = 1))
@@ -205,7 +206,7 @@ ggsave("output/figures/p4_opp_woningtype.png", p4, width = 7, height = 5, dpi = 
 message("  p4 done")
 
 # -- Plot 5: Build-year distribution (object level) ----------------------------
-p5 <- ggplot(dt_ko[VBOBouwjaar1Jan >= 1850 & VBOBouwjaar1Jan <= 2023],
+p5 <- ggplot(dt_ko[VBOBouwjaar1Jan >= 1850 & VBOBouwjaar1Jan <= YEAR],
              aes(VBOBouwjaar1Jan)) +
   geom_histogram(binwidth = 5, fill = BLUE, colour = "white", linewidth = 0.25) +
   geom_vline(xintercept = c(1945, 1975, 2000), linetype = "dashed",
@@ -215,7 +216,7 @@ p5 <- ggplot(dt_ko[VBOBouwjaar1Jan >= 1850 & VBOBouwjaar1Jan <= 2023],
            hjust = 0, vjust = 1.4, size = 2.8, colour = "grey45") +
   scale_x_continuous(breaks = seq(1850, 2025, 25)) +
   labs(title    = "Bouwjaar verblijfsobjecten",
-       subtitle = "Woonruimten in Woonbase, 1 januari 2023",
+       subtitle = paste0("Woonruimten in Woonbase, 1 januari ", YEAR),
        x = "Bouwjaar", y = "Aantal VBO's") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -236,7 +237,7 @@ p6 <- ggplot(p6_grp, aes(x = hh_size_cap, y = N, fill = typhh_f)) +
   scale_fill_brewer(palette = "Set2", name = NULL,
                     guide   = guide_legend(ncol = 2, keyheight = 0.8)) +
   labs(title    = "Huishoudensgrootte naar type",
-       subtitle = "Huishoudens in Woonbase, 1 januari 2023",
+       subtitle = paste0("Huishoudens in Woonbase, 1 januari ", YEAR),
        x = "Aantal personen per huishouden", y = "Aantal huishoudens") +
   theme(legend.position = "bottom",
         legend.text     = element_text(size = 7.5))
@@ -246,12 +247,12 @@ ggsave("output/figures/p6_hh_grootte_type.png", p6, width = 9, height = 6, dpi =
 message("  p6 done")
 
 
-# ── 5. Maps ───────────────────────────────────────────────────────────────────
+# Maps ----
 
 message("Loading gemeente boundaries …")
 
 gem_sf <- tryCatch(
-  sf::st_read("https://cartomap.github.io/nl/wgs84/gemeente_2023.geojson",
+  sf::st_read(sprintf("https://cartomap.github.io/nl/wgs84/gemeente_%d.geojson", YEAR),
               quiet = TRUE),
   error = function(e) {
     message("  Could not load shapefile: ", conditionMessage(e))
@@ -292,8 +293,8 @@ if (!is.null(gem_sf)) {
                          na.value = "grey88", name = "Personen",
                          labels   = \(x) format(round(x), big.mark = ".")) +
     labs(title    = "Bevolking per gemeente",
-         subtitle = "Personen in Woonbase, 1 januari 2023",
-         caption  = "Gemeentegrenzen: CBS 2023 via cartomap.github.io\nData: CBS Woonbase (gesimuleerd)") +
+         subtitle = paste0("Personen in Woonbase, 1 januari ", YEAR),
+         caption  = paste0("Gemeentegrenzen: CBS ", YEAR, " via cartomap.github.io\nData: CBS Woonbase (gesimuleerd)")) +
     map_theme
 
   print(map1)
@@ -309,8 +310,8 @@ if (!is.null(gem_sf)) {
                          name     = "WOZ\n(\u00d7\u20ac1k)",
                          labels   = \(x) paste0("\u20ac", round(x))) +
     labs(title    = "Gemiddelde WOZ-waarde per gemeente",
-         subtitle = "Woonruimten in Woonbase, 1 januari 2023",
-         caption  = "Gemeentegrenzen: CBS 2023 via cartomap.github.io\nData: CBS Woonbase (gesimuleerd)") +
+         subtitle = paste0("Woonruimten in Woonbase, 1 januari ", YEAR),
+         caption  = paste0("Gemeentegrenzen: CBS ", YEAR, " via cartomap.github.io\nData: CBS Woonbase (gesimuleerd)")) +
     map_theme
 
   print(map2)
