@@ -4,9 +4,13 @@
 #   map1 — Population per gemeente
 #   map2 — Population density per gemeente (persons / km²)
 
-source("scripts/000_project_init.R")
-source("scripts/functions/read_sav_woonbase.R")
-library(glue)
+suppressPackageStartupMessages({
+  library(data.table)
+  library(ggplot2)
+  library(haven)
+  library(simcbsradata)
+  library(glue)
+})
 
 YEAR <- 2020L
 log_message <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))

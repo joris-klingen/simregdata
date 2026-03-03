@@ -8,9 +8,8 @@ suppressPackageStartupMessages({
   library(data.table)
   library(ggplot2)
   library(haven)
+  library(simcbsradata)
 })
-
-source("scripts/functions/read_sav_woonbase.R")
 
 dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
 
