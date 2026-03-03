@@ -152,7 +152,7 @@ suppressPackageStartupMessages({
 # Path to the YAML file with year-specific CBS parameters.
 .WB_PARAMS_YAML <- file.path(
   if (exists(".wb_root")) .wb_root else ".",
-  "data", "woonbase_params.yaml"
+  "config", "woonbase_params.yaml"
 )
 
 # Fixed distributions that do not vary by year in the YAML.
