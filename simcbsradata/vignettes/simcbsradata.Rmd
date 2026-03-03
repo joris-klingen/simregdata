@@ -1,0 +1,131 @@
+---
+title: "Getting started with simcbsradata"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with simcbsradata}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## What is simcbsradata?
+
+`simcbsradata` generates synthetic CBS Woonbase microdata.
+It provides a drop-in `read_sav()` that intercepts CBS Woonbase file names
+and returns simulated data with the same structure as the real `.sav` files
+on the CBS remote-access environment.
+
+This lets you develop and test analysis scripts outside the CBS environment
+using realistic data with:
+
+- Correct Dutch population sizes (calibrated to CBS StatLine)
+- haven-compatible labelled columns (same as `haven::read_sav()`)
+- Consistent cross-file identifiers (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER)
+- All 7 Woonbase file types
+
+## Quick start
+
+```{r quick-start}
+library(haven)
+library(simcbsradata)   # load after haven so read_sav() masks haven::read_sav()
+
+# See what files are available
+woonbase_catalog()
+```
+
+### Initialise the spine
+
+The "spine" is a shared set of person, household, and object identifiers.
+Pre-building it ensures that joins between different Woonbase files always
+succeed.
+
+```{r init}
+# Build a small spine for development (5,000 persons)
+woonbase_init(year = 2023, n = 5000, seed = 42)
+```
+
+### Read synthetic Woonbase files
+
+Use `read_sav()` exactly as you would with real CBS microdata.
+Pass the exact CBS CamelCase dataset name:
+
+```{r read}
+# Read the person population file
+dt_pers <- read_sav("WoonbasePopulatiePersonen2023V1",
+                    n_max = 100,
+                    col_select = c(RINPERSOON, TYPHH1Jan, GBAGeboorteJaar1Jan))
+head(dt_pers)
+```
+
+```{r read-hh}
+# Read the household population file
+dt_hh <- read_sav("WoonbasePopulatieHuishoudens2023V1",
+                  n_max = 100,
+                  col_select = c(HUISHOUDNR1Jan, TYPHH1Jan, LeeftijdRefPersoon1Jan))
+head(dt_hh)
+```
+
+### Haven-compatible labels
+
+Categorical columns are returned as `haven::labelled` integers, just like
+real `.sav` files.  Use `haven::as_factor()` to convert to factors:
+
+```{r labels}
+# TYPHH1Jan is a labelled integer
+class(dt_pers$TYPHH1Jan)
+attr(dt_pers$TYPHH1Jan, "labels")
+
+# Convert to factor for analysis
+table(haven::as_factor(dt_pers$TYPHH1Jan))
+```
+
+### Cross-file joins
+
+Because the spine is shared, identifiers match across files:
+
+```{r joins}
+pers <- read_sav("WoonbasePopulatiePersonen2023V1",
+                 col_select = c(RINPERSOON, HUISHOUDNR1Jan))
+hh   <- read_sav("WoonbasePopulatieHuishoudens2023V1",
+                 col_select = c(HUISHOUDNR1Jan, TYPHH1Jan))
+
+joined <- merge(pers, hh, by = "HUISHOUDNR1Jan")
+cat(sprintf("Join match rate: %.1f%%\n", nrow(joined) / nrow(pers) * 100))
+```
+
+## The 7 Woonbase file types
+
+| Key | CBS dataset name | Unit | Description |
+|-----|-----------------|------|-------------|
+| sleutel | WoonbaseSleutelbestand | person | Key file linking persons to HH and objects |
+| kenmerken_pers | WoonbaseKenmerkenPersonen | person | Person characteristics (age, gender, civil status) |
+| kenmerken_hh | WoonbaseKenmerkenHuishoudens | household | Household characteristics (type, size) |
+| kenmerken_obj | WoonbaseKenmerkenWoonruimten | object | Dwelling characteristics (WOZ, floor area, build year) |
+| populatie_pers | WoonbasePopulatiePersonen | person | Person population (rich: includes HH + object attributes) |
+| populatie_hh | WoonbasePopulatieHuishoudens | household | Household population (includes ref-person + object attributes) |
+| populatie_obj | WoonbasePopulatieWoonruimten | object | Dwelling population (includes HH + ref-person attributes) |
+
+## Refreshing CBS parameters
+
+Population sizes and household type distributions are stored in a bundled
+YAML file.  To update them from CBS StatLine (requires `cbsodataR`):
+```r
+woonbase_update_params(years = 2016:2024, path = "my_params.yaml")
+```
+
+## Non-Woonbase files
+
+For any file name that doesn't match a Woonbase pattern, `read_sav()` falls
+through to `haven::read_sav()`.  This means you can use a single `read_sav()`
+call throughout your code:
+
+```r
+# This reads a real .sav file via haven
+dt <- read_sav("G:/MICRODATA/SOME_OTHER_FILE.sav")
+```
