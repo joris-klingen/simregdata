@@ -13,9 +13,10 @@ woonbase_cbs_params(year = 2023L)
 A named list of population parameters.
 }
 \description{
-Reads year-specific parameters (n_persons, n_hh, typhh_p, gem_weights)
-from the bundled \code{woonbase_params.yaml}.  Fixed distributions (eigenaar,
-woningtype, bouwjaar, etc.) are appended from internal defaults.
+Reads year-specific aggregate parameters (n_persons, n_hh, typhh_p) from
+\code{cbs_annual.yaml} and municipality weights from \code{gem_weights.csv}.
+Fixed distributions (eigenaar, woningtype, bouwjaar, etc.) are appended
+from internal defaults.
 }
 \details{
 If the requested year is missing from the YAML, the nearest available year

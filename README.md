@@ -15,7 +15,8 @@ Synthetic CBS Woonbase microdata generator for R. Mimics the exact file structur
 ```
 sim_mdata/
 ├── config/
-│   └── woonbase_params.yaml          # CBS population params per year (checked in)
+│   ├── cbs_annual.yaml               # CBS population counts + TYPHH per year
+│   └── gem_weights.csv               # Municipality population weights per year
 ├── data/
 │   ├── raw/mdata_pdfs_woonbase/      # 7 CBS variable documentation PDFs
 │   │   └── extracted/                # Plain-text extraction from each PDF
@@ -88,17 +89,17 @@ dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches exact CBS Woonbase dataset names (e.g. `WoonbasePopulatiePersonen2023V1`) and returns synthetic data; infers the simulation year from the filename. Falls through to `haven::read_sav()` for any other path. |
 | `woonbase_catalog(year)` | Prints all 7 available synthetic file names with column counts and observation units. |
 | `woonbase_reset()` | Clears the cached spine (forces a rebuild on the next call). |
-| `woonbase_update_params(years)` | Fetches CBS StatLine data via `cbsodataR` and writes to `config/woonbase_params.yaml`. Run once to refresh. |
+| `woonbase_update_params(years)` | Fetches CBS StatLine data via `cbsodataR` and writes to `config/cbs_annual.yaml` + `config/gem_weights.csv`. Run once to refresh. |
 
 ### Spine generation
 
 A single shared spine is built in three stages:
 
 1. **Objects** — N_HH dwelling records with spatial attributes (gemeente, wijk, buurt), WOZ value, floor area, build year, owner type, housing type.
-2. **Households** — N_HH household records linked to objects; TYPHH proportions from `config/woonbase_params.yaml`.
+2. **Households** — N_HH household records linked to objects; TYPHH proportions from `config/cbs_annual.yaml`.
 3. **Persons** — expanded from households using vectorised `rep()` + `rowid()`; person roles (PLHH), birth year, civil status, and movement indicators assigned by subsetting rather than eager `fcase()` to avoid generating wasted random draws.
 
-Population counts and household type proportions for each year (2016–2024) are read from `config/woonbase_params.yaml`. This file is pre-populated and checked into git, so **no API calls are made during data generation**. To refresh the YAML with the latest CBS data, run `woonbase_update_params()` once.
+Population counts and household type proportions for each year (2016–2024) are read from `config/cbs_annual.yaml`; municipality weights from `config/gem_weights.csv`. Both files are pre-populated and checked into git, so **no API calls are made during data generation**. To refresh with the latest CBS data, run `woonbase_update_params()` once.
 
 ### File assembly and lazy labelling
 
@@ -122,11 +123,11 @@ At 1 M persons on a modern laptop:
 
 Run `scripts/090_test_woonbase_import.R` in RStudio for a labelled timing breakdown and a `profvis` flame graph.
 
-## CBS parameters (YAML)
+## CBS parameters
 
-Year-specific population counts and household type distributions are stored in `config/woonbase_params.yaml` (checked into git). This means `read_sav()` never calls the CBS API during normal use.
+Year-specific population counts and household type distributions are stored in `config/cbs_annual.yaml`; municipality population weights in `config/gem_weights.csv` (both checked into git). This means `read_sav()` never calls the CBS API during normal use.
 
-To refresh the YAML (e.g. when CBS publishes a new year):
+To refresh (e.g. when CBS publishes a new year):
 
 ```r
 source("scripts/functions/read_sav_woonbase.R")

@@ -1,4 +1,4 @@
-# Fixed distributions that do not vary by year in the YAML.
+# Fixed distributions that do not vary by year.
 .wb_fixed_params <- function(year) {
   list(
     year        = year,
@@ -11,16 +11,17 @@
     geslacht_p  = c("1"=0.495,"2"=0.505),
     soortobj_p  = c(B=0.900,H=0.040,D=0.050,O=0.010),
     vslsoort_p  = c("1"=0.878,"2"=0.022,"3"=0.032,"4"=0.012,"5"=0.041,"6"=0.015),
-    gem_codes   = NULL,   # populated from YAML (all municipalities with weights)
+    gem_codes   = NULL,   # populated from gem_weights.csv
     gem_probs   = NULL
   )
 }
 
 #' Load CBS population parameters for a given year
 #'
-#' Reads year-specific parameters (n_persons, n_hh, typhh_p, gem_weights)
-#' from the bundled `woonbase_params.yaml`.  Fixed distributions (eigenaar,
-#' woningtype, bouwjaar, etc.) are appended from internal defaults.
+#' Reads year-specific aggregate parameters (n_persons, n_hh, typhh_p) from
+#' `cbs_annual.yaml` and municipality weights from `gem_weights.csv`.  Fixed
+#' distributions (eigenaar, woningtype, bouwjaar, etc.) are appended from
+#' internal defaults.
 #'
 #' If the requested year is missing from the YAML, the nearest available year
 #' is used with a warning.
@@ -29,10 +30,12 @@
 #' @return A named list of population parameters.
 #' @export
 woonbase_cbs_params <- function(year = 2023L) {
-  yaml_path <- .wb_params_yaml()
+
+  # ---- Annual aggregates (YAML) ----
+  yaml_path <- .wb_annual_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
     stop("Parameter file not found. Ensure simcbsradata is properly installed.",
-         "\nExpected: inst/config/woonbase_params.yaml")
+         "\nExpected: inst/config/cbs_annual.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)
   yr_key     <- as.character(year)
@@ -42,22 +45,32 @@ woonbase_cbs_params <- function(year = 2023L) {
   } else {
     avail   <- sort(as.integer(names(all_params)))
     nearest <- avail[which.min(abs(avail - year))]
-    warning(sprintf("Year %d not in woonbase_params.yaml; using nearest year %d.", year, nearest))
+    warning(sprintf("Year %d not in cbs_annual.yaml; using nearest year %d.", year, nearest))
     yr_data <- all_params[[as.character(nearest)]]
   }
 
   p <- .wb_fixed_params(year)
-  p$n_persons  <- as.integer(yr_data$n_persons)
-  p$n_hh       <- as.integer(yr_data$n_hh)
-  p$n_obj      <- round(p$n_hh * 1.035)
+  p$n_persons   <- as.integer(yr_data$n_persons)
+  p$n_hh        <- as.integer(yr_data$n_hh)
+  p$n_obj       <- round(p$n_hh * 1.035)
   p$avg_hh_size <- p$n_persons / p$n_hh
-  p$typhh_p    <- unlist(yr_data$typhh_p)
+  p$typhh_p     <- unlist(yr_data$typhh_p)
 
-  # Gemeente weights (code -> population proportion)
-  gw <- unlist(yr_data$gem_weights)
-  if (!is.null(gw) && length(gw) > 0L) {
-    p$gem_codes <- names(gw)
-    p$gem_probs <- as.numeric(gw)
+  # ---- Gemeente weights (CSV) ----
+  csv_path <- .wb_gem_weights_csv()
+  if (nzchar(csv_path) && file.exists(csv_path)) {
+    gw_all <- data.table::fread(csv_path, colClasses = c("character", "integer", "numeric"))
+    yr_filter <- as.integer(year)
+    gw <- gw_all[year == yr_filter]
+    if (nrow(gw) == 0L) {
+      # Fall back to nearest year in CSV
+      avail_csv <- sort(unique(gw_all$year))
+      nearest_csv <- avail_csv[which.min(abs(avail_csv - yr_filter))]
+      warning(sprintf("Year %d not in gem_weights.csv; using nearest year %d.", yr_filter, nearest_csv))
+      gw <- gw_all[year == nearest_csv]
+    }
+    p$gem_codes <- gw$gem_code
+    p$gem_probs <- gw$weight
   } else {
     # Fallback: 30 large municipalities, uniform
     p$gem_codes <- sprintf("%04d", c(363,599,518,344,503,268,307,392,398,400,
@@ -66,36 +79,50 @@ woonbase_cbs_params <- function(year = 2023L) {
     p$gem_probs <- NULL
   }
 
-  message(sprintf("CBS population %d: %s persons, %s households, %d gemeenten (from YAML)",
+  message(sprintf("CBS population %d: %s persons, %s households, %d gemeenten",
                   year, format(p$n_persons, big.mark=","),
                   format(p$n_hh, big.mark=","), length(p$gem_codes)))
   p
 }
 
-#' Fetch CBS StatLine data and write to woonbase_params.yaml
+#' Fetch CBS StatLine data and write to cbs_annual.yaml and gem_weights.csv
 #'
 #' Queries CBS StatLine via `cbsodataR` for population and household counts
-#' for the requested years, and writes the results to a YAML file.  Run once
-#' (or whenever CBS publishes new data) to refresh the parameters.
+#' for the requested years, and writes the results to two files:
+#' \itemize{
+#'   \item `cbs_annual.yaml` — n_persons, n_hh, typhh_p per year
+#'   \item `gem_weights.csv` — gemeente population weights per year
+#' }
+#' Run once (or whenever CBS publishes new data) to refresh the parameters.
 #'
 #' @param years Integer vector of years to fetch (default `2016:2024`).
-#' @param path  Path to write the YAML file.  Defaults to the package's
-#'   bundled copy (useful during development).  Pass a custom path when the
-#'   package is installed read-only.
-#' @return Invisibly, the full parameter list.
+#' @param config_dir  Directory to write files into.  Defaults to the package's
+#'   bundled `inst/config/` (useful during development).
+#' @return Invisibly, the full annual parameter list.
 #' @export
-woonbase_update_params <- function(years = 2016:2024, path = .wb_params_yaml()) {
+woonbase_update_params <- function(years = 2016:2024,
+                                   config_dir = dirname(.wb_annual_yaml())) {
   if (!requireNamespace("cbsodataR", quietly = TRUE))
     stop("Package 'cbsodataR' is required. Install with install.packages('cbsodataR').")
 
+  yaml_path <- file.path(config_dir, "cbs_annual.yaml")
+  csv_path  <- file.path(config_dir, "gem_weights.csv")
+
   # Load existing YAML if present (merge new years into it)
-  if (file.exists(path)) {
-    all_params <- yaml::read_yaml(path)
+  if (file.exists(yaml_path)) {
+    all_annual <- yaml::read_yaml(yaml_path)
   } else {
-    all_params <- list()
+    all_annual <- list()
   }
 
-  cat("Fetching CBS StatLine parameters (not data generation):\n")
+  # Load existing CSV if present
+  if (file.exists(csv_path)) {
+    gw_all <- data.table::fread(csv_path, colClasses = c("character", "integer", "numeric"))
+  } else {
+    gw_all <- data.table::data.table(gem_code = character(), year = integer(), weight = numeric())
+  }
+
+  cat("Fetching CBS StatLine parameters:\n")
 
   for (yr in years) {
     yr_code <- paste0(yr, "JJ00")
@@ -129,35 +156,43 @@ woonbase_update_params <- function(years = 2016:2024, path = .wb_params_yaml()) 
       typhh <- as.list(setNames(pct, as.character(1:7)))
       typhh[["8"]] <- 0.014
 
+      # Store annual aggregates
+      all_annual[[as.character(yr)]] <- list(
+        n_persons = n_pers,
+        n_hh      = n_hh,
+        typhh_p   = typhh
+      )
+
       # Gemeente population weights from the same 37230ned table
       gem_rows <- pop_all[grepl("^GM", trimws(pop_all$RegioS)), ]
       gem_rows$code <- sub("^GM", "", trimws(gem_rows$RegioS))
       gem_rows$pop  <- as.numeric(gem_rows$BevolkingAanHetBeginVanDePeriode_1)
       gem_rows <- gem_rows[!is.na(gem_rows$pop) & gem_rows$pop > 0, ]
-      gem_weights <- as.list(setNames(
-        round(gem_rows$pop / sum(gem_rows$pop), 6),
-        gem_rows$code
-      ))
+      weights <- round(gem_rows$pop / sum(gem_rows$pop), 6)
 
-      all_params[[as.character(yr)]] <- list(
-        n_persons   = n_pers,
-        n_hh        = n_hh,
-        typhh_p     = typhh,
-        gem_weights = gem_weights
-      )
+      # Replace this year's rows in the data.table
+      gw_all <- gw_all[year != yr]
+      gw_new <- data.table::data.table(gem_code = gem_rows$code, year = yr, weight = weights)
+      gw_all <- data.table::rbindlist(list(gw_all, gw_new))
+
       cat(sprintf("%s persons, %s households, %d gemeenten\n",
                   format(n_pers, big.mark = ","), format(n_hh, big.mark = ","),
-                  length(gem_weights)))
+                  nrow(gem_rows)))
     }, error = function(e) {
       cat(sprintf("FAILED (%s)\n", conditionMessage(e)))
     })
   }
 
-  # Sort by year and write
-  all_params <- all_params[order(as.integer(names(all_params)))]
+  # Sort and write YAML
+  all_annual <- all_annual[order(as.integer(names(all_annual)))]
+  dir.create(config_dir, recursive = TRUE, showWarnings = FALSE)
+  yaml::write_yaml(all_annual, yaml_path)
+  cat(sprintf("Written cbs_annual.yaml (%d years)\n", length(all_annual)))
 
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  yaml::write_yaml(all_params, path)
-  cat(sprintf("Written to %s (%d years)\n", path, length(all_params)))
-  invisible(all_params)
+  # Sort and write CSV
+  data.table::setorder(gw_all, year, gem_code)
+  data.table::fwrite(gw_all, csv_path)
+  cat(sprintf("Written gem_weights.csv (%d rows)\n", nrow(gw_all)))
+
+  invisible(all_annual)
 }

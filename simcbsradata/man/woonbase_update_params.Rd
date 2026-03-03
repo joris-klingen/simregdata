@@ -2,22 +2,25 @@
 % Please edit documentation in R/params.R
 \name{woonbase_update_params}
 \alias{woonbase_update_params}
-\title{Fetch CBS StatLine data and write to woonbase_params.yaml}
+\title{Fetch CBS StatLine data and write to cbs_annual.yaml and gem_weights.csv}
 \usage{
-woonbase_update_params(years = 2016:2024, path = .wb_params_yaml())
+woonbase_update_params(years = 2016:2024, config_dir = dirname(.wb_annual_yaml()))
 }
 \arguments{
 \item{years}{Integer vector of years to fetch (default \code{2016:2024}).}
 
-\item{path}{Path to write the YAML file.  Defaults to the package's
-bundled copy (useful during development).  Pass a custom path when the
-package is installed read-only.}
+\item{config_dir}{Directory to write files into.  Defaults to the package's
+bundled \code{inst/config/} (useful during development).}
 }
 \value{
-Invisibly, the full parameter list.
+Invisibly, the full annual parameter list.
 }
 \description{
 Queries CBS StatLine via \code{cbsodataR} for population and household counts
-for the requested years, and writes the results to a YAML file.  Run once
-(or whenever CBS publishes new data) to refresh the parameters.
+for the requested years, and writes the results to two files:
+\itemize{
+  \item \code{cbs_annual.yaml} -- n_persons, n_hh, typhh_p per year
+  \item \code{gem_weights.csv} -- gemeente population weights per year
+}
+Run once (or whenever CBS publishes new data) to refresh the parameters.
 }
