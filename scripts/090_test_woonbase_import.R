@@ -41,7 +41,7 @@ t_assemble_colq <- system.time(
 # End-to-end read_sav with col_select (includes n_max trim + as_tibble)
 t_readsav <- system.time({
   dt <- read_sav(
-    file       = "woonbasepopulatieperso",
+    file       = sprintf("WoonbasePopulatiePersonen%dV1", YR),
     col_select = c(RINOBJECTNUMMER1Jan, VBOWoningType1Jan)
   )
 })
@@ -146,7 +146,7 @@ woonbase_reset()
 p <- profvis({
   woonbase_init(year = YR, n = ceiling(N * 1.05), seed = 42L)
   dt <- read_sav(
-    file       = "woonbasepopulatieperso",
+    file       = sprintf("WoonbasePopulatiePersonen%dV1", YR),
     col_select = c(RINOBJECTNUMMER1Jan, VBOWoningType1Jan)
   )
 }, interval = 0.02)   # 20 ms sampling interval for finer resolution

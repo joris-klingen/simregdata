@@ -45,7 +45,7 @@ message("Loading Woonbase files …")
 # (persons) or 8 M (HH / objects) rows in the full register.
 
 dt_pp <- as.data.table(read_sav(
-  "woonbasepopulatieperso",
+  sprintf("WoonbasePopulatiePersonen%dV1", YEAR),
   n_max      = 50000L,
   col_select = c(RINPERSOON, RINOBJECTNUMMER1Jan, HUISHOUDNR1Jan,
                  GBAGeboorteJaar1Jan, GBAGeslachtsAanduiding1Jan,
@@ -54,7 +54,7 @@ dt_pp <- as.data.table(read_sav(
 ))
 
 dt_kh <- as.data.table(read_sav(
-  "woonbasekenmerkenhuis",
+  sprintf("WoonbaseKenmerkenHuishoudens%dV1", YEAR),
   n_max      = 50000L,
   col_select = c(HUISHOUDNR1Jan, RINPERSOON,
                  TYPHH1Jan, AantalPersonenPerHuishouden1Jan,
@@ -62,13 +62,13 @@ dt_kh <- as.data.table(read_sav(
 ))
 
 dt_kp <- as.data.table(read_sav(
-  "woonbasekenmerkenpers",
+  sprintf("WoonbaseKenmerkenPersonen%dV1", YEAR),
   n_max      = 50000L,
   col_select = c(RINPERSOON, GBAGeboorteJaar1Jan, GBAGeslachtsAanduiding1Jan)
 ))
 
 dt_ko <- as.data.table(read_sav(
-  "woonbasekenmerkenwoon",
+  sprintf("WoonbaseKenmerkenWoonruimten%dV1", YEAR),
   n_max      = 50000L,
   col_select = c(RINOBJECTNUMMER, VBOWoningType1Jan, VBOBouwjaar1Jan,
                  VBOOppervlakte1Jan, WOZWaardeObjectBAG1Jan)

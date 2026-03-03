@@ -42,7 +42,7 @@ sim_mdata/
 | `populatie_hh` | `woonbasepopulatiehuis` |
 | `populatie_obj` | `woonbasepopulatiewoon` |
 
-`read_sav()` recognises any realistic CBS file name (with or without year and version suffix, any case).
+`read_sav()` matches exact CBS dataset names (CamelCase, as used on the secure VM). The year and version suffix (`2023V1`) are parsed to auto-set the simulation year. Full VM paths, bare dataset names, and `.sav` extensions are all accepted.
 
 ## Quick start
 
@@ -55,15 +55,21 @@ woonbase_init(year = 2023L, n = 100000L, seed = 42L)
 # Read columns — works exactly like haven::read_sav() on the real CBS file,
 # including haven::labelled columns that convert with as_factor()
 dt <- read_sav(
-  "woonbasepopulatieperso",
+  "WoonbasePopulatiePersonen2023V1",
   col_select = c(RINPERSOON, VBOWoningType1Jan, GBAGeboorteJaar1Jan)
 )
 
+# Full CBS VM path works too — year is inferred from the filename
+dt <- read_sav(
+  "G:/BOUWENENWONEN/WOONBASEPOPULATIEPERSONEN/WoonbasePopulatiePersonen2023V1.sav",
+  col_select = c(RINPERSOON, VBOWoningType1Jan)
+)
+
 # Cross-file joins work because all files share the same spine IDs
-dt_pers <- as.data.table(read_sav("woonbasepopulatieperso",
+dt_pers <- as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
                                    col_select = c(RINPERSOON, HUISHOUDNR1Jan,
                                                   VBOWoningType1Jan)))
-dt_hh   <- as.data.table(read_sav("woonbasepopulatiehuis",
+dt_hh   <- as.data.table(read_sav("WoonbasePopulatieHuishoudens2023V1",
                                    col_select = c(HUISHOUDNR1Jan, TYPHH1Jan)))
 
 dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
@@ -76,7 +82,7 @@ dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
 | Function | Description |
 |----------|-------------|
 | `woonbase_init(year, n, seed)` | Builds and caches the shared spine (persons × households × objects). Call once before reading multiple files to guarantee consistent join keys. |
-| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Recognises Woonbase file names and returns synthetic data; falls through to `haven::read_sav()` for any other path. |
+| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches exact CBS Woonbase dataset names (e.g. `WoonbasePopulatiePersonen2023V1`) and returns synthetic data; infers the simulation year from the filename. Falls through to `haven::read_sav()` for any other path. |
 | `woonbase_reset()` | Clears the cached spine (forces a rebuild on the next call). |
 
 ### Spine generation

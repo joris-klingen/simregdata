@@ -17,7 +17,7 @@
 #   source("scripts/functions/read_sav_woonbase.R")
 #   woonbase_init(year = 2023, n = 100000)           # optional explicit init
 #   dt <- read_sav("WoonbaseKenmerkenHuishoudens2023V1")
-#   dt <- read_sav("woonbasepopulatiepersonen",
+#   dt <- read_sav("WoonbasePopulatiePersonen2023V1",
 #                  n_max = 5000, col_select = c(RINPERSOON, TYPHH1Jan))
 
 suppressPackageStartupMessages({
@@ -203,6 +203,7 @@ woonbase_cbs_params <- function(year = 2023L) {
       stop("cbsodataR not installed")
 
     yr_code <- paste0(year, "JJ00")
+    cat("  Fetching CBS StatLine parameters (not data generation):\n")
 
     # ---- Population on 1 January (table 37230ned) ----------------------------
     # Column: BevolkingAanHetBeginVanDePeriode_1 (absolute count, not thousands)
@@ -287,6 +288,10 @@ woonbase_cbs_params <- function(year = 2023L) {
 
 .wb_build_spine <- function(n_persons, params, seed, year) {
   set.seed(seed)
+  t0 <- proc.time()[["elapsed"]]
+  .stage <- function(i, n, label) {
+    message(sprintf("  [%d/%d] %s ...", i, n, label))
+  }
 
   jan1  <- as.Date(paste0(year, "-01-01"))
   dec31 <- as.Date(paste0(year, "-12-31"))
@@ -295,10 +300,11 @@ woonbase_cbs_params <- function(year = 2023L) {
   N_HH <- round(n_persons / params$avg_hh_size)
   N_OBJ <- N_HH
 
-  message(sprintf("  Building spine: %s persons / %s households / %s objects ...",
+  message(sprintf("  Building spine: %s persons / %s households / %s objects",
                   format(n_persons, big.mark=","),
                   format(N_HH, big.mark=","),
                   format(N_OBJ, big.mark=",")))
+  .stage(1L, 5L, "Objects")
 
   dt_obj <- data.table(
     RINOBJECTNUMMER   = .rand_id(N_OBJ, 16L),
@@ -334,6 +340,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   setkey(dt_obj, RINOBJECTNUMMER)
 
   # ---- Households -------------------------------------------------------------
+  .stage(2L, 5L, "Households")
   dt_hh <- data.table(
     HUISHOUDNR        = .seq_id(N_HH, 12L),
     TYPHH             = .rcat(N_HH, names(params$typhh_p), params$typhh_p),
@@ -356,6 +363,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   setkey(dt_hh, HUISHOUDNR)
 
   # ---- Persons (vectorized) ---------------------------------------------------
+  .stage(3L, 5L, "Persons")
   # Expand: repeat each HH row once per person it contains
   dt_pers <- dt_hh[rep(seq_len(N_HH), times = dt_hh$HHSize)]
   dt_pers[, rank := rowid(HUISHOUDNR)]
@@ -417,6 +425,8 @@ woonbase_cbs_params <- function(year = 2023L) {
   # Drop internal HH expansion columns not needed on persons
   dt_pers[, c("HHSize", "NKids", "rank") := NULL]
 
+  # ---- Aggregation + joins ----------------------------------------------------
+  .stage(4L, 5L, "Aggregation + joins")
   # Household sizes from the expanded person table
   hh_sz <- dt_pers[, .(
     AantalPersonenPerHuishouden = .N,
@@ -436,6 +446,8 @@ woonbase_cbs_params <- function(year = 2023L) {
              "VBOOppervlakteKlasse","WOZWaardeObjectBAGKlasse"), "31Dec"))
   dt_pers <- merge(dt_pers, dt_obj[, ..obj_join_cols], by="RINOBJECTNUMMER")
 
+  # ---- Reference persons + final assembly ------------------------------------
+  .stage(5L, 5L, "Reference persons + final assembly")
   # Option E: .I[1L] extracts row indices without copying .SD per group (~5x faster)
   dt_ref <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1]
   dt_ref[, LeeftijdRefPersoon := as.integer(year - GBAGeboorteJaar)]
@@ -472,10 +484,12 @@ woonbase_cbs_params <- function(year = 2023L) {
   dt_obj2[is.na(LeeftijdJongsteKindPerVSL), LeeftijdJongsteKindPerVSL := 99L]
   dt_obj2[is.na(AantalPersonenPerVSL), AantalPersonenPerVSL := 0L]
 
-  message(sprintf("  Spine ready: %s persons, %s households, %s objects.",
+  elapsed <- proc.time()[["elapsed"]] - t0
+  message(sprintf("  Spine ready: %s persons, %s households, %s objects (%.1f s)",
                   format(N_PERS_actual, big.mark=","),
                   format(N_HH, big.mark=","),
-                  format(N_OBJ, big.mark=",")))
+                  format(N_OBJ, big.mark=","),
+                  elapsed))
 
   list(pers=dt_pers, hh=dt_hh2, obj=dt_obj2,
        year=year, jan1=jan1, dec31=dec31)
@@ -486,22 +500,38 @@ woonbase_cbs_params <- function(year = 2023L) {
 
 # Recognised file types (normalised to a key)
 .WB_FILES <- c(
-  sleutel           = "woonbasesleutel",
-  kenmerken_pers    = "woonbasekenmerkenpers",
-  kenmerken_hh      = "woonbasekenmerkenhuis",
-  kenmerken_obj     = "woonbasekenmerkenwoon",
-  populatie_pers    = "woonbasepopulatieperso",
-  populatie_hh      = "woonbasepopulatiehuis",
-  populatie_obj     = "woonbasepopulatiewoon"
+  sleutel        = "WoonbaseSleutelbestand",
+  kenmerken_pers = "WoonbaseKenmerkenPersonen",
+  kenmerken_hh   = "WoonbaseKenmerkenHuishoudens",
+  kenmerken_obj  = "WoonbaseKenmerkenWoonruimten",
+  populatie_pers = "WoonbasePopulatiePersonen",
+  populatie_hh   = "WoonbasePopulatieHuishoudens",
+  populatie_obj  = "WoonbasePopulatieWoonruimten"
 )
 
+# Parse a CBS Woonbase file path into its file type key and year.
+# Accepts exact CBS names with or without path, year+version suffix, and .sav
+# extension.  Examples:
+#   "WoonbasePopulatiePersonen"                → list(type = "populatie_pers", year = NULL)
+#   "WoonbasePopulatiePersonen2023V1"          → list(type = "populatie_pers", year = 2023)
+#   "WoonbasePopulatiePersonen2023V1.sav"      → list(type = "populatie_pers", year = 2023)
+#   "G:/BOUWENENWONEN/.../WoonbasePopulatiePersonen2023V1.sav"
+#                                              → list(type = "populatie_pers", year = 2023)
+#   "some_other_file.sav"                      → NULL
 .wb_parse_file <- function(file) {
-  base <- tolower(tools::file_path_sans_ext(basename(file)))
-  base <- gsub("[_ \\-]", "", base)            # strip separators
-  base <- gsub("(\\d{4})(v\\d+)?$", "", base) # strip year + version suffix
-  for (key in names(.WB_FILES)) {
-    if (startsWith(base, .WB_FILES[[key]])) return(key)
+  base <- tools::file_path_sans_ext(basename(file))
+  # Extract year from {DatasetName}{YYYY}V{N} pattern
+  m <- regmatches(base, regexec("^(.+?)(\\d{4})V\\d+$", base))[[1L]]
+  if (length(m) == 3L) {
+    dataset_name <- m[2L]
+    file_year    <- as.integer(m[3L])
+  } else {
+    dataset_name <- base
+    file_year    <- NULL
   }
+  # Exact match against the 7 CBS dataset names (case-sensitive)
+  idx <- match(dataset_name, .WB_FILES)
+  if (!is.na(idx)) return(list(type = names(.WB_FILES)[idx], year = file_year))
   NULL
 }
 
@@ -789,6 +819,50 @@ woonbase_init <- function(year = 2023L, n = NULL, seed = 42L) {
 #' Clear the cached spine (forces rebuild on next read_sav call).
 woonbase_reset <- function() { .wb$spine <- NULL; invisible(NULL) }
 
+#' Print a catalog of all available synthetic Woonbase files.
+#'
+#' Shows the 7 CBS dataset names, their observation unit, column count, and
+#' the exact file name to pass to \code{read_sav()}.
+#'
+#' @param year  Year to display in example file names (default 2023).
+#' @examples
+#' woonbase_catalog()
+#' woonbase_catalog(year = 2024)
+woonbase_catalog <- function(year = 2023L) {
+
+  units <- c(sleutel = "person", kenmerken_pers = "person",
+             kenmerken_hh = "household", kenmerken_obj = "object",
+             populatie_pers = "person", populatie_hh = "household",
+             populatie_obj = "object")
+
+  ncols <- c(sleutel = 16L, kenmerken_pers = 20L, kenmerken_hh = 14L,
+             kenmerken_obj = 22L, populatie_pers = 40L, populatie_hh = 34L,
+             populatie_obj = 35L)
+
+  cat("\n")
+  cat("  CBS Woonbase — synthetic file catalog\n")
+  cat("  ======================================\n\n")
+  cat(sprintf("  %-30s  %-10s  %s  %s\n",
+              "Dataset name", "Unit", "Cols", "read_sav() file argument"))
+  cat(sprintf("  %-30s  %-10s  %s  %s\n",
+              "------------------------------", "----------", "----",
+              "----------------------------------------"))
+
+  for (key in names(.WB_FILES)) {
+    dsname   <- .WB_FILES[[key]]
+    filename <- sprintf("%s%dV1", dsname, year)
+    cat(sprintf("  %-30s  %-10s  %3d   %s\n",
+                dsname, units[[key]], ncols[[key]], filename))
+  }
+
+  cat(sprintf("\n  Full VM path example:\n"))
+  cat(sprintf("    G:/BOUWENENWONEN/%s/%s%dV1.sav\n",
+              toupper(.WB_FILES[["populatie_pers"]]),
+              .WB_FILES[["populatie_pers"]], year))
+  cat("\n")
+  invisible(NULL)
+}
+
 
 # Main read_sav wrapper ----
 
@@ -800,17 +874,20 @@ woonbase_reset <- function() { .wb$spine <- NULL; invisible(NULL) }
 #' no spine has been pre-built with \code{woonbase_init()}.
 #'
 #' @examples
-#' # Quick usage (auto-initialises a small spine)
+#' # Quick usage — year is inferred from the filename (auto-inits spine)
 #' dt <- read_sav("WoonbaseKenmerkenHuishoudens2023V1", n_max = 1000)
+#'
+#' # Full CBS VM path works too
+#' dt <- read_sav("G:/BOUWENENWONEN/WOONBASEKENMERKENPERSONEN/WoonbaseKenmerkenPersonen2024V1.sav")
 #'
 #' # Full Dutch population (slow; needs memory)
 #' woonbase_init(year = 2023)
-#' dt_pers <- read_sav("woonbasepopulatiepersonen")
-#' dt_hh   <- read_sav("woonbasepopulatiehuishoudens")
+#' dt_pers <- read_sav("WoonbasePopulatiePersonen2023V1")
+#' dt_hh   <- read_sav("WoonbasePopulatieHuishoudens2023V1")
 #' # → RINPERSOON / HUISHOUDNR join correctly between the two files
 #'
 #' # Column selection (tidyselect)
-#' dt <- read_sav("woonbasepopulatiepersonen", n_max = 5000,
+#' dt <- read_sav("WoonbasePopulatiePersonen2023V1", n_max = 5000,
 #'                col_select = c(RINPERSOON, TYPHH1Jan, GBAGeboorteJaar1Jan))
 read_sav <- function(file,
                      encoding     = NULL,
@@ -823,15 +900,19 @@ read_sav <- function(file,
                      seed         = 42L,
                      ...) {
 
-  col_q     <- enquo(col_select)
-  file_type <- .wb_parse_file(file)
+  col_q  <- enquo(col_select)
+  parsed <- .wb_parse_file(file)
 
   # Fall through to haven for non-Woonbase files
-  if (is.null(file_type)) {
+  if (is.null(parsed)) {
     return(haven::read_sav(file, encoding=encoding, user_na=user_na,
                            col_select=!!col_q, skip=skip, n_max=n_max,
                            .name_repair=.name_repair, ...))
   }
+
+  file_type <- parsed$type
+  # Year inferred from filename (e.g. 2023 from "...2023V1") takes precedence
+  if (!is.null(parsed$year)) year <- parsed$year
 
   # Auto-initialise spine if needed
   if (is.null(.wb$spine) || (!is.null(.wb$year) && .wb$year != year)) {

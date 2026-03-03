@@ -52,49 +52,58 @@ ok(n_obj  == n_hh,   "object count equals household count")
 
 section("2. File name parsing (various name formats)")
 
-names_should_match <- c(
-  "WoonbaseSleutelbestand2023V1"             = "sleutel",
-  "woonbasesleutelbestand"                   = "sleutel",
-  "WoonbaseKenmerkenPersonen2023V1"          = "kenmerken_pers",
-  "woonbasekenmerkenpers"                    = "kenmerken_pers",
-  "WoonbaseKenmerkenHuishoudens2022V2.sav"   = "kenmerken_hh",
-  "woonbasekenmerkenhuis"                    = "kenmerken_hh",
-  "WoonbaseKenmerkenWoonruimten2023"         = "kenmerken_obj",
-  "woonbasekenmerkenwoon"                    = "kenmerken_obj",
-  "WoonbasePopulatiePersonen2023V1"          = "populatie_pers",
-  "woonbasepopulatieperso"                   = "populatie_pers",
-  "WoonbasePopulatieHuishoudens2023"         = "populatie_hh",
-  "woonbasepopulatiehuis"                    = "populatie_hh",
-  "WoonbasePopulatieWoonruimten2023V1.sav"   = "populatie_obj",
-  "woonbasepopulatiewoon"                    = "populatie_obj"
+# .wb_parse_file() now returns list(type, year) for exact CBS dataset names.
+# Bare names (without year+version) also match; year is NULL in that case.
+
+names_should_match <- list(
+  "WoonbaseSleutelbestand2023V1"                  = list(type = "sleutel",        year = 2023L),
+  "WoonbaseSleutelbestand"                        = list(type = "sleutel",        year = NULL),
+  "WoonbaseKenmerkenPersonen2023V1"               = list(type = "kenmerken_pers", year = 2023L),
+  "WoonbaseKenmerkenPersonen"                     = list(type = "kenmerken_pers", year = NULL),
+  "WoonbaseKenmerkenHuishoudens2022V2.sav"        = list(type = "kenmerken_hh",   year = 2022L),
+  "WoonbaseKenmerkenHuishoudens"                  = list(type = "kenmerken_hh",   year = NULL),
+  "WoonbaseKenmerkenWoonruimten2023V1"            = list(type = "kenmerken_obj",  year = 2023L),
+  "WoonbasePopulatiePersonen2023V1"               = list(type = "populatie_pers", year = 2023L),
+  "WoonbasePopulatieHuishoudens2024V1"            = list(type = "populatie_hh",   year = 2024L),
+  "WoonbasePopulatieWoonruimten2023V1.sav"        = list(type = "populatie_obj",  year = 2023L),
+  # Full CBS VM path
+  "G:/BOUWENENWONEN/WOONBASEPOPULATIEPERSONEN/WoonbasePopulatiePersonen2023V1.sav"
+                                                  = list(type = "populatie_pers", year = 2023L)
 )
 
 for (nm in names(names_should_match)) {
-  parsed <- .wb_parse_file(nm)
-  ok(identical(parsed, names_should_match[[nm]]),
-     sprintf("parse '%s' -> '%s'", nm, names_should_match[[nm]]))
+  parsed   <- .wb_parse_file(nm)
+  expected <- names_should_match[[nm]]
+  ok(identical(parsed$type, expected$type) && identical(parsed$year, expected$year),
+     sprintf("parse '%s' -> type='%s', year=%s",
+             basename(nm), expected$type,
+             if (is.null(expected$year)) "NULL" else expected$year))
 }
 
+# Non-Woonbase files must return NULL
 ok(is.null(.wb_parse_file("some_other_file.sav")), "non-Woonbase file -> NULL")
 ok(is.null(.wb_parse_file("/path/to/GBA2023.sav")), "GBA file -> NULL (no false match)")
+# Old fuzzy/truncated names must NOT match (no shortcuts)
+ok(is.null(.wb_parse_file("woonbasepopulatieperso")), "truncated name -> NULL (no fuzzy match)")
+ok(is.null(.wb_parse_file("woonbasekenmerkenhuis")),  "lowercase shorthand -> NULL (no fuzzy match)")
 
 
 # All seven file assemblers ----
 
 section("3. All seven file assemblers return non-empty tibbles")
 
-file_keys <- c("woonbasesleutelbestand2023V1",
-               "woonbasekenmerkenpers2023",
-               "woonbasekenmerkenhuis2023",
-               "woonbasekenmerkenwoon2023",
-               "woonbasepopulatieperso2023",
-               "woonbasepopulatiehuis2023",
-               "woonbasepopulatiewoon2023")
+file_keys <- c("WoonbaseSleutelbestand2023V1",
+               "WoonbaseKenmerkenPersonen2023V1",
+               "WoonbaseKenmerkenHuishoudens2023V1",
+               "WoonbaseKenmerkenWoonruimten2023V1",
+               "WoonbasePopulatiePersonen2023V1",
+               "WoonbasePopulatieHuishoudens2023V1",
+               "WoonbasePopulatieWoonruimten2023V1")
 
 results <- list()
 for (f in file_keys) {
   dt <- tryCatch(read_sav(f), error = function(e) { cat("  ERROR:", conditionMessage(e), "\n"); NULL })
-  key <- .wb_parse_file(f)
+  key <- .wb_parse_file(f)$type
   ok(!is.null(dt),         sprintf("%s: no error", key))
   ok(is.data.frame(dt),    sprintf("%s: returns data frame", key))
   ok(nrow(dt) > 0L,        sprintf("%s: has rows (%d)", key, if(!is.null(dt)) nrow(dt) else 0L))
@@ -134,8 +143,8 @@ check_labelled(results$populatie_obj,  "VSLSoort1Jan",   "populatie_obj")
 
 section("5. n_max and skip")
 
-dt_100  <- read_sav("woonbasepopulatieperso", n_max = 100L)
-dt_skip <- read_sav("woonbasepopulatieperso", n_max = 100L, skip = 50L)
+dt_100  <- read_sav("WoonbasePopulatiePersonen2023V1", n_max = 100L)
+dt_skip <- read_sav("WoonbasePopulatiePersonen2023V1", n_max = 100L, skip = 50L)
 
 ok(nrow(dt_100)  == 100L, "n_max=100 returns exactly 100 rows")
 ok(nrow(dt_skip) == 100L, "skip=50, n_max=100 returns 100 rows")
@@ -147,7 +156,7 @@ ok(!identical(dt_100$RINPERSOON[1], dt_skip$RINPERSOON[1]),
 
 section("6. col_select")
 
-dt_sel <- read_sav("woonbasepopulatieperso",
+dt_sel <- read_sav("WoonbasePopulatiePersonen2023V1",
                    n_max = 200L,
                    col_select = c(RINPERSOON, TYPHH1Jan, GBAGeboorteJaar1Jan))
 
@@ -157,7 +166,7 @@ ok("TYPHH1Jan"       %in% names(dt_sel),     "col_select: TYPHH1Jan present")
 ok("GBAGeboorteJaar1Jan" %in% names(dt_sel), "col_select: GBAGeboorteJaar1Jan present")
 
 # Character vector selection
-dt_chr <- read_sav("woonbasekenmerkenhuis2023",
+dt_chr <- read_sav("WoonbaseKenmerkenHuishoudens2023V1",
                    n_max = 100L,
                    col_select = c("HUISHOUDNR1Jan", "TYPHH1Jan"))
 ok(ncol(dt_chr) == 2L,  "col_select character vector: 2 columns")
@@ -167,9 +176,9 @@ ok(ncol(dt_chr) == 2L,  "col_select character vector: 2 columns")
 
 section("7. Cross-file join consistency (shared spine IDs)")
 
-pers_ids <- read_sav("woonbasepopulatieperso",
+pers_ids <- read_sav("WoonbasePopulatiePersonen2023V1",
                      col_select = c(RINPERSOON, HUISHOUDNR1Jan))
-hh_ids   <- read_sav("woonbasepopulatiehuis",
+hh_ids   <- read_sav("WoonbasePopulatieHuishoudens2023V1",
                      col_select = c(HUISHOUDNR1Jan, TYPHH1Jan))
 
 ok(nrow(pers_ids) > 0L, "person file has rows for join test")
@@ -184,8 +193,8 @@ ok(match_rate > 0.95,
    sprintf("join match rate %.1f%% (> 95%%)", match_rate * 100))
 
 # Persons and sleutel share RINPERSOON
-sleutel_ids <- read_sav("woonbasesleutelbestand2023", col_select = c(RINPERSOON, HUISHOUDNR))
-pers_ids2   <- read_sav("woonbasepopulatieperso",    col_select = c(RINPERSOON, HUISHOUDNR1Jan))
+sleutel_ids <- read_sav("WoonbaseSleutelbestand2023V1", col_select = c(RINPERSOON, HUISHOUDNR))
+pers_ids2   <- read_sav("WoonbasePopulatiePersonen2023V1", col_select = c(RINPERSOON, HUISHOUDNR1Jan))
 
 joined2 <- merge(sleutel_ids, pers_ids2, by = "RINPERSOON")
 ok(nrow(joined2) > 0L,
@@ -228,7 +237,7 @@ woonbase_reset()
 ok(is.null(.wb$spine), "spine is NULL after reset")
 
 # Auto-init on next read_sav call (small n_max so it's fast)
-dt_auto <- read_sav("woonbasekenmerkenhuis2023", n_max = 50L)
+dt_auto <- read_sav("WoonbaseKenmerkenHuishoudens2023V1", n_max = 50L)
 ok(!is.null(.wb$spine),  "spine auto-rebuilt on read_sav after reset")
 ok(nrow(dt_auto) == 50L, "auto-init + n_max=50 returns 50 rows")
 

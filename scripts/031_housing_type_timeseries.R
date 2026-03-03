@@ -37,7 +37,7 @@ dt_list <- lapply(years, function(yr) {
   woonbase_init(year = yr, n = NULL, seed = 42L)
 
   dt <- as.data.table(read_sav(
-    "woonbasepopulatieperso",
+    sprintf("WoonbasePopulatiePersonen%dV1", yr),
     col_select = c(RINOBJECTNUMMER1Jan, VBOWoningType1Jan)
     # no n_max: full generated population
   ))
