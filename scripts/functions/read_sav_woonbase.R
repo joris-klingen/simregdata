@@ -149,109 +149,173 @@ suppressPackageStartupMessages({
 
 # CBS population parameters ----
 
-# Hardcoded 2023 figures (CBS StatLine; used as fallback)
-.wb_fallback <- function(year = 2023L) {
+# Path to the YAML file with year-specific CBS parameters.
+.WB_PARAMS_YAML <- file.path(
+  if (exists(".wb_root")) .wb_root else ".",
+  "data", "woonbase_params.yaml"
+)
+
+# Fixed distributions that do not vary by year in the YAML.
+.wb_fixed_params <- function(year) {
   list(
-    year       = year,
-    n_persons  = 17890220L,    # Bevolking op 1 jan 2023 (37230ned)
-    n_hh       = 8358000L,     # Particuliere + institutionele HH (71488ned)
-    n_obj      = 8133000L,     # Woningvoorraad (82249NED)
+    year        = year,
     avg_hh_size = 2.145,
-
-    # TYPHH proportions (CBS 71488ned, 2023)
-    typhh_p = c("1"=0.387,"2"=0.093,"3"=0.188,"4"=0.050,"5"=0.175,"6"=0.070,"7"=0.023,"8"=0.014),
-
-    # TypeEigenaar (CBS 83625NED, 2023)
-    eigenaar_p = c(C=0.295, V=0.121, E=0.559, O=0.015, `9`=0.010),
-
-    # VBOWoningType (BAG/CBS 2023)
+    eigenaar_p  = c(C=0.295, V=0.121, E=0.559, O=0.015, `9`=0.010),
     woningtype_p = c("00"=0.010,"01"=0.138,"02"=0.112,"03"=0.143,"04"=0.281,"05"=0.306,"99"=0.010),
-
-    # VBOBouwJaarKlasse 1-15 (CBS bouwjaarstatistieken 2023)
-    bouwjaar_p = c(0.048,0.063,0.070,0.085,0.103,0.121,0.121,0.101,0.097,0.088,0.050,0.036,0.010,0.004,0.003),
-
-    # WOZWaardeObjectBAGKlasse (CBS WOZ statistieken 2023)
-    woz_p = c("1"=0.096,"2"=0.241,"3"=0.248,"4"=0.176,"5"=0.103,"6"=0.064,"7"=0.058,"9"=0.014),
-
-    # VBOOppervlakteKlasse (CBS 2023)
-    opp_p = c("1"=0.082,"2"=0.228,"3"=0.256,"4"=0.224,"5"=0.142,"6"=0.058,"9"=0.010),
-
+    bouwjaar_p  = c(0.048,0.063,0.070,0.085,0.103,0.121,0.121,0.101,0.097,0.088,0.050,0.036,0.010,0.004,0.003),
+    woz_p       = c("1"=0.096,"2"=0.241,"3"=0.248,"4"=0.176,"5"=0.103,"6"=0.064,"7"=0.058,"9"=0.014),
+    opp_p       = c("1"=0.082,"2"=0.228,"3"=0.256,"4"=0.224,"5"=0.142,"6"=0.058,"9"=0.010),
     geslacht_p  = c("1"=0.495,"2"=0.505),
     soortobj_p  = c(B=0.900,H=0.040,D=0.050,O=0.010),
     vslsoort_p  = c("1"=0.878,"2"=0.022,"3"=0.032,"4"=0.012,"5"=0.041,"6"=0.015),
-
-    # Sample of Dutch gemeente codes for geographic realism
-    gem_codes = sprintf("%04d", c(363,599,518,344,503,268,307,392,398,400,
-                                   14,15,16,17,18,19,20,21,22,23,
-                                   106,114,153,163,171,175,180,193,196,200))
+    gem_codes   = NULL,   # populated from YAML (all municipalities with weights)
+    gem_probs   = NULL
   )
 }
 
-#' Fetch Dutch population parameters from CBS StatLine via cbsodataR.
-#' Falls back to hardcoded 2023 values if the API is unavailable.
+#' Load population parameters for a given year from data/woonbase_params.yaml.
 #'
-#' Tables used:
-#'   37230ned  – Bevolkingsontwikkeling; regio           (population on 1 Jan)
-#'   71486ned  – Huishoudens; samenstelling, grootte, regio (HH counts + TYPHH)
-#'
-#' NOTE: cbsodataR v1.x named-argument dimension filters (e.g. RegioS = "NL01")
-#' fail when combined on the CBS OData endpoint.  We therefore fetch the full
-#' annual table and apply all dimension filters in R.
+#' The YAML contains n_persons, n_hh, and typhh_p for each year (2016-2024).
+#' Fixed distributions (eigenaar, woningtype, bouwjaar, etc.) are appended
+#' from .wb_fixed_params().  If the year is missing from the YAML, the nearest
+#' available year is used with a warning.
 woonbase_cbs_params <- function(year = 2023L) {
-  result <- tryCatch({
-    if (!requireNamespace("cbsodataR", quietly = TRUE))
-      stop("cbsodataR not installed")
+  if (!requireNamespace("yaml", quietly = TRUE))
+    stop("Package 'yaml' is required to read woonbase_params.yaml. Install with install.packages('yaml').")
 
-    yr_code <- paste0(year, "JJ00")
-    cat("  Fetching CBS StatLine parameters (not data generation):\n")
+  yaml_path <- .WB_PARAMS_YAML
+  if (!file.exists(yaml_path))
+    stop("Parameter file not found: ", yaml_path,
+         "\nRun woonbase_update_params() to create it, or check your working directory.")
 
-    # ---- Population on 1 January (table 37230ned) ----------------------------
-    # Column: BevolkingAanHetBeginVanDePeriode_1 (absolute count, not thousands)
-    pop_all <- cbsodataR::cbs_get_data("37230ned", Perioden = yr_code)
-    pop <- pop_all[trimws(pop_all$RegioS) == "NL01", ]
-    if (nrow(pop) == 0L) stop("37230ned: no NL01 row found for year ", year)
-    n_pers <- as.integer(pop$BevolkingAanHetBeginVanDePeriode_1[[1]])
+  all_params <- yaml::read_yaml(yaml_path)
+  yr_key     <- as.character(year)
 
-    # ---- Households: count + TYPHH proportions (table 71486ned) --------------
-    # Particuliere huishoudens; samenstelling en grootte, regio
-    # Dimension LeeftijdReferentiepersoon == "10000" is the all-ages total row.
-    hh_all <- cbsodataR::cbs_get_data("71486ned", Perioden = yr_code)
-    hh <- hh_all[trimws(hh_all$RegioS) == "NL01" &
-                 trimws(hh_all$LeeftijdReferentiepersoon) == "10000", ]
-    if (nrow(hh) == 0L) stop("71486ned: no NL01/totaal row found for year ", year)
+  if (yr_key %in% names(all_params)) {
+    yr_data <- all_params[[yr_key]]
+  } else {
+    avail   <- sort(as.integer(names(all_params)))
+    nearest <- avail[which.min(abs(avail - year))]
+    warning(sprintf("Year %d not in woonbase_params.yaml; using nearest year %d.", year, nearest))
+    yr_data <- all_params[[as.character(nearest)]]
+  }
 
-    n_hh <- as.integer(hh$TotaalParticuliereHuishoudens_1[[1]])
+  p <- .wb_fixed_params(year)
+  p$n_persons  <- as.integer(yr_data$n_persons)
+  p$n_hh       <- as.integer(yr_data$n_hh)
+  p$n_obj      <- round(p$n_hh * 1.035)
+  p$avg_hh_size <- p$n_persons / p$n_hh
+  p$typhh_p    <- unlist(yr_data$typhh_p)
 
-    # Map 71486ned columns to TYPHH codes (particuliere HH only; excl type 8/9)
-    hh_1  <- as.numeric(hh$Eenpersoonshuishouden_2[[1]])          # Type 1
-    hh_2  <- as.numeric(hh$k_0Kinderen_7[[1]])                    # Type 2 (niet-geh paar z.k.)
-    hh_3  <- as.numeric(hh$k_0Kinderen_12[[1]])                   # Type 3 (geh paar z.k.)
-    hh_4  <- as.numeric(hh$TotaalNietGehuwdeParen_6[[1]]) - hh_2  # Type 4 (niet-geh paar m.k.)
-    hh_5  <- as.numeric(hh$TotaalGehuwdeParen_11[[1]])  - hh_3    # Type 5 (geh paar m.k.)
-    hh_6  <- as.numeric(hh$TotaalEenouderhuishoudens_16[[1]])      # Type 6
-    hh_7  <- as.numeric(hh$OverigHuishouden_20[[1]])               # Type 7
+  # Gemeente weights (code → population proportion)
+  gw <- unlist(yr_data$gem_weights)
+  if (!is.null(gw) && length(gw) > 0L) {
+    p$gem_codes <- names(gw)
+    p$gem_probs <- as.numeric(gw)
+  } else {
+    # Fallback: 30 large municipalities, uniform
+    p$gem_codes <- sprintf("%04d", c(363,599,518,344,503,268,307,392,398,400,
+                                      14,15,16,17,18,19,20,21,22,23,
+                                      106,114,153,163,171,175,180,193,196,200))
+    p$gem_probs <- NULL
+  }
 
-    hh_tot_known <- hh_1 + hh_2 + hh_3 + hh_4 + hh_5 + hh_6 + hh_7
+  message(sprintf("CBS population %d: %s persons, %s households, %d gemeenten (from YAML)",
+                  year, format(p$n_persons, big.mark=","),
+                  format(p$n_hh, big.mark=","), length(p$gem_codes)))
+  p
+}
 
-    # Type 8 (institutioneel) is not in 71486ned; keep 2023 estimate and rescale
-    typhh_raw <- c("1"=hh_1,"2"=hh_2,"3"=hh_3,"4"=hh_4,"5"=hh_5,"6"=hh_6,"7"=hh_7)
-    typhh_p8  <- c(typhh_raw / hh_tot_known * (1 - 0.014), "8" = 0.014)
+#' Fetch CBS StatLine data for years 2016-2024 and write to data/woonbase_params.yaml.
+#'
+#' Requires cbsodataR.  Run once (or whenever CBS publishes new data) to refresh
+#' the YAML.  After this, read_sav() reads parameters from the YAML without any
+#' API calls.
+#'
+#' @param years  Integer vector of years to fetch (default 2016:2024).
+#' @param path   Path to write the YAML file (default: data/woonbase_params.yaml).
+#'
+#' @examples
+#' woonbase_update_params()                  # refresh all years
+#' woonbase_update_params(years = 2025)      # add a new year
+woonbase_update_params <- function(years = 2016:2024, path = .WB_PARAMS_YAML) {
+  if (!requireNamespace("cbsodataR", quietly = TRUE))
+    stop("Package 'cbsodataR' is required. Install with install.packages('cbsodataR').")
+  if (!requireNamespace("yaml", quietly = TRUE))
+    stop("Package 'yaml' is required. Install with install.packages('yaml').")
 
-    if (anyNA(c(n_pers, n_hh))) stop("missing values in CBS response")
+  # Load existing YAML if present (merge new years into it)
+  if (file.exists(path)) {
+    all_params <- yaml::read_yaml(path)
+  } else {
+    all_params <- list()
+  }
 
-    p <- .wb_fallback(year)
-    p$n_persons <- n_pers
-    p$n_hh      <- n_hh
-    p$n_obj     <- round(n_hh * 1.035)
-    p$typhh_p   <- typhh_p8
-    message(sprintf("CBS population %d: %s persons, %s households",
-                    year, format(n_pers, big.mark=","), format(n_hh, big.mark=",")))
-    p
-  }, error = function(e) {
-    message("CBS API unavailable (", conditionMessage(e), "). Using hardcoded values for ", year, ".")
-    .wb_fallback(year)
-  })
-  result
+  cat("Fetching CBS StatLine parameters (not data generation):\n")
+
+  for (yr in years) {
+    yr_code <- paste0(yr, "JJ00")
+    cat(sprintf("  %d: ", yr))
+
+    tryCatch({
+      # Population on 1 January (table 37230ned)
+      pop_all <- cbsodataR::cbs_get_data("37230ned", Perioden = yr_code)
+      pop <- pop_all[trimws(pop_all$RegioS) == "NL01", ]
+      if (nrow(pop) == 0L) stop("no NL01 row")
+      n_pers <- as.integer(pop$BevolkingAanHetBeginVanDePeriode_1[[1]])
+
+      # Households (table 71486ned)
+      hh_all <- cbsodataR::cbs_get_data("71486ned", Perioden = yr_code)
+      hh <- hh_all[trimws(hh_all$RegioS) == "NL01" &
+                   trimws(hh_all$LeeftijdReferentiepersoon) == "10000", ]
+      if (nrow(hh) == 0L) stop("no NL01/totaal row")
+      n_hh <- as.integer(hh$TotaalParticuliereHuishoudens_1[[1]])
+
+      # TYPHH proportions
+      hh_1 <- as.numeric(hh$Eenpersoonshuishouden_2[[1]])
+      hh_2 <- as.numeric(hh$k_0Kinderen_7[[1]])
+      hh_3 <- as.numeric(hh$k_0Kinderen_12[[1]])
+      hh_4 <- as.numeric(hh$TotaalNietGehuwdeParen_6[[1]]) - hh_2
+      hh_5 <- as.numeric(hh$TotaalGehuwdeParen_11[[1]]) - hh_3
+      hh_6 <- as.numeric(hh$TotaalEenouderhuishoudens_16[[1]])
+      hh_7 <- as.numeric(hh$OverigHuishouden_20[[1]])
+      hh_tot <- hh_1 + hh_2 + hh_3 + hh_4 + hh_5 + hh_6 + hh_7
+      pct   <- round(c(hh_1, hh_2, hh_3, hh_4, hh_5, hh_6, hh_7) / hh_tot * (1 - 0.014), 4)
+
+      typhh <- as.list(setNames(pct, as.character(1:7)))
+      typhh[["8"]] <- 0.014
+
+      # Gemeente population weights from the same 37230ned table
+      gem_rows <- pop_all[grepl("^GM", trimws(pop_all$RegioS)), ]
+      gem_rows$code <- sub("^GM", "", trimws(gem_rows$RegioS))
+      gem_rows$pop  <- as.numeric(gem_rows$BevolkingAanHetBeginVanDePeriode_1)
+      gem_rows <- gem_rows[!is.na(gem_rows$pop) & gem_rows$pop > 0, ]
+      gem_weights <- as.list(setNames(
+        round(gem_rows$pop / sum(gem_rows$pop), 6),
+        gem_rows$code
+      ))
+
+      all_params[[as.character(yr)]] <- list(
+        n_persons   = n_pers,
+        n_hh        = n_hh,
+        typhh_p     = typhh,
+        gem_weights = gem_weights
+      )
+      cat(sprintf("%s persons, %s households, %d gemeenten\n",
+                  format(n_pers, big.mark = ","), format(n_hh, big.mark = ","),
+                  length(gem_weights)))
+    }, error = function(e) {
+      cat(sprintf("FAILED (%s)\n", conditionMessage(e)))
+    })
+  }
+
+  # Sort by year and write
+  all_params <- all_params[order(as.integer(names(all_params)))]
+
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  yaml::write_yaml(all_params, path)
+  cat(sprintf("Written to %s (%d years)\n", path, length(all_params)))
+  invisible(all_params)
 }
 
 
@@ -312,7 +376,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   )
 
   for (sfx in c("1Jan","31Dec")) {
-    gem <- .rcat(N_OBJ, params$gem_codes)
+    gem <- .rcat(N_OBJ, params$gem_codes, params$gem_probs)
     set(dt_obj, j = paste0("GemeenteCodeJJJJ",       sfx), value = gem)
     set(dt_obj, j = paste0("WijkCodeJJJJ",           sfx), value = paste0(gem, sprintf("%02d", sample(1:20, N_OBJ, replace=TRUE))))
     set(dt_obj, j = paste0("BuurtCodeJJJJ",          sfx), value = paste0(gem, sprintf("%04d", sample(1:200,N_OBJ, replace=TRUE))))

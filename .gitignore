@@ -12,3 +12,4 @@ Rplots.pdf
 # Generated outputs (large / reproducible from scripts)
 output/
 data/
+!data/woonbase_params.yaml

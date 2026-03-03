@@ -83,17 +83,19 @@ dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
 |----------|-------------|
 | `woonbase_init(year, n, seed)` | Builds and caches the shared spine (persons × households × objects). Call once before reading multiple files to guarantee consistent join keys. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches exact CBS Woonbase dataset names (e.g. `WoonbasePopulatiePersonen2023V1`) and returns synthetic data; infers the simulation year from the filename. Falls through to `haven::read_sav()` for any other path. |
+| `woonbase_catalog(year)` | Prints all 7 available synthetic file names with column counts and observation units. |
 | `woonbase_reset()` | Clears the cached spine (forces a rebuild on the next call). |
+| `woonbase_update_params(years)` | Fetches CBS StatLine data via `cbsodataR` and writes to `data/woonbase_params.yaml`. Run once to refresh. |
 
 ### Spine generation
 
 A single shared spine is built in three stages:
 
 1. **Objects** — N_HH dwelling records with spatial attributes (gemeente, wijk, buurt), WOZ value, floor area, build year, owner type, housing type.
-2. **Households** — N_HH household records linked to objects; TYPHH proportions optionally drawn from CBS table 71486ned via `cbsodataR`.
+2. **Households** — N_HH household records linked to objects; TYPHH proportions from `data/woonbase_params.yaml`.
 3. **Persons** — expanded from households using vectorised `rep()` + `rowid()`; person roles (PLHH), birth year, civil status, and movement indicators assigned by subsetting rather than eager `fcase()` to avoid generating wasted random draws.
 
-Population and household counts for the requested year are fetched from CBS StatLine (tables `37230ned` and `71486ned`) when `cbsodataR` is available; otherwise hardcoded 2023 fallback values are used.
+Population counts and household type proportions for each year (2016–2024) are read from `data/woonbase_params.yaml`. This file is pre-populated and checked into git, so **no API calls are made during data generation**. To refresh the YAML with the latest CBS data, run `woonbase_update_params()` once.
 
 ### File assembly and lazy labelling
 
@@ -117,9 +119,19 @@ At 1 M persons on a modern laptop:
 
 Run `scripts/090_test_woonbase_import.R` in RStudio for a labelled timing breakdown and a `profvis` flame graph.
 
-## CBS API (cbsodataR)
+## CBS parameters (YAML)
 
-`woonbase_cbs_params()` fetches live population and household counts from CBS StatLine. If the package is not installed or the API is unreachable the function silently falls back to hardcoded 2023 values. The relevant tables are:
+Year-specific population counts and household type distributions are stored in `data/woonbase_params.yaml` (checked into git). This means `read_sav()` never calls the CBS API during normal use.
+
+To refresh the YAML (e.g. when CBS publishes a new year):
+
+```r
+source("scripts/functions/read_sav_woonbase.R")
+woonbase_update_params()               # refreshes 2016-2024
+woonbase_update_params(years = 2025)   # add a single new year
+```
+
+The update function fetches from CBS StatLine tables:
 
 - `37230ned` — *Bevolking aan het begin van de periode* (population on 1 January)
 - `71486ned` — *Particuliere huishoudens; samenstelling en grootte* (household type distribution)
@@ -127,8 +139,8 @@ Run `scripts/090_test_woonbase_import.R` in RStudio for a labelled timing breakd
 ## Dependencies
 
 ```r
-install.packages(c("data.table", "haven", "rlang", "tidyselect",
-                   "ggplot2", "sf",        # for 030 / 031
-                   "cbsodataR",            # optional: live CBS counts
-                   "profvis"))             # optional: flame graph in 090
+install.packages(c("data.table", "haven", "rlang", "tidyselect", "yaml",
+                   "ggplot2", "sf", "glue",  # for 030 / 031 / 101
+                   "cbsodataR",              # optional: refresh YAML params
+                   "profvis"))               # optional: flame graph in 090
 ```
