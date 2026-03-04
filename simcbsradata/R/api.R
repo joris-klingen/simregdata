@@ -66,8 +66,10 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
     if (!is.null(gem_col)) {
       pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
       pw[is.na(pw)] <- 1.0
+      # Always sample with replacement — synthetic data, and
+      # sample.int(replace=FALSE, prob=) is O(n*k) in R
       idx <- sample.int(nrow(wb_spine$pers), n_records,
-        replace = n_records > nrow(wb_spine$pers), prob = pw)
+        replace = TRUE, prob = pw)
     } else {
       idx <- sample.int(nrow(wb_spine$pers), n_records,
         replace = n_records > nrow(wb_spine$pers))

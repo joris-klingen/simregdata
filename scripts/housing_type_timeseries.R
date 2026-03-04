@@ -35,7 +35,7 @@ message("Loading Woonbase for years ", min(years), "-", max(years), " ...")
 agg_list <- lapply(years, function(yr) {
 
   sim_reset()
-  woonbase_init(year = yr, n = 1e6, seed = 42L)
+  woonbase_init(year = yr, n = NULL, seed = 42L)
 
   # Read from KenmerkenWoonruimten (object-level) — already one row per
   # dwelling, and VBOWoningType lives on the raw obj spine so no lazy

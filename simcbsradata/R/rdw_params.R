@@ -138,18 +138,21 @@ rdw_update_params <- function(years = 2019:2025,
         fuel_total <- sum(fuel_raw)
         fuel_p <- round(fuel_raw / fuel_total, 4)
 
-        # Approximate PHEV (A) and HEV (B) fleet shares by year
-        # Source: RDW open data trends; split from Benzine
+        # PHEV and HEV fleet shares by year (split from CBS Benzine total)
+        # PHEV: CBS "Meer dan 1 miljoen stekkerauto's" (2025) + "Wie rijdt
+        #   er elektrisch?" (2023) — exact BEV/PHEV counts per 1 Jan
+        # HEV: CBS reports ~700k in 2023, +24%/yr growth; earlier years
+        #   estimated from RAI Kerncijfers / fleet composition reports
         phev_hev <- list(
           "2018" = c(A = 0.0090, B = 0.0120),
-          "2019" = c(A = 0.0110, B = 0.0170),
-          "2020" = c(A = 0.0130, B = 0.0230),
-          "2021" = c(A = 0.0150, B = 0.0320),
-          "2022" = c(A = 0.0170, B = 0.0430),
-          "2023" = c(A = 0.0200, B = 0.0550),
-          "2024" = c(A = 0.0220, B = 0.0650),
-          "2025" = c(A = 0.0240, B = 0.0750),
-          "2026" = c(A = 0.0260, B = 0.0850))
+          "2019" = c(A = 0.0111, B = 0.0200),
+          "2020" = c(A = 0.0105, B = 0.0280),
+          "2021" = c(A = 0.0113, B = 0.0380),
+          "2022" = c(A = 0.0160, B = 0.0500),
+          "2023" = c(A = 0.0205, B = 0.0600),
+          "2024" = c(A = 0.0292, B = 0.0750),
+          "2025" = c(A = 0.0403, B = 0.0900),
+          "2026" = c(A = 0.0500, B = 0.1050))
         yr_str <- as.character(yr)
         if (yr_str %in% names(phev_hev)) {
           ab <- phev_hev[[yr_str]]

@@ -22,7 +22,7 @@ dir.create("plots", showWarnings = FALSE)
 log_msg <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))
 
 YEARS  <- c(2010:2025)
-N_PERS <- 1e4
+N_PERS <- 1e6
 BLUE   <- "#2166AC"
 
 theme_set(

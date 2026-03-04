@@ -38,10 +38,12 @@
     data.table::set(dt_obj, j = paste0("VBOOppervlakteKlasse",   sfx), value = .rcat(N_OBJ, names(params$opp_p),       params$opp_p))
     data.table::set(dt_obj, j = paste0("TypeEigenaar",           sfx), value = .rcat(N_OBJ, names(params$eigenaar_p),  params$eigenaar_p))
     data.table::set(dt_obj, j = paste0("VBOBouwjaar",            sfx), value = sample(1850L:year, N_OBJ, replace=TRUE))
-    data.table::set(dt_obj, j = paste0("VBOOppervlakte",         sfx), value = as.integer(pmax(15L, round(stats::rlnorm(N_OBJ, log(85), 0.45)))))
+    opp_vec <- as.integer(pmax(15L, round(stats::rlnorm(N_OBJ, log(85), 0.45))))
+    data.table::set(dt_obj, j = paste0("VBOOppervlakte",         sfx), value = opp_vec)
 
-    # WOZ: per-municipality mean from StatLine, lognormal with fixed sd
-    # E[X] = exp(mu + sd^2/2) => mu = log(target_mean) - sd^2/2
+    # WOZ: per-municipality mean from StatLine, conditional on dwelling size
+    # Base: E[X] = exp(mu + sd^2/2) => mu = log(target_mean) - sd^2/2
+    # Size shift: beta * log(opp / 85) — larger dwellings get higher WOZ
     if (!is.null(params$woz_gem_means)) {
       woz_mean <- params$woz_gem_means[gem]
       woz_mean[is.na(woz_mean)] <- params$woz_national_mean
@@ -49,7 +51,8 @@
     } else {
       woz_mu <- rep(log(params$woz_national_mean) - woz_sd^2 / 2, N_OBJ)
     }
-    woz_val <- round(stats::rlnorm(N_OBJ, woz_mu, woz_sd), -3L)
+    woz_mu <- woz_mu + 0.8 * log(opp_vec / 85)
+    woz_val <- round(stats::rlnorm(N_OBJ, woz_mu, woz_sd * 0.7), -3L)
     data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAG",      sfx), value = woz_val)
     data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAGKlasse", sfx), value = .woz_to_klasse(woz_val))
 
