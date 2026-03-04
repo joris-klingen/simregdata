@@ -19,7 +19,7 @@
 #' Load CBS population parameters for a given year
 #'
 #' Reads year-specific aggregate parameters (n_persons, n_hh, typhh_p) from
-#' `cbs_annual.yaml` and municipality weights from `gem_weights.csv`.  Fixed
+#' `params.yaml` and municipality weights from `gem_weights.csv`.  Fixed
 #' distributions (eigenaar, woningtype, bouwjaar, etc.) are appended from
 #' internal defaults.
 #'
@@ -35,7 +35,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   yaml_path <- .wb_annual_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
     stop("Parameter file not found. Ensure simcbsradata is properly installed.",
-         "\nExpected: inst/config/cbs_annual.yaml")
+         "\nExpected: inst/config/datasets/woonbase/params.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)
   yr_key     <- as.character(year)
@@ -45,7 +45,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   } else {
     avail   <- sort(as.integer(names(all_params)))
     nearest <- avail[which.min(abs(avail - year))]
-    warning(sprintf("Year %d not in cbs_annual.yaml; using nearest year %d.", year, nearest))
+    warning(sprintf("Year %d not in params.yaml; using nearest year %d.", year, nearest))
     yr_data <- all_params[[as.character(nearest)]]
   }
 
@@ -79,18 +79,38 @@ woonbase_cbs_params <- function(year = 2023L) {
     p$gem_probs <- NULL
   }
 
+  # ---- WOZ means per gemeente (CSV) ----
+  woz_csv <- .wb_woz_means_csv()
+  if (nzchar(woz_csv) && file.exists(woz_csv)) {
+    woz_all <- data.table::fread(woz_csv, colClasses = c("character", "integer", "numeric"))
+    yr_filter <- as.integer(year)
+    woz <- woz_all[year == yr_filter]
+    if (nrow(woz) == 0L) {
+      avail_woz <- sort(unique(woz_all$year))
+      nearest_woz <- avail_woz[which.min(abs(avail_woz - yr_filter))]
+      warning(sprintf("Year %d not in woz_means.csv; using nearest year %d.", yr_filter, nearest_woz))
+      woz <- woz_all[year == nearest_woz]
+    }
+    # Named vector: gem_code → mean WOZ in euros
+    p$woz_gem_means <- stats::setNames(woz$woz_mean, woz$gem_code)
+    p$woz_national_mean <- mean(woz$woz_mean, na.rm = TRUE)
+  } else {
+    p$woz_gem_means <- NULL
+    p$woz_national_mean <- 300000
+  }
+
   message(sprintf("CBS population %d: %s persons, %s households, %d gemeenten",
                   year, format(p$n_persons, big.mark=","),
                   format(p$n_hh, big.mark=","), length(p$gem_codes)))
   p
 }
 
-#' Fetch CBS StatLine data and write to cbs_annual.yaml and gem_weights.csv
+#' Fetch CBS StatLine data and write to params.yaml and gem_weights.csv
 #'
 #' Queries CBS StatLine via `cbsodataR` for population and household counts
 #' for the requested years, and writes the results to two files:
 #' \itemize{
-#'   \item `cbs_annual.yaml` — n_persons, n_hh, typhh_p per year
+#'   \item `params.yaml` — n_persons, n_hh, typhh_p per year
 #'   \item `gem_weights.csv` — gemeente population weights per year
 #' }
 #' Run once (or whenever CBS publishes new data) to refresh the parameters.
@@ -105,8 +125,9 @@ woonbase_update_params <- function(years = 2016:2024,
   if (!requireNamespace("cbsodataR", quietly = TRUE))
     stop("Package 'cbsodataR' is required. Install with install.packages('cbsodataR').")
 
-  yaml_path <- file.path(config_dir, "cbs_annual.yaml")
+  yaml_path <- file.path(config_dir, "params.yaml")
   csv_path  <- file.path(config_dir, "gem_weights.csv")
+  woz_path  <- file.path(config_dir, "woz_means.csv")
 
   # Load existing YAML if present (merge new years into it)
   if (file.exists(yaml_path)) {
@@ -120,6 +141,13 @@ woonbase_update_params <- function(years = 2016:2024,
     gw_all <- data.table::fread(csv_path, colClasses = c("character", "integer", "numeric"))
   } else {
     gw_all <- data.table::data.table(gem_code = character(), year = integer(), weight = numeric())
+  }
+
+  # Load existing WOZ means CSV if present
+  if (file.exists(woz_path)) {
+    woz_all <- data.table::fread(woz_path, colClasses = c("character", "integer", "numeric"))
+  } else {
+    woz_all <- data.table::data.table(gem_code = character(), year = integer(), woz_mean = numeric())
   }
 
   cat("Fetching CBS StatLine parameters:\n")
@@ -175,9 +203,22 @@ woonbase_update_params <- function(years = 2016:2024,
       gw_new <- data.table::data.table(gem_code = gem_rows$code, year = yr, weight = weights)
       gw_all <- data.table::rbindlist(list(gw_all, gw_new))
 
-      cat(sprintf("%s persons, %s households, %d gemeenten\n",
+      # WOZ means per gemeente (table 70072ned)
+      woz_raw <- cbsodataR::cbs_get_data(
+        "70072ned", Perioden = yr_code,
+        select = c("RegioS", "Perioden", "GemiddeldeWOZWaardeVanWoningen_98"))
+      woz_gem <- woz_raw[grepl("^GM", trimws(woz_raw$RegioS)), ]
+      woz_gem$code <- sub("^GM", "", trimws(woz_gem$RegioS))
+      woz_gem$woz  <- as.numeric(woz_gem$GemiddeldeWOZWaardeVanWoningen_98) * 1000
+      woz_gem <- woz_gem[!is.na(woz_gem$woz) & woz_gem$woz > 0, ]
+
+      woz_all <- woz_all[year != yr]
+      woz_new <- data.table::data.table(gem_code = woz_gem$code, year = yr, woz_mean = woz_gem$woz)
+      woz_all <- data.table::rbindlist(list(woz_all, woz_new))
+
+      cat(sprintf("%s persons, %s households, %d gemeenten, %d WOZ\n",
                   format(n_pers, big.mark = ","), format(n_hh, big.mark = ","),
-                  nrow(gem_rows)))
+                  nrow(gem_rows), nrow(woz_gem)))
     }, error = function(e) {
       cat(sprintf("FAILED (%s)\n", conditionMessage(e)))
     })
@@ -187,12 +228,17 @@ woonbase_update_params <- function(years = 2016:2024,
   all_annual <- all_annual[order(as.integer(names(all_annual)))]
   dir.create(config_dir, recursive = TRUE, showWarnings = FALSE)
   yaml::write_yaml(all_annual, yaml_path)
-  cat(sprintf("Written cbs_annual.yaml (%d years)\n", length(all_annual)))
+  cat(sprintf("Written params.yaml (%d years)\n", length(all_annual)))
 
   # Sort and write CSV
   data.table::setorder(gw_all, year, gem_code)
   data.table::fwrite(gw_all, csv_path)
   cat(sprintf("Written gem_weights.csv (%d rows)\n", nrow(gw_all)))
+
+  # Sort and write WOZ means CSV
+  data.table::setorder(woz_all, year, gem_code)
+  data.table::fwrite(woz_all, woz_path)
+  cat(sprintf("Written woz_means.csv (%d rows)\n", nrow(woz_all)))
 
   invisible(all_annual)
 }

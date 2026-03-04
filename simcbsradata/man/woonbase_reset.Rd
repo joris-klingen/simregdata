@@ -2,7 +2,7 @@
 % Please edit documentation in R/api.R
 \name{woonbase_reset}
 \alias{woonbase_reset}
-\title{Clear the cached spine}
+\title{Clear the cached Woonbase spine}
 \usage{
 woonbase_reset()
 }
@@ -10,5 +10,6 @@ woonbase_reset()
 Invisibly \code{NULL}.
 }
 \description{
+Convenience wrapper around \code{\link[=sim_reset]{sim_reset("woonbase")}}.
 Forces a rebuild on the next \code{\link[=read_sav]{read_sav()}} call.
 }

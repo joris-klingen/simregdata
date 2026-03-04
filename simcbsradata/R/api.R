@@ -39,11 +39,47 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
     if (is.null(wb_spine))
       stop("Woonbase spine must be initialized first for linked datasets. ",
            "Call sim_init('woonbase', ...) first.")
-    n_records <- if (is.null(n)) nrow(wb_spine$pers) else as.integer(n)
+    # Determine record count: scale n_vehicles to spine size
+    if (is.null(n)) {
+      n_national <- .load_dataset_n(dataset, year)
+      if (!is.null(n_national)) {
+        # Scale proportionally: n_vehicles / n_persons_national * spine_size
+        wb_params <- .sim_cache$params_woonbase
+        if (!is.null(wb_params) && !is.null(wb_params$n_persons)) {
+          ratio <- n_national / wb_params$n_persons
+          n_records <- as.integer(round(nrow(wb_spine$pers) * ratio))
+        } else {
+          n_records <- n_national
+        }
+      } else {
+        n_records <- nrow(wb_spine$pers)
+      }
+    } else {
+      n_records <- as.integer(n)
+    }
     set.seed(seed)
-    idx <- sample.int(nrow(wb_spine$pers), n_records, replace = n_records > nrow(wb_spine$pers))
+    # Weighted sampling: use gemeente vehicle weights if available
+    gem_wt <- .load_gem_vehicle_weights(dataset, year)
+    gem_col <- if (!is.null(gem_wt)) {
+      wb_spine$pers$GemeenteCodeJJJJ1Jan %||% wb_spine$pers_gemeente
+    }
+    if (!is.null(gem_col)) {
+      pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
+      pw[is.na(pw)] <- 1.0
+      idx <- sample.int(nrow(wb_spine$pers), n_records,
+        replace = n_records > nrow(wb_spine$pers), prob = pw)
+    } else {
+      idx <- sample.int(nrow(wb_spine$pers), n_records,
+        replace = n_records > nrow(wb_spine$pers))
+    }
+    # Column-pruned generic spine: only copy referenced spine columns
+    needed <- .scan_spine_columns(dataset)
+    pers_cols <- needed$pers
+    if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+    pers_cols <- intersect(pers_cols, names(wb_spine$pers))
+    if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
     spine <- list(
-      pers = wb_spine$pers[idx],
+      pers = wb_spine$pers[idx, ..pers_cols],
       year = as.integer(year),
       jan1 = as.Date(paste0(year, "-01-01")),
       dec31 = as.Date(paste0(year, "-12-31"))
@@ -239,4 +275,24 @@ read_sav <- function(file,
 
   # Return as tibble (matches haven::read_sav output class)
   tibble::as_tibble(dt)
+}
+
+
+# Try to load n_vehicles from a dataset's params.yaml
+.load_dataset_n <- function(dataset_id, year) {
+  params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
+  if (!file.exists(params_path)) return(NULL)
+
+  tryCatch({
+    all_params <- yaml::read_yaml(params_path)
+    yr_key <- as.character(year)
+    yr_data <- all_params[[yr_key]]
+    if (is.null(yr_data)) {
+      avail <- sort(as.integer(names(all_params)))
+      nearest <- avail[which.min(abs(avail - year))]
+      yr_data <- all_params[[as.character(nearest)]]
+    }
+    n <- yr_data$n_vehicles %||% yr_data$n_jobs
+    if (!is.null(n)) as.integer(n) else NULL
+  }, error = function(e) NULL)
 }

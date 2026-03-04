@@ -27,7 +27,7 @@ utils::globalVariables(c(
   "RINPERSOON_Ref", "RINPERSOONS_Ref", "REFPERSOONHH_Ref",
   "PLHH_Ref", "GBAGeslachtsAanduiding_Ref",
   "RINPERSOON_Ref2", "RINPERSOONS_Ref2",
-  "..obj_join_cols", "..ref_obj_cols",
+  "..obj_join_cols", "..ref_obj_cols", "..pers_cols",
   ".", "GemeenteCodeJJJJ1Jan", "GemeenteCodeJJJJ31Dec",
   "WijkCodeJJJJ1Jan", "WijkCodeJJJJ31Dec",
   "BuurtCodeJJJJ1Jan", "BuurtCodeJJJJ31Dec",

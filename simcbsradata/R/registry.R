@@ -63,10 +63,12 @@
     }, integer(1L))
     names(c2i_vals) <- c2i_names
 
-    # labels: named int vector
+    # labels: named int vector; YAML nulls (~) → NA_integer_
     lab_raw <- entry$labels
     lab_names <- names(lab_raw)
-    lab_vals <- vapply(lab_raw, as.integer, integer(1L))
+    lab_vals <- vapply(lab_raw, function(v) {
+      if (is.null(v)) NA_integer_ else as.integer(v)
+    }, integer(1L))
     names(lab_vals) <- lab_names
 
     list(c2i = c2i_vals, labels = lab_vals)
@@ -143,4 +145,49 @@
   fi <- ds$files[[file_key]]
   if (is.null(fi)) return("person")
   fi$entity
+}
+
+# Scan all column specs for a dataset, return spine columns referenced per table
+.scan_spine_columns <- function(dataset_id) {
+  cache_key <- paste0("spine_cols_", dataset_id)
+  if (!is.null(.sim_cache[[cache_key]])) return(.sim_cache[[cache_key]])
+
+  .load_dataset_registry()
+  ds <- .sim_cache$datasets[[dataset_id]]
+  if (is.null(ds)) return(list(pers = character(), hh = character(), obj = character()))
+
+  all_sources <- character()
+  for (fkey in names(ds$files)) {
+    spec <- .load_column_spec(dataset_id, fkey)
+    for (cs in c(spec$columns, spec$pre_compute)) {
+      if (is.null(cs$source)) next
+      src <- cs$source
+      if (!is.null(cs$suffixes)) {
+        for (sfx in cs$suffixes)
+          all_sources <- c(all_sources, gsub("{sfx}", sfx, src, fixed = TRUE))
+      } else if (!is.null(cs$suffixes_custom)) {
+        for (sc in cs$suffixes_custom) {
+          s <- gsub("{sfx}", sc$output_suffix, src, fixed = TRUE)
+          s <- gsub("{sfx_lower}", sc$output_suffix, s, fixed = TRUE)
+          all_sources <- c(all_sources, s)
+        }
+      } else {
+        all_sources <- c(all_sources, src)
+      }
+    }
+  }
+
+  result <- list(pers = character(), hh = character(), obj = character())
+  for (src in unique(all_sources)) {
+    parts <- strsplit(src, ".", fixed = TRUE)[[1L]]
+    if (length(parts) >= 3L && parts[1L] == "spine") {
+      tbl <- parts[2L]
+      col <- paste(parts[3L:length(parts)], collapse = ".")
+      if (tbl %in% names(result))
+        result[[tbl]] <- c(result[[tbl]], col)
+    }
+  }
+  result <- lapply(result, unique)
+  .sim_cache[[cache_key]] <- result
+  result
 }

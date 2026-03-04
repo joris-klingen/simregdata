@@ -13,6 +13,5 @@ woonbase_catalog(year = 2023L)
 Invisibly \code{NULL}.
 }
 \description{
-Shows the 7 CBS dataset names, their observation unit, column count, and
-the exact file name to pass to \code{\link[=read_sav]{read_sav()}}.
+Convenience wrapper around \code{\link[=sim_catalog]{sim_catalog("woonbase")}}.
 }

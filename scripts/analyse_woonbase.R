@@ -13,9 +13,9 @@ suppressPackageStartupMessages({
   library(data.table)
   library(ggplot2)
   library(haven)
-  library(simcbsradata)
   library(sf)
 })
+devtools::load_all("simcbsradata")  # must come AFTER library(haven) to avoid masking read_sav
 
 dir.create("plots", recursive = TRUE, showWarnings = FALSE)
 
@@ -31,7 +31,7 @@ theme_set(
 
 # Initialise spine ----
 
-woonbase_init(year = YEAR, n = 100000L, seed = 42L)
+woonbase_init(year = YEAR, n = 1e5, seed = 42L)
 
 
 # Load files into data.table ----

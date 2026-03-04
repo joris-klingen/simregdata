@@ -1,0 +1,689 @@
+# Codelists for SPOLISBUS (employment records / Polisadministratie)
+
+RINPERSOONS_SPOLIS:
+  c2i:
+    "A": 1
+    "R": 2
+    "S": 3
+  labels:
+    "Niet in GBA/BRP, polisnummer": 1
+    "Wel in GBA/BRP": 2
+    "Niet in GBA/BRP, wel sofinrproef": 3
+
+SCDAARD:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "11": 11
+    "12": 12
+    "13": 13
+    "14": 14
+    "17": 17
+    "18": 18
+    "19": 19
+    "78": 78
+    "79": 79
+    "80": 80
+    "81": 81
+    "82": 82
+    "83": 83
+    "99": 99
+    "00": 0
+  labels:
+    "Arbeidsovereenkomst onbepaalde tijd": 1
+    "Arbeidsovereenkomst bepaalde tijd": 2
+    "Publiekrechtelijke aanstelling vast": 3
+    "Publiekrechtelijke aanstelling bepaalde tijd": 4
+    "Oproep met arbeidsovereenkomst": 5
+    "Nul-urencontract": 6
+    "Min-max contract": 7
+    "Oproep zonder arbeidsovereenkomst": 8
+    "WSW-dienstverband": 9
+    "DGA": 10
+    "Uitzendkracht": 11
+    "Persoonlijke arbeid tegen beloning": 12
+    "Ambtenaar / abp'er": 13
+    "A-Topsporter": 14
+    "Vutter": 17
+    "Publiekrechtelijke aanstelling": 18
+    "Ontslag uitkering": 19
+    "Werk als zelfstandige": 78
+    "Opting-in regeling": 79
+    "Sekswerker in fictieve dienstbetrekking": 80
+    "Overige fictieve dienstbetrekking": 81
+    "Payrolling": 82
+    "Beroepspraktijkopleiding BBL": 83
+    "Onbekend": 99
+    "Onbekend (00)": 0
+
+SCDAGH:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+  labels:
+    "Onbekend": ~
+    "Geen gehandicaptenkorting": 0
+    "AG-korting jonggehandicapte/REA": 1
+    "AG-korting herplaatste jonggeh/REA": 2
+    "AG-korting in dienst genomen AG": 3
+    "AG-korting herplaatste AG": 4
+    "Werknemer met een arbeidshandicap": 5
+    "Werknemer van >=50 jr vanuit uitk": 6
+    "Werknemer 62-64 jaar code 6 nvt": 7
+    "Codes 5 en 6 beide van toepassing": 8
+
+JN_INDICATOR:
+  c2i:
+    "J": 1
+    "N": 0
+  labels:
+    "Ja": 1
+    "Nee": 0
+
+INDICATOR_01:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "Nee": 0
+    "Ja": 1
+
+SCDINCINKVERM:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Onbekend": ~
+    "Geen vermindering coderingen": 0
+    "Vermindering coderingen": 1
+
+SCDINVLVPL:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+  labels:
+    "Onbekend": ~
+    "Niet van toepassing": 0
+    "levensloopverlofkorting": 1
+    "aanvulling Zvw": 2
+    "levensloopverlofkorting + Zvw": 3
+    "uitkering": 4
+    "uitkering + levensloopverlofkorting": 5
+    "uitkering + Zvw": 6
+    "uitkering + levensloopverlofkorting + Zvw": 7
+    "fiscale bijtelling auto van de zaak": 8
+    "overig": 9
+
+SCDRDNGNBIJT:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+  labels:
+    "Onbekend": ~
+    "Auto niet ter beschikking gesteld": 0
+    "Geen verklaring geen privegebruik auto": 1
+    "Verklaring geen privegebruik auto": 2
+    "Doorlopend afwisselend gebruik": 3
+    "Nihilbijtelling": 4
+    "Werknemer meer dan 1 auto ter beschikking": 5
+
+SCDZVW:
+  c2i:
+    "A": 1
+    "B": 2
+    "G": 3
+    "H": 4
+    "I": 5
+    "J": 6
+    "K": 7
+    "L": 8
+    "M": 9
+    "N": 10
+  labels:
+    "Niet verzekeringsplichtig": 1
+    "Niet verzekeringsplichtig geen bijdrage": 2
+    "Wel verzekeringsplichtig bijdrage Zvw": 3
+    "Niet verzekeringsplichtig gemoedsbezwaard": 4
+    "Niet verzekeringsplichtig pseudobijdrage": 5
+    "Verzekeringsplichtig 0% kleinebanenregeling": 6
+    "Verzekeringsplichtig werkgeversheffing": 7
+    "Verzekeringsplichtig 0% zeelieden": 8
+    "Verzekeringsplichtig ingehouden bijdrage": 9
+    "Verzekeringsplichtig meer tarieven": 10
+
+SCONTRACTSOORT:
+  c2i:
+    "B": 1
+    "O": 2
+    "N": 3
+  labels:
+    "Bepaalde tijd": 1
+    "Onbepaalde tijd": 2
+    "Niet van toepassing": 3
+
+SFSINDFZ:
+  c2i:
+    "--": ~
+    "00": 0
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "17": 17
+    "18": 18
+    "19": 19
+    "38": 38
+    "41": 41
+    "42": 42
+    "43": 43
+    "44": 44
+  labels:
+    "Onbekend": ~
+    "Onbekend of nvt": 0
+    "Fase 1 met uitzendbeding": 1
+    "Fase 2 met uitzendbeding": 2
+    "Fase 3": 3
+    "Fase 4": 4
+    "Wettelijk regime": 5
+    "Ketensysteem": 6
+    "Fase A met uitzendbeding": 17
+    "Fase B": 18
+    "Fase C": 19
+    "Fase A zonder uitzendbeding, met loonuitsluiting": 38
+    "Fase A met uitzendbeding (41)": 41
+    "Fase A zonder uitzendbeding, met loonuitsluiting (42)": 42
+    "Fase 1/2 met uitzendbeding (43)": 43
+    "Fase 1/2 zonder uitzendbeding (44)": 44
+
+SPOLISDIENSTVERBAND:
+  c2i:
+    "1": 1
+    "2": 2
+  labels:
+    "Voltijd": 1
+    "Deeltijd": 2
+
+SRISGRP:
+  c2i:
+    "--": ~
+    "00": 0
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "11": 11
+  labels:
+    "Onbekend": ~
+    "Niet van toepassing": 0
+    "Premiegroep kortingsklasse": 1
+    "Premiegroep middenklasse": 2
+    "Premiegroep opslagklasse": 3
+    "Premiegroep kortingsklasse (4)": 4
+    "Premiegroep middenklasse (5)": 5
+    "Premiegroep opslagklasse (6)": 6
+    "Premiegroep detachering": 7
+    "Premiegroep intermediaire diensten": 8
+    "Uitzendbedrijven I B + II B": 9
+    "Uitzendbedrijven I A": 10
+    "Uitzendbedrijven II A": 11
+
+SSRTIV:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "10": 10
+    "11": 11
+    "13": 13
+    "15": 15
+    "17": 17
+    "18": 18
+    "21": 21
+    "22": 22
+    "24": 24
+    "31": 31
+    "32": 32
+    "33": 33
+    "34": 34
+    "35": 35
+    "36": 36
+    "37": 37
+    "38": 38
+    "39": 39
+    "40": 40
+    "42": 42
+    "43": 43
+    "45": 45
+    "46": 46
+    "50": 50
+    "51": 51
+    "52": 52
+    "54": 54
+    "55": 55
+    "56": 56
+    "57": 57
+    "58": 58
+    "59": 59
+    "60": 60
+    "61": 61
+    "62": 62
+    "63": 63
+  labels:
+    "Loon of salaris ambtenaren": 1
+    "Overige loon in geld": 2
+    "Loon in natura": 3
+    "Fooien en uitkeringen uit fondsen": 4
+    "Stakingsuitkering": 10
+    "Ziektewetuitkering": 11
+    "Wachtgeld": 13
+    "WW-uitkering": 15
+    "WAO/WIA/IVA/WGA-uitkering": 17
+    "Bovenwettelijke werkloosheidsuitkering": 18
+    "Bijstandsuitkering IOAW/IOAZ": 21
+    "Bijstandsuitkering Participatiewet/WWB": 22
+    "Inburgering": 24
+    "Waz-uitkering": 31
+    "Waz + andere ao-uitkering": 32
+    "Pensioen/vut e.d.": 33
+    "Oorlogs- of verzetspensioenen": 34
+    "Uitkering dmv lijfrente": 35
+    "Pensioen buitenland": 36
+    "WAO/IVA/WGA-herleving": 37
+    "Wajong": 38
+    "Prepensioen": 39
+    "Afkoopsom/ontslagvergoeding": 40
+    "Levensloopregeling": 42
+    "Premie spaar of beleggingsregeling": 43
+    "Uitkering uit stamrecht": 45
+    "WW aanvulling": 46
+    "Loon flexwerker": 50
+    "Loon oproepkracht": 51
+    "Loon thuiswerker": 52
+    "Loon uit vroegere dienstbetrekking": 54
+    "Loon directeur-grootaandeelhouder": 55
+    "Uitkering WAZO": 56
+    "Uitkering WAJONG": 57
+    "Uitkering toeslagenwet": 58
+    "Loondoorbetaling bij ziekte": 59
+    "Uitkering regeling vervroegd uittreden": 60
+    "Wachtgeld overheid": 61
+    "Ontslagvergoeding/transitievergoeding": 62
+    "Overige pensioenen/samenloop": 63
+
+SWEKARBDUURKLASSE:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+  labels:
+    "< 12 uur": 1
+    "12-<20 uur": 2
+    "20-<25 uur": 3
+    "25-<30 uur": 4
+    "30-<35 uur": 5
+    "35 en meer uur": 6
+
+SARBEIDSRELATIE:
+  c2i:
+    "1": 1
+    "2": 2
+  labels:
+    "Vast (dga, stagiar, wsw of rest)": 1
+    "Flex (uitz.kr of oproepkr)": 2
+
+SAUTOVANDEZAAK:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "Geen auto van de zaak": 0
+    "Wel auto van de zaak": 1
+
+SCAOSECTOR:
+  c2i:
+    "1000": 1
+    "2000": 2
+    "3000": 3
+    "3100": 4
+    "3200": 5
+    "3210": 6
+    "3211": 7
+    "3212": 8
+    "3213": 9
+    "3220": 10
+    "3230": 11
+    "3240": 12
+    "3250": 13
+    "3290": 14
+    "3300": 15
+    "3400": 16
+    "3500": 17
+    "3600": 18
+    "3700": 19
+  labels:
+    "Particuliere bedrijven": 1
+    "Gesubsidieerde sector": 2
+    "Overheid (totaal)": 3
+    "Rijksoverheid": 4
+    "Onderwijs (totaal)": 5
+    "Funderend onderwijs": 6
+    "Primair onderwijs": 7
+    "Voortgezet onderwijs (excl BVE)": 8
+    "BVE onderwijs": 9
+    "Hoger beroepsonderwijs": 10
+    "Universiteiten": 11
+    "Academische ziekenhuizen": 12
+    "Onderzoeksinstellingen": 13
+    "Restgroep onderwijs": 14
+    "Defensie": 15
+    "Politie": 16
+    "Rechterlijke macht": 17
+    "Gemeenten": 18
+    "Overige overheid": 19
+
+SSECT:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "11": 11
+    "12": 12
+    "13": 13
+    "14": 14
+    "15": 15
+    "17": 17
+    "18": 18
+    "19": 19
+    "20": 20
+    "21": 21
+    "22": 22
+    "23": 23
+    "24": 24
+    "25": 25
+    "26": 26
+    "27": 27
+    "28": 28
+    "29": 29
+    "30": 30
+    "31": 31
+    "32": 32
+    "33": 33
+    "34": 34
+    "35": 35
+    "38": 38
+    "39": 39
+    "40": 40
+    "41": 41
+    "42": 42
+    "43": 43
+    "44": 44
+    "45": 45
+    "46": 46
+    "47": 47
+    "48": 48
+    "49": 49
+    "50": 50
+    "51": 51
+    "52": 52
+    "53": 53
+    "54": 54
+    "55": 55
+    "56": 56
+    "57": 57
+    "58": 58
+    "59": 59
+    "60": 60
+    "61": 61
+    "62": 62
+    "63": 63
+    "64": 64
+    "65": 65
+    "66": 66
+    "67": 67
+    "68": 68
+    "69": 69
+    "99": 99
+  labels:
+    "Agrarisch bedrijf": 1
+    "Tabakverwerkende industrie": 2
+    "Bouwbedrijf": 3
+    "Baggerbedrijf": 4
+    "Hout/borstelindustrie": 5
+    "Grafische industrie": 6
+    "Metalectro-industrie": 7
+    "Kleinmetaal": 8
+    "Metaalnijverheid": 9
+    "Elektrotechnische industrie": 10
+    "Textiel industrie": 11
+    "Havenbedrijven": 12
+    "Koopvaardij": 13
+    "Visserij": 14
+    "Slagersbedrijven": 15
+    "Gezondheid, geestelijke en maatschappelijke belangen": 17
+    "Banken": 18
+    "Verzekeringswezen en ziekenfondsen": 19
+    "Uitgeverij": 20
+    "Groothandel I": 21
+    "Groothandel II": 22
+    "Detailhandel": 23
+    "Ambulante handel": 24
+    "Horeca algemeen": 25
+    "Horeca catering": 26
+    "Binnenscheepvaart": 27
+    "Reiniging": 28
+    "Havenclassificeerders": 29
+    "Besloten busvervoer": 30
+    "Overig personenvervoer land": 31
+    "Overig goederenvervoer land": 32
+    "Luchtvaart": 33
+    "Communicatiebedrijven": 34
+    "Culturele instellingen": 35
+    "Koopvaardij (38)": 38
+    "Zuivelindustrie": 39
+    "Schoen- en lederindustrie": 40
+    "Confectie-industrie": 41
+    "Energiebedrijven": 42
+    "Zakelijke dienstverlening I": 43
+    "Zakelijke dienstverlening II": 44
+    "Zakelijke dienstverlening III": 45
+    "Zuivelindustrie (46)": 46
+    "Textielindustrie": 47
+    "Steen-,cement-,glas- en keramische ind": 48
+    "Chemische industrie": 49
+    "Voedingsindustrie": 50
+    "Algemene industrie": 51
+    "Uitleenbedrijven": 52
+    "Bewakingsondernemingen": 53
+    "Culturele instellingen premiegroep los": 54
+    "Overige takken van bedrijf en beroep": 55
+    "Schildersbedrijf premiegroep los": 56
+    "Stukadoorsbedrijf": 57
+    "Dakdekkersbedrijf": 58
+    "Mortelbedrijf": 59
+    "Steenhouwersbedrijf": 60
+    "Overheid, onderwijs en wetenschappen": 61
+    "Overheid, rijk, politie, rechterlijke macht": 62
+    "Overheid, defensie": 63
+    "Overheid, prov, gemeenten, waterschappen": 64
+    "Overheid, openbare nutsbedrijven": 65
+    "Overheid, overige instellingen": 66
+    "Werk en (re)integratie": 67
+    "Railbouw": 68
+    "Telecommunicatie": 69
+    "Onbekend": 99
+
+SSOORTBAAN:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "9": 9
+  labels:
+    "Directeur groot aandeelhouder": 1
+    "Stagiaire": 2
+    "WSW-er": 3
+    "Uitzendkracht": 4
+    "Oproepkracht": 5
+    "Rest": 9
+
+STIJDVAKTYPE:
+  c2i:
+    "1": 1
+    "3": 3
+    "4": 4
+    "5": 5
+  labels:
+    "Vierweekse opgave": 1
+    "Halfjaarlijkse opgave": 3
+    "Jaarlijkse opgave": 4
+    "Maandelijkse opgave": 5
+
+SLBTAB:
+  c2i:
+    "010": 1
+    "011": 2
+    "012": 3
+    "013": 4
+    "014": 5
+    "015": 6
+    "020": 7
+    "021": 8
+    "022": 9
+    "023": 10
+    "024": 11
+    "025": 12
+    "310": 13
+    "312": 14
+    "320": 15
+    "322": 16
+    "510": 17
+    "512": 18
+    "520": 19
+    "522": 20
+    "610": 21
+    "612": 22
+    "252": 23
+    "940": 24
+    "950": 25
+  labels:
+    "Bel+prem plichtig;wit; bijz bel": 1
+    "Bel+prem plichtig;wit; kwartaal": 2
+    "Bel+prem plichtig;wit; maand": 3
+    "Bel+prem plichtig;wit; week": 4
+    "Bel+prem plichtig;wit; 4-weken": 5
+    "Bel+prem plichtig;wit; dag": 6
+    "Bel+prem plichtig;groen; bijz bel": 7
+    "Bel+prem plichtig;groen; kwartaal": 8
+    "Bel+prem plichtig;groen; maand": 9
+    "Bel+prem plichtig;groen; week": 10
+    "Bel+prem plichtig;groen; 4-weken": 11
+    "Bel+prem plichtig;groen; dag": 12
+    "Alleen premieplichtig;wit; bijz bel": 13
+    "Alleen premieplichtig;wit; maand": 14
+    "Alleen premieplichtig;groen; bijz bel": 15
+    "Alleen premieplichtig;groen; maand": 16
+    "Alleen belastingplichtig;wit; bijz bel": 17
+    "Alleen belastingplichtig;wit; maand": 18
+    "Alleen belastingplichtig;groen; bijz bel": 19
+    "Alleen belastingplichtig;groen; maand": 20
+    "Niet premieplichtig AWBZ;wit; bijz bel": 21
+    "Niet premieplichtig AWBZ;wit; maand": 22
+    "Bronheffing pensioenen Curacoa": 23
+    "Anoniementarief": 24
+    "Afwijkend tarief": 25
+
+SINDWAO:
+  c2i:
+    "J": 1
+    "N": 0
+  labels:
+    "Ja": 1
+    "Nee": 0
+
+SINDWW:
+  c2i:
+    "J": 1
+    "N": 0
+  labels:
+    "Ja": 1
+    "Nee": 0
+
+CDRDNEINDARB:
+  c2i:
+    "--": ~
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "99": 99
+  labels:
+    "Onbekend": ~
+    "Opzegging door werkgever": 1
+    "Ontbinding rechter": 2
+    "Einde rechtswege": 3
+    "Wederzijds goedvinden": 4
+    "Opzegging door werknemer": 5
+    "Overlijden werknemer": 6
+    "Einde faillissement/surseance": 7
+    "Einde pensioen/AOW": 8
+    "Opzegging proeftijd": 9
+    "Ontslag op staande voet": 10
+    "Overig/onbekend": 99

@@ -18,3 +18,7 @@
 .wb_gem_weights_csv <- function() {
   file.path(.dataset_dir("woonbase"), "gem_weights.csv")
 }
+
+.wb_woz_means_csv <- function() {
+  file.path(.dataset_dir("woonbase"), "woz_means.csv")
+}

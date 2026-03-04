@@ -14,7 +14,7 @@ A named list of population parameters.
 }
 \description{
 Reads year-specific aggregate parameters (n_persons, n_hh, typhh_p) from
-\code{cbs_annual.yaml} and municipality weights from \code{gem_weights.csv}.
+\code{params.yaml} and municipality weights from \code{gem_weights.csv}.
 Fixed distributions (eigenaar, woningtype, bouwjaar, etc.) are appended
 from internal defaults.
 }

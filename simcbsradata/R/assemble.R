@@ -1,7 +1,8 @@
 # Generic data-driven assembly engine ----
 
 # Resolve a single column value from spec + spine
-.resolve_column <- function(col_spec, spine, n_rows, codelists, jan1, dec31, computed) {
+.resolve_column <- function(col_spec, spine, n_rows, codelists, jan1, dec31,
+                            computed, params = NULL) {
 
   # Constant value
   if (!is.null(col_spec$value)) {
@@ -16,9 +17,18 @@
     return(rep(tpl, n_rows))
   }
 
-  # Random categorical
+  # Random categorical (optionally from params)
   if (!is.null(col_spec$random_categorical)) {
     rc <- col_spec$random_categorical
+    # from_params: look up named probability vector from cached dataset params
+    if (!is.null(rc$from_params) && !is.null(params)) {
+      pv <- params[[rc$from_params]]
+      if (!is.null(pv)) {
+        vals  <- as.character(names(pv))
+        probs <- as.numeric(pv)
+        return(.rcat(n_rows, vals, probs))
+      }
+    }
     vals <- as.character(rc$values)
     probs <- if (!is.null(rc$probs)) as.numeric(rc$probs) else NULL
     return(.rcat(n_rows, vals, probs))
@@ -30,11 +40,25 @@
     return(.rand_id(n_rows, w))
   }
 
-  # Random numeric
+  # Random numeric (optionally from params)
   if (!is.null(col_spec$random_numeric)) {
     rn <- col_spec$random_numeric
+    # Override mean/sd from params if specified
+    if (!is.null(params)) {
+      if (!is.null(rn$mean_from_params))
+        rn$mean <- as.numeric(params[[rn$mean_from_params]] %||% rn$mean)
+      if (!is.null(rn$sd_from_params))
+        rn$sd <- as.numeric(params[[rn$sd_from_params]] %||% rn$sd)
+    }
     if (identical(rn$distribution, "uniform")) {
       vals <- runif(n_rows, rn$min, rn$max)
+      if (!is.null(rn$round)) vals <- round(vals, as.integer(rn$round))
+      return(vals)
+    }
+    if (identical(rn$distribution, "normal")) {
+      vals <- rnorm(n_rows, rn$mean, rn$sd)
+      if (!is.null(rn$min)) vals <- pmax(vals, rn$min)
+      if (!is.null(rn$max)) vals <- pmin(vals, rn$max)
       if (!is.null(rn$round)) vals <- round(vals, as.integer(rn$round))
       return(vals)
     }
@@ -103,6 +127,24 @@
 
   # Determine which spine table to use + row count
   tbl_name <- spec$spine_table
+
+  # Trigger lazy enrichment if needed (woonbase spine has enrichment flags)
+  if (!is.null(spine$hh_enriched)) {
+    if (tbl_name == "hh" && !isTRUE(spine$hh_enriched)) {
+      if (.spec_needs_hh_enriched(spec)) {
+        spine <- .wb_ensure_enriched(dataset_id, "hh")
+      }
+    } else if (tbl_name == "obj" && !isTRUE(spine$obj_enriched)) {
+      if (.spec_needs_obj_enriched(spec)) {
+        spine <- .wb_ensure_enriched(dataset_id, "obj")
+      }
+    } else if (tbl_name == "pers" && !isTRUE(spine$pers_spatial_enriched)) {
+      if (.spec_needs_pers_spatial(spec)) {
+        spine <- .wb_ensure_enriched(dataset_id, "pers_spatial")
+      }
+    }
+  }
+
   base_tbl <- spine[[tbl_name]]
   if (is.null(base_tbl)) stop("Spine table '", tbl_name, "' not found")
   n_rows <- nrow(base_tbl)
@@ -110,11 +152,35 @@
   jan1  <- .yyyymmdd(spine$jan1)
   dec31 <- .yyyymmdd(spine$dec31)
 
+  # Load dataset params (year-specific calibrated distributions)
+  params <- .sim_cache[[paste0("params_", dataset_id)]]
+  if (is.null(params)) {
+    # Try loading from YAML
+    params <- tryCatch({
+      params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
+      if (file.exists(params_path)) {
+        all_p <- yaml::read_yaml(params_path)
+        yr_key <- as.character(spine$year)
+        yr_data <- all_p[[yr_key]]
+        if (is.null(yr_data)) {
+          avail <- sort(as.integer(names(all_p)))
+          nearest <- avail[which.min(abs(avail - spine$year))]
+          yr_data <- all_p[[as.character(nearest)]]
+        }
+        # Unlist named vectors so they're usable as values/probs
+        lapply(yr_data, function(x) {
+          if (is.list(x)) unlist(x) else x
+        })
+      }
+    }, error = function(e) NULL)
+  }
+
   # Pre-compute derived columns if specified
   computed <- list()
   if (!is.null(spec$pre_compute)) {
     for (pc in spec$pre_compute) {
-      src_val <- .resolve_column(pc, spine, n_rows, codelists, jan1, dec31, computed)
+      src_val <- .resolve_column(pc, spine, n_rows, codelists, jan1, dec31,
+                                 computed, params)
       if (identical(pc$transform, "persklasse")) {
         computed[[pc$name]] <- .compute_persklasse(as.integer(src_val))
       } else {
@@ -123,58 +189,96 @@
     }
   }
 
+  # Pre-filter columns via col_select (skip generating unneeded columns)
+  selected_set <- NULL
+  if (!is.null(col_q) && !rlang::quo_is_null(col_q)) {
+    # Expand all column names to know the full set
+    all_names <- character()
+    for (cs in spec$columns) {
+      if (!is.null(cs[["suffixes"]])) {
+        for (sfx in cs[["suffixes"]])
+          all_names <- c(all_names, gsub("\\{sfx\\}", sfx, cs$name))
+      } else if (!is.null(cs[["suffixes_custom"]])) {
+        for (sc in cs[["suffixes_custom"]])
+          all_names <- c(all_names, gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name))
+      } else {
+        all_names <- c(all_names, cs$name)
+      }
+    }
+    # Evaluate col_select against a dummy with all names
+    selected_set <- tryCatch({
+      dummy <- stats::setNames(as.list(seq_along(all_names)), all_names)
+      dummy <- as.data.frame(dummy, check.names = FALSE)
+      names(tidyselect::eval_select(col_q, dummy))
+    }, error = function(e) NULL)   # fallback: generate all columns
+  }
+
   # Build result data.table column by column
-  result_cols <- list()
-  result_names <- character()
+  n_cols <- length(spec$columns) * 2L  # upper bound (suffixes expand)
+  result_cols <- vector("list", n_cols)
+  result_names <- character(n_cols)
+  idx <- 0L
 
   for (cs in spec$columns) {
     # Expand suffixes
-    if (!is.null(cs$suffixes)) {
-      for (sfx in cs$suffixes) {
-        # Create a copy of the spec with suffix applied
+    if (!is.null(cs[["suffixes"]])) {
+      for (sfx in cs[["suffixes"]]) {
         cs2 <- cs
         cs2$name <- gsub("\\{sfx\\}", sfx, cs$name)
-        if (!is.null(cs2$source)) {
+        # Skip if not selected
+        if (!is.null(selected_set) && !(cs2$name %in% selected_set)) next
+        if (!is.null(cs2$source))
           cs2$source <- gsub("\\{sfx\\}", sfx, cs2$source)
-        }
-        if (isTRUE(cs2$indicator_label) && !is.null(cs2$label)) {
+        if (isTRUE(cs2$indicator_label) && !is.null(cs2$label))
           cs2$label <- gsub("\\{sfx\\}", sfx, cs2$label)
-        }
         cs2$suffixes <- NULL
 
-        val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31, computed)
+        val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
+                               computed, params)
         val <- .apply_codelist(val, cs2, codelists)
-        result_cols[[length(result_cols) + 1L]] <- val
-        result_names <- c(result_names, cs2$name)
+        idx <- idx + 1L
+        result_cols[[idx]] <- val
+        result_names[[idx]] <- cs2$name
       }
-    } else if (!is.null(cs$suffixes_custom)) {
-      # Custom suffix list with explicit output_suffix values
-      for (sc in cs$suffixes_custom) {
+    } else if (!is.null(cs[["suffixes_custom"]])) {
+      for (sc in cs[["suffixes_custom"]]) {
         cs2 <- cs
         cs2$name <- gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name)
+        # Skip if not selected
+        if (!is.null(selected_set) && !(cs2$name %in% selected_set)) next
         if (!is.null(cs2$source)) {
           cs2$source <- gsub("\\{sfx\\}", sc$output_suffix, cs2$source)
           cs2$source <- gsub("\\{sfx_lower\\}", sc$output_suffix, cs2$source)
         }
         cs2$suffixes_custom <- NULL
 
-        val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31, computed)
+        val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
+                               computed, params)
         val <- .apply_codelist(val, cs2, codelists)
-        result_cols[[length(result_cols) + 1L]] <- val
-        result_names <- c(result_names, cs2$name)
+        idx <- idx + 1L
+        result_cols[[idx]] <- val
+        result_names[[idx]] <- cs2$name
       }
     } else {
-      val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31, computed)
+      # Skip if not selected
+      if (!is.null(selected_set) && !(cs$name %in% selected_set)) next
+      val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31,
+                             computed, params)
       val <- .apply_codelist(val, cs, codelists)
-      result_cols[[length(result_cols) + 1L]] <- val
-      result_names <- c(result_names, cs$name)
+      idx <- idx + 1L
+      result_cols[[idx]] <- val
+      result_names[[idx]] <- cs$name
     }
   }
+
+  # Trim pre-allocated vectors to actual size
+  result_cols <- result_cols[seq_len(idx)]
+  result_names <- result_names[seq_len(idx)]
 
   names(result_cols) <- result_names
   dt <- data.table::as.data.table(result_cols)
 
-  # Apply col_select
+  # Apply col_select (still needed for tidyselect patterns like starts_with)
   if (!is.null(col_q) && !rlang::quo_is_null(col_q)) {
     sel <- tryCatch(
       names(tidyselect::eval_select(col_q, dt)),

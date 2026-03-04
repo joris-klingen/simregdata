@@ -8,9 +8,9 @@ suppressPackageStartupMessages({
   library(data.table)
   library(ggplot2)
   library(haven)
-  library(simcbsradata)
   library(glue)
 })
+devtools::load_all("simcbsradata")  # must come AFTER library(haven) to avoid masking read_sav
 
 YEAR <- 2020L
 log_message <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))

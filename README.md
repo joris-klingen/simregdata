@@ -1,10 +1,12 @@
 # sim_mdata
 
-Synthetic CBS Woonbase microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of the seven CBS Woonbase registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
+Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
+
+Supports multiple CBS datasets: **Woonbase** (housing + population, 9 file types), **RDW** (vehicle registrations + traffic performance, 2 file types), and **SPOLIS** (employment records with wages, hours, insurance, 1 file type).
 
 ## Background
 
-[CBS Woonbase](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/woonbase-kenmerken-woonruimten) is a set of linked housing and population microdata files available to researchers via the CBS Remote Access environment. Because the real files are restricted, this project simulates them from the PDF variable documentation so that:
+[CBS microdata](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen) are linked administrative registers available to researchers via the CBS Remote Access environment. Because the real files are restricted, this project simulates them from the PDF variable documentation so that:
 
 - Analysis scripts can be developed and tested locally
 - Workflows can be benchmarked and profiled
@@ -14,44 +16,58 @@ Synthetic CBS Woonbase microdata generator for R. Mimics the exact file structur
 
 ```
 sim_mdata/
-├── config/
-│   ├── cbs_annual.yaml               # CBS population counts + TYPHH per year
-│   └── gem_weights.csv               # Municipality population weights per year
-├── data/
-│   ├── raw/mdata_pdfs_woonbase/      # 7 CBS variable documentation PDFs
-│   │   └── extracted/                # Plain-text extraction from each PDF
-│   └── interim/woonbase_meta/        # Parsed metadata (RDS + CSV)
-├── output/figures/                   # Generated plots (gitignored)
+├── pdfs_cbs_catalog/pdf/          # CBS variable documentation PDFs
 ├── scripts/
-│   ├── analyse_woonbase.R            # 6 plots + 2 maps from joined Woonbase files
-│   ├── housing_type_timeseries.R     # Housing stock composition 2016–2024
-│   └── maps_woonbase.R              # Municipality choropleths
-├── simcbsradata/                     # R package (simulator + config)
-│   └── inst/scripts/benchmark.R     # Phase timing + profvis flame graph
-└── references/                       # Variable selection notes
+│   ├── analyse_woonbase.R         # 6 plots + 2 maps from joined Woonbase files
+│   ├── analyse_rdw_woonbase.R     # 5 plots: fuel, car ownership, VKT
+│   ├── housing_type_timeseries.R  # Housing stock composition 2016–2024
+│   └── maps_woonbase.R           # Municipality choropleths
+├── simcbsradata/                  # R package (simulator + config)
+│   ├── R/                         # Package R code
+│   ├── inst/config/datasets/
+│   │   ├── woonbase/              # 9 file types, params.yaml, gem_weights.csv
+│   │   ├── rdw/                   # 2 file types, params.yaml, gem_vehicle_weights.csv
+│   │   └── spolis/                # 1 file type, params.yaml
+│   └── man/                       # Function documentation
+└── references/                    # Variable selection notes
 ```
 
-## The seven Woonbase files
+## Supported datasets
 
-| Short name | CBS file name prefix |
-|------------|----------------------|
-| `sleutel` | `woonbasesleutel` |
-| `kenmerken_pers` | `woonbasekenmerkenpers` |
-| `kenmerken_hh` | `woonbasekenmerkenhuis` |
-| `kenmerken_obj` | `woonbasekenmerkenwoon` |
-| `populatie_pers` | `woonbasepopulatieperso` |
-| `populatie_hh` | `woonbasepopulatiehuis` |
-| `populatie_obj` | `woonbasepopulatiewoon` |
+### Woonbase (9 file types)
 
-`read_sav()` matches exact CBS dataset names (CamelCase, as used on the secure VM). The year and version suffix (`2023V1`) are parsed to auto-set the simulation year. Full VM paths, bare dataset names, and `.sav` extensions are all accepted.
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `sleutel` | WoonbaseSleutelbestand | person |
+| `kenmerken_pers` | WoonbaseKenmerkenPersonen | person |
+| `kenmerken_hh` | WoonbaseKenmerkenHuishoudens | household |
+| `kenmerken_obj` | WoonbaseKenmerkenWoonruimten | object |
+| `populatie_pers` | WoonbasePopulatiePersonen | person |
+| `populatie_hh` | WoonbasePopulatieHuishoudens | household |
+| `populatie_obj` | WoonbasePopulatieWoonruimten | object |
+| `ek_hh_welvaart` | WOONBASEEKHuishoudensWV | household |
+| `ek_obj_panden` | ExtraKenmerkenPanden | object |
+
+### RDW (2 file types)
+
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `kentekens` | RDWNPACT | person |
+| `verkeersprestatie` | VERKEERSPRESTATIE | person |
+
+### SPOLIS (1 file type)
+
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `spolisbus` | SPOLISBUS | person |
 
 ## Quick start
 
 ```r
-source("scripts/functions/read_sav_woonbase.R")
+library(simcbsradata)
 
-# Build a spine for 2023 (100 000 persons takes ~ 2 s)
-woonbase_init(year = 2023L, n = 100000L, seed = 42L)
+# Build a woonbase spine for 2023 (100k persons takes ~2 s)
+sim_init("woonbase", year = 2023, n = 100000, seed = 42)
 
 # Read columns — works exactly like haven::read_sav() on the real CBS file,
 # including haven::labelled columns that convert with as_factor()
@@ -72,76 +88,94 @@ dt_pers <- as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
                                                   VBOWoningType1Jan)))
 dt_hh   <- as.data.table(read_sav("WoonbasePopulatieHuishoudens2023V1",
                                    col_select = c(HUISHOUDNR1Jan, TYPHH1Jan)))
-
 dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
+
+# Initialize linked datasets (RDW, SPOLIS) — requires woonbase spine first
+sim_init("rdw", year = 2023)
+sim_init("spolis", year = 2023)
+
+rdw  <- read_sav("RDWNPACT2023TABV1")
+jobs <- read_sav("SPOLISBUS2023V1")
+
+# See all available files
+sim_catalog()
 ```
 
 ## How the simulator works
 
-`read_sav_woonbase.R` exports three public functions:
+### Public functions
 
 | Function | Description |
 |----------|-------------|
-| `woonbase_init(year, n, seed)` | Builds and caches the shared spine (persons × households × objects). Call once before reading multiple files to guarantee consistent join keys. |
-| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches exact CBS Woonbase dataset names (e.g. `WoonbasePopulatiePersonen2023V1`) and returns synthetic data; infers the simulation year from the filename. Falls through to `haven::read_sav()` for any other path. |
-| `woonbase_catalog(year)` | Prints all 7 available synthetic file names with column counts and observation units. |
-| `woonbase_reset()` | Clears the cached spine (forces a rebuild on the next call). |
-| `woonbase_update_params(years)` | Fetches CBS StatLine data via `cbsodataR` and writes to `config/cbs_annual.yaml` + `config/gem_weights.csv`. Run once to refresh. |
+| `sim_init(dataset, year, n, seed)` | Builds and caches the shared spine for a dataset. Call once per dataset before reading files. |
+| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches registered CBS dataset names and returns synthetic data; infers the year from the filename. Falls through to `haven::read_sav()` for unregistered paths. |
+| `sim_catalog(dataset, year)` | Prints all available synthetic file names across all datasets. |
+| `sim_reset(dataset)` | Clears the cached spine (forces a rebuild on next call). |
+| `woonbase_cbs_params(year)` | Loads CBS population parameters from `params.yaml`. |
+| `woonbase_update_params(years)` | Fetches CBS StatLine data and writes `params.yaml` + `gem_weights.csv`. |
+| `rdw_cbs_params(year)` | Loads RDW vehicle parameters from `params.yaml`. |
+| `rdw_update_params(years)` | Fetches CBS StatLine data for vehicles (85237NED, 85236NED, 85404NED). |
+| `spolis_cbs_params(year)` | Loads SPOLIS employment parameters from `params.yaml`. |
+| `spolis_update_params(years)` | Fetches CBS StatLine data for employment (81431NED). |
+| `cbs_scaffold_dataset(...)` | Generates skeleton YAML config for a new dataset from PDF documentation. |
+
+Backward-compatible wrappers: `woonbase_init()`, `woonbase_reset()`, `woonbase_catalog()`.
+
+### Architecture
+
+The simulator uses a YAML-driven config system under `inst/config/datasets/{dataset_id}/`:
+
+- **`manifest.yaml`** — registers the dataset, its spine builder, and file types
+- **`codelists.yaml`** — value label mappings (applied as `haven::labelled`)
+- **`columns/*.yaml`** — per-file column definitions (sources, distributions, codelists)
+- **`params.yaml`** — year-specific CBS-calibrated parameters
 
 ### Spine generation
 
-A single shared spine is built in three stages:
+**Woonbase** uses a custom spine builder with three stages:
+1. **Objects** — dwelling records with spatial attributes, WOZ value, floor area, etc.
+2. **Households** — linked to objects; TYPHH proportions from `params.yaml`
+3. **Persons** — expanded from households; person roles, birth year, civil status
 
-1. **Objects** — N_HH dwelling records with spatial attributes (gemeente, wijk, buurt), WOZ value, floor area, build year, owner type, housing type.
-2. **Households** — N_HH household records linked to objects; TYPHH proportions from `config/cbs_annual.yaml`.
-3. **Persons** — expanded from households using vectorised `rep()` + `rowid()`; person roles (PLHH), birth year, civil status, and movement indicators assigned by subsetting rather than eager `fcase()` to avoid generating wasted random draws.
+**RDW and SPOLIS** use the generic spine builder: sample RINPERSOON with replacement from the woonbase person spine, scaled by `n_vehicles / n_persons` or `n_jobs / n_persons`.
 
-Population counts and household type proportions for each year (2016–2024) are read from `config/cbs_annual.yaml`; municipality weights from `config/gem_weights.csv`. Both files are pre-populated and checked into git, so **no API calls are made during data generation**. To refresh with the latest CBS data, run `woonbase_update_params()` once.
+### CBS parameters
 
-### File assembly and lazy labelling
+Year-specific parameters (population counts, household types, vehicle distributions, employment stats) are stored in each dataset's `params.yaml` and checked into git. **No API calls are made during data generation.**
 
-Each call to `read_sav()` passes the tidyselect `col_select` quosure directly into `.wb_assemble()`. The assembler:
+To refresh (e.g. when CBS publishes new data):
 
-1. Selects the full wide column set from the spine
-2. Immediately trims to the requested columns (`.subset_cols()`)
-3. Applies `haven::labelled()` only to columns that survived the trim (`.lbl_if()`)
+```r
+library(simcbsradata)
+woonbase_update_params()            # refreshes 2016–2024
+rdw_update_params()                 # refreshes 2019–2025
+spolis_update_params()              # refreshes 2019–2025
+```
 
-Requesting 2 columns from `populatie_pers` skips ~28 of the 30 labelling calls, which dominates wall time at scale.
+CBS StatLine tables used:
+- `37230ned` — Population on 1 January
+- `71486ned` — Household type distribution
+- `85237NED` — Personenauto's: fuel, color, weight, construction year
+- `85236NED` — Motor vehicles: type breakdown, total count
+- `85404NED` — Traffic performance: annual mileage
+- `81431NED` — Employment: job counts, FT/PT ratio, wages, sectors
 
 ## Performance
 
-At 1 M persons on a modern laptop:
+At 1M persons on a modern laptop:
 
 | Stage | Approximate time |
 |-------|-----------------|
-| Spine build (`woonbase_init`) | 8–15 s |
+| Spine build (`sim_init("woonbase")`) | 8–15 s |
 | Assemble 2 columns (`read_sav` with `col_select`) | < 0.5 s |
 | Assemble all columns (no `col_select`) | 3–5 s |
-
-Run `simcbsradata/inst/scripts/benchmark.R` in RStudio for a labelled timing breakdown and a `profvis` flame graph.
-
-## CBS parameters
-
-Year-specific population counts and household type distributions are stored in `config/cbs_annual.yaml`; municipality population weights in `config/gem_weights.csv` (both checked into git). This means `read_sav()` never calls the CBS API during normal use.
-
-To refresh (e.g. when CBS publishes a new year):
-
-```r
-source("scripts/functions/read_sav_woonbase.R")
-woonbase_update_params()               # refreshes 2016-2024
-woonbase_update_params(years = 2025)   # add a single new year
-```
-
-The update function fetches from CBS StatLine tables:
-
-- `37230ned` — *Bevolking aan het begin van de periode* (population on 1 January)
-- `71486ned` — *Particuliere huishoudens; samenstelling en grootte* (household type distribution)
 
 ## Dependencies
 
 ```r
 install.packages(c("data.table", "haven", "rlang", "tidyselect", "yaml",
-                   "ggplot2", "sf", "glue",  # for 030 / 031 / 101
-                   "cbsodataR",              # optional: refresh YAML params
-                   "profvis"))               # optional: flame graph in 090
+                   "tibble", "stats", "tools",
+                   "ggplot2", "sf", "glue",     # for analysis scripts
+                   "cbsodataR",                  # optional: refresh params from StatLine
+                   "profvis"))                   # optional: flame graph
 ```

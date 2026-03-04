@@ -2,7 +2,7 @@
 % Please edit documentation in R/api.R
 \name{read_sav}
 \alias{read_sav}
-\title{Read a CBS Woonbase file (synthetic) or any other .sav file (via haven)}
+\title{Read a CBS file (synthetic) or any other .sav file (via haven)}
 \usage{
 read_sav(
   file,
@@ -18,12 +18,12 @@ read_sav(
 )
 }
 \arguments{
-\item{file}{File name or path.  For Woonbase files, use the exact CBS
+\item{file}{File name or path.  For simulated files, use the exact CBS
 CamelCase name (e.g. \code{"WoonbasePopulatiePersonen2023V1"}).}
 
-\item{encoding}{Passed to \code{haven::read_sav()} (non-Woonbase files only).}
+\item{encoding}{Passed to \code{haven::read_sav()} (non-simulated files only).}
 
-\item{user_na}{Passed to \code{haven::read_sav()} (non-Woonbase files only).}
+\item{user_na}{Passed to \code{haven::read_sav()} (non-simulated files only).}
 
 \item{col_select}{Column selection (tidyselect expressions or character
 vector).}
@@ -32,7 +32,7 @@ vector).}
 
 \item{n_max}{Maximum number of rows to return (default \code{Inf}).}
 
-\item{.name_repair}{Passed to \code{haven::read_sav()} (non-Woonbase files
+\item{.name_repair}{Passed to \code{haven::read_sav()} (non-simulated files
 only).}
 
 \item{year}{Simulation year used for auto-init (default 2023).}
@@ -45,13 +45,13 @@ only).}
 A tibble.
 }
 \description{
-Drop-in replacement for \code{\link[haven:read_spss]{haven::read_sav()}} that intercepts CBS Woonbase
-file names and returns synthetic microdata.  For all other file paths,
-falls through to \code{haven::read_sav()}.
+Drop-in replacement for \code{\link[haven:read_spss]{haven::read_sav()}} that intercepts registered CBS
+dataset file names and returns synthetic microdata.  For all other file
+paths, falls through to \code{haven::read_sav()}.
 }
 \details{
 Supports the same arguments as \code{haven::read_sav()}: \code{n_max}, \code{skip},
 \code{col_select} (tidyselect or character vector).  Extra arguments (\code{year},
 \code{seed}) control the simulation when no spine has been pre-built with
-\code{\link[=woonbase_init]{woonbase_init()}}.
+\code{\link[=sim_init]{sim_init()}}.
 }

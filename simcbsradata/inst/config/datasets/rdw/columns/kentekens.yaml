@@ -1,6 +1,8 @@
 # RDWNPACT kentekens — vehicle characteristics per license plate
 # CBS name: RDWNPACT{YYYY}TABV{N}
 # One row per vehicle per person
+# Calibrated from CBS StatLine 85237NED + 85236NED via rdw_update_params()
+# Columns with from_params use year-specific distributions from params.yaml
 entity: person
 spine_table: pers
 
@@ -19,17 +21,23 @@ columns:
     random_id:
       width: 32
 
+  # Year-specific color distribution from 85237NED
   - name: KLEURCODEVRTG
     random_categorical:
+      from_params: kleur_p
+      # Fallback if params not loaded:
       values: ["--","00","01","02","03","04","05","06","07","08","09","10","11","12","13","99"]
-      probs:  [0.02, 0.01, 0.01, 0.08, 0.15, 0.06, 0.04, 0.02, 0.22, 0.03, 0.01, 0.01, 0.01, 0.18, 0.03, 0.12]
+      probs:  [0.005, 0.003, 0.005, 0.072, 0.148, 0.086, 0.035, 0.012, 0.298, 0.018, 0.004, 0.005, 0.004, 0.238, 0.030, 0.037]
     codelist: KLEURCODE
     label: Kleur voertuig
 
+  # Year-specific construction year distribution from 85237NED
   - name: EERSTETOELDAT1VRTG
     random_categorical:
-      values: ["1990","1995","2000","2005","2008","2010","2012","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"]
-      probs:  [0.02, 0.03, 0.05, 0.07, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.07, 0.07, 0.06, 0.05, 0.05, 0.05, 0.06]
+      from_params: bouwjaar_p
+      # Fallback:
+      values: ["2000","2005","2010","2015","2020"]
+      probs:  [0.10, 0.15, 0.20, 0.30, 0.25]
 
   - name: SRTREFVRTG
     random_categorical:
@@ -38,23 +46,36 @@ columns:
     codelist: SRTREF
     label: Soort referentie
 
+  # Year-specific vehicle type distribution from 85236NED
   - name: VRTGSOORT
     random_categorical:
-      values: ["-","0","1","2","3","4","5","6","7","8","9","F","P"]
-      probs:  [0.01, 0.05, 0.08, 0.02, 0.01, 0.005, 0.005, 0.65, 0.04, 0.02, 0.01, 0.05, 0.05]
+      from_params: vrtgsoort_p
+      # Fallback:
+      values: ["0","1","2","3","4","5","6","7","8","9"]
+      probs:  [0.038, 0.074, 0.012, 0.005, 0.004, 0.003, 0.720, 0.048, 0.073, 0.023]
     codelist: VRTGSOORT
     label: Soort voertuig
 
+  # Year-specific fuel type distribution from 85237NED
+  # Codes: 1=Benzine, 2=Diesel, 3=LPG, 4=BEV, 5=CNG, A=PHEV, B=HEV
+  # PHEV/HEV split from Benzine using fleet estimates (85237NED lumps hybrids)
   - name: BRANDSTCODECORVRTG
     random_categorical:
+      from_params: brandstof_p
+      # Fallback (approximate 2023):
       values: ["1", "2", "3", "4", "5", "A", "B"]
-      probs:  [0.50, 0.25, 0.02, 0.08, 0.01, 0.06, 0.08]
+      probs:  [0.709, 0.096, 0.011, 0.107, 0.001, 0.020, 0.055]
     codelist: BRANDSTOF
     label: Brandstoftype
 
+  # Year-specific weight from 85237NED weight class distribution
   - name: MASSALEEGCORVRTG
     random_numeric:
-      distribution: uniform
+      distribution: normal
+      mean: 1350
+      sd: 350
+      mean_from_params: gewicht_mean
+      sd_from_params: gewicht_sd
       min: 500
       max: 3500
       round: 0
@@ -67,15 +88,15 @@ columns:
       round: 0
 
   - name: AANTALCYLCORVRTG
-    random_numeric:
-      distribution: uniform
-      min: 0
-      max: 12
-      round: 0
+    random_categorical:
+      values: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"]
+      probs:  [0.10, 0.01, 0.02, 0.08, 0.55, 0.02, 0.12, 0.08, 0.01, 0.01]
 
   - name: CYLININHOUDCORVRTG
     random_numeric:
-      distribution: uniform
+      distribution: normal
+      mean: 1600
+      sd: 600
       min: 0
       max: 6000
       round: 0

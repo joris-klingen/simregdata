@@ -1,0 +1,20 @@
+# SPOLIS dataset manifest
+# Employment records: jobs, wages, hours, insurance from Polisadministratie
+# CBS name pattern: SPOLISBUS{YYYY}V{N}
+# ~110M records nationally (multiple rows per person = job records)
+
+dataset_id: spolis
+label: Banen en lonen (SPOLISBUS)
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  spolisbus:
+    cbs_name: SPOLISBUS
+    entity: person
+    columns_file: spolisbus.yaml

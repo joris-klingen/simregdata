@@ -1,0 +1,23 @@
+# RDW dataset manifest
+# Motor vehicle data: vehicle characteristics + traffic performance
+# CBS name patterns: RDWNPACT{YYYY}TABV{N}, VERKEERSPRESTATIE{YYYY}TABV{N}
+
+dataset_id: rdw
+label: RDW Motorvoertuigenpark
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  kentekens:
+    cbs_name: RDWNPACT
+    entity: person
+    columns_file: kentekens.yaml
+  verkeersprestatie:
+    cbs_name: VERKEERSPRESTATIE
+    entity: person
+    columns_file: verkeersprestatie.yaml

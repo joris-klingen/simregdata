@@ -8,8 +8,8 @@ suppressPackageStartupMessages({
   library(data.table)
   library(ggplot2)
   library(haven)
-  library(simcbsradata)
 })
+devtools::load_all("simcbsradata")  # must come AFTER library(haven) to avoid masking read_sav
 
 dir.create("plots", recursive = TRUE, showWarnings = FALSE)
 
@@ -24,42 +24,42 @@ theme_set(
 
 # Load Woonbase per year ----
 
-years <- 2016:2024
+years <- 2022:2023
 message("Loading Woonbase for years ", min(years), "-", max(years), " ...")
 
 # In real CBS microdata: col_select loads only needed columns across all 17 M
 # rows; no n_max — the full population is read.  The vectorised spine generator
 # makes this fast enough to repeat across all years in a loop.
 
-dt_list <- lapply(years, function(yr) {
+# Aggregate counts directly per year (avoid large row-level rbindlist)
+agg_list <- lapply(years, function(yr) {
 
-  woonbase_init(year = yr, n = NULL, seed = 42L)
+  sim_reset()
+  woonbase_init(year = yr, n = 1e6, seed = 42L)
 
-  dt <- as.data.table(read_sav(
-    sprintf("WoonbasePopulatiePersonen%dV1", yr),
-    col_select = c(RINOBJECTNUMMER1Jan, VBOWoningType1Jan)
-    # no n_max: full generated population
+  # Read from KenmerkenWoonruimten (object-level) — already one row per
+  # dwelling, and VBOWoningType lives on the raw obj spine so no lazy
+  # enrichment is triggered.
+  dt_vbo <- as.data.table(read_sav(
+    sprintf("WoonbaseKenmerkenWoonruimten%dV1", yr),
+    col_select = c(RINOBJECTNUMMER, VBOWoningType1Jan)
   ))
 
-  # One row per dwelling (dedup to VBO level)
-  dt_vbo <- dt[, .SD[1L], by = RINOBJECTNUMMER1Jan]
-
   # Convert to factor with CBS labels; drop unknown categories
-  dt_vbo[, woningtype := as_factor(VBOWoningType1Jan)]
+  dt_vbo[, woningtype := as.character(as_factor(VBOWoningType1Jan))]
   dt_vbo <- dt_vbo[!is.na(woningtype) &
                    !grepl("nbekend", woningtype, ignore.case = TRUE)]
-  dt_vbo[, woningtype := factor(as.character(woningtype))]
 
-  dt_vbo[, .(year = yr, woningtype)]
+  # Return aggregated counts — no need to carry full rows
+  counts <- dt_vbo[, .N, by = woningtype]
+  counts[, year := yr]
+  counts
 })
 
-dt <- rbindlist(dt_list)
-message("  ", format(nrow(dt), big.mark = ","), " dwelling observations loaded")
-
-
-# Aggregate to counts per year and type ----
-
-dt_agg <- dt[, .N, by = .(year, woningtype)]
+dt_agg <- rbindlist(agg_list)
+dt_agg[, woningtype := factor(woningtype)]
+message("  ", format(sum(dt_agg$N), big.mark = ","), " dwellings across ",
+        length(years), " years")
 
 
 # Plot ----
@@ -67,14 +67,14 @@ dt_agg <- dt[, .N, by = .(year, woningtype)]
 KLEUREN <- c("#004699", "#6cbd74", "#bed200", "#ff9100", "#009dec")
 
 p1 <- ggplot(dt_agg, aes(x = year, y = N, fill = woningtype)) +
-  geom_area(position = "fill", alpha = 0.85, colour = "white", linewidth = 0.2) +
+  geom_area(alpha = 0.85, colour = "white", linewidth = 0.2) +
   scale_x_continuous(breaks = years) +
-  scale_y_continuous(labels = \(x) paste0(round(x * 100), "%")) +
+  scale_y_continuous(labels = scales::label_comma()) +
   scale_fill_manual(values = KLEUREN,
                     guide  = guide_legend(ncol = 2, keyheight = 0.8)) +
-  labs(title    = "Verdeling woningtypen in de woningvoorraad",
-       subtitle = "Aandeel per woningtype op 1 januari (Woonbase-simulatie)",
-       x = NULL, y = "Aandeel (%)", fill = NULL,
+  labs(title    = "Woningtypen in de woningvoorraad",
+       subtitle = "Aantal per woningtype op 1 januari (Woonbase-simulatie)",
+       x = NULL, y = "Aantal woningen", fill = NULL,
        caption  = "Bron: CBS Woonbase (gesimuleerd)") +
   theme(legend.position = "bottom",
         axis.text.x     = element_text(angle = 45, hjust = 1))

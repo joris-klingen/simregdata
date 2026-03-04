@@ -1,0 +1,1073 @@
+# SPOLISBUS — employment records (jobs, wages, hours, insurance)
+# CBS name: SPOLISBUS{YYYY}V{N}
+# One row per job record per person per period
+# Calibrated from CBS StatLine 81431NED via spolis_update_params()
+# Columns with from_params use year-specific distributions from params.yaml
+entity: person
+spine_table: pers
+
+columns:
+  # --- Identifiers ---
+
+  - name: RINPERSOONS
+    random_categorical:
+      values: ["A", "R", "S"]
+      probs:  [0.01, 0.97, 0.02]
+    codelist: RINPERSOONS_SPOLIS
+    label: Oorsprong persoon-id
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: IKVID
+    random_id:
+      width: 32
+
+  # --- Dates ---
+
+  - name: SDATUMAANVANGIKO
+    template: "{jan1}"
+
+  - name: SDATUMEINDEIKO
+    template: "{dec31}"
+
+  # --- Monetary / numeric columns (F10 / F10.2 / F8.2) ---
+
+  - name: SAANTSV
+    random_numeric:
+      distribution: normal
+      mean: 18.0
+      sd: 6.0
+      min: 0
+      max: 31
+      round: 2
+
+  - name: SAANTVERLU
+    random_numeric:
+      distribution: normal
+      mean: 130.0
+      sd: 40.0
+      min: 0
+      max: 250
+      round: 2
+
+  - name: SAUTOZAAK
+    random_numeric:
+      distribution: normal
+      mean: 200
+      sd: 600
+      min: 0
+      max: 15000
+      round: 0
+
+  - name: SBAANDAGEN
+    random_categorical:
+      values: ["28", "29", "30", "31"]
+      probs:  [0.10, 0.05, 0.40, 0.45]
+
+  - name: SBASISLOON
+    random_numeric:
+      distribution: normal
+      mean: 2800
+      sd: 1200
+      min: 0
+      max: 25000
+      round: 0
+
+  - name: SBASISUREN
+    random_numeric:
+      distribution: normal
+      mean: 130.0
+      sd: 40.0
+      min: 0
+      max: 250
+      round: 2
+
+  - name: SBEDRALINWWB
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 50
+      min: 0
+      max: 5000
+      round: 2
+
+  - name: SBEDRRCHTAL
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 20
+      min: 0
+      max: 2000
+      round: 2
+
+  - name: SBEDRZDAFTR
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 10
+      min: 0
+      max: 1000
+      round: 2
+
+  - name: SBIJDRZVW
+    random_numeric:
+      distribution: normal
+      mean: 180
+      sd: 100
+      min: 0
+      max: 3000
+      round: 2
+
+  - name: SBIJZONDEREBELONING
+    random_numeric:
+      distribution: normal
+      mean: 350
+      sd: 500
+      min: 0
+      max: 20000
+      round: 0
+
+  - name: SEXTRSAL
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 200
+      min: 0
+      max: 10000
+      round: 0
+
+  - name: SINCIDENTSAL
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 100
+      min: 0
+      max: 10000
+      round: 0
+
+  - name: SINGLBPH
+    random_numeric:
+      distribution: normal
+      mean: 100
+      sd: 200
+      min: 0
+      max: 5000
+      round: 0
+
+  # Year-specific mean wage from 81431NED
+  - name: SLNINGLD
+    random_numeric:
+      distribution: normal
+      mean: 3200
+      sd: 1800
+      mean_from_params: loon_mean
+      sd_from_params: loon_sd
+      min: 0
+      max: 50000
+      round: 0
+
+  - name: SLNLBPH
+    random_numeric:
+      distribution: normal
+      mean: 2800
+      sd: 1500
+      min: 0
+      max: 40000
+      round: 0
+
+  - name: SLNOWRK
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 200
+      min: 0
+      max: 10000
+      round: 0
+
+  - name: SLNSV
+    random_numeric:
+      distribution: normal
+      mean: 2900
+      sd: 1600
+      min: 0
+      max: 40000
+      round: 0
+
+  - name: SLNTABBB
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 50
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SLVLPREG
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 50
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SLVLPREGTOEG
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 50
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SOPGRCHTEXTRSAL
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 100
+      min: 0
+      max: 10000
+      round: 0
+
+  - name: SOPGRCHTVAKBSL
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 50
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SOVERWERKUREN
+    random_numeric:
+      distribution: normal
+      mean: 3.0
+      sd: 8.0
+      min: 0
+      max: 100
+      round: 2
+
+  - name: SPENSIOENPREMIE
+    random_numeric:
+      distribution: normal
+      mean: 250
+      sd: 200
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SPRAWF
+    random_numeric:
+      distribution: normal
+      mean: 90
+      sd: 60
+      min: 0
+      max: 2000
+      round: 2
+
+  - name: SPRUFO
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 30
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SPRWAOAOF
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 30
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SPRWAOAOK
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 25
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SPRWGF
+    random_numeric:
+      distribution: normal
+      mean: 30
+      sd: 40
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SREGULIEREUREN
+    random_numeric:
+      distribution: normal
+      mean: 125.0
+      sd: 40.0
+      min: 0
+      max: 250
+      round: 2
+
+  - name: SREISK
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 80
+      min: 0
+      max: 2000
+      round: 2
+
+  - name: SVAKBSL
+    random_numeric:
+      distribution: normal
+      mean: 200
+      sd: 150
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SVERGZVW
+    random_numeric:
+      distribution: normal
+      mean: 180
+      sd: 120
+      min: 0
+      max: 3000
+      round: 0
+
+  - name: SVERRARBKRT
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 30
+      min: 0
+      max: 1000
+      round: 2
+
+  - name: SVERSTRAANV
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 20
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SVOLTIJDDAGEN
+    random_numeric:
+      distribution: normal
+      mean: 22.0
+      sd: 6.0
+      min: 0
+      max: 31
+      round: 2
+
+  - name: SWGBIJDRKO
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 30
+      min: 0
+      max: 2000
+      round: 0
+
+  - name: SWRDLN
+    random_numeric:
+      distribution: normal
+      mean: 100
+      sd: 300
+      min: 0
+      max: 10000
+      round: 0
+
+  - name: SWRDPRGEBRAUT
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 200
+      min: 0
+      max: 5000
+      round: 0
+
+  - name: SWRKNBIJDRAUT
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 50
+      min: 0
+      max: 2000
+      round: 0
+
+  # --- Categorical columns ---
+
+  - name: SCAO_crypt
+    random_id:
+      width: 32
+
+  - name: SCDAARD
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "82", "83", "99"]
+      probs:  [0.45, 0.20, 0.05, 0.02, 0.03, 0.01, 0.01, 0.02, 0.01, 0.03, 0.08, 0.03, 0.02, 0.04]
+    codelist: SCDAARD
+    label: Aard arbeidsverhouding
+
+  - name: SCDAGH
+    random_categorical:
+      values: ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+      probs:  [0.05, 0.85, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.01, 0.01]
+    codelist: SCDAGH
+    label: Arbeidsgehandicaptenkorting
+
+  - name: SCDINCINKVERM
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.95, 0.03]
+    codelist: SCDINCINKVERM
+    label: Inkomensvermindering
+
+  - name: SCDINVLVPL1
+    random_categorical:
+      values: ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      probs:  [0.02, 0.90, 0.01, 0.01, 0.005, 0.01, 0.005, 0.005, 0.005, 0.01, 0.02]
+    codelist: SCDINVLVPL
+    label: Invloed op voorlopige teruggaaf 1
+
+  - name: SCDINVLVPL2
+    random_categorical:
+      values: ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      probs:  [0.02, 0.93, 0.005, 0.005, 0.002, 0.005, 0.003, 0.003, 0.003, 0.005, 0.02]
+    codelist: SCDINVLVPL
+    label: Invloed op voorlopige teruggaaf 2
+
+  - name: SCDINVLVPL3
+    random_categorical:
+      values: ["-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      probs:  [0.02, 0.93, 0.005, 0.005, 0.002, 0.005, 0.003, 0.003, 0.003, 0.005, 0.02]
+    codelist: SCDINVLVPL
+    label: Invloed op voorlopige teruggaaf 3
+
+  - name: SCDRDNGNBIJT
+    random_categorical:
+      values: ["-", "0", "1", "2", "3", "4", "5"]
+      probs:  [0.02, 0.80, 0.08, 0.05, 0.02, 0.02, 0.01]
+    codelist: SCDRDNGNBIJT
+    label: Reden geen bijtelling
+
+  - name: SCDZVW
+    random_categorical:
+      values: ["A", "B", "G", "H", "I", "K", "L", "M", "N"]
+      probs:  [0.05, 0.02, 0.02, 0.01, 0.01, 0.75, 0.01, 0.10, 0.03]
+    codelist: SCDZVW
+    label: Code Zvw
+
+  - name: SCONTRACTSOORT
+    random_categorical:
+      values: ["B", "O", "N"]
+      probs:  [0.30, 0.65, 0.05]
+    codelist: SCONTRACTSOORT
+    label: Soort contract
+
+  - name: SDATUMAANVANGIKVORG
+    template: "{jan1}"
+
+  - name: SFSINDFZ
+    random_categorical:
+      values: ["--", "00", "01", "02", "03", "04", "05", "06"]
+      probs:  [0.05, 0.60, 0.08, 0.06, 0.05, 0.04, 0.06, 0.06]
+    codelist: SFSINDFZ
+    label: Fase flexibiliteit en zekerheid
+
+  - name: SINDLHKORT
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.10, 0.90]
+    codelist: JN_INDICATOR
+    label: Loonheffingskorting
+
+  - name: SINDSA03
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.05, 0.95]
+    codelist: JN_INDICATOR
+    label: Indicatie SA03
+
+  - name: SINDSA43
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.02, 0.98]
+    codelist: JN_INDICATOR
+    label: Indicatie SA43
+
+  - name: SINDSA71
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.02, 0.98]
+    codelist: JN_INDICATOR
+    label: Indicatie SA71
+
+  - name: SINDSA72
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.02, 0.98]
+    codelist: JN_INDICATOR
+    label: Indicatie SA72
+
+  - name: SINDVAKBN
+    random_categorical:
+      values: ["-", "J", "N"]
+      probs:  [0.05, 0.05, 0.90]
+    codelist: JN_INDICATOR
+    label: Indicatie vakantiebonnen
+
+  - name: SINDZW
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.85, 0.15]
+    codelist: JN_INDICATOR
+    label: Indicatie verzekerd ZW
+
+  - name: SINLEGLEVENSLOOP
+    random_categorical:
+      values: ["-", "J", "N"]
+      probs:  [0.05, 0.02, 0.93]
+    codelist: JN_INDICATOR
+    label: Inleg levensloopregeling
+
+  - name: SOVERWERK
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.85, 0.15]
+    codelist: INDICATOR_01
+    label: Indicatie overwerk
+
+  # Year-specific dienstverband from 81431NED
+  - name: SPOLISDIENSTVERBAND
+    random_categorical:
+      from_params: dienstverband_p
+      values: ["1", "2"]
+      probs:  [0.50, 0.50]
+    codelist: SPOLISDIENSTVERBAND
+    label: Dienstverband voltijd/deeltijd
+
+  - name: SRISGRP
+    random_categorical:
+      values: ["--", "00", "01", "02", "03"]
+      probs:  [0.05, 0.30, 0.40, 0.15, 0.10]
+    codelist: SRISGRP
+    label: Risicopremiegroep
+
+  - name: SSRTIV
+    random_categorical:
+      values: ["01", "02", "03", "11", "15", "17", "22", "33", "50", "51", "55", "56", "59", "62"]
+      probs:  [0.35, 0.25, 0.02, 0.03, 0.02, 0.02, 0.01, 0.05, 0.08, 0.05, 0.03, 0.02, 0.04, 0.03]
+    codelist: SSRTIV
+    label: Soort inkomstenverhouding
+
+  # Year-specific working hours class from 81431NED
+  - name: SWEKARBDUURKLASSE
+    random_categorical:
+      from_params: wekarbduur_p
+      values: ["1", "2", "3", "4", "5", "6"]
+      probs:  [0.10, 0.10, 0.08, 0.07, 0.15, 0.50]
+    codelist: SWEKARBDUURKLASSE
+    label: Wekelijkse arbeidsduurklasse
+
+  - name: SARBEIDSRELATIE
+    random_categorical:
+      values: ["1", "2"]
+      probs:  [0.80, 0.20]
+    codelist: SARBEIDSRELATIE
+    label: Arbeidsrelatie
+
+  - name: SAUTOVANDEZAAK
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.88, 0.12]
+    codelist: SAUTOVANDEZAAK
+    label: Auto van de zaak
+
+  - name: SBEID
+    random_id:
+      width: 8
+
+  - name: SCAOSECTOR
+    random_categorical:
+      values: ["1000", "2000", "3000", "3100", "3200", "3300"]
+      probs:  [0.70, 0.10, 0.05, 0.03, 0.08, 0.04]
+    codelist: SCAOSECTOR
+    label: CAO-sector
+
+  - name: SDATUMAANVANGIKV
+    template: "{jan1}"
+
+  - name: SDATUMEINDEIKV
+    template: "{dec31}"
+
+  - name: SINDWAO
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.82, 0.18]
+    codelist: JN_INDICATOR
+    label: Indicatie verzekerd WAO
+
+  - name: SINDWW
+    random_categorical:
+      values: ["J", "N"]
+      probs:  [0.82, 0.18]
+    codelist: JN_INDICATOR
+    label: Indicatie verzekerd WW
+
+  - name: SLBTAB
+    random_categorical:
+      values: ["010", "012", "020", "022", "310", "312", "510", "512", "610", "612", "940"]
+      probs:  [0.02, 0.65, 0.01, 0.15, 0.01, 0.02, 0.01, 0.02, 0.01, 0.02, 0.08]
+    codelist: SLBTAB
+    label: Loonbelastingtabel
+
+  - name: SLHNR_crypt
+    random_id:
+      width: 32
+
+  # Year-specific sector distribution from 81431NED
+  - name: SSECT
+    random_categorical:
+      from_params: ssect_p
+      values: ["01", "03", "07", "08", "17", "18", "21", "23", "25", "33", "35", "43", "44", "45", "51", "52", "55", "61", "64", "66", "99"]
+      probs:  [0.03, 0.04, 0.03, 0.02, 0.12, 0.03, 0.03, 0.05, 0.04, 0.02, 0.03, 0.05, 0.05, 0.05, 0.04, 0.08, 0.08, 0.06, 0.05, 0.03, 0.07]
+    codelist: SSECT
+    label: Sectorcode
+
+  # Year-specific soort baan from 81431NED
+  - name: SSOORTBAAN
+    random_categorical:
+      from_params: soortbaan_p
+      values: ["1", "2", "3", "4", "5", "9"]
+      probs:  [0.03, 0.02, 0.01, 0.08, 0.05, 0.81]
+    codelist: SSOORTBAAN
+    label: Soort baan
+
+  - name: STIJDVAKTYPE
+    random_categorical:
+      values: ["1", "3", "4", "5"]
+      probs:  [0.10, 0.01, 0.01, 0.88]
+    codelist: STIJDVAKTYPE
+    label: Tijdvaktype
+
+  # --- Additional premium / monetary columns ---
+
+  - name: SPRWGAWHK
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 25
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SWGHZVW
+    random_numeric:
+      distribution: normal
+      mean: 180
+      sd: 120
+      min: 0
+      max: 3000
+      round: 2
+
+  - name: SPRGEDIFFWHK
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 20
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SINDTIJDHK
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.90, 0.10]
+    codelist: INDICATOR_01
+    label: Indicatie tijdelijke heffingskorting
+
+  - name: SIMPUTATIE
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Indicatie imputatie
+
+  # --- Columns added from 2015 ---
+
+  - name: SINDPRKJONGRWEN
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Premiekorting jongere werknemer
+
+  - name: SINDPKAGH
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Premiekorting arbeidsgehandicapte
+
+  - name: SINDPKNWARBVOUDWN
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Premiekorting nieuwe arbeid oudere werknemer
+
+  - name: SINDPMA
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.90, 0.10]
+    codelist: INDICATOR_01
+    label: Premie mobiliteitsbonus arbeidsgehandicapte
+
+  - name: SCTRCTLN
+    random_numeric:
+      distribution: normal
+      mean: 2800
+      sd: 1200
+      min: 0
+      max: 25000
+      round: 2
+
+  - name: SAANTCTRCTURENPWK
+    random_numeric:
+      distribution: normal
+      mean: 32.0
+      sd: 8.0
+      min: 0
+      max: 60
+      round: 2
+
+  - name: SBEDRRNTKSTVPERSL
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 20
+      min: 0
+      max: 1000
+      round: 2
+
+  - name: SINDWAARNEMING
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.10, 0.90]
+    codelist: INDICATOR_01
+    label: Indicatie waarneming
+
+  - name: SModelramingPensioenpremieWn
+    random_numeric:
+      distribution: normal
+      mean: 100
+      sd: 80
+      min: 0
+      max: 2000
+      round: 2
+
+  - name: SModelramingPensioenpremieWg
+    random_numeric:
+      distribution: normal
+      mean: 200
+      sd: 150
+      min: 0
+      max: 5000
+      round: 2
+
+  - name: SModelramingVutpremieWn
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 30
+      min: 0
+      max: 500
+      round: 2
+
+  - name: SModelramingVutpremieWg
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 50
+      min: 0
+      max: 1000
+      round: 2
+
+  - name: SModelramingSFpremieWg
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 40
+      min: 0
+      max: 800
+      round: 2
+
+  # --- Columns added from 2018 ---
+
+  - name: SIndAvrLkvOudrWn
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Loonkostenvoordeel oudere werknemer
+
+  - name: SIndAvrLkvAgWn
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.97, 0.03]
+    codelist: INDICATOR_01
+    label: Loonkostenvoordeel arbeidsgehandicapte werknemer
+
+  - name: SIndAvrLkvDgBafSb
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.97, 0.03]
+    codelist: INDICATOR_01
+    label: Loonkostenvoordeel doelgroep banenafspraak
+
+  - name: SIndAvrLkvHpAgWn
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.97, 0.03]
+    codelist: INDICATOR_01
+    label: Loonkostenvoordeel herplaatste arbeidsgehandicapte
+
+  # --- Columns added from 2020 ---
+
+  - name: CdRdnEindArbov
+    random_categorical:
+      values: ["--", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "99"]
+      probs:  [0.60, 0.05, 0.03, 0.08, 0.05, 0.06, 0.01, 0.01, 0.03, 0.02, 0.01, 0.05]
+    codelist: CDRDNEINDARB
+    label: Reden einde arbeidsovereenkomst
+
+  - name: CdCaoInl_crypt
+    random_id:
+      width: 32
+
+  - name: IndArbovOnbepTd
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.35, 0.65]
+    codelist: INDICATOR_01
+    label: Arbeidsovereenkomst onbepaalde tijd
+
+  - name: IndSchriftArbov
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.10, 0.90]
+    codelist: INDICATOR_01
+    label: Schriftelijke arbeidsovereenkomst
+
+  - name: IndOprov
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.85, 0.15]
+    codelist: INDICATOR_01
+    label: Indicatie oproepovereenkomst
+
+  - name: IndJrurennrm
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.90, 0.10]
+    codelist: INDICATOR_01
+    label: Indicatie jaarurennorm
+
+  - name: PRLNUFO
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 25
+      min: 0
+      max: 500
+      round: 2
+
+  - name: PRLNAWFANWLg
+    random_numeric:
+      distribution: normal
+      mean: 30
+      sd: 30
+      min: 0
+      max: 500
+      round: 2
+
+  - name: PRLNAWFANWHg
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 40
+      min: 0
+      max: 800
+      round: 2
+
+  - name: PRLNAWFANWHz
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 10
+      min: 0
+      max: 200
+      round: 2
+
+  - name: PrAwfLg
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 15
+      min: 0
+      max: 200
+      round: 2
+
+  - name: PrAwfHg
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 20
+      min: 0
+      max: 300
+      round: 2
+
+  - name: PrAwfHz
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 5
+      min: 0
+      max: 100
+      round: 2
+
+  # --- Column added from 2021 ---
+
+  - name: INDPUBAANONBEPTD
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Publiekrechtelijke aanstelling onbepaalde tijd
+
+  # --- Columns added from 2022 ---
+
+  - name: OPBAVWB
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 15
+      min: 0
+      max: 500
+      round: 2
+
+  - name: OPNAVWB
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 15
+      min: 0
+      max: 500
+      round: 2
+
+  - name: PRLNAOFANWHG
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 20
+      min: 0
+      max: 400
+      round: 2
+
+  - name: PRLNAOFANWLG
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 10
+      min: 0
+      max: 200
+      round: 2
+
+  - name: PRLNAOFANWUIT
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 5
+      min: 0
+      max: 100
+      round: 2
+
+  - name: PRAOFHG
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 10
+      min: 0
+      max: 200
+      round: 2
+
+  - name: PRAOFLG
+    random_numeric:
+      distribution: normal
+      mean: 3
+      sd: 8
+      min: 0
+      max: 150
+      round: 2
+
+  - name: PRAOFUIT
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 5
+      min: 0
+      max: 100
+      round: 2
+
+  - name: OPSLWKO
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 15
+      min: 0
+      max: 500
+      round: 2
+
+  # --- Columns added from 2023 ---
+
+  - name: PRLNWHKANW
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 20
+      min: 0
+      max: 400
+      round: 2
+
+  - name: PRLNAWFANWUIT
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 5
+      min: 0
+      max: 100
+      round: 2
+
+  - name: PRAWFUIT
+    random_numeric:
+      distribution: normal
+      mean: 0
+      sd: 5
+      min: 0
+      max: 100
+      round: 2
+
+  # --- Column added from 2024 ---
+
+  - name: INDDEELNTIJDSPF
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+    codelist: INDICATOR_01
+    label: Indicatie deelname tijdspaarfonds
