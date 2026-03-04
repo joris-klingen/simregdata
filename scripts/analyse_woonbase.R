@@ -1,4 +1,4 @@
-# scripts/030_analyse_woonbase.R
+# scripts/analyse_woonbase.R
 #
 # Loads 4 Woonbase files, joins them by reference with data.table,
 # and produces 6 descriptive plots + 2 municipality choropleths.

@@ -23,14 +23,11 @@ sim_mdata/
 │   └── interim/woonbase_meta/        # Parsed metadata (RDS + CSV)
 ├── output/figures/                   # Generated plots (gitignored)
 ├── scripts/
-│   ├── 000_project_init.R            # Shared package loads + directory setup
-│   ├── 030_analyse_woonbase.R        # 6 plots + 2 maps from joined Woonbase files
-│   ├── 031_housing_type_timeseries.R # Housing stock composition 2016–2024
-│   ├── 101_maps_woonbase.R           # Municipality choropleths
-│   ├── 090_test_woonbase_import.R    # Phase timing + profvis flame graph
-│   ├── test_read_sav_woonbase.R      # Correctness test suite (PASS/FAIL)
-│   └── functions/
-│       └── read_sav_woonbase.R       # Core simulator (~880 lines)
+│   ├── analyse_woonbase.R            # 6 plots + 2 maps from joined Woonbase files
+│   ├── housing_type_timeseries.R     # Housing stock composition 2016–2024
+│   └── maps_woonbase.R              # Municipality choropleths
+├── simcbsradata/                     # R package (simulator + config)
+│   └── inst/scripts/benchmark.R     # Phase timing + profvis flame graph
 └── references/                       # Variable selection notes
 ```
 
@@ -121,7 +118,7 @@ At 1 M persons on a modern laptop:
 | Assemble 2 columns (`read_sav` with `col_select`) | < 0.5 s |
 | Assemble all columns (no `col_select`) | 3–5 s |
 
-Run `scripts/090_test_woonbase_import.R` in RStudio for a labelled timing breakdown and a `profvis` flame graph.
+Run `simcbsradata/inst/scripts/benchmark.R` in RStudio for a labelled timing breakdown and a `profvis` flame graph.
 
 ## CBS parameters
 

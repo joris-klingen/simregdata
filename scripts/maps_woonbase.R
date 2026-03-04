@@ -1,14 +1,16 @@
-# scripts/101_maps_woonbase.R
+# scripts/maps_woonbase.R
 #
 # Municipality choropleths from Woonbase 2020:
 #   map1 — Population per gemeente
 #   map2 — Population density per gemeente (persons / km²)
 
-library(simcbsradata)
-library(data.table)
-library(ggplot2)
-library(haven)
-library(glue)
+suppressPackageStartupMessages({
+  library(data.table)
+  library(ggplot2)
+  library(haven)
+  library(simcbsradata)
+  library(glue)
+})
 
 YEAR <- 2020L
 log_message <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))
@@ -69,7 +71,7 @@ if (is.null(gem_sf)) {
   q(save = "no")
 }
 
-# statcode in cartomap is "GM0363"; strip prefix -> "0363" to match our codes
+# statcode in cartomap is "GM0363"; strip prefix → "0363" to match our codes
 gem_sf <- setDT(gem_sf)[, GemCode4 := sub("^GM", "", statcode)]
 gem_sf <- sf::st_as_sf(gem_sf)
 

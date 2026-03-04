@@ -1,4 +1,4 @@
-# scripts/031_housing_type_timeseries.R
+# scripts/housing_type_timeseries.R
 #
 # Housing type composition of the Dutch dwelling stock, 2016-2024.
 # Mimics a microdata workflow: for each year the Woonbase population
