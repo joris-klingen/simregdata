@@ -1,0 +1,152 @@
+# PopulatieWoonruimten — object-level population file
+entity: object
+spine_table: obj
+
+# Special pre-processing: compute AantalPersonenPerVSLKlasse from AantalPersonenPerVSL
+pre_compute:
+  - name: AantalPersonenPerVSLKlasse
+    source: spine.obj.AantalPersonenPerVSL
+    transform: persklasse
+
+columns:
+  - name: SOORTOBJECTNUMMER
+    source: spine.obj.SOORTOBJECTNUMMER
+
+  - name: RINOBJECTNUMMER
+    source: spine.obj.RINOBJECTNUMMER
+
+  - name: "PandID{sfx}"
+    source: spine.obj.PandID{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "VSLSoort{sfx}"
+    source: spine.obj.VSLSoort{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: VSLSOORT
+    label: Soort VSL
+
+  - name: "HUISHOUDNR{sfx}"
+    source: spine.obj.HUISHOUDNR
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "DATUMAANVANGHH{sfx_lower}"
+    source: spine.obj.DATUMAANVANGHH
+    suffixes_custom:
+      - output_suffix: "1jan"
+      - output_suffix: "31Dec"
+
+  - name: "RINPERSOONS_Ref{sfx_lower}"
+    source: spine.obj.RINPERSOONS_Ref2
+    suffixes_custom:
+      - output_suffix: "1jan"
+      - output_suffix: "31Dec"
+
+  - name: "RINPERSOON_Ref{sfx_lower}"
+    source: spine.obj.RINPERSOON_Ref2
+    suffixes_custom:
+      - output_suffix: "1jan"
+      - output_suffix: "31Dec"
+
+  - name: "VBOWoningType{sfx}"
+    source: spine.obj.VBOWoningType{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WONINGTYPE
+    label: Woningtype VBO
+
+  - name: "VBOBouwJaarKlasse{sfx}"
+    source: spine.obj.VBOBouwJaarKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: BOUWJAARKLASSE
+    label: Bouwjaarklass VBO
+
+  - name: "VBOOppervlakteKlasse{sfx}"
+    source: spine.obj.VBOOppervlakteKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: OPPKLASSE
+    label: Oppervlakteklasse VBO
+
+  - name: "WOZWaardeObjectBAGKlasse{sfx}"
+    source: spine.obj.WOZWaardeObjectBAGKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WOZKLASSE
+    label: WOZ waardeklasse
+
+  - name: "TypeEigenaar{sfx}"
+    source: spine.obj.TypeEigenaar{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPEIGENAAR
+    label: Type eigenaar
+
+  - name: "AantalPersonenPerVSLKlasse{sfx}"
+    source: computed.AantalPersonenPerVSLKlasse
+    suffixes: ["1Jan", "31Dec"]
+    codelist: PERSKLASSE
+    label: Aantal personen per VSL klasse
+
+  - name: "AantalHuishoudensPerVSLKlasse{sfx}"
+    value: "1"
+    suffixes: ["1Jan", "31Dec"]
+    codelist: HHKLASSE
+    label: Aantal HH per VSL klasse
+
+  - name: "AantalKinderenPerVSL{sfx}"
+    source: spine.obj.AantalKinderenPerVSL
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "LeeftijdJongsteKindPerVSL{sfx}"
+    source: spine.obj.LeeftijdJongsteKindPerVSL
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "TYPHH{sfx}"
+    source: spine.obj.TYPHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPHH
+    label: Type huishouden
+
+  - name: "GemeenteCodeJJJJ{sfx}"
+    source: spine.obj.GemeenteCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "Indicator_VBOIsAanwezig{sfx}"
+    source: spine.obj.Indicator_VBOIsAanwezig{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: INDICATOR
+    label: Indicator VBOIsAanwezig{sfx}
+    indicator_label: true
+
+  - name: "Indicator_VSLIsAanwezig{sfx}"
+    source: spine.obj.Indicator_VSLIsAanwezig{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: INDICATOR
+    label: Indicator VSLIsAanwezig{sfx}
+    indicator_label: true
+
+  - name: Indicator_VBOIsGesloopt
+    source: spine.obj.Indicator_VBOIsGesloopt
+    codelist: INDICATOR
+    label: Indicator VBOIsGesloopt
+    indicator_label: true
+
+  - name: Indicator_VSLIsOntrokken
+    source: spine.obj.Indicator_VSLIsOntrokken
+    codelist: INDICATOR
+    label: Indicator VSLIsOntrokken
+    indicator_label: true
+
+  - name: Indicator_VBOIsTransformatie
+    source: spine.obj.Indicator_VBOIsTransformatie
+    codelist: INDICATOR
+    label: Indicator VBOIsTransformatie
+    indicator_label: true
+
+  - name: Indicator_VBOIsNieuwbouw
+    source: spine.obj.Indicator_VBOIsNieuwbouw
+    codelist: INDICATOR
+    label: Indicator VBOIsNieuwbouw
+    indicator_label: true
+
+  - name: Indicator_VSLIsNieuw
+    source: spine.obj.Indicator_VSLIsNieuw
+    codelist: INDICATOR
+    label: Indicator VSLIsNieuw
+    indicator_label: true

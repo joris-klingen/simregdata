@@ -1,0 +1,271 @@
+# WOONBASEEKHuishoudensWV — Extra Kenmerken Huishoudens Welvaart
+# Household income and wealth characteristics
+# CBS name: WOONBASEEKHuishoudensWV{YYYY}V{N}
+entity: household
+spine_table: hh
+
+columns:
+  - name: RINPERSOONS
+    source: spine.hh.RINPERSOONS_Ref
+
+  - name: RINPERSOON
+    source: spine.hh.RINPERSOON_Ref
+
+  # Aandachtsgroep huurtoeslag
+  - name: "AGHT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.25, 0.15, 0.60]
+    codelist: AGHT
+    label: Aandachtsgroep huurtoeslag
+
+  # Aandachtsgroep inkomensafhankelijk huurbeleid
+  - name: "AGIAH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.30, 0.20, 0.50]
+    codelist: AGIAH
+    label: Aandachtsgroep inkomensafhankelijk huurbeleid
+
+  # Aandachtsgroep toewijzing sociale huurwoning
+  - name: "AGTSH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.35, 0.15, 0.50]
+    codelist: AGTSH
+    label: Aandachtsgroep toewijzing sociale huurwoning
+
+  # AOW-gerechtigde indicator
+  - name: "AOWHT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.72, 0.28]
+    codelist: AOWHT
+    label: Oudste lid AOW-gerechtigd
+
+  # Armoede percentage
+  - name: "ARMOEDE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 50
+      max: 500
+      round: 0
+
+  # Sociaal minimum percentage
+  - name: "ARMSOC{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 50
+      max: 500
+      round: 0
+
+  # Breedband inkomen huishouden jaar
+  - name: "BBIHJ{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 20
+      round: 0
+
+  # Belastbaar inkomen aandachtsgroep huurtoeslag
+  - name: "BELIAGHT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 80000
+      round: 0
+
+  # Belastbaar inkomen aandachtsgroep IAH
+  - name: "BELIAGIAH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 80000
+      round: 0
+
+  # Belastbaar inkomen aandachtsgroep toewijzing
+  - name: "BELIAGTSH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 80000
+      round: 0
+
+  # Belastbaar inkomen huishouden
+  - name: "BELIH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 120000
+      round: 0
+
+  # Besteedbaar inkomen huishouden
+  - name: "BESTINKH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 100000
+      round: 0
+
+  # Betaalbudget
+  - name: "BETAALBUDGET{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: -10000
+      max: 60000
+      round: 0
+
+  # Betaalreserve
+  - name: "BETAALRESERVE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: -5000
+      max: 50000
+      round: 0
+
+  # Correctie betaalbudget indicator
+  - name: "CORBETAALBUDGET{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.85, 0.15]
+
+  # Equivalentiefactor huishouden
+  - name: "EHALGR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 30
+      round: 0
+
+  # Gestandaardiseerd inkomen huishouden
+  - name: "GESTINKH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 5000
+      max: 80000
+      round: 0
+
+  # Leegrond (eigenwoningforfait o.i.d.)
+  - name: "LEERGROND{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50000
+      round: 0
+
+  # Percentiel besteedbaar inkomen
+  - name: "P100HBEST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Percentiel gestandaardiseerd inkomen
+  - name: "P100HGEST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Percentiel vermogen
+  - name: "P100HVERM{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Percentiel welvaart
+  - name: "P100WELVAART{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Populatie FEC indicator
+  - name: "POPFEC{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2"]
+      probs:  [0.90, 0.10]
+    codelist: POPFEC
+    label: Populatie FEC
+
+  # Populatie IIV indicator
+  - name: "POPIIV{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.15, 0.85]
+    codelist: POPIIV
+    label: Populatie IIV
+
+  # Populatie IIV woning
+  - name: "POPIIVWONING{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 10
+      round: 0
+
+  # Vermogen huishouden
+  - name: "VERMHH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: -50000
+      max: 500000
+      round: 0
+
+  # Vrij opneembaar vermogen huishouden
+  - name: "VROMHH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: -20000
+      max: 400000
+      round: 0
+
+  # Welvaart op de grens van 1000-groepen vermogen
+  - name: "W1000VERH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 500000
+      round: 0
+
+  # Verschil IIV indicator
+  - name: "VERSCHILIIV{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.92, 0.08]
+    codelist: VERSCHILIIV
+    label: Verschil IIV

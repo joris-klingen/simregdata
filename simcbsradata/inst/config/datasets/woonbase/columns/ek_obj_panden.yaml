@@ -1,0 +1,153 @@
+# ExtraKenmerkenPanden — building-level characteristics
+# CBS name: ExtraKenmerkenPanden{YYYY}TABV{N}
+entity: object
+spine_table: obj
+
+columns:
+  - name: PandID
+    source: spine.obj.PandID1Jan
+
+  # Aantal VBOs in voorraad
+  - name: "PandAantalVbos{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 20
+      round: 0
+
+  # Aantal woningen
+  - name: "PandAantalWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 15
+      round: 0
+
+  # Aantal niet-woningen
+  - name: "PandAantalNietWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 5
+      round: 0
+
+  # Totale oppervlakte woningen
+  - name: "PandOppTotWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 5000
+      round: 0
+
+  # Totale oppervlakte niet-woningen
+  - name: "PandOppTotNietWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 3000
+      round: 0
+
+  # Gemiddelde oppervlakte woningen
+  - name: "PandOppGemWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 30
+      max: 250
+      round: 0
+
+  # Gemiddelde oppervlakte niet-woningen
+  - name: "PandOppGemNietWoning{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 30
+      max: 500
+      round: 0
+
+  # Function indicators (0/1/-) paired by 1Jan/31Dec
+  - name: "PandWinkelfunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.88, 0.10]
+    codelist: PANDFUNCTIE
+    label: Pand heeft winkelfunctie
+
+  - name: "PandKantoorfunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.85, 0.13]
+    codelist: PANDFUNCTIE
+    label: Pand heeft kantoorfunctie
+
+  - name: "PandIndustriefunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.90, 0.08]
+    codelist: PANDFUNCTIE
+    label: Pand heeft industriefunctie
+
+  - name: "PandBijeenkomstfunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.95, 0.03]
+    codelist: PANDFUNCTIE
+    label: Pand heeft bijeenkomstfunctie
+
+  - name: "PandGezondheidszorgfunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.96, 0.02]
+    codelist: PANDFUNCTIE
+    label: Pand heeft gezondheidszorgfunctie
+
+  - name: "PandAnderefunctie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.90, 0.08]
+    codelist: PANDFUNCTIE
+    label: Pand heeft andere functie
+
+  # Transformatie indicator
+  - name: "PandTransformatie{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["-", "0", "1"]
+      probs:  [0.02, 0.96, 0.02]
+    codelist: PANDTRANSFORMATIE
+    label: Pand is transformatie
+
+  # Building height (meters)
+  - name: PandHoogte
+    random_numeric:
+      distribution: uniform
+      min: 3
+      max: 60
+      round: 0
+
+  # Number of floors
+  - name: PandAantalVerdiepingen
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 15
+      round: 0
+
+  # Roof type
+  - name: PandDaktype
+    random_categorical:
+      values: ["0", "1", "2", "3"]
+      probs:  [0.05, 0.30, 0.15, 0.50]
+    codelist: PANDDAKTYPE
+    label: Type dakvlak

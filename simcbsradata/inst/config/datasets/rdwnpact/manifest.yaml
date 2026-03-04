@@ -1,0 +1,19 @@
+# RDWNPACT dataset manifest
+# Motor vehicle park with vehicle characteristics at license plate level
+# CBS name pattern: RDWNPACT{YYYY}TABV{N}
+
+dataset_id: rdwnpact
+label: RDW Motorvoertuigenpark
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  kentekens:
+    cbs_name: RDWNPACT
+    entity: person
+    columns_file: kentekens.yaml

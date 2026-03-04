@@ -1,6 +1,5 @@
 .seq_id  <- function(n, w)    sprintf(paste0("%0", w, "d"), seq_len(n))
 .rand_id <- function(n, w) {
-  # For widths <= 9 use sample.int; wider: combine two ranges
   if (w <= 9L) {
     pool <- 10^w - 1L
     unique <- n <= pool
@@ -8,9 +7,11 @@
       warning(sprintf(".rand_id: n=%d > pool=%d for width %d; IDs will not be unique", n, pool, w))
     sprintf(paste0("%0", w, "d"), sample.int(pool, n, replace = !unique))
   } else {
-    h <- ceiling(w / 2L)
-    paste0(sprintf(paste0("%0", h,   "d"), sample.int(10^h       - 1L, n, replace = TRUE)),
-           sprintf(paste0("%0", w-h, "d"), sample.int(10^(w - h) - 1L, n, replace = TRUE)))
+    # For wide IDs, concatenate random hex chunks of 8 chars (safe for sample.int)
+    n_chunks <- ceiling(w / 8L)
+    parts <- replicate(n_chunks, sprintf("%08x", sample.int(.Machine$integer.max, n, replace = TRUE)))
+    if (is.null(dim(parts))) parts <- matrix(parts, nrow = n)
+    vapply(seq_len(n), function(i) substr(paste0(parts[i, ], collapse = ""), 1L, w), character(1L))
   }
 }
 .rcat    <- function(n, v, p = NULL) sample(v, n, replace = TRUE, prob = p)

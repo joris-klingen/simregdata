@@ -1,0 +1,44 @@
+# KenmerkenHuishoudens — household characteristics
+entity: household
+spine_table: hh
+
+columns:
+  - name: "HUISHOUDNR{sfx}"
+    source: spine.hh.HUISHOUDNR
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "DatumAanvangHH{sfx}"
+    source: spine.hh.DATUMAANVANGHH
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "IMPUTATIECODEHH{sfx}"
+    source: spine.hh.IMPUTATIECODEHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: IMPUTATIECODEHH
+    label: Huishouden geimputeerd
+
+  - name: "RefPersoonHH{sfx}"
+    source: spine.hh.REFPERSOONHH_Ref
+    suffixes: ["1Jan", "31Dec"]
+    codelist: REFPERSOONHH
+    label: Referentiepersoon
+
+  - name: RINPERSOON
+    source: spine.hh.RINPERSOON_Ref
+
+  - name: RINPERSOONS
+    source: spine.hh.RINPERSOONS_Ref
+
+  - name: "TYPHH{sfx}"
+    source: spine.hh.TYPHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPHH
+    label: Type huishouden
+
+  - name: "AantalKinderenPerHuishouden{sfx}"
+    source: spine.hh.AantalKinderenPerHuishouden
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "AantalPersonenPerHuishouden{sfx}"
+    source: spine.hh.AantalPersonenPerHuishouden
+    suffixes: ["1Jan", "31Dec"]

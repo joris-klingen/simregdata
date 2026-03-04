@@ -1,0 +1,66 @@
+# Sleutelbestand — person-level key file
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: REFPERSOONHH
+    source: spine.pers.REFPERSOONHH
+    codelist: REFPERSOONHH
+    label: Referentiepersoon
+
+  - name: PLHH
+    source: spine.pers.PLHH
+    codelist: PLHH
+    label: Plaats in huishouden
+
+  - name: HUISHOUDNR
+    source: spine.pers.HUISHOUDNR
+
+  - name: DATUMAANVANGHH
+    source: spine.pers.DATUMAANVANGHH
+
+  - name: TYPHH
+    source: spine.pers.TYPHH
+    codelist: TYPHH
+    label: Type huishouden
+
+  - name: IMPUTATIECODEHH
+    source: spine.pers.IMPUTATIECODEHH
+    codelist: IMPUTATIECODEHH
+    label: Huishouden geimputeerd
+
+  - name: SOORTOBJECTNUMMER
+    source: spine.pers.SOORTOBJECTNUMMER
+
+  - name: RINOBJECTNUMMER
+    source: spine.pers.RINOBJECTNUMMER
+
+  - name: INVOORRAAD
+    value: "1"
+    codelist: INVOORRAAD
+    label: In de voorraad
+
+  - name: VBOVOORRAADTYPE
+    value: "0"
+    codelist: VBOVOORRAADTYPE
+    label: Voorraadtype VBO
+
+  - name: BEGINGELDIGHEID
+    template: "{jan1}"
+
+  - name: EINDGELDIGHEID
+    template: "{dec31}"
+
+  - name: REDENBEGINGELDIGHEID
+    random_categorical:
+      values: [ADR, GEB, HH, IMM, OBJ, OPN, V]
+      probs:  [0.20, 0.05, 0.30, 0.05, 0.10, 0.02, 0.28]
+
+  - name: REDENEINDGELDIGHEID
+    value: NVT

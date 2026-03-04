@@ -1,0 +1,156 @@
+# Codelists for RDWNPACT (motor vehicle registration)
+
+RINPERSOONS_RDW:
+  c2i:
+    "K": 1
+    "R": 2
+    "S": 3
+  labels:
+    "Niet in GBA, kentekens (RDW)": 1
+    "Wel in GBA": 2
+    "Niet in GBA, wel sofinrproef": 3
+
+KLEURCODE:
+  c2i:
+    "--": ~
+    "00": 0
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "11": 11
+    "12": 12
+    "13": 13
+    "99": 99
+  labels:
+    Oranje: 0
+    Rose: 1
+    Rood: 2
+    Wit: 3
+    Blauw: 4
+    Groen: 5
+    Geel: 6
+    Grijs: 7
+    Bruin: 8
+    Beige: 9
+    Creme: 10
+    Paars: 11
+    Zwart: 12
+    Diversen: 13
+    "Niet van toepassing": 99
+
+SRTREF:
+  c2i:
+    "B": 1
+    "I": 2
+    "N": 3
+    "R": 4
+    "H": 5
+  labels:
+    "Erkend bedrijf": 1
+    Importeur: 2
+    "Natuurlijk persoon": 3
+    Rechtspersoon: 4
+    Handelaar: 5
+
+VRTGSOORT:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+    "A": 10
+    "B": 11
+    "C": 12
+    "D": 13
+    "E": 14
+    "F": 15
+    "K": 16
+    "L": 17
+    "M": 18
+    "N": 19
+    "O": 20
+    "P": 21
+    "Q": 22
+    "R": 23
+    "S": 24
+    "T": 25
+  labels:
+    "bromfiets - actief park": 0
+    "bestelauto - actief park": 1
+    "vrachtwagen - actief park": 2
+    "trekker - actief park": 3
+    "speciaal voertuig - actief park": 4
+    "autobus - actief park": 5
+    "personenauto - actief park": 6
+    "motorfiets - actief park": 7
+    "aanhanger - actief park": 8
+    "oplegger - actief park": 9
+    "bestelauto - uitval": 10
+    "vrachtwagen - uitval": 11
+    "trekker - uitval": 12
+    "speciaal voertuig - uitval": 13
+    "autobus - uitval": 14
+    "personenauto - uitval": 15
+    "bestelauto - bedrijfsvoorraad": 16
+    "vrachtwagen - bedrijfsvoorraad": 17
+    "trekker - bedrijfsvoorraad": 18
+    "speciaal voertuig - bedrijfsvoorraad": 19
+    "autobus - bedrijfsvoorraad": 20
+    "personenauto - bedrijfsvoorraad": 21
+    "motorfiets - bedrijfsvoorraad": 22
+    "aanhanger - bedrijfsvoorraad": 23
+    "oplegger - bedrijfsvoorraad": 24
+    "bromfiets - bedrijfsvoorraad": 25
+
+BRANDSTOF:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+    "A": 10
+    "B": 11
+  labels:
+    Benzine: 1
+    Diesel: 2
+    LPG: 3
+    Electriciteit: 4
+    "CNG (aardgas)": 5
+    Waterstof: 6
+    Alcohol: 7
+    Cryogeen: 8
+    Hybride: 9
+    "Plug-in hybride (PHEV)": 10
+    "Hybride (HEV)": 11
+
+SOORTBROMFIETS:
+  c2i:
+    "--": ~
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+  labels:
+    Snorfiets: 1
+    Bromfiets: 2
+    Brommobiel: 3
+    Overig: 4

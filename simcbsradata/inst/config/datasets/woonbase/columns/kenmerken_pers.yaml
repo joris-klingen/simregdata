@@ -1,0 +1,86 @@
+# KenmerkenPersonen — person characteristics
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+
+  - name: "GBABurgerlijkeStaat{sfx}"
+    source: spine.pers.GBABurgerlijkeStaat
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "GBAGeboorteJaar{sfx}"
+    source: spine.pers.GBAGeboorteJaar
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "GBAGeslachtsAanduiding{sfx}"
+    source: spine.pers.GBAGeslachtsAanduiding
+    suffixes: ["1Jan", "31Dec"]
+    codelist: GESLACHT
+    label: Geslachtsaanduiding GBA
+
+  - name: "GEMEENTECODEJJJJ{sfx}"
+    source: spine.pers.GemeenteCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "WIJKCODEJJJJ{sfx}"
+    source: spine.pers.WijkCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "BUURTCODEJJJJ{sfx}"
+    source: spine.pers.BuurtCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "PLHH{sfx}"
+    source: spine.pers.PLHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: PLHH
+    label: Plaats in het huishouden
+
+  - name: "RINOBJECTNUMMER{sfx}"
+    source: spine.pers.RINOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "SOORTOBJECTNUMMER{sfx}"
+    source: spine.pers.SOORTOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "AanvangWoonduur{sfx}"
+    source: spine.pers.AanvangWoonduur
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "OPLNIVSOI2016AGG4HBMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1111","1211","1212","1213","2111","2131","2132","3111","3112","3211","3212","3213","----"]
+      probs:  [0.10, 0.10, 0.05, 0.03, 0.15, 0.10, 0.05, 0.15, 0.05, 0.03, 0.10, 0.02, 0.07]
+
+  - name: "OPLNIVSOI2016AGG4HGMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1111","1211","1212","1213","2111","2131","2132","3111","3112","3211","3212","3213","----"]
+      probs:  [0.10, 0.10, 0.05, 0.03, 0.15, 0.10, 0.05, 0.15, 0.05, 0.03, 0.10, 0.02, 0.07]
+
+  - name: "OPLNIVSOI2021AGG4HBMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1111","1211","1212","1213","2111","2131","2132","3111","3112","3211","3212","3213","----"]
+      probs:  [0.10, 0.10, 0.05, 0.03, 0.15, 0.10, 0.05, 0.15, 0.05, 0.03, 0.10, 0.02, 0.07]
+
+  - name: "OPLNIVSOI2021AGG4HGMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1111","1211","1212","1213","2111","2131","2132","3111","3112","3211","3212","3213","----"]
+      probs:  [0.10, 0.10, 0.05, 0.03, 0.15, 0.10, 0.05, 0.15, 0.05, 0.03, 0.10, 0.02, 0.07]
+
+  - name: "GEWICHTHOOGSTEOPL{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0.5
+      max: 1.5
+      round: 6

@@ -1,0 +1,62 @@
+# KenmerkenWoonruimten — dwelling characteristics
+entity: object
+spine_table: obj
+
+columns:
+  - name: RINOBJECTNUMMER
+    source: spine.obj.RINOBJECTNUMMER
+
+  - name: SOORTOBJECTNUMMER
+    source: spine.obj.SOORTOBJECTNUMMER
+
+  - name: "GEMEENTECODEJJJJ{sfx}"
+    source: spine.obj.GemeenteCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "WIJKCODEJJJJ{sfx}"
+    source: spine.obj.WijkCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "BUURTCODEJJJJ{sfx}"
+    source: spine.obj.BuurtCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: Indicator_VBOIsNieuwbouw
+    source: spine.obj.Indicator_VBOIsNieuwbouw1Jan
+    codelist: INDICATOR
+    label: VBO is nieuwbouw
+
+  - name: "Indicator_VBOIsNieuwbouwJJJJ-1"
+    source: spine.obj.Indicator_VBOIsNieuwbouw1Jan
+    codelist: INDICATOR
+    label: VBO is nieuwbouw (vorig jaar)
+
+  - name: "VSLSoort{sfx}"
+    source: spine.obj.VSLSoort{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: VSLSOORT
+    label: Soort VSL
+
+  - name: "VBOWoningType{sfx}"
+    source: spine.obj.VBOWoningType{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WONINGTYPE
+    label: Woningtype VBO
+
+  - name: "VBOBouwjaar{sfx}"
+    source: spine.obj.VBOBouwjaar{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "VBOOppervlakte{sfx}"
+    source: spine.obj.VBOOppervlakte{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "WOZWaardeObjectBAG{sfx}"
+    source: spine.obj.WOZWaardeObjectBAG{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "VBOStatus{sfx}"
+    source: spine.obj.VBOStatus{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: VBOSTATUS
+    label: Status VBO

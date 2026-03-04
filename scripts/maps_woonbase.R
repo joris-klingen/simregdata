@@ -24,7 +24,7 @@ woonbase_catalog(year = YEAR)
 
 log_message("Loading Woonbase files")
 
-woonbase_init(year = YEAR, n = NULL, seed = 42L)
+woonbase_init(year = YEAR, n = 1e5, seed = 42L)
 
 log_message("Reading PopulatieHuishoudens")
 dt_hh <- as.data.table(read_sav(
@@ -35,19 +35,19 @@ dt_hh <- as.data.table(read_sav(
 log_message("Reading KenmerkenWoonruimten")
 dt_woon <- as.data.table(read_sav(
   file       = glue("WoonbaseKenmerkenWoonruimten{YEAR}V1"),
-  col_select = c(RINOBJECTNUMMER, GemeenteCodeJJJJ1Jan)
+  col_select = c(RINOBJECTNUMMER, GEMEENTECODEJJJJ1Jan)
 ))
 
 # Join gemeente onto households via object key
 log_message("Joining gemeente onto households")
 dt_hh[dt_woon,
       on = c("RINOBJECTNUMMER1Jan" = "RINOBJECTNUMMER"),
-      GemeenteCodeJJJJ1Jan := i.GemeenteCodeJJJJ1Jan]
+      GEMEENTECODEJJJJ1Jan := i.GEMEENTECODEJJJJ1Jan]
 
 # Aggregate: persons per gemeente
-gem_pop <- dt_hh[!is.na(GemeenteCodeJJJJ1Jan),
+gem_pop <- dt_hh[!is.na(GEMEENTECODEJJJJ1Jan),
                  .(n_personen = .N),
-                 by = .(GemCode4 = GemeenteCodeJJJJ1Jan)]
+                 by = .(GemCode4 = GEMEENTECODEJJJJ1Jan)]
 
 
 # Load gemeente boundaries ----
@@ -105,7 +105,7 @@ map1 <- ggplot(map_sf) +
   map_theme
 
 print(map1)
-ggsave("output/figures/101_map1_bevolking_gemeente.png",
+ggsave("plots/101_map1_bevolking_gemeente.png",
        map1, width = 6.5, height = 9, dpi = 150)
 log_message("map1 saved")
 
@@ -126,8 +126,8 @@ map2 <- ggplot(map_sf) +
   map_theme
 
 print(map2)
-ggsave("output/figures/101_map2_dichtheid_gemeente.png",
+ggsave("plots/101_map2_dichtheid_gemeente.png",
        map2, width = 6.5, height = 9, dpi = 150)
 log_message("map2 saved")
 
-log_message("Done — figures saved to output/figures/")
+log_message("Done — figures saved to plots/")

@@ -1,11 +1,12 @@
 Package: simcbsradata
-Title: Simulate CBS Woonbase Microdata
-Version: 0.1.0
+Title: Simulate CBS Microdata
+Version: 0.2.0
 Authors@R: person("Author", "Name", role = c("aut", "cre"),
                   email = "author@example.com")
-Description: Generates synthetic CBS Woonbase microdata with realistic Dutch
-    population distributions. Provides a drop-in replacement for
-    haven::read_sav() that intercepts CBS Woonbase file names and returns
+Description: Generates synthetic CBS microdata with realistic Dutch population
+    distributions. Supports multiple CBS datasets (Woonbase and others) via
+    YAML-driven config files. Provides a drop-in replacement for
+    haven::read_sav() that intercepts registered CBS file names and returns
     simulated data with haven-compatible labelled columns, consistent
     cross-file identifiers, and CBS-calibrated value distributions.
 License: MIT + file LICENSE

@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
   library(sf)
 })
 
-dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+dir.create("plots", recursive = TRUE, showWarnings = FALSE)
 
 YEAR  <- 2023L
 BLUE  <- "#2166AC"
@@ -138,7 +138,7 @@ p1 <- ggplot(dt_pp[leeftijd >= 0 & leeftijd <= 100],
        x = "Leeftijd (jaren)", y = "Aantal personen")
 
 print(p1)
-ggsave("output/figures/p1_leeftijd.png", p1, width = 7, height = 4, dpi = 150)
+ggsave("plots/p1_leeftijd.png", p1, width = 7, height = 4, dpi = 150)
 message("  p1 done")
 
 # -- Plot 2: Household type composition ----------------------------------------
@@ -158,7 +158,7 @@ p2 <- ggplot(hh_type_cnt,
        x = NULL, y = "Aandeel (%)")
 
 print(p2)
-ggsave("output/figures/p2_typhh.png", p2, width = 9, height = 5, dpi = 150)
+ggsave("plots/p2_typhh.png", p2, width = 9, height = 5, dpi = 150)
 message("  p2 done")
 
 # -- Plot 3: WOZ value by owner type (object level) ----------------------------
@@ -180,7 +180,7 @@ p3 <- ggplot(p3_data, aes(x = eigenaar_f, y = WOZ_exact / 1e3, fill = eigenaar_f
         axis.text.x       = element_text(angle = 15, hjust = 1))
 
 print(p3)
-ggsave("output/figures/p3_woz_eigenaar.png", p3, width = 7, height = 5, dpi = 150)
+ggsave("plots/p3_woz_eigenaar.png", p3, width = 7, height = 5, dpi = 150)
 message("  p3 done")
 
 # -- Plot 4: Floor area by dwelling type (object level) ------------------------
@@ -201,7 +201,7 @@ p4 <- ggplot(p4_data,
         axis.text.x     = element_text(angle = 20, hjust = 1))
 
 print(p4)
-ggsave("output/figures/p4_opp_woningtype.png", p4, width = 7, height = 5, dpi = 150)
+ggsave("plots/p4_opp_woningtype.png", p4, width = 7, height = 5, dpi = 150)
 message("  p4 done")
 
 # -- Plot 5: Build-year distribution (object level) ----------------------------
@@ -220,7 +220,7 @@ p5 <- ggplot(dt_ko[VBOBouwjaar1Jan >= 1850 & VBOBouwjaar1Jan <= YEAR],
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 print(p5)
-ggsave("output/figures/p5_bouwjaar.png", p5, width = 7, height = 4, dpi = 150)
+ggsave("plots/p5_bouwjaar.png", p5, width = 7, height = 4, dpi = 150)
 message("  p5 done")
 
 # -- Plot 6: Household size by type (stacked bar) ------------------------------
@@ -242,7 +242,7 @@ p6 <- ggplot(p6_grp, aes(x = hh_size_cap, y = N, fill = typhh_f)) +
         legend.text     = element_text(size = 7.5))
 
 print(p6)
-ggsave("output/figures/p6_hh_grootte_type.png", p6, width = 9, height = 6, dpi = 150)
+ggsave("plots/p6_hh_grootte_type.png", p6, width = 9, height = 6, dpi = 150)
 message("  p6 done")
 
 
@@ -297,7 +297,7 @@ if (!is.null(gem_sf)) {
     map_theme
 
   print(map1)
-  ggsave("output/figures/map1_bevolking_gemeente.png",
+  ggsave("plots/map1_bevolking_gemeente.png",
          map1, width = 6.5, height = 9, dpi = 150)
   message("  map1 done")
 
@@ -314,7 +314,7 @@ if (!is.null(gem_sf)) {
     map_theme
 
   print(map2)
-  ggsave("output/figures/map2_woz_gemeente.png",
+  ggsave("plots/map2_woz_gemeente.png",
          map2, width = 6.5, height = 9, dpi = 150)
   message("  map2 done")
 
@@ -322,4 +322,4 @@ if (!is.null(gem_sf)) {
   message("Maps skipped (gemeente shapefile unavailable).")
 }
 
-message("All figures saved to output/figures/")
+message("All figures saved to plots/")

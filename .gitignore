@@ -9,6 +9,11 @@ Rplots.pdf
 # Claude Code settings (local only)
 .claude/
 
-# Generated outputs (large / reproducible from scripts)
-output/
-data/
+# Generated plots (reproducible from scripts)
+plots/
+
+# Extracted text from PDFs (regenerate with pdftools/pypdf)
+pdfs_cbs_catalog/extracted/
+
+# Built package tarballs
+*.tar.gz

@@ -1,0 +1,384 @@
+# Codelist mappings for Woonbase files
+# Each entry has:
+#   c2i:    character code -> integer (for spine -> labelled conversion)
+#   labels: human-readable label -> integer (for haven::labelled attribute)
+
+TYPHH:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+  labels:
+    Eenpersoonshuishouden: 1
+    Niet-gehuwd paar zonder kinderen: 2
+    Gehuwd paar zonder kinderen: 3
+    Niet-gehuwd paar met kinderen: 4
+    Gehuwd paar met kinderen: 5
+    Eenouderhuishouden: 6
+    Overig huishouden: 7
+    Institutioneel huishouden: 8
+    Meerdere huishoudens: 9
+
+PLHH:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+    "10": 10
+    "99": 99
+  labels:
+    Thuiswonend kind: 1
+    Alleenstaande: 2
+    Partner niet-gehuwd paar zonder k: 3
+    Partner gehuwd paar zonder k: 4
+    Partner niet-gehuwd paar met k: 5
+    Partner gehuwd paar met k: 6
+    Ouder in eenouderhuishouden: 7
+    Ref persoon overig huishouden: 8
+    Overig lid van huishouden: 9
+    Lid institutioneel huishouden: 10
+    Onbekend: 99
+
+REFPERSOONHH:
+  c2i:
+    "0": 0
+    "1": 1
+    "9": 9
+  labels:
+    Nee: 0
+    Ja: 1
+    "Nee, persoon in institutioneel huishouden": 9
+
+IMPUTATIECODEHH:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    Niet geimputeerd: 0
+    Geimputeerd: 1
+
+GESLACHT:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+  labels:
+    Mannen: 1
+    Vrouwen: 2
+
+VSLSOORT:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "9": 9
+  labels:
+    VBO voorraad woonfunctie: 1
+    VBO voorraad niet-woonfunctie: 2
+    VBO niet-voorraad woonfunctie: 3
+    VBO niet-voorraad niet-woonfunctie: 4
+    Bewoonde Standplaats: 5
+    Bewoonde Ligplaats: 6
+    Onbekend: 9
+
+WONINGTYPE:
+  c2i:
+    "--": ~
+    "00": 0
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "99": 99
+  labels:
+    Eengezinswoning onbekend: 0
+    Vrijstaande woning: 1
+    Twee-onder-een-kapwoning: 2
+    Hoekwoning: 3
+    Tussenwoning: 4
+    Meergezinswoning: 5
+    Onbekend: 99
+
+BOUWJAARKLASSE:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+    "10": 10
+    "11": 11
+    "12": 12
+    "13": 13
+    "14": 14
+    "15": 15
+    "99": 99
+  labels:
+    "<1905": 1
+    "1905-1925": 2
+    "1925-1945": 3
+    "1945-1955": 4
+    "1955-1965": 5
+    "1965-1975": 6
+    "1975-1985": 7
+    "1985-1995": 8
+    "1995-2005": 9
+    "2005-2015": 10
+    "2015-2020": 11
+    "2020-2025": 12
+    "2025-2030": 13
+    "2030-2035": 14
+    ">=2035": 15
+    Onbekend: 99
+
+OPPKLASSE:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "9": 9
+  labels:
+    "<50 m2": 1
+    "50-75 m2": 2
+    "75-100 m2": 3
+    "100-150 m2": 4
+    "150-250 m2": 5
+    ">=250 m2": 6
+    Onbekend: 9
+
+WOZKLASSE:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "9": 9
+  labels:
+    "<150k": 1
+    "150-250k": 2
+    "250-350k": 3
+    "350-450k": 4
+    "450-550k": 5
+    "550-650k": 6
+    ">=650k": 7
+    Onbekend: 9
+
+TYPEIGENAAR:
+  c2i:
+    "-": ~
+    "C": 1
+    "V": 2
+    "E": 3
+    "O": 4
+    "9": 9
+  labels:
+    Woningcorporatie: 1
+    Verhuurder anders: 2
+    Eigenaar-gebruiker: 3
+    Onbekend: 4
+    "Onbekend (niet gevonden)": 9
+
+VBOSTATUS:
+  c2i:
+    "-": ~
+    "3": 3
+    "4": 4
+    "6": 6
+  labels:
+    "In gebruik (niet ingemeten)": 3
+    In gebruik: 4
+    Buiten gebruik: 6
+
+INVOORRAAD:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    Niet in de voorraad: 0
+    In de voorraad: 1
+
+VBOVOORRAADTYPE:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    Woonfunctie: 0
+    Niet-woonfunctie: 1
+
+INDICATOR:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    Nee: 0
+    Ja: 1
+
+PERSKLASSE:
+  c2i:
+    "----": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+  labels:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6-9": 6
+    ">=10": 7
+
+HHKLASSE:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+  labels:
+    "1": 1
+    "2": 2
+    "3-9": 3
+    ">=10": 4
+
+# --- Extra Kenmerken Welvaart codelists ---
+
+AGHT:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    "Aandachtsgroep huurtoeslag; tot norminkomen": 1
+    "Aandachtsgroep huurtoeslag; boven norminkomen": 2
+    "Niet aandachtsgroep huurtoeslag": 3
+
+AGIAH:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    "Geen extra huurverhoging": 1
+    "Beperkte extra huurverhoging": 2
+    "Maximale extra huurverhoging": 3
+
+AGTSH:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    "Toewijzing laagste inkomens": 1
+    "Toewijzing middeninkomens": 2
+    "Niet aandachtsgroep toewijzing": 3
+
+AOWHT:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Geen AOW-gerechtigd lid": 0
+    "Oudste lid AOW-gerechtigd": 1
+
+POPFEC:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+  labels:
+    "In FEC populatie (compleet)": 1
+    "In FEC populatie (partieel)": 2
+
+POPIIV:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Niet in IIV populatie": 0
+    "In IIV populatie": 1
+
+VERSCHILIIV:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Geen verschil": 0
+    "Verschil": 1
+
+# --- Extra Kenmerken Panden codelists ---
+
+PANDFUNCTIE:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Nee": 0
+    "Ja": 1
+
+PANDDAKTYPE:
+  c2i:
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    "Onbekend": 0
+    "Pand heeft een plat dak": 1
+    "Pand heeft meerdere platte dakvlakken": 2
+    "Pand heeft schuine dakvlakken": 3
+
+PANDTRANSFORMATIE:
+  c2i:
+    "-": ~
+    "0": 0
+    "1": 1
+  labels:
+    "Nee": 0
+    "Ja": 1

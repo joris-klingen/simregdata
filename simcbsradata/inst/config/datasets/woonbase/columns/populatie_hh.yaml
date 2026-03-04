@@ -1,0 +1,108 @@
+# PopulatieHuishoudens — household-level population file
+entity: household
+spine_table: hh
+
+columns:
+  - name: "HUISHOUDNR{sfx}"
+    source: spine.hh.HUISHOUDNR
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "DATUMAANVANGHH{sfx}"
+    source: spine.hh.DATUMAANVANGHH
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "IMPUTATIECODEHH{sfx}"
+    source: spine.hh.IMPUTATIECODEHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: IMPUTATIECODEHH
+    label: Huishouden geimputeerd
+
+  - name: RINPERSOONS
+    source: spine.hh.RINPERSOONS_Ref
+
+  - name: RINPERSOON
+    source: spine.hh.RINPERSOON_Ref
+
+  - name: "RINOBJECTNUMMER{sfx}"
+    source: spine.hh.RINOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "SOORTOBJECTNUMMER{sfx}"
+    source: spine.hh.SOORTOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "TYPHH{sfx}"
+    source: spine.hh.TYPHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPHH
+    label: Type huishouden
+
+  - name: "AantalPersonenPerHuishouden{sfx}"
+    source: spine.hh.AantalPersonenPerHuishouden
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "AantalKinderenPerHuishouden{sfx}"
+    source: spine.hh.AantalKinderenPerHuishouden
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "LeeftijdRefPersoon{sfx}"
+    source: spine.hh.LeeftijdRefPersoon
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "PLHHRefPersoon{sfx}"
+    source: spine.hh.PLHH_Ref
+    suffixes: ["1Jan", "31Dec"]
+    codelist: PLHH
+    label: Plaats ref persoon
+
+  - name: "GBAGeslachtsaanduidingRefPersoon{sfx}"
+    source: spine.hh.GBAGeslachtsAanduiding_Ref
+    suffixes: ["1Jan", "31Dec"]
+    codelist: GESLACHT
+    label: Geslacht ref persoon
+
+  - name: "GemeenteCodeJJJJ{sfx}"
+    source: spine.hh.GemeenteCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "VSLSoort{sfx}"
+    source: spine.hh.VSLSoort{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: VSLSOORT
+    label: Soort VSL
+
+  - name: "WOZWaardeObjectBAGKlasse{sfx}"
+    source: spine.hh.WOZWaardeObjectBAGKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WOZKLASSE
+    label: WOZ waardeklasse
+
+  - name: "VBOBouwJaarKlasse{sfx}"
+    source: spine.hh.VBOBouwJaarKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: BOUWJAARKLASSE
+    label: Bouwjaarklass VBO
+
+  - name: "VBOOppervlakteKlasse{sfx}"
+    source: spine.hh.VBOOppervlakteKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: OPPKLASSE
+    label: Oppervlakteklasse VBO
+
+  - name: "VBOWoningType{sfx}"
+    source: spine.hh.VBOWoningType{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WONINGTYPE
+    label: Woningtype VBO
+
+  - name: "TypeEigenaar{sfx}"
+    source: spine.hh.TypeEigenaar{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPEIGENAAR
+    label: Type eigenaar
+
+  - name: "Indicator_HHIsAanwezig{sfx}"
+    value: "1"
+    suffixes: ["1Jan", "31Dec"]
+    codelist: INDICATOR
+    label: HH aanwezig

@@ -1,0 +1,165 @@
+# PopulatiePersonen — person-level population file
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+
+  - name: "RefPersoonHH{sfx}"
+    source: spine.pers.REFPERSOONHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: REFPERSOONHH
+    label: Referentiepersoon
+
+  - name: "HUISHOUDNR{sfx}"
+    source: spine.pers.HUISHOUDNR
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "DATUMAANVANGHH{sfx}"
+    source: spine.pers.DATUMAANVANGHH
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "IMPUTATIECODEHH{sfx}"
+    source: spine.pers.IMPUTATIECODEHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: IMPUTATIECODEHH
+    label: Huishouden geimputeerd
+
+  - name: "RINOBJECTNUMMER{sfx}"
+    source: spine.pers.RINOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "SOORTOBJECTNUMMER{sfx}"
+    source: spine.pers.SOORTOBJECTNUMMER
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: Indicator_PersoonIsGeboren
+    source: spine.pers.Indicator_PersoonIsGeboren
+    codelist: INDICATOR
+    label: Indicator PersoonIsGeboren
+    indicator_label: true
+
+  - name: Indicator_PersoonIsOverleden
+    source: spine.pers.Indicator_PersoonIsOverleden
+    codelist: INDICATOR
+    label: Indicator PersoonIsOverleden
+    indicator_label: true
+
+  - name: Indicator_PersoonIsGeemigreerd
+    source: spine.pers.Indicator_PersoonIsGeemigreerd
+    codelist: INDICATOR
+    label: Indicator PersoonIsGeemigreerd
+    indicator_label: true
+
+  - name: Indicator_PersoonIsAdministratiefAfgevoerd
+    source: spine.pers.Indicator_PersoonIsAdministratiefAfgevoerd
+    codelist: INDICATOR
+    label: Indicator PersoonIsAdministratiefAfgevoerd
+    indicator_label: true
+
+  - name: Indicator_PersoonIsGeimmigreerd
+    source: spine.pers.Indicator_PersoonIsGeimmigreerd
+    codelist: INDICATOR
+    label: Indicator PersoonIsGeimmigreerd
+    indicator_label: true
+
+  - name: Indicator_PersoonIsAdministratiefOpgenomen
+    source: spine.pers.Indicator_PersoonIsAdministratiefOpgenomen
+    codelist: INDICATOR
+    label: Indicator PersoonIsAdministratiefOpgenomen
+    indicator_label: true
+
+  - name: Indicator_PersoonIsVerhuisd
+    source: spine.pers.Indicator_PersoonIsVerhuisd
+    codelist: INDICATOR
+    label: Indicator PersoonIsVerhuisd
+    indicator_label: true
+
+  - name: Indicator_PersoonIsAanwezig1Jan
+    source: spine.pers.Indicator_PersoonIsAanwezig1Jan
+    codelist: INDICATOR
+    label: Indicator PersoonIsAanwezig1Jan
+    indicator_label: true
+
+  - name: Indicator_PersoonIsAanwezig31Dec
+    source: spine.pers.Indicator_PersoonIsAanwezig31Dec
+    codelist: INDICATOR
+    label: Indicator PersoonIsAanwezig31Dec
+    indicator_label: true
+
+  - name: AantalKeerVerhuisd
+    source: spine.pers.AantalKeerVerhuisd
+
+  - name: "PLHH{sfx}"
+    source: spine.pers.PLHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: PLHH
+    label: Plaats in het huishouden
+
+  - name: "TYPHH{sfx}"
+    source: spine.pers.TYPHH
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPHH
+    label: Type huishouden
+
+  - name: "GBAGeslachtsAanduiding{sfx}"
+    source: spine.pers.GBAGeslachtsAanduiding
+    suffixes: ["1Jan", "31Dec"]
+    codelist: GESLACHT
+    label: Geslachtsaanduiding GBA
+
+  - name: "GBAGeboorteJaar{sfx}"
+    source: spine.pers.GBAGeboorteJaar
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "GBABurgerlijkeStaat{sfx}"
+    source: spine.pers.GBABurgerlijkeStaat
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "AantalPersonenPerHuishouden{sfx}"
+    source: spine.pers.AantalPersonenPerHuishouden
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "GemeenteCodeJJJJ{sfx}"
+    source: spine.pers.GemeenteCodeJJJJ{sfx}
+    suffixes: ["1Jan", "31Dec"]
+
+  - name: "VSLSoort{sfx}"
+    source: spine.pers.VSLSoort{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: VSLSOORT
+    label: Soort VSL
+
+  - name: "TypeEigenaar{sfx}"
+    source: spine.pers.TypeEigenaar{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: TYPEIGENAAR
+    label: Type eigenaar
+
+  - name: "VBOWoningType{sfx}"
+    source: spine.pers.VBOWoningType{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WONINGTYPE
+    label: Woningtype VBO
+
+  - name: "VBOBouwJaarKlasse{sfx}"
+    source: spine.pers.VBOBouwJaarKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: BOUWJAARKLASSE
+    label: Bouwjaarklass VBO
+
+  - name: "VBOOppervlakteKlasse{sfx}"
+    source: spine.pers.VBOOppervlakteKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: OPPKLASSE
+    label: Oppervlakteklasse VBO
+
+  - name: "WOZWaardeObjectBAGKlasse{sfx}"
+    source: spine.pers.WOZWaardeObjectBAGKlasse{sfx}
+    suffixes: ["1Jan", "31Dec"]
+    codelist: WOZKLASSE
+    label: WOZ waardeklasse

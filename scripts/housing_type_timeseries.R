@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
   library(simcbsradata)
 })
 
-dir.create("output/figures", recursive = TRUE, showWarnings = FALSE)
+dir.create("plots", recursive = TRUE, showWarnings = FALSE)
 
 BLUE <- "#2166AC"
 theme_set(
@@ -80,8 +80,8 @@ p1 <- ggplot(dt_agg, aes(x = year, y = N, fill = woningtype)) +
         axis.text.x     = element_text(angle = 45, hjust = 1))
 
 print(p1)
-ggsave("output/figures/031_p1_woningtype_tijdreeks.png",
+ggsave("plots/031_p1_woningtype_tijdreeks.png",
        p1, width = 8, height = 5, dpi = 150)
 message("  p1 done")
 
-message("Figure saved to output/figures/")
+message("Figure saved to plots/")

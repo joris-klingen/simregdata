@@ -1,0 +1,72 @@
+# Woonbase dataset manifest
+# Defines CBS Woonbase file types, their entities, and column specs.
+# Includes the 7 core files + Extra Kenmerken extension files.
+
+dataset_id: woonbase
+label: CBS Woonbase
+spine_builder: woonbase
+
+# CBS VM path pattern
+path_pattern: "G:/BOUWENENWONEN/{UPPER_CBS_NAME}/{cbs_name}{YYYY}V{N}.sav"
+
+# Entity type definitions (id column name + width)
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+  household:
+    id_col: HUISHOUDNR
+    id_width: 12
+  object:
+    id_col: RINOBJECTNUMMER
+    id_width: 16
+    id_prefix_col: SOORTOBJECTNUMMER
+
+# File registry: key → CBS dataset name + metadata
+files:
+  sleutel:
+    cbs_name: WoonbaseSleutelbestand
+    entity: person
+    columns_file: sleutel.yaml
+
+  kenmerken_pers:
+    cbs_name: WoonbaseKenmerkenPersonen
+    entity: person
+    columns_file: kenmerken_pers.yaml
+
+  kenmerken_hh:
+    cbs_name: WoonbaseKenmerkenHuishoudens
+    entity: household
+    columns_file: kenmerken_hh.yaml
+
+  kenmerken_obj:
+    cbs_name: WoonbaseKenmerkenWoonruimten
+    entity: object
+    columns_file: kenmerken_obj.yaml
+
+  populatie_pers:
+    cbs_name: WoonbasePopulatiePersonen
+    entity: person
+    columns_file: populatie_pers.yaml
+
+  populatie_hh:
+    cbs_name: WoonbasePopulatieHuishoudens
+    entity: household
+    columns_file: populatie_hh.yaml
+
+  populatie_obj:
+    cbs_name: WoonbasePopulatieWoonruimten
+    entity: object
+    columns_file: populatie_obj.yaml
+
+  # Extra Kenmerken extension files
+  ek_hh_welvaart:
+    cbs_name: WOONBASEEKHuishoudensWV
+    entity: household
+    columns_file: ek_hh_welvaart.yaml
+
+  ek_obj_panden:
+    cbs_name: ExtraKenmerkenPanden
+    entity: object
+    columns_file: ek_obj_panden.yaml
