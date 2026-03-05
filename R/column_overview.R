@@ -11,7 +11,7 @@
 #'     \item{file}{File type key (e.g. `"kenmerken_pers"`, `"kentekens"`)}
 #'     \item{column}{Column name (suffixed columns are expanded, e.g. `"AGHT1Jan, AGHT31Dec"`)}
 #'     \item{level}{Calibration level: `"statline-calibrated"`, `"spine-derived"`,
-#'       `"codelist-hardcoded"`, `"random-normal"`, `"random-uniform"`,
+#'       `"random-categorical"`, `"random-normal"`, `"random-uniform"`,
 #'       `"constant"`, `"random-id"`, `"computed"`}
 #'     \item{source}{Human-readable source description, e.g.
 #'       `"params: loon_mean (81431NED)"` or `"spine.pers.RINPERSOON"`}
@@ -110,7 +110,7 @@ sim_column_overview <- function() {
     }
     cl <- col$codelist %||% ""
     src <- if (nzchar(cl)) paste0("codelist: ", cl) else "hardcoded probs"
-    return(list(level = "codelist-hardcoded", source = src, spatial = NA_character_))
+    return(list(level = "random-categorical", source = src, spatial = NA_character_))
   }
 
   # Random numeric

@@ -12,10 +12,10 @@ Overview of all simulated columns
 |--------|-------|---------|--------|----------|
 | `RINPERSOONS` | spine-derived | NL | spine.hh.RINPERSOONS_Ref |  |
 | `RINPERSOON` | spine-derived | NL | spine.hh.RINPERSOON_Ref |  |
-| `AGHT1JAN, AGHT31DEC` | codelist-hardcoded |  | codelist: AGHT | [AGHT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `AGIAH1JAN, AGIAH31DEC` | codelist-hardcoded |  | codelist: AGIAH | [AGIAH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `AGTSH1JAN, AGTSH31DEC` | codelist-hardcoded |  | codelist: AGTSH | [AGTSH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `AOWHT1JAN, AOWHT31DEC` | codelist-hardcoded |  | codelist: AOWHT | [AOWHT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `AGHT1JAN, AGHT31DEC` | random-categorical |  | codelist: AGHT | [AGHT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `AGIAH1JAN, AGIAH31DEC` | random-categorical |  | codelist: AGIAH | [AGIAH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `AGTSH1JAN, AGTSH31DEC` | random-categorical |  | codelist: AGTSH | [AGTSH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `AOWHT1JAN, AOWHT31DEC` | random-categorical |  | codelist: AOWHT | [AOWHT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `ARMOEDE1JAN, ARMOEDE31DEC` | random-uniform |  | uniform [50, 500] |  |
 | `ARMSOC1JAN, ARMSOC31DEC` | random-uniform |  | uniform [50, 500] |  |
 | `BBIHJ1JAN, BBIHJ31DEC` | random-uniform |  | uniform [1, 20] |  |
@@ -26,7 +26,7 @@ Overview of all simulated columns
 | `BESTINKH1JAN, BESTINKH31DEC` | spine-derived | NL | spine.hh.BESTINKH |  |
 | `BETAALBUDGET1JAN, BETAALBUDGET31DEC` | random-uniform |  | uniform [-10000, 60000] |  |
 | `BETAALRESERVE1JAN, BETAALRESERVE31DEC` | random-uniform |  | uniform [-5000, 50000] |  |
-| `CORBETAALBUDGET1JAN, CORBETAALBUDGET31DEC` | codelist-hardcoded |  | hardcoded probs |  |
+| `CORBETAALBUDGET1JAN, CORBETAALBUDGET31DEC` | random-categorical |  | hardcoded probs |  |
 | `EHALGR1JAN, EHALGR31DEC` | random-uniform |  | uniform [1, 30] |  |
 | `GESTINKH1JAN, GESTINKH31DEC` | spine-derived | NL | spine.hh.GESTINKH |  |
 | `LEERGROND1JAN, LEERGROND31DEC` | random-uniform |  | uniform [0, 50000] |  |
@@ -34,13 +34,13 @@ Overview of all simulated columns
 | `P100HGEST1JAN, P100HGEST31DEC` | spine-derived | NL | spine.hh.P100HGEST |  |
 | `P100HVERM1JAN, P100HVERM31DEC` | spine-derived | NL | spine.hh.P100HVERM |  |
 | `P100WELVAART1JAN, P100WELVAART31DEC` | spine-derived | NL | spine.hh.P100WELVAART |  |
-| `POPFEC1JAN, POPFEC31DEC` | codelist-hardcoded |  | codelist: POPFEC | [POPFEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `POPIIV1JAN, POPIIV31DEC` | codelist-hardcoded |  | codelist: POPIIV | [POPIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `POPFEC1JAN, POPFEC31DEC` | random-categorical |  | codelist: POPFEC | [POPFEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `POPIIV1JAN, POPIIV31DEC` | random-categorical |  | codelist: POPIIV | [POPIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `POPIIVWONING1JAN, POPIIVWONING31DEC` | random-uniform |  | uniform [0, 10] |  |
 | `VERMHH1JAN, VERMHH31DEC` | spine-derived | NL | spine.hh.VERMHH |  |
 | `VROMHH1JAN, VROMHH31DEC` | spine-derived | NL | spine.hh.VROMHH |  |
 | `W1000VERH1JAN, W1000VERH31DEC` | random-uniform |  | uniform [0, 500000] |  |
-| `VERSCHILIIV1JAN, VERSCHILIIV31DEC` | codelist-hardcoded |  | codelist: VERSCHILIIV | [VERSCHILIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `VERSCHILIIV1JAN, VERSCHILIIV31DEC` | random-categorical |  | codelist: VERSCHILIIV | [VERSCHILIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
 </details>
 
@@ -57,16 +57,16 @@ Overview of all simulated columns
 | `PandOppTotNietWoning1Jan, PandOppTotNietWoning31Dec` | random-uniform |  | uniform [0, 3000] |  |
 | `PandOppGemWoning1Jan, PandOppGemWoning31Dec` | random-uniform |  | uniform [30, 250] |  |
 | `PandOppGemNietWoning1Jan, PandOppGemNietWoning31Dec` | random-uniform |  | uniform [30, 500] |  |
-| `PandWinkelfunctie1Jan, PandWinkelfunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandKantoorfunctie1Jan, PandKantoorfunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandIndustriefunctie1Jan, PandIndustriefunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandBijeenkomstfunctie1Jan, PandBijeenkomstfunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandGezondheidszorgfunctie1Jan, PandGezondheidszorgfunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandAnderefunctie1Jan, PandAnderefunctie31Dec` | codelist-hardcoded |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
-| `PandTransformatie1Jan, PandTransformatie31Dec` | codelist-hardcoded |  | codelist: PANDTRANSFORMATIE | [PANDTRANSFORMATIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandWinkelfunctie1Jan, PandWinkelfunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandKantoorfunctie1Jan, PandKantoorfunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandIndustriefunctie1Jan, PandIndustriefunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandBijeenkomstfunctie1Jan, PandBijeenkomstfunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandGezondheidszorgfunctie1Jan, PandGezondheidszorgfunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandAnderefunctie1Jan, PandAnderefunctie31Dec` | random-categorical |  | codelist: PANDFUNCTIE | [PANDFUNCTIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandTransformatie1Jan, PandTransformatie31Dec` | random-categorical |  | codelist: PANDTRANSFORMATIE | [PANDTRANSFORMATIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `PandHoogte` | random-uniform |  | uniform [3, 60] |  |
 | `PandAantalVerdiepingen` | random-uniform |  | uniform [1, 15] |  |
-| `PandDaktype` | codelist-hardcoded |  | codelist: PANDDAKTYPE | [PANDDAKTYPE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `PandDaktype` | random-categorical |  | codelist: PANDDAKTYPE | [PANDDAKTYPE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
 </details>
 
@@ -125,10 +125,10 @@ Overview of all simulated columns
 | `RINOBJECTNUMMER1Jan, RINOBJECTNUMMER31Dec` | spine-derived | gemeente | spine.pers.RINOBJECTNUMMER |  |
 | `SOORTOBJECTNUMMER1Jan, SOORTOBJECTNUMMER31Dec` | spine-derived | gemeente | spine.pers.SOORTOBJECTNUMMER |  |
 | `AanvangWoonduur1Jan, AanvangWoonduur31Dec` | spine-derived | NL | spine.pers.AanvangWoonduur |  |
-| `OPLNIVSOI2016AGG4HBMETNIRWO1Jan, OPLNIVSOI2016AGG4HBMETNIRWO31Dec` | codelist-hardcoded |  | hardcoded probs |  |
-| `OPLNIVSOI2016AGG4HGMETNIRWO1Jan, OPLNIVSOI2016AGG4HGMETNIRWO31Dec` | codelist-hardcoded |  | hardcoded probs |  |
-| `OPLNIVSOI2021AGG4HBMETNIRWO1Jan, OPLNIVSOI2021AGG4HBMETNIRWO31Dec` | codelist-hardcoded |  | hardcoded probs |  |
-| `OPLNIVSOI2021AGG4HGMETNIRWO1Jan, OPLNIVSOI2021AGG4HGMETNIRWO31Dec` | codelist-hardcoded |  | hardcoded probs |  |
+| `OPLNIVSOI2016AGG4HBMETNIRWO1Jan, OPLNIVSOI2016AGG4HBMETNIRWO31Dec` | random-categorical |  | hardcoded probs |  |
+| `OPLNIVSOI2016AGG4HGMETNIRWO1Jan, OPLNIVSOI2016AGG4HGMETNIRWO31Dec` | random-categorical |  | hardcoded probs |  |
+| `OPLNIVSOI2021AGG4HBMETNIRWO1Jan, OPLNIVSOI2021AGG4HBMETNIRWO31Dec` | random-categorical |  | hardcoded probs |  |
+| `OPLNIVSOI2021AGG4HGMETNIRWO1Jan, OPLNIVSOI2021AGG4HGMETNIRWO31Dec` | random-categorical |  | hardcoded probs |  |
 | `GEWICHTHOOGSTEOPL1Jan, GEWICHTHOOGSTEOPL31Dec` | random-uniform |  | uniform [0.5, 1.5] |  |
 
 </details>
@@ -254,7 +254,7 @@ Overview of all simulated columns
 | `VBOVOORRAADTYPE` | constant |  | value: 0 | [VBOVOORRAADTYPE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `BEGINGELDIGHEID` | constant |  | template: {jan1} |  |
 | `EINDGELDIGHEID` | constant |  | template: {dec31} |  |
-| `REDENBEGINGELDIGHEID` | codelist-hardcoded |  | hardcoded probs |  |
+| `REDENBEGINGELDIGHEID` | random-categorical |  | hardcoded probs |  |
 | `REDENEINDGELDIGHEID` | constant |  | value: NVT |  |
 
 </details>
@@ -269,19 +269,19 @@ Overview of all simulated columns
 
 | Column | Level | Spatial | Source | Codelist |
 |--------|-------|---------|--------|----------|
-| `RINPERSOONS` | codelist-hardcoded |  | codelist: RINPERSOONS_RDW | [RINPERSOONS_RDW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
+| `RINPERSOONS` | random-categorical |  | codelist: RINPERSOONS_RDW | [RINPERSOONS_RDW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `RINPERSOON` | spine-derived | NL | spine.pers.RINPERSOON |  |
 | `RINKENTEKEN` | spine-derived | NL | spine.pers.RINKENTEKEN |  |
 | `KLEURCODEVRTG` | statline-calibrated | NL | params: kleur_p (85237NED, 85236NED, 85404NED) | [KLEURCODE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `EERSTETOELDAT1VRTG` | statline-calibrated | NL | params: bouwjaar_p (85237NED, 85236NED, 85404NED) |  |
-| `SRTREFVRTG` | codelist-hardcoded |  | codelist: SRTREF | [SRTREF](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
+| `SRTREFVRTG` | random-categorical |  | codelist: SRTREF | [SRTREF](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `VRTGSOORT` | statline-calibrated | NL | params: vrtgsoort_p (85237NED, 85236NED, 85404NED) | [VRTGSOORT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `BRANDSTCODECORVRTG` | statline-calibrated | NL | params: brandstof_p (85237NED, 85236NED, 85404NED) | [BRANDSTOF](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `MASSALEEGCORVRTG` | statline-calibrated | NL | params: gewicht_mean (85237NED, 85236NED, 85404NED) |  |
 | `MAXLAADVERMCORVRTG` | random-uniform |  | uniform [0, 3000] |  |
-| `AANTALCYLCORVRTG` | codelist-hardcoded |  | hardcoded probs |  |
+| `AANTALCYLCORVRTG` | random-categorical |  | hardcoded probs |  |
 | `CYLININHOUDCORVRTG` | random-normal |  | normal (mean=1600, sd=600) |  |
-| `SOORTBROMFIETSCOR` | codelist-hardcoded |  | codelist: SOORTBROMFIETS | [SOORTBROMFIETS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
+| `SOORTBROMFIETSCOR` | random-categorical |  | codelist: SOORTBROMFIETS | [SOORTBROMFIETS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 
 </details>
 
@@ -291,10 +291,10 @@ Overview of all simulated columns
 | Column | Level | Spatial | Source | Codelist |
 |--------|-------|---------|--------|----------|
 | `RINKENTEKEN` | spine-derived | NL | spine.pers.RINKENTEKEN |  |
-| `RinpersoonsVP` | codelist-hardcoded |  | codelist: RINPERSOONS_RDW | [RINPERSOONS_RDW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
+| `RinpersoonsVP` | random-categorical |  | codelist: RINPERSOONS_RDW | [RINPERSOONS_RDW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 | `RinpersoonVP` | spine-derived | NL | spine.pers.RINPERSOON |  |
-| `VPGEWICHT` | codelist-hardcoded |  | hardcoded probs |  |
-| `VPDGNWEG` | codelist-hardcoded |  | hardcoded probs |  |
+| `VPGEWICHT` | random-categorical |  | hardcoded probs |  |
+| `VPDGNWEG` | random-categorical |  | hardcoded probs |  |
 | `VPJAARKM` | statline-calibrated | NL | params: jaarkm_mean (85237NED, 85236NED, 85404NED) |  |
 
 </details>
@@ -309,7 +309,7 @@ Overview of all simulated columns
 
 | Column | Level | Spatial | Source | Codelist |
 |--------|-------|---------|--------|----------|
-| `RINPERSOONS` | codelist-hardcoded |  | codelist: RINPERSOONS_SPOLIS | [RINPERSOONS_SPOLIS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `RINPERSOONS` | random-categorical |  | codelist: RINPERSOONS_SPOLIS | [RINPERSOONS_SPOLIS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `RINPERSOON` | spine-derived | NL | spine.pers.RINPERSOON |  |
 | `IKVID` | random-id |  | random hex, width=32 |  |
 | `SDATUMAANVANGIKO` | constant |  | template: {jan1} |  |
@@ -317,7 +317,7 @@ Overview of all simulated columns
 | `SAANTSV` | random-normal |  | normal (mean=18, sd=6) |  |
 | `SAANTVERLU` | random-normal |  | normal (mean=130, sd=40) |  |
 | `SAUTOZAAK` | statline-calibrated | NL | params: autozaak_mean (81431NED) |  |
-| `SBAANDAGEN` | codelist-hardcoded |  | hardcoded probs |  |
+| `SBAANDAGEN` | random-categorical |  | hardcoded probs |  |
 | `SBASISLOON` | statline-calibrated | NL | params: basisloon_mean (81431NED) |  |
 | `SBASISUREN` | statline-calibrated | NL | params: basisuren_mean (81431NED) |  |
 | `SBEDRALINWWB` | random-normal |  | normal (mean=0, sd=50) |  |
@@ -356,71 +356,71 @@ Overview of all simulated columns
 | `SWRDPRGEBRAUT` | random-normal |  | normal (mean=50, sd=200) |  |
 | `SWRKNBIJDRAUT` | random-normal |  | normal (mean=10, sd=50) |  |
 | `SCAO_crypt` | random-id |  | random hex, width=32 |  |
-| `SCDAARD` | codelist-hardcoded |  | codelist: SCDAARD | [SCDAARD](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDAGH` | codelist-hardcoded |  | codelist: SCDAGH | [SCDAGH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDINCINKVERM` | codelist-hardcoded |  | codelist: SCDINCINKVERM | [SCDINCINKVERM](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDINVLVPL1` | codelist-hardcoded |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDINVLVPL2` | codelist-hardcoded |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDINVLVPL3` | codelist-hardcoded |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDRDNGNBIJT` | codelist-hardcoded |  | codelist: SCDRDNGNBIJT | [SCDRDNGNBIJT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCDZVW` | codelist-hardcoded |  | codelist: SCDZVW | [SCDZVW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SCONTRACTSOORT` | codelist-hardcoded |  | codelist: SCONTRACTSOORT | [SCONTRACTSOORT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDAARD` | random-categorical |  | codelist: SCDAARD | [SCDAARD](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDAGH` | random-categorical |  | codelist: SCDAGH | [SCDAGH](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDINCINKVERM` | random-categorical |  | codelist: SCDINCINKVERM | [SCDINCINKVERM](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDINVLVPL1` | random-categorical |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDINVLVPL2` | random-categorical |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDINVLVPL3` | random-categorical |  | codelist: SCDINVLVPL | [SCDINVLVPL](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDRDNGNBIJT` | random-categorical |  | codelist: SCDRDNGNBIJT | [SCDRDNGNBIJT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCDZVW` | random-categorical |  | codelist: SCDZVW | [SCDZVW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCONTRACTSOORT` | random-categorical |  | codelist: SCONTRACTSOORT | [SCONTRACTSOORT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SDATUMAANVANGIKVORG` | constant |  | template: {jan1} |  |
-| `SFSINDFZ` | codelist-hardcoded |  | codelist: SFSINDFZ | [SFSINDFZ](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDLHKORT` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDSA03` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDSA43` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDSA71` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDSA72` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDVAKBN` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDZW` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINLEGLEVENSLOOP` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SOVERWERK` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SFSINDFZ` | random-categorical |  | codelist: SFSINDFZ | [SFSINDFZ](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDLHKORT` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDSA03` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDSA43` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDSA71` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDSA72` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDVAKBN` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDZW` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINLEGLEVENSLOOP` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SOVERWERK` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SPOLISDIENSTVERBAND` | statline-calibrated | NL | params: dienstverband_p (81431NED) | [SPOLISDIENSTVERBAND](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SRISGRP` | codelist-hardcoded |  | codelist: SRISGRP | [SRISGRP](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SSRTIV` | codelist-hardcoded |  | codelist: SSRTIV | [SSRTIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SRISGRP` | random-categorical |  | codelist: SRISGRP | [SRISGRP](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SSRTIV` | random-categorical |  | codelist: SSRTIV | [SSRTIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SWEKARBDUURKLASSE` | statline-calibrated | NL | params: wekarbduur_p (81431NED) | [SWEKARBDUURKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SARBEIDSRELATIE` | codelist-hardcoded |  | codelist: SARBEIDSRELATIE | [SARBEIDSRELATIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SAUTOVANDEZAAK` | codelist-hardcoded |  | codelist: SAUTOVANDEZAAK | [SAUTOVANDEZAAK](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SARBEIDSRELATIE` | random-categorical |  | codelist: SARBEIDSRELATIE | [SARBEIDSRELATIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SAUTOVANDEZAAK` | random-categorical |  | codelist: SAUTOVANDEZAAK | [SAUTOVANDEZAAK](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SBEID` | random-id |  | random hex, width=8 |  |
-| `SCAOSECTOR` | codelist-hardcoded |  | codelist: SCAOSECTOR | [SCAOSECTOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SCAOSECTOR` | random-categorical |  | codelist: SCAOSECTOR | [SCAOSECTOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SDATUMAANVANGIKV` | constant |  | template: {jan1} |  |
 | `SDATUMEINDEIKV` | constant |  | template: {dec31} |  |
-| `SINDWAO` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDWW` | codelist-hardcoded |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SLBTAB` | codelist-hardcoded |  | codelist: SLBTAB | [SLBTAB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDWAO` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDWW` | random-categorical |  | codelist: JN_INDICATOR | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SLBTAB` | random-categorical |  | codelist: SLBTAB | [SLBTAB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SLHNR_crypt` | random-id |  | random hex, width=32 |  |
 | `SSECT` | statline-calibrated | NL | params: ssect_p (81431NED) | [SSECT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SSOORTBAAN` | statline-calibrated | NL | params: soortbaan_p (81431NED) | [SSOORTBAAN](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `STIJDVAKTYPE` | codelist-hardcoded |  | codelist: STIJDVAKTYPE | [STIJDVAKTYPE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `STIJDVAKTYPE` | random-categorical |  | codelist: STIJDVAKTYPE | [STIJDVAKTYPE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SPRWGAWHK` | random-normal |  | normal (mean=15, sd=25) |  |
 | `SWGHZVW` | random-normal |  | normal (mean=180, sd=120) |  |
 | `SPRGEDIFFWHK` | random-normal |  | normal (mean=10, sd=20) |  |
-| `SINDTIJDHK` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SIMPUTATIE` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDPRKJONGRWEN` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDPKAGH` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDPKNWARBVOUDWN` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SINDPMA` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDTIJDHK` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SIMPUTATIE` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDPRKJONGRWEN` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDPKAGH` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDPKNWARBVOUDWN` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDPMA` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SCTRCTLN` | random-normal |  | normal (mean=2800, sd=1200) |  |
 | `SAANTCTRCTURENPWK` | random-normal |  | normal (mean=32, sd=8) |  |
 | `SBEDRRNTKSTVPERSL` | random-normal |  | normal (mean=0, sd=20) |  |
-| `SINDWAARNEMING` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SINDWAARNEMING` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SModelramingPensioenpremieWn` | random-normal |  | normal (mean=100, sd=80) |  |
 | `SModelramingPensioenpremieWg` | random-normal |  | normal (mean=200, sd=150) |  |
 | `SModelramingVutpremieWn` | random-normal |  | normal (mean=10, sd=30) |  |
 | `SModelramingVutpremieWg` | random-normal |  | normal (mean=20, sd=50) |  |
 | `SModelramingSFpremieWg` | random-normal |  | normal (mean=15, sd=40) |  |
-| `SIndAvrLkvOudrWn` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SIndAvrLkvAgWn` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SIndAvrLkvDgBafSb` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SIndAvrLkvHpAgWn` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `CdRdnEindArbov` | codelist-hardcoded |  | codelist: CDRDNEINDARB | [CDRDNEINDARB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SIndAvrLkvOudrWn` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SIndAvrLkvAgWn` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SIndAvrLkvDgBafSb` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `SIndAvrLkvHpAgWn` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `CdRdnEindArbov` | random-categorical |  | codelist: CDRDNEINDARB | [CDRDNEINDARB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `CdCaoInl_crypt` | random-id |  | random hex, width=32 |  |
-| `IndArbovOnbepTd` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `IndSchriftArbov` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `IndOprov` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `IndJrurennrm` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `IndArbovOnbepTd` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `IndSchriftArbov` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `IndOprov` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `IndJrurennrm` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `PRLNUFO` | random-normal |  | normal (mean=10, sd=25) |  |
 | `PRLNAWFANWLg` | random-normal |  | normal (mean=30, sd=30) |  |
 | `PRLNAWFANWHg` | random-normal |  | normal (mean=50, sd=40) |  |
@@ -428,7 +428,7 @@ Overview of all simulated columns
 | `PrAwfLg` | random-normal |  | normal (mean=10, sd=15) |  |
 | `PrAwfHg` | random-normal |  | normal (mean=15, sd=20) |  |
 | `PrAwfHz` | random-normal |  | normal (mean=0, sd=5) |  |
-| `INDPUBAANONBEPTD` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `INDPUBAANONBEPTD` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `OPBAVWB` | random-normal |  | normal (mean=5, sd=15) |  |
 | `OPNAVWB` | random-normal |  | normal (mean=5, sd=15) |  |
 | `PRLNAOFANWHG` | random-normal |  | normal (mean=10, sd=20) |  |
@@ -441,7 +441,7 @@ Overview of all simulated columns
 | `PRLNWHKANW` | random-normal |  | normal (mean=10, sd=20) |  |
 | `PRLNAWFANWUIT` | random-normal |  | normal (mean=0, sd=5) |  |
 | `PRAWFUIT` | random-normal |  | normal (mean=0, sd=5) |  |
-| `INDDEELNTIJDSPF` | codelist-hardcoded |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
+| `INDDEELNTIJDSPF` | random-categorical |  | codelist: INDICATOR_01 | [INDICATOR_01](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 
 </details>
 
@@ -495,8 +495,8 @@ Overview of all simulated columns
 | `STADSW` | statline-calibrated | NL | params: stadsverwarming_categorical (Kerncijfers wijken en buurten) | [STADSW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `GAS` | statline-calibrated | NL | params: gas_mean (Kerncijfers wijken en buurten) |  |
 | `ELEK` | statline-calibrated | NL | params: elek_mean (Kerncijfers wijken en buurten) |  |
-| `GASBRON` | codelist-hardcoded |  | codelist: GASBRON | [GASBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `ELEKBRON` | codelist-hardcoded |  | codelist: ELEKBRON | [ELEKBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `GASBRON` | random-categorical |  | codelist: GASBRON | [GASBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `ELEKBRON` | random-categorical |  | codelist: ELEKBRON | [ELEKBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `ELEKTERUG` | random-normal |  | normal (mean=500, sd=1200) |  |
 | `ELEKNETTO` | random-normal |  | normal (mean=2400, sd=1200) |  |
 | `GASSJV` | random-normal |  | normal (mean=1100, sd=620) |  |
@@ -504,10 +504,10 @@ Overview of all simulated columns
 | `ZONPV` | statline-calibrated | NL | params: solar_pv_categorical (Kerncijfers wijken en buurten) | [ZONPV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `ZONVERMOGEN1JAN` | random-normal |  | normal (mean=2.5, sd=3) |  |
 | `ZONVERMOGEN31DEC` | random-normal |  | normal (mean=2.8, sd=3.2) |  |
-| `ZONPVBRON` | codelist-hardcoded |  | codelist: ZONPVBRON | [ZONPVBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `HOOFDVERWARMING31DEC` | codelist-hardcoded |  | codelist: HOOFDVERWARMING31DEC | [HOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `WONINGBEWONING10PROFIELEN` | codelist-hardcoded |  | codelist: WONINGBEWONING10PROFIELEN | [WONINGBEWONING10PROFIELEN](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `KBHOOFDVERWARMING31DEC` | codelist-hardcoded |  | codelist: KBHOOFDVERWARMING31DEC | [KBHOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `ZONPVBRON` | random-categorical |  | codelist: ZONPVBRON | [ZONPVBRON](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `HOOFDVERWARMING31DEC` | random-categorical |  | codelist: HOOFDVERWARMING31DEC | [HOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `WONINGBEWONING10PROFIELEN` | random-categorical |  | codelist: WONINGBEWONING10PROFIELEN | [WONINGBEWONING10PROFIELEN](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `KBHOOFDVERWARMING31DEC` | random-categorical |  | codelist: KBHOOFDVERWARMING31DEC | [KBHOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 
 </details>
 
