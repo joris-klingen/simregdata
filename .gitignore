@@ -17,3 +17,8 @@ pdfs_cbs_catalog/extracted/
 
 # Built package tarballs
 *.tar.gz
+
+# Vignette build artefacts
+/doc/
+/Meta/
+vignettes/*.html

@@ -12,24 +12,36 @@ Supports multiple CBS datasets: **Woonbase** (housing + population, 9 file types
 - Workflows can be benchmarked and profiled
 - Colleagues without CBS access can reproduce results
 
+## Installation
+
+```r
+# Install from GitHub
+remotes::install_github("youruser/simcbsradata")
+```
+
 ## Directory layout
 
+The repo root **is** the R package. Non-package files (`scripts/`, `plots/`, etc.) live
+alongside it and are excluded from the built package via `.Rbuildignore`.
+
 ```
-sim_mdata/
-├── pdfs_cbs_catalog/pdf/          # CBS variable documentation PDFs
-├── scripts/
+simcbsradata/
+├── R/                             # Package R code
+├── inst/config/datasets/
+│   ├── woonbase/                  # 9 file types, params.yaml, gem_weights.csv
+│   ├── rdw/                       # 2 file types, params.yaml, gem_vehicle_weights.csv
+│   └── spolis/                    # 1 file type, params.yaml
+├── man/                           # Function documentation
+├── tests/                         # Unit tests
+├── vignettes/                     # Package vignettes
+├── scripts/                       # Analysis & dev scripts (not part of package)
 │   ├── analyse_woonbase.R         # 6 plots + 2 maps from joined Woonbase files
 │   ├── analyse_rdw_woonbase.R     # 5 plots: fuel, car ownership, VKT
 │   ├── housing_type_timeseries.R  # Housing stock composition 2016–2024
 │   └── maps_woonbase.R           # Municipality choropleths
-├── simcbsradata/                  # R package (simulator + config)
-│   ├── R/                         # Package R code
-│   ├── inst/config/datasets/
-│   │   ├── woonbase/              # 9 file types, params.yaml, gem_weights.csv
-│   │   ├── rdw/                   # 2 file types, params.yaml, gem_vehicle_weights.csv
-│   │   └── spolis/                # 1 file type, params.yaml
-│   └── man/                       # Function documentation
-└── references/                    # Variable selection notes
+├── pdfs_cbs_catalog/pdf/          # CBS variable documentation PDFs
+├── DESCRIPTION
+└── NAMESPACE
 ```
 
 ## Supported datasets

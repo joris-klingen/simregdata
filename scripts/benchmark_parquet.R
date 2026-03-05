@@ -1,7 +1,7 @@
 # Benchmark: on-the-fly generation vs pre-exported parquet
 library(data.table)
 library(haven)
-devtools::load_all("simcbsradata")
+devtools::load_all(".")
 
 N <- 1e6L
 YEAR <- 2023L

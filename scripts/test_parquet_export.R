@@ -1,7 +1,7 @@
 # Test parquet export + read-back round-trip
 library(data.table)
 library(haven)
-devtools::load_all("simcbsradata")
+devtools::load_all(".")
 
 cat("=== Test 1: sim_export() — all datasets ===\n")
 out_dir <- file.path(tempdir(), "test_export")

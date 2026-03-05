@@ -15,7 +15,7 @@ suppressPackageStartupMessages({
   library(haven)
   library(sf)
 })
-devtools::load_all("simcbsradata")  # must come AFTER library(haven) to avoid masking read_sav
+devtools::load_all(".")  # must come AFTER library(haven) to avoid masking read_sav
 
 dir.create("plots", recursive = TRUE, showWarnings = FALSE)
 

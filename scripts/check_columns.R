@@ -4,7 +4,7 @@
 # prints a per-file report of matched / missing / extra / case-mismatch
 # columns.
 
-devtools::load_all("simcbsradata")
+devtools::load_all(".")
 
 pdf_dir <- "pdfs_cbs_catalog/extracted/woonbase"
 
