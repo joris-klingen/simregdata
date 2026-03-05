@@ -3,10 +3,9 @@
 Overview of all simulated columns
 
 <details>
-<summary><strong>GBA Bevolkingsregister</strong> — 22 columns across 3 files (0 statline-calibrated)</summary>
+<summary><strong>GBA Bevolkingsregister</strong></summary>
 
-<details>
-<summary><code>GBAPERSOONKTAB</code> — 6 columns (0 statline-calibrated)</summary>
+#### `GBAPERSOONKTAB`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -17,10 +16,7 @@ Overview of all simulated columns
 | `GBAGEBOORTEMAAND` | random: uniform [1, 12] |  | [geboortemaand](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
 | `GBAGEBOORTEDAG` | value: 01 |  |  |
 
-</details>
-
-<details>
-<summary><code>GBAADRESOBJECTBUS</code> — 8 columns (0 statline-calibrated)</summary>
+#### `GBAADRESOBJECTBUS`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -33,10 +29,7 @@ Overview of all simulated columns
 | `GBAGEMEENTEVANINSCHRIJVING` | computed | gemeente |  |
 | `GBAAANTALINGESCHREVENENOPNUMMERAANDUIDING` | random: normal (mean=2.2, sd=1.5) |  |  |
 
-</details>
-
-<details>
-<summary><code>GBAHUISHOUDENSBUS</code> — 8 columns (0 statline-calibrated)</summary>
+#### `GBAHUISHOUDENSBUS`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -51,13 +44,10 @@ Overview of all simulated columns
 
 </details>
 
-</details>
-
 <details>
-<summary><strong>CBS Woonbase</strong> — 182 columns across 9 files (0 statline-calibrated)</summary>
+<summary><strong>CBS Woonbase</strong></summary>
 
-<details>
-<summary><code>WoonbaseSleutelbestand</code> — 16 columns (0 statline-calibrated)</summary>
+#### `WoonbaseSleutelbestand`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -78,10 +68,7 @@ Overview of all simulated columns
 | `REDENBEGINGELDIGHEID` | random: hardcoded probs |  |  |
 | `REDENEINDGELDIGHEID` | value: NVT |  |  |
 
-</details>
-
-<details>
-<summary><code>WoonbaseKenmerkenPersonen</code> — 17 columns (0 statline-calibrated)</summary>
+#### `WoonbaseKenmerkenPersonen`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -103,10 +90,7 @@ Overview of all simulated columns
 | `OPLNIVSOI2021AGG4HGMETNIRWO1Jan, OPLNIVSOI2021AGG4HGMETNIRWO31Dec` | random: hardcoded probs |  |  |
 | `GEWICHTHOOGSTEOPL1Jan, GEWICHTHOOGSTEOPL31Dec` | random: uniform [0.5, 1.5] |  |  |
 
-</details>
-
-<details>
-<summary><code>WoonbaseKenmerkenHuishoudens</code> — 9 columns (0 statline-calibrated)</summary>
+#### `WoonbaseKenmerkenHuishoudens`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -120,10 +104,7 @@ Overview of all simulated columns
 | `AantalKinderenPerHuishouden1Jan, AantalKinderenPerHuishouden31Dec` | spine-derived | NL |  |
 | `AantalPersonenPerHuishouden1Jan, AantalPersonenPerHuishouden31Dec` | spine-derived | NL |  |
 
-</details>
-
-<details>
-<summary><code>WoonbaseKenmerkenWoonruimten</code> — 13 columns (0 statline-calibrated)</summary>
+#### `WoonbaseKenmerkenWoonruimten`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -141,10 +122,7 @@ Overview of all simulated columns
 | `WOZWaardeObjectBAG1Jan, WOZWaardeObjectBAG31Dec` | spine-derived | gemeente |  |
 | `VBOStatus1Jan, VBOStatus31Dec` | spine-derived | NL | [VBOSTATUS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>WoonbasePopulatiePersonen</code> — 31 columns (0 statline-calibrated)</summary>
+#### `WoonbasePopulatiePersonen`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -180,10 +158,7 @@ Overview of all simulated columns
 | `VBOOppervlakteKlasse1Jan, VBOOppervlakteKlasse31Dec` | spine-derived | NL | [OPPKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `WOZWaardeObjectBAGKlasse1Jan, WOZWaardeObjectBAGKlasse31Dec` | spine-derived | gemeente | [WOZKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>WoonbasePopulatieHuishoudens</code> — 21 columns (0 statline-calibrated)</summary>
+#### `WoonbasePopulatieHuishoudens`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -209,10 +184,7 @@ Overview of all simulated columns
 | `TypeEigenaar1Jan, TypeEigenaar31Dec` | spine-derived | NL | [TYPEIGENAAR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `Indicator_HHIsAanwezig1Jan, Indicator_HHIsAanwezig31Dec` | value: 1 |  | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>WoonbasePopulatieWoonruimten</code> — 26 columns (0 statline-calibrated)</summary>
+#### `WoonbasePopulatieWoonruimten`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -243,10 +215,7 @@ Overview of all simulated columns
 | `Indicator_VBOIsNieuwbouw` | spine-derived | NL | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `Indicator_VSLIsNieuw` | spine-derived | NL | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>WOONBASEEKHuishoudensWV</code> — 31 columns (0 statline-calibrated)</summary>
+#### `WOONBASEEKHuishoudensWV`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -282,10 +251,7 @@ Overview of all simulated columns
 | `W1000VERH1JAN, W1000VERH31DEC` | random: uniform [0, 500000] |  |  |
 | `VERSCHILIIV1JAN, VERSCHILIIV31DEC` | random: codelist: VERSCHILIIV |  | [VERSCHILIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>ExtraKenmerkenPanden</code> — 18 columns (0 statline-calibrated)</summary>
+#### `ExtraKenmerkenPanden`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -310,13 +276,10 @@ Overview of all simulated columns
 
 </details>
 
-</details>
-
 <details>
-<summary><strong>RDW Motorvoertuigenpark</strong> — 19 columns across 2 files (6 statline-calibrated)</summary>
+<summary><strong>RDW Motorvoertuigenpark</strong></summary>
 
-<details>
-<summary><code>RDWNPACT</code> — 13 columns (5 statline-calibrated)</summary>
+#### `RDWNPACT`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -334,10 +297,7 @@ Overview of all simulated columns
 | `CYLININHOUDCORVRTG` | random: normal (mean=1600, sd=600) |  |  |
 | `SOORTBROMFIETSCOR` | random: codelist: SOORTBROMFIETS |  | [SOORTBROMFIETS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 
-</details>
-
-<details>
-<summary><code>VERKEERSPRESTATIE</code> — 6 columns (1 statline-calibrated)</summary>
+#### `VERKEERSPRESTATIE`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -350,13 +310,10 @@ Overview of all simulated columns
 
 </details>
 
-</details>
-
 <details>
-<summary><strong>Banen en lonen (SPOLISBUS)</strong> — 133 columns across 1 files (12 statline-calibrated)</summary>
+<summary><strong>Banen en lonen (SPOLISBUS)</strong></summary>
 
-<details>
-<summary><code>SPOLISBUS</code> — 133 columns (12 statline-calibrated)</summary>
+#### `SPOLISBUS`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -496,13 +453,10 @@ Overview of all simulated columns
 
 </details>
 
-</details>
-
 <details>
-<summary><strong>Vermogens van huishoudens (VEHTAB)</strong> — 20 columns across 1 files (15 statline-calibrated)</summary>
+<summary><strong>Vermogens van huishoudens (VEHTAB)</strong></summary>
 
-<details>
-<summary><code>VEH</code> — 20 columns (15 statline-calibrated)</summary>
+#### `VEH`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -529,13 +483,10 @@ Overview of all simulated columns
 
 </details>
 
-</details>
-
 <details>
-<summary><strong>Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)</strong> — 20 columns across 1 files (4 statline-calibrated)</summary>
+<summary><strong>Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)</strong></summary>
 
-<details>
-<summary><code>ENERGIEVERBRUIK</code> — 20 columns (4 statline-calibrated)</summary>
+#### `ENERGIEVERBRUIK`
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -559,8 +510,6 @@ Overview of all simulated columns
 | `HOOFDVERWARMING31DEC` | random: codelist: HOOFDVERWARMING31DEC |  | [HOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `WONINGBEWONING10PROFIELEN` | random: codelist: WONINGBEWONING10PROFIELEN |  | [WONINGBEWONING10PROFIELEN](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `KBHOOFDVERWARMING31DEC` | random: codelist: KBHOOFDVERWARMING31DEC |  | [KBHOOFDVERWARMING31DEC](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-
-</details>
 
 </details>
 

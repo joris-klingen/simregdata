@@ -40,29 +40,21 @@ add("")
 add("Overview of all simulated columns")
 add("")
 
-# Per-dataset sections (collapsible)
+# Per-dataset sections (collapsible at dataset level only)
 for (ds in unique(dt$dataset)) {
   ds_dt <- dt[dt$dataset == ds, ]
-  n_cols <- nrow(ds_dt)
-  n_files <- length(unique(ds_dt$file))
-  n_cal <- sum(ds_dt$level == "statline-calibrated")
   ds_label <- ds_labels[[ds]] %||% ds
 
   add("<details>")
-  add(sprintf("<summary><strong>%s</strong> — %d columns across %d files (%d statline-calibrated)</summary>",
-              ds_label, n_cols, n_files, n_cal))
+  add(sprintf("<summary><strong>%s</strong></summary>", ds_label))
   add("")
 
   fkeys <- file_order[[ds]] %||% unique(ds_dt$file)
   for (fkey in fkeys) {
     file_dt <- ds_dt[ds_dt$file == fkey, ]
     cbs_name <- cbs_names[[ds]][[fkey]] %||% fkey
-    n_fcols <- nrow(file_dt)
-    n_fcal <- sum(file_dt$level == "statline-calibrated")
 
-    add("<details>")
-    add(sprintf("<summary><code>%s</code> — %d columns (%d statline-calibrated)</summary>",
-                cbs_name, n_fcols, n_fcal))
+    add("#### `", cbs_name, "`")
     add("")
     add("| Column | Source | Spatial | Codelist |")
     add("|--------|--------|---------|----------|")
@@ -91,8 +83,6 @@ for (ds in unique(dt$dataset)) {
       )
       add("| `", r$column, "` | ", src_cell, " | ", sp_cell, " | ", cl_cell, " |")
     }
-    add("")
-    add("</details>")
     add("")
   }
 
