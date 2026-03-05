@@ -87,11 +87,11 @@ cbs_scaffold_dataset <- function(dataset_id,
   cat(sprintf("  Written manifest.yaml\n"))
 
   yaml::write_yaml(list(), file.path(output_dir, "codelists.yaml"))
-  cat(sprintf("  Written codelists.yaml (empty — add codelists manually)\n"))
+  cat(sprintf("  Written codelists.yaml (empty -- add codelists manually)\n"))
 
   cat(sprintf("\nScaffolded dataset '%s' in:\n  %s\n", dataset_id, output_dir))
   cat("Next steps:\n")
-  cat("  1. Edit columns/*.yaml — set correct sources, distributions, codelists\n")
+  cat("  1. Edit columns/*.yaml -- set correct sources, distributions, codelists\n")
   cat("  2. Fill in codelists.yaml with value label mappings\n")
   cat("  3. Reload package or restart R to pick up the new dataset\n")
 
@@ -112,11 +112,11 @@ cbs_scaffold_dataset <- function(dataset_id,
     fmt  <- pdf_cols$formaat[i]
     col  <- list(name = naam)
 
-    # Known ID columns → source from spine
+    # Known ID columns -> source from spine
     if (naam %in% known_ids) {
       col$source <- paste0("spine.", spine_tbl, ".", naam)
     } else if (grepl("^A", fmt)) {
-      # Character format → random_categorical stub
+      # Character format -> random_categorical stub
       width <- as.integer(sub("^A", "", fmt))
       if (width == 1L) {
         col$random_categorical <- list(
@@ -129,7 +129,7 @@ cbs_scaffold_dataset <- function(dataset_id,
       }
       col$`_comment` <- paste0("TODO: set values/probs (format ", fmt, ")")
     } else if (grepl("^F", fmt)) {
-      # Numeric format → random_numeric stub
+      # Numeric format -> random_numeric stub
       width <- as.integer(sub("^F", "", fmt))
       col$random_numeric <- list(
         distribution = "uniform",

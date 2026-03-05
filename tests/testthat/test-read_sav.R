@@ -23,34 +23,36 @@ test_that("spine initialisation works", {
 
 test_that("file name parsing matches exact CBS names", {
   names_should_match <- list(
-    "WoonbaseSleutelbestand2023V1"                  = list(type = "sleutel",        year = 2023L),
-    "WoonbaseSleutelbestand"                        = list(type = "sleutel",        year = NULL),
-    "WoonbaseKenmerkenPersonen2023V1"               = list(type = "kenmerken_pers", year = 2023L),
-    "WoonbaseKenmerkenPersonen"                     = list(type = "kenmerken_pers", year = NULL),
-    "WoonbaseKenmerkenHuishoudens2022V2.sav"        = list(type = "kenmerken_hh",   year = 2022L),
-    "WoonbaseKenmerkenHuishoudens"                  = list(type = "kenmerken_hh",   year = NULL),
-    "WoonbaseKenmerkenWoonruimten2023V1"            = list(type = "kenmerken_obj",  year = 2023L),
-    "WoonbasePopulatiePersonen2023V1"               = list(type = "populatie_pers", year = 2023L),
-    "WoonbasePopulatieHuishoudens2024V1"            = list(type = "populatie_hh",   year = 2024L),
-    "WoonbasePopulatieWoonruimten2023V1.sav"        = list(type = "populatie_obj",  year = 2023L),
+    "WoonbaseSleutelbestand2023V1"                  = list(file_key = "sleutel",        year = 2023L),
+    "WoonbaseSleutelbestand"                        = list(file_key = "sleutel",        year = NULL),
+    "WoonbaseKenmerkenPersonen2023V1"               = list(file_key = "kenmerken_pers", year = 2023L),
+    "WoonbaseKenmerkenPersonen"                     = list(file_key = "kenmerken_pers", year = NULL),
+    "WoonbaseKenmerkenHuishoudens2022V2.sav"        = list(file_key = "kenmerken_hh",   year = 2022L),
+    "WoonbaseKenmerkenHuishoudens"                  = list(file_key = "kenmerken_hh",   year = NULL),
+    "WoonbaseKenmerkenWoonruimten2023V1"            = list(file_key = "kenmerken_obj",  year = 2023L),
+    "WoonbasePopulatiePersonen2023V1"               = list(file_key = "populatie_pers", year = 2023L),
+    "WoonbasePopulatieHuishoudens2024V1"            = list(file_key = "populatie_hh",   year = 2024L),
+    "WoonbasePopulatieWoonruimten2023V1.sav"        = list(file_key = "populatie_obj",  year = 2023L),
     "G:/BOUWENENWONEN/WOONBASEPOPULATIEPERSONEN/WoonbasePopulatiePersonen2023V1.sav" =
-      list(type = "populatie_pers", year = 2023L)
+      list(file_key = "populatie_pers", year = 2023L),
+    "GBAPERSOONKTAB2023TABV1"                       = list(file_key = "persoonktab",    year = 2023L),
+    "RDWNPACT2023TABV1"                             = list(file_key = "kentekens",      year = 2023L),
+    "SPOLISBUS2023V1"                               = list(file_key = "spolisbus",      year = 2023L)
   )
 
   for (nm in names(names_should_match)) {
-    parsed   <- .wb_parse_file(nm)
+    parsed   <- simcbsradata:::.parse_file_registry(nm)
     expected <- names_should_match[[nm]]
-    expect_identical(parsed$type, expected$type, label = paste("type for", basename(nm)))
+    expect_identical(parsed$file_key, expected$file_key, label = paste("file_key for", basename(nm)))
     expect_identical(parsed$year, expected$year, label = paste("year for", basename(nm)))
   }
 })
 
 
-test_that("non-Woonbase files return NULL", {
-  expect_null(.wb_parse_file("some_other_file.sav"))
-  expect_null(.wb_parse_file("/path/to/GBA2023.sav"))
-  expect_null(.wb_parse_file("woonbasepopulatieperso"))
-  expect_null(.wb_parse_file("woonbasekenmerkenhuis"))
+test_that("unregistered files return NULL", {
+  expect_null(simcbsradata:::.parse_file_registry("some_other_file.sav"))
+  expect_null(simcbsradata:::.parse_file_registry("woonbasepopulatieperso"))
+  expect_null(simcbsradata:::.parse_file_registry("woonbasekenmerkenhuis"))
 })
 
 

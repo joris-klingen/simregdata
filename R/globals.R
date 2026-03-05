@@ -3,7 +3,7 @@
 #' @importFrom rlang enquo quo_is_null quo_get_expr
 #' @importFrom tidyselect eval_select
 #' @importFrom tibble as_tibble
-#' @importFrom stats rlnorm setNames
+#' @importFrom stats rbinom rlnorm rnorm runif setNames
 NULL
 
 # Suppress R CMD check NOTEs for data.table NSE variables
@@ -41,7 +41,11 @@ utils::globalVariables(c(
   "VBOOppervlakteKlasse1Jan", "VBOOppervlakteKlasse31Dec",
   "WOZWaardeObjectBAGKlasse1Jan", "WOZWaardeObjectBAGKlasse31Dec",
   "Indicator_VBOIsAanwezig1Jan", "Indicator_VBOIsAanwezig31Dec",
-  "Indicator_VSLIsAanwezig1Jan", "Indicator_VSLIsAanwezig31Dec"
+  "Indicator_VSLIsAanwezig1Jan", "Indicator_VSLIsAanwezig31Dec",
+  "BESTINKH", "BELIH", "GESTINKH", "VERMHH",
+  "VROMHH", "P100HBEST", "P100HGEST", "P100HVERM", "P100WELVAART",
+  "veh_weight", "vehicles", "pop",
+  "gem_code", "RINKENTEKEN", "..hh_cols", "..obj_cols"
 ))
 
 # Session cache environment — per-dataset spine + config caches
