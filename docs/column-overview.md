@@ -1,23 +1,6 @@
 # Column Overview
 
-Auto-generated overview of all simulated columns, their calibration level, and data source.
-
-Generated: 2026-03-05
-
-## Summary by calibration level
-
-| Level | Count |
-|-------|------:|
-| spine-derived | 159 |
-| codelist-hardcoded | 82 |
-| random-normal | 70 |
-| statline-calibrated | 37 |
-| random-uniform | 24 |
-| constant | 17 |
-| random-id | 5 |
-| computed | 2 |
-
-**Total columns:** 396
+Overview of all simulated columns
 
 <details>
 <summary><strong>CBS Woonbase</strong> — 182 columns across 9 files (0 statline-calibrated)</summary>
