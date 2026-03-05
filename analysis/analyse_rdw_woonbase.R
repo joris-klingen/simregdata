@@ -1,4 +1,4 @@
-# scripts/analyse_rdw_woonbase.R
+# analysis/analyse_rdw_woonbase.R
 #
 # Joins Woonbase + RDW (kentekens + verkeersprestatie) to explore
 # car ownership and VKT across time, space, and housing indicators.

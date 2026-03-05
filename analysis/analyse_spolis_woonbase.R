@@ -1,4 +1,4 @@
-# scripts/analyse_spolis_woonbase.R
+# analysis/analyse_spolis_woonbase.R
 #
 # Joins Woonbase + SPOLIS to explore employment across space and housing.
 #

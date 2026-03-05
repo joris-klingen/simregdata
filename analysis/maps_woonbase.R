@@ -1,4 +1,4 @@
-# scripts/maps_woonbase.R
+# analysis/maps_woonbase.R
 #
 # Municipality choropleths from Woonbase 2020:
 #   map1 — Population per gemeente

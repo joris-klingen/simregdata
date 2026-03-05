@@ -1,4 +1,4 @@
-# scripts/check_rdw_profiled.R
+# analysis/check_rdw_profiled.R
 #
 # Profiled version of check_rdw.R — identical output but with
 # per-step timing instrumentation to identify bottlenecks.

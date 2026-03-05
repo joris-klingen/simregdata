@@ -1,4 +1,4 @@
-# scripts/check_rdw.R
+# analysis/check_rdw.R
 #
 # Quick validation plots for simulated RDW data.
 # Checks whether fuel type transitions, VKT levels, and weight
