@@ -16,7 +16,7 @@ Supports multiple CBS datasets: **Woonbase** (housing + population, 9 file types
 
 ```r
 # Install from GitHub
-remotes::install_github("youruser/simcbsradata")
+remotes::install_github("joris-klingen/simcbsradata")
 ```
 
 ## Directory layout
