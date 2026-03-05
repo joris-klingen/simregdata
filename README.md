@@ -2,8 +2,6 @@
 
 Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
 
-Supports 6 CBS datasets: **Woonbase** (housing + population, 9 file types), **GBA** (population register, 3 file types), **RDW** (vehicle registrations + traffic performance, 2 file types), **SPOLIS** (employment records, 1 file type), **VEHTAB** (household wealth, 1 file type), and **Energieverbruik** (dwelling energy consumption, 1 file type).
-
 ## Background
 
 [CBS microdata](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen) are linked administrative registers available to researchers via the CBS Remote Access environment. Because the real files are restricted, this project simulates them from the PDF variable documentation so that:
@@ -19,81 +17,13 @@ Supports 6 CBS datasets: **Woonbase** (housing + population, 9 file types), **GB
 remotes::install_github("joris-klingen/simcbsradata")
 ```
 
-## Directory layout
-
-The repo root **is** the R package. Non-package files (`analysis/`, `plots/`, etc.) live
-alongside it and are excluded from the built package via `.Rbuildignore`.
-
-```
-simcbsradata/
-├── R/                             # Package R code
-├── inst/config/datasets/
-│   ├── woonbase/                  # 9 file types, params.yaml, gem_weights.csv
-│   ├── gba/                       # 3 file types (spine-derived, no params)
-│   ├── rdw/                       # 2 file types, params.yaml, gem_vehicle_weights.csv
-│   ├── spolis/                    # 1 file type, params.yaml
-│   ├── vehtab/                    # 1 file type, params.yaml
-│   └── energieverbruik/           # 1 file type, params.yaml
-├── man/                           # Function documentation
-├── tests/                         # Unit tests
-├── vignettes/                     # Package vignettes
-├── analysis/                      # Analysis & dev scripts (not part of package)
-│   ├── test_*.R                   # Per-dataset validation scripts
-│   ├── demo_*.R                   # Visualization demos
-│   └── benchmark_*.R              # Performance profiling
-├── docs/                          # CBS variable documentation PDFs + extraction instructions
-├── DESCRIPTION
-└── NAMESPACE
-```
-
 ## Supported datasets
 
-### Woonbase (9 file types)
+Currently supports 6 CBS datasets across 17 file types: **GBA** (population register), **Woonbase** (housing + population), **RDW** (vehicle registrations), **SPOLIS** (employment records), **VEHTAB** (household wealth), and **Energieverbruik** (dwelling energy consumption). More datasets will be added over time.
 
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `sleutel` | WoonbaseSleutelbestand | person |
-| `kenmerken_pers` | WoonbaseKenmerkenPersonen | person |
-| `kenmerken_hh` | WoonbaseKenmerkenHuishoudens | household |
-| `kenmerken_obj` | WoonbaseKenmerkenWoonruimten | object |
-| `populatie_pers` | WoonbasePopulatiePersonen | person |
-| `populatie_hh` | WoonbasePopulatieHuishoudens | household |
-| `populatie_obj` | WoonbasePopulatieWoonruimten | object |
-| `ek_hh_welvaart` | WOONBASEEKHuishoudensWV | household |
-| `ek_obj_panden` | ExtraKenmerkenPanden | object |
+All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER), so cross-file joins work exactly as on the real CBS Remote Access.
 
-### RDW (2 file types)
-
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `kentekens` | RDWNPACT | person |
-| `verkeersprestatie` | VERKEERSPRESTATIE | person |
-
-### GBA (3 file types)
-
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `persoonktab` | GBAPERSOONKTAB | person |
-| `adresobjectbus` | GBAADRESOBJECTBUS | person |
-| `huishoudensbus` | GBAHUISHOUDENSBUS | person |
-
-### SPOLIS (1 file type)
-
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `spolisbus` | SPOLISBUS | person |
-
-### VEHTAB (1 file type)
-
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `vehtab` | VEH | household |
-
-### Energieverbruik (1 file type)
-
-| Short name | CBS dataset name | Entity |
-|------------|------------------|--------|
-| `energieverbruik` | ENERGIEVERBRUIK | object |
+See the full [column overview](docs/column-overview.md) for all 396 simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Quick start
 
@@ -141,24 +71,13 @@ sim_catalog()
 
 | Function | Description |
 |----------|-------------|
-| `sim_init(dataset, year, n, seed)` | Builds the shared population spine (if needed) and prepares dataset-specific state. The spine is auto-built on first call. |
-| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches registered CBS dataset names and returns synthetic data; infers the year from the filename. Falls through to `haven::read_sav()` for unregistered paths. |
-| `sim_catalog(dataset, year)` | Prints all available synthetic file names across all datasets. |
-| `sim_reset(dataset)` | Clears the cached spine (forces a rebuild on next call). |
-| `woonbase_cbs_params(year)` | Loads CBS population parameters from `params.yaml`. |
-| `woonbase_update_params(years)` | Fetches CBS StatLine data and writes `params.yaml` + `gem_weights.csv`. |
-| `rdw_cbs_params(year)` | Loads RDW vehicle parameters from `params.yaml`. |
-| `rdw_update_params(years)` | Fetches CBS StatLine data for vehicles (85237NED, 85236NED, 85404NED). |
-| `spolis_cbs_params(year)` | Loads SPOLIS employment parameters from `params.yaml`. |
-| `spolis_update_params(years)` | Fetches CBS StatLine data for employment (81431NED). |
-| `vehtab_cbs_params(year)` | Loads VEHTAB household wealth parameters from `params.yaml`. |
-| `vehtab_update_params(years)` | Fetches CBS StatLine data for household wealth (83834NED). |
-| `energieverbruik_cbs_params(year)` | Loads energy consumption parameters from `params.yaml`. |
-| `energieverbruik_update_params(years)` | Fetches CBS Kerncijfers wijken en buurten for energy data. |
-| `sim_column_overview()` | Returns a `data.table` of all 406 columns with calibration level and source. |
-| `cbs_scaffold_dataset(...)` | Generates skeleton YAML config for a new dataset from PDF documentation. |
-
-Backward-compatible wrappers: `woonbase_init()`, `woonbase_reset()`, `woonbase_catalog()`.
+| `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
+| `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
+| `sim_catalog(dataset, year)` | Prints all available synthetic file names. |
+| `sim_reset(dataset)` | Clears the cached spine (forces rebuild on next call). |
+| `sim_column_overview()` | Returns a `data.table` of all columns with calibration level and source. |
+| `*_cbs_params(year)` | Loads cached CBS parameters for a dataset (e.g. `spolis_cbs_params(2023)`). |
+| `*_update_params(years)` | Fetches CBS StatLine data and writes `params.yaml` (e.g. `vehtab_update_params()`). |
 
 ### Architecture
 
@@ -169,45 +88,17 @@ The simulator uses a YAML-driven config system under `inst/config/datasets/{data
 - **`columns/*.yaml`** — per-file column definitions (sources, distributions, codelists)
 - **`params.yaml`** — year-specific CBS-calibrated parameters
 
-### Spine generation
-
-**Woonbase** uses a custom spine builder with three stages:
-1. **Objects** — dwelling records with spatial attributes, WOZ value, floor area, etc.
-2. **Households** — linked to objects; TYPHH proportions from `params.yaml`
-3. **Persons** — expanded from households; person roles, birth year, civil status
-
-**GBA** reads directly from the shared woonbase spine (no separate spine build).
-
-**RDW, SPOLIS, VEHTAB, and Energieverbruik** use the generic spine builder: sample or link from the woonbase spine, scaled by dataset-specific ratios (e.g. `n_vehicles / n_persons`).
-
-### Column overview
-
-A full [column overview](docs/column-overview.md) lists all 406 simulated columns with their calibration level (`statline-calibrated`, `spine-derived`, `codelist-hardcoded`, etc.) and data source. Regenerate with `Rscript analysis/generate_column_overview.R`.
-
 ### CBS parameters
 
-Year-specific parameters (population counts, household types, vehicle distributions, employment stats) are stored in each dataset's `params.yaml` and checked into git. **No API calls are made during data generation.**
-
-To refresh (e.g. when CBS publishes new data):
+Year-specific parameters are stored in each dataset's `params.yaml` and checked into git. **No API calls are made during data generation.** To refresh when CBS publishes new data:
 
 ```r
-library(simcbsradata)
-woonbase_update_params()            # refreshes 2016–2024
-rdw_update_params()                 # refreshes 2019–2025
-spolis_update_params()              # refreshes 2019–2025
-vehtab_update_params()              # refreshes 2006–2024
-energieverbruik_update_params()     # refreshes 2017–2023
+woonbase_update_params()            # 37230ned, 71486ned
+rdw_update_params()                 # 85237NED, 85236NED, 85404NED
+spolis_update_params()              # 81431NED
+vehtab_update_params()              # 83834NED
+energieverbruik_update_params()     # Kerncijfers wijken en buurten
 ```
-
-CBS StatLine tables used:
-- `37230ned` — Population on 1 January
-- `71486ned` — Household type distribution
-- `85237NED` — Personenauto's: fuel, color, weight, construction year
-- `85236NED` — Motor vehicles: type breakdown, total count
-- `85404NED` — Traffic performance: annual mileage
-- `81431NED` — Employment: job counts, FT/PT ratio, wages, sectors
-- `83834NED` — Household wealth: assets, debts, wealth components
-- Kerncijfers wijken en buurten (year-specific IDs) — Energy consumption, district heating
 
 ## Performance
 
@@ -224,7 +115,5 @@ At 1M persons on a modern laptop:
 ```r
 install.packages(c("data.table", "haven", "rlang", "tidyselect", "yaml",
                    "tibble", "stats", "tools",
-                   "ggplot2", "sf", "glue",     # for analysis scripts
-                   "cbsodataR",                  # optional: refresh params from StatLine
-                   "profvis"))                   # optional: flame graph
+                   "cbsodataR"))  # optional: refresh params from StatLine
 ```
