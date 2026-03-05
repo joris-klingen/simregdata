@@ -281,7 +281,7 @@ Overview of all simulated columns
 </details>
 
 <details>
-<summary><code>ExtraKenmerkenPanden</code></summary>
+<summary><code>ExtraKenmerkenPandenTAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -309,7 +309,7 @@ Overview of all simulated columns
 ## RDW Motorvoertuigenpark
 
 <details>
-<summary><code>RDWNPACT</code></summary>
+<summary><code>RDWNPACTTAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -330,7 +330,7 @@ Overview of all simulated columns
 </details>
 
 <details>
-<summary><code>VERKEERSPRESTATIE</code></summary>
+<summary><code>VERKEERSPRESTATIETAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -489,7 +489,7 @@ Overview of all simulated columns
 ## Vermogens van huishoudens
 
 <details>
-<summary><code>VEH</code></summary>
+<summary><code>VEHTAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -519,7 +519,7 @@ Overview of all simulated columns
 ## Energieverbruik particuliere woningen
 
 <details>
-<summary><code>ENERGIEVERBRUIK</code></summary>
+<summary><code>ENERGIEVERBRUIKTAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|

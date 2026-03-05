@@ -23,7 +23,11 @@ for (dpath in datasets) {
   if (!is.null(manifest$files)) {
     file_order[[ds_id]] <- names(manifest$files)
     for (fkey in names(manifest$files)) {
-      cbs_names[[ds_id]][[fkey]] <- manifest$files[[fkey]]$cbs_name %||% fkey
+      fi <- manifest$files[[fkey]]
+      cbs_name <- fi$cbs_name %||% fkey
+      tab <- if (isTRUE(fi$tab_suffix) && !grepl("TAB$", toupper(cbs_name))) "TAB" else ""
+      display_name <- paste0(cbs_name, tab)
+      cbs_names[[ds_id]][[fkey]] <- display_name
     }
   }
 }
