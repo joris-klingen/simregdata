@@ -21,7 +21,7 @@ remotes::install_github("joris-klingen/simcbsradata")
 
 ## Directory layout
 
-The repo root **is** the R package. Non-package files (`scripts/`, `plots/`, etc.) live
+The repo root **is** the R package. Non-package files (`analysis/`, `plots/`, etc.) live
 alongside it and are excluded from the built package via `.Rbuildignore`.
 
 ```
@@ -34,7 +34,7 @@ simcbsradata/
 ├── man/                           # Function documentation
 ├── tests/                         # Unit tests
 ├── vignettes/                     # Package vignettes
-├── scripts/                       # Analysis & dev scripts (not part of package)
+├── analysis/                      # Analysis & dev scripts (not part of package)
 │   ├── analyse_woonbase.R         # 6 plots + 2 maps from joined Woonbase files
 │   ├── analyse_rdw_woonbase.R     # 5 plots: fuel, car ownership, VKT
 │   ├── housing_type_timeseries.R  # Housing stock composition 2016–2024
