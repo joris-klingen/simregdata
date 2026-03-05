@@ -15,6 +15,7 @@
 #'       `"constant"`, `"random-id"`, `"computed"`}
 #'     \item{source}{Human-readable source description, e.g.
 #'       `"params: loon_mean (81431NED)"` or `"spine.pers.RINPERSOON"`}
+#'     \item{codelist}{Codelist name if applicable, `NA` otherwise}
 #'   }
 #' @export
 sim_column_overview <- function() {
@@ -46,11 +47,12 @@ sim_column_overview <- function() {
       for (col in spec$columns) {
         info <- .classify_column(col, sl_table)
         rows[[length(rows) + 1L]] <- data.table::data.table(
-          dataset = ds,
-          file    = fkey,
-          column  = col$name,
-          level   = info$level,
-          source  = info$source
+          dataset  = ds,
+          file     = fkey,
+          column   = col$name,
+          level    = info$level,
+          source   = info$source,
+          codelist = col$codelist %||% NA_character_
         )
       }
     }

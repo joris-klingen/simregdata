@@ -26,6 +26,9 @@ for (dpath in datasets) {
   }
 }
 
+# GitHub base URL for codelist links
+gh_base <- "https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets"
+
 # --- Build markdown ---
 lines <- character()
 add <- function(...) lines <<- c(lines, paste0(...))
@@ -73,11 +76,19 @@ for (ds in unique(dt$dataset)) {
     add(sprintf("<summary><code>%s</code> — %d columns (%d statline-calibrated)</summary>",
                 cbs_name, n_fcols, n_fcal))
     add("")
-    add("| Column | Level | Source |")
-    add("|--------|-------|--------|")
+    add("| Column | Level | Source | Codelist |")
+    add("|--------|-------|--------|----------|")
     for (i in seq_len(nrow(file_dt))) {
       r <- file_dt[i, ]
-      add("| `", r$column, "` | ", r$level, " | ", r$source, " |")
+      # Build codelist link if applicable
+      cl <- r$codelist
+      if (!is.na(cl) && nzchar(cl)) {
+        cl_url <- sprintf("%s/%s/codelists.yaml", gh_base, ds)
+        cl_cell <- sprintf("[%s](%s)", cl, cl_url)
+      } else {
+        cl_cell <- ""
+      }
+      add("| `", r$column, "` | ", r$level, " | ", r$source, " | ", cl_cell, " |")
     }
     add("")
     add("</details>")
