@@ -56,6 +56,8 @@ columns:
       distribution: normal
       mean: 200
       sd: 600
+      mean_from_params: autozaak_mean
+      sd_from_params: autozaak_sd
       min: 0
       max: 15000
       round: 0
@@ -70,6 +72,8 @@ columns:
       distribution: normal
       mean: 2800
       sd: 1200
+      mean_from_params: basisloon_mean
+      sd_from_params: basisloon_sd
       min: 0
       max: 25000
       round: 0
@@ -79,6 +83,8 @@ columns:
       distribution: normal
       mean: 130.0
       sd: 40.0
+      mean_from_params: basisuren_mean
+      sd_from_params: basisuren_sd
       min: 0
       max: 250
       round: 2
@@ -124,6 +130,8 @@ columns:
       distribution: normal
       mean: 350
       sd: 500
+      mean_from_params: bijzbeloning_mean
+      sd_from_params: bijzbeloning_sd
       min: 0
       max: 20000
       round: 0
@@ -172,6 +180,8 @@ columns:
       distribution: normal
       mean: 2800
       sd: 1500
+      mean_from_params: lnlbph_mean
+      sd_from_params: lnlbph_sd
       min: 0
       max: 40000
       round: 0
@@ -190,6 +200,8 @@ columns:
       distribution: normal
       mean: 2900
       sd: 1600
+      mean_from_params: lnsv_mean
+      sd_from_params: lnsv_sd
       min: 0
       max: 40000
       round: 0
@@ -307,6 +319,8 @@ columns:
       distribution: normal
       mean: 125.0
       sd: 40.0
+      mean_from_params: reguliereuren_mean
+      sd_from_params: reguliereuren_sd
       min: 0
       max: 250
       round: 2

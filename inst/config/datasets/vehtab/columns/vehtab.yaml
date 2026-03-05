@@ -44,6 +44,8 @@ columns:
       distribution: normal
       mean: 310000
       sd: 280000
+      mean_from_params: bezh_mean
+      sd_from_params: bezh_sd
       min: 0
       round: 0
     label: Bezittingen van het huishouden
@@ -54,6 +56,8 @@ columns:
       distribution: normal
       mean: 52000
       sd: 85000
+      mean_from_params: finh_mean
+      sd_from_params: finh_sd
       min: 0
       round: 0
     label: Financiele bezittingen van het huishouden
@@ -64,6 +68,8 @@ columns:
       distribution: normal
       mean: 35000
       sd: 55000
+      mean_from_params: banh_mean
+      sd_from_params: banh_sd
       min: 0
       round: 0
     label: Bank- en spaartegoeden van het huishouden
@@ -74,6 +80,8 @@ columns:
       distribution: normal
       mean: 17000
       sd: 65000
+      mean_from_params: effh_mean
+      sd_from_params: effh_sd
       min: 0
       round: 0
     label: Effecten van het huishouden
@@ -84,6 +92,8 @@ columns:
       distribution: normal
       mean: 195000
       sd: 180000
+      mean_from_params: onrh_mean
+      sd_from_params: onrh_sd
       min: 0
       round: 0
     label: Onroerend goed van het huishouden
@@ -94,6 +104,8 @@ columns:
       distribution: normal
       mean: 175000
       sd: 160000
+      mean_from_params: wonh_mean
+      sd_from_params: wonh_sd
       min: 0
       round: 0
     label: Eigen woning van het huishouden
@@ -104,6 +116,8 @@ columns:
       distribution: normal
       mean: 20000
       sd: 75000
+      mean_from_params: ogoh_mean
+      sd_from_params: ogoh_sd
       min: 0
       round: 0
     label: Overig onroerend goed van het huishouden
@@ -114,6 +128,8 @@ columns:
       distribution: normal
       mean: 15000
       sd: 80000
+      mean_from_params: ondh_mean
+      sd_from_params: ondh_sd
       round: 0
     label: Ondernemingsvermogen van het huishouden
 
@@ -123,6 +139,8 @@ columns:
       distribution: normal
       mean: 12000
       sd: 100000
+      mean_from_params: abeh_mean
+      sd_from_params: abeh_sd
       min: 0
       round: 0
     label: Aanmerkelijk belang van het huishouden
@@ -133,6 +151,8 @@ columns:
       distribution: normal
       mean: 5000
       sd: 25000
+      mean_from_params: oveh_mean
+      sd_from_params: oveh_sd
       min: 0
       round: 0
     label: Overige bezittingen van het huishouden
@@ -144,6 +164,8 @@ columns:
       distribution: normal
       mean: 105000
       sd: 110000
+      mean_from_params: stoh_mean
+      sd_from_params: stoh_sd
       min: 0
       round: 0
     label: Schulden van het huishouden
@@ -154,6 +176,8 @@ columns:
       distribution: normal
       mean: 90000
       sd: 100000
+      mean_from_params: shyh_mean
+      sd_from_params: shyh_sd
       min: 0
       round: 0
     label: Hypotheekschuld eigen woning van het huishouden
@@ -164,6 +188,8 @@ columns:
       distribution: normal
       mean: 3000
       sd: 12000
+      mean_from_params: ssth_mean
+      sd_from_params: ssth_sd
       min: 0
       round: 0
     label: Studieschuld van het huishouden
@@ -174,6 +200,8 @@ columns:
       distribution: normal
       mean: 12000
       sd: 35000
+      mean_from_params: sovh_mean
+      sd_from_params: sovh_sd
       min: 0
       round: 0
     label: Overige schulden van het huishouden
@@ -184,5 +212,7 @@ columns:
       distribution: normal
       mean: 45000
       sd: 200000
+      mean_from_params: verexewh_mean
+      sd_from_params: verexewh_sd
       round: 0
     label: Vermogen van het huishouden exclusief eigen woning

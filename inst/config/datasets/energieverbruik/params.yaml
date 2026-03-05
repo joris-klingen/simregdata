@@ -1,90 +1,96 @@
-# ENERGIEVERBRUIKTAB year-specific parameters
-# n_dwellings: number of private dwellings in the population
-# gas_mean/sd: gas consumption in m3
-# elek_mean/sd: electricity consumption in kWh
-# solar_pv_share: fraction of dwellings with solar PV
-
-2004:
+'2004':
   n_dwellings: 6900000
   gas_mean: 1750
   gas_sd: 800
   elek_mean: 3400
   elek_sd: 1500
   solar_pv_share: 0.005
-2010:
+  stadsverwarming_pct: 4.0
+'2010':
   n_dwellings: 7200000
   gas_mean: 1600
   gas_sd: 750
   elek_mean: 3350
   elek_sd: 1500
   solar_pv_share: 0.01
-2015:
+  stadsverwarming_pct: 4.5
+'2015':
   n_dwellings: 7500000
   gas_mean: 1350
   gas_sd: 700
   elek_mean: 3200
   elek_sd: 1400
   solar_pv_share: 0.06
-2016:
+  stadsverwarming_pct: 5.2
+'2016':
   n_dwellings: 7550000
   gas_mean: 1300
   gas_sd: 680
   elek_mean: 3100
   elek_sd: 1400
   solar_pv_share: 0.08
-2017:
-  n_dwellings: 7600000
-  gas_mean: 1280
-  gas_sd: 670
+  stadsverwarming_pct: 5.4
+'2017':
+  n_dwellings: 7686175
+  gas_mean: 1240.0
+  gas_sd: 620.0
   elek_mean: 3050
   elek_sd: 1400
-  solar_pv_share: 0.10
-2018:
-  n_dwellings: 7650000
-  gas_mean: 1270
-  gas_sd: 660
+  solar_pv_share: 0.1
+  stadsverwarming_pct: 5.6
+'2018':
+  n_dwellings: 7740984
+  gas_mean: 1270.0
+  gas_sd: 635.0
   elek_mean: 3000
   elek_sd: 1400
   solar_pv_share: 0.12
-2019:
-  n_dwellings: 7750000
-  gas_mean: 1200
-  gas_sd: 650
+  stadsverwarming_pct: 5.7
+'2019':
+  n_dwellings: 7814912
+  gas_mean: 1180.0
+  gas_sd: 590.0
   elek_mean: 2950
   elek_sd: 1350
   solar_pv_share: 0.15
-2020:
-  n_dwellings: 7850000
-  gas_mean: 1250
-  gas_sd: 650
+  stadsverwarming_pct: 5.9
+'2020':
+  n_dwellings: 7891786
+  gas_mean: 1120.0
+  gas_sd: 560.0
   elek_mean: 3100
   elek_sd: 1400
   solar_pv_share: 0.18
-2021:
-  n_dwellings: 7950000
-  gas_mean: 1200
-  gas_sd: 640
-  elek_mean: 3000
-  elek_sd: 1350
+  stadsverwarming_pct: 6.3
+'2021':
+  n_dwellings: 7966331
+  gas_mean: 1250.0
+  gas_sd: 625.0
+  elek_mean: 2810.0
+  elek_sd: 1264.0
   solar_pv_share: 0.22
-2022:
-  n_dwellings: 8050000
-  gas_mean: 1100
-  gas_sd: 620
-  elek_mean: 2900
-  elek_sd: 1350
+  stadsverwarming_pct: 6.3
+'2022':
+  n_dwellings: 8045580
+  gas_mean: 970.0
+  gas_sd: 485.0
+  elek_mean: 2630.0
+  elek_sd: 1184.0
   solar_pv_share: 0.27
-2023:
-  n_dwellings: 8150000
-  gas_mean: 1050
-  gas_sd: 600
-  elek_mean: 2850
-  elek_sd: 1300
+  stadsverwarming_pct: 6.5
+'2023':
+  n_dwellings: 8125229
+  gas_mean: 820.0
+  gas_sd: 410.0
+  elek_mean: 2500.0
+  elek_sd: 1125.0
   solar_pv_share: 0.32
-2024:
+  stadsverwarming_pct: 6.8
+'2024':
   n_dwellings: 8250000
   gas_mean: 1000
   gas_sd: 580
   elek_mean: 2800
   elek_sd: 1300
   solar_pv_share: 0.37
+  stadsverwarming_pct: 7.0

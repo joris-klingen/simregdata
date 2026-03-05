@@ -152,7 +152,10 @@ sim_catalog()
 | `spolis_cbs_params(year)` | Loads SPOLIS employment parameters from `params.yaml`. |
 | `spolis_update_params(years)` | Fetches CBS StatLine data for employment (81431NED). |
 | `vehtab_cbs_params(year)` | Loads VEHTAB household wealth parameters from `params.yaml`. |
+| `vehtab_update_params(years)` | Fetches CBS StatLine data for household wealth (83834NED). |
 | `energieverbruik_cbs_params(year)` | Loads energy consumption parameters from `params.yaml`. |
+| `energieverbruik_update_params(years)` | Fetches CBS Kerncijfers wijken en buurten for energy data. |
+| `sim_column_overview()` | Returns a `data.table` of all 406 columns with calibration level and source. |
 | `cbs_scaffold_dataset(...)` | Generates skeleton YAML config for a new dataset from PDF documentation. |
 
 Backward-compatible wrappers: `woonbase_init()`, `woonbase_reset()`, `woonbase_catalog()`.
@@ -177,6 +180,10 @@ The simulator uses a YAML-driven config system under `inst/config/datasets/{data
 
 **RDW, SPOLIS, VEHTAB, and Energieverbruik** use the generic spine builder: sample or link from the woonbase spine, scaled by dataset-specific ratios (e.g. `n_vehicles / n_persons`).
 
+### Column overview
+
+A full [column overview](docs/column-overview.md) lists all 406 simulated columns with their calibration level (`statline-calibrated`, `spine-derived`, `codelist-hardcoded`, etc.) and data source. Regenerate with `Rscript analysis/generate_column_overview.R`.
+
 ### CBS parameters
 
 Year-specific parameters (population counts, household types, vehicle distributions, employment stats) are stored in each dataset's `params.yaml` and checked into git. **No API calls are made during data generation.**
@@ -188,6 +195,8 @@ library(simcbsradata)
 woonbase_update_params()            # refreshes 2016–2024
 rdw_update_params()                 # refreshes 2019–2025
 spolis_update_params()              # refreshes 2019–2025
+vehtab_update_params()              # refreshes 2006–2024
+energieverbruik_update_params()     # refreshes 2017–2023
 ```
 
 CBS StatLine tables used:
@@ -197,6 +206,8 @@ CBS StatLine tables used:
 - `85236NED` — Motor vehicles: type breakdown, total count
 - `85404NED` — Traffic performance: annual mileage
 - `81431NED` — Employment: job counts, FT/PT ratio, wages, sectors
+- `83834NED` — Household wealth: assets, debts, wealth components
+- Kerncijfers wijken en buurten (year-specific IDs) — Energy consumption, district heating
 
 ## Performance
 

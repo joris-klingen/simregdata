@@ -1,42 +1,598 @@
-# VEHTAB year-specific parameters
-# n_households: number of households in the population
-# Values for 2016-2024 from CBS woonbase; 2006-2015 estimated
-
-2006:
+'2006':
   n_households: 7146033
-2007:
+  bezh_mean: 241000.0
+  bezh_sd: 361500.0
+  finh_mean: 59600.0
+  finh_sd: 89400.0
+  banh_mean: 35500.0
+  banh_sd: 53250.0
+  effh_mean: 81000.0
+  effh_sd: 121500.0
+  onrh_mean: 293700.0
+  onrh_sd: 440550.0
+  wonh_mean: 275200.0
+  wonh_sd: 412800.0
+  ogoh_mean: 236900.0
+  ogoh_sd: 355350.0
+  ondh_mean: 55200.0
+  ondh_sd: 82800.0
+  abeh_mean: 553100.0
+  abeh_sd: 829650.0
+  oveh_mean: 76700.0
+  oveh_sd: 115050.0
+  stoh_mean: 160900.0
+  stoh_sd: 241350.0
+  shyh_mean: 149200.0
+  shyh_sd: 119360.0
+  sovh_mean: 108400.0
+  sovh_sd: 162600.0
+  verexewh_mean: 85400.0
+  verexewh_sd: 128100.0
+'2007':
   n_households: 7191548
-2008:
+  bezh_mean: 256800.0
+  bezh_sd: 385200.0
+  finh_mean: 64100.0
+  finh_sd: 96150.0
+  banh_mean: 38200.0
+  banh_sd: 57300.0
+  effh_mean: 90000.0
+  effh_sd: 135000.0
+  onrh_mean: 310600.0
+  onrh_sd: 465900.0
+  wonh_mean: 291500.0
+  wonh_sd: 437250.0
+  ogoh_mean: 244800.0
+  ogoh_sd: 367200.0
+  ondh_mean: 54900.0
+  ondh_sd: 82350.0
+  abeh_mean: 551600.0
+  abeh_sd: 827400.0
+  oveh_mean: 80000.0
+  oveh_sd: 120000.0
+  stoh_mean: 171400.0
+  stoh_sd: 257100.0
+  shyh_mean: 158600.0
+  shyh_sd: 126880.0
+  sovh_mean: 113200.0
+  sovh_sd: 169800.0
+  verexewh_mean: 89200.0
+  verexewh_sd: 133800.0
+'2008':
   n_households: 7242834
-2009:
+  bezh_mean: 274000.0
+  bezh_sd: 411000.0
+  finh_mean: 66100.0
+  finh_sd: 99150.0
+  banh_mean: 41500.0
+  banh_sd: 62250.0
+  effh_mean: 91000.0
+  effh_sd: 136500.0
+  onrh_mean: 325800.0
+  onrh_sd: 488700.0
+  wonh_mean: 303800.0
+  wonh_sd: 455700.0
+  ogoh_mean: 269000.0
+  ogoh_sd: 403500.0
+  ondh_mean: 56900.0
+  ondh_sd: 85350.0
+  abeh_mean: 534100.0
+  abeh_sd: 801150.0
+  oveh_mean: 89500.0
+  oveh_sd: 134250.0
+  stoh_mean: 182300.0
+  stoh_sd: 273450.0
+  shyh_mean: 168000.0
+  shyh_sd: 134400.0
+  sovh_mean: 123400.0
+  sovh_sd: 185100.0
+  verexewh_mean: 92600.0
+  verexewh_sd: 138900.0
+'2009':
   n_households: 7307900
-2010:
+  bezh_mean: 272300.0
+  bezh_sd: 408450.0
+  finh_mean: 59600.0
+  finh_sd: 89400.0
+  banh_mean: 43300.0
+  banh_sd: 64950.0
+  effh_mean: 64600.0
+  effh_sd: 96900.0
+  onrh_mean: 324900.0
+  onrh_sd: 487350.0
+  wonh_mean: 301500.0
+  wonh_sd: 452250.0
+  ogoh_mean: 277500.0
+  ogoh_sd: 416250.0
+  ondh_mean: 55700.0
+  ondh_sd: 83550.0
+  abeh_mean: 557000.0
+  abeh_sd: 835500.0
+  oveh_mean: 93800.0
+  oveh_sd: 140700.0
+  stoh_mean: 191900.0
+  stoh_sd: 287850.0
+  shyh_mean: 176600.0
+  shyh_sd: 141280.0
+  sovh_mean: 130400.0
+  sovh_sd: 195600.0
+  verexewh_mean: 90200.0
+  verexewh_sd: 135300.0
+'2010':
   n_households: 7386144
-2011:
+  bezh_mean: 271100.0
+  bezh_sd: 406650.0
+  finh_mean: 60200.0
+  finh_sd: 90300.0
+  banh_mean: 42500.0
+  banh_sd: 63750.0
+  effh_mean: 72900.0
+  effh_sd: 109350.0
+  onrh_mean: 308000.0
+  onrh_sd: 462000.0
+  wonh_mean: 282300.0
+  wonh_sd: 423450.0
+  ogoh_mean: 292900.0
+  ogoh_sd: 439350.0
+  ondh_mean: 54400.0
+  ondh_sd: 81600.0
+  abeh_mean: 611900.0
+  abeh_sd: 917850.0
+  oveh_mean: 99100.0
+  oveh_sd: 148650.0
+  stoh_mean: 198400.0
+  stoh_sd: 297600.0
+  shyh_mean: 180800.0
+  shyh_sd: 144640.0
+  sovh_mean: 146300.0
+  sovh_sd: 219450.0
+  verexewh_mean: 98100.0
+  verexewh_sd: 147150.0
+'2011':
   n_households: 7459076
-2012:
+  bezh_mean: 271900.0
+  bezh_sd: 407850.0
+  finh_mean: 56000.0
+  finh_sd: 84000.0
+  banh_mean: 38900.0
+  banh_sd: 58350.0
+  effh_mean: 75500.0
+  effh_sd: 113250.0
+  onrh_mean: 309600.0
+  onrh_sd: 464400.0
+  wonh_mean: 283800.0
+  wonh_sd: 425700.0
+  ogoh_mean: 290900.0
+  ogoh_sd: 436350.0
+  ondh_mean: 57000.0
+  ondh_sd: 85500.0
+  abeh_mean: 616900.0
+  abeh_sd: 925350.0
+  oveh_mean: 119400.0
+  oveh_sd: 179100.0
+  stoh_mean: 145800.0
+  stoh_sd: 218700.0
+  shyh_mean: 182700.0
+  shyh_sd: 146160.0
+  ssth_mean: 14100.0
+  ssth_sd: 14100.0
+  sovh_mean: 32400.0
+  sovh_sd: 48600.0
+  verexewh_mean: 96300.0
+  verexewh_sd: 144450.0
+'2012':
   n_households: 7512830
-2013:
+  bezh_mean: 264600.0
+  bezh_sd: 396900.0
+  finh_mean: 54400.0
+  finh_sd: 81600.0
+  banh_mean: 39400.0
+  banh_sd: 59100.0
+  effh_mean: 71600.0
+  effh_sd: 107400.0
+  onrh_mean: 296400.0
+  onrh_sd: 444600.0
+  wonh_mean: 270700.0
+  wonh_sd: 406050.0
+  ogoh_mean: 285300.0
+  ogoh_sd: 427950.0
+  ondh_mean: 60100.0
+  ondh_sd: 90150.0
+  abeh_mean: 625100.0
+  abeh_sd: 937650.0
+  oveh_mean: 120900.0
+  oveh_sd: 181350.0
+  stoh_mean: 149500.0
+  stoh_sd: 224250.0
+  shyh_mean: 185700.0
+  shyh_sd: 148560.0
+  ssth_mean: 13300.0
+  ssth_sd: 13300.0
+  sovh_mean: 34400.0
+  sovh_sd: 51600.0
+  verexewh_mean: 95900.0
+  verexewh_sd: 143850.0
+'2013':
   n_households: 7571682
-2014:
+  bezh_mean: 256700.0
+  bezh_sd: 385050.0
+  finh_mean: 55400.0
+  finh_sd: 83100.0
+  banh_mean: 39900.0
+  banh_sd: 59850.0
+  effh_mean: 80000.0
+  effh_sd: 120000.0
+  onrh_mean: 268700.0
+  onrh_sd: 403050.0
+  wonh_mean: 243300.0
+  wonh_sd: 364950.0
+  ogoh_mean: 276500.0
+  ogoh_sd: 414750.0
+  ondh_mean: 63700.0
+  ondh_sd: 95550.0
+  abeh_mean: 742900.0
+  abeh_sd: 1114350.0
+  oveh_mean: 121200.0
+  oveh_sd: 181800.0
+  stoh_mean: 146500.0
+  stoh_sd: 219750.0
+  shyh_mean: 185900.0
+  shyh_sd: 148720.0
+  ssth_mean: 13500.0
+  ssth_sd: 13500.0
+  sovh_mean: 31800.0
+  sovh_sd: 47700.0
+  verexewh_mean: 103600.0
+  verexewh_sd: 155400.0
+'2014':
   n_households: 7621813
-2015:
+  bezh_mean: 256600.0
+  bezh_sd: 384900.0
+  finh_mean: 55800.0
+  finh_sd: 83700.0
+  banh_mean: 39700.0
+  banh_sd: 59550.0
+  effh_mean: 89200.0
+  effh_sd: 133800.0
+  onrh_mean: 266800.0
+  onrh_sd: 400200.0
+  wonh_mean: 242200.0
+  wonh_sd: 363300.0
+  ogoh_mean: 248700.0
+  ogoh_sd: 373050.0
+  ondh_mean: 66200.0
+  ondh_sd: 99300.0
+  abeh_mean: 702800.0
+  abeh_sd: 1054200.0
+  oveh_mean: 113300.0
+  oveh_sd: 169950.0
+  stoh_mean: 148200.0
+  stoh_sd: 222300.0
+  shyh_mean: 184700.0
+  shyh_sd: 147760.0
+  ssth_mean: 13800.0
+  ssth_sd: 13800.0
+  sovh_mean: 34900.0
+  sovh_sd: 52350.0
+  verexewh_mean: 103300.0
+  verexewh_sd: 154950.0
+'2015':
   n_households: 7669621
-2016:
+  bezh_mean: 264200.0
+  bezh_sd: 396300.0
+  finh_mean: 56700.0
+  finh_sd: 85050.0
+  banh_mean: 40000.0
+  banh_sd: 60000.0
+  effh_mean: 98500.0
+  effh_sd: 147750.0
+  onrh_mean: 272500.0
+  onrh_sd: 408750.0
+  wonh_mean: 247800.0
+  wonh_sd: 371700.0
+  ogoh_mean: 242100.0
+  ogoh_sd: 363150.0
+  ondh_mean: 67700.0
+  ondh_sd: 101550.0
+  abeh_mean: 749700.0
+  abeh_sd: 1124550.0
+  oveh_mean: 112700.0
+  oveh_sd: 169050.0
+  stoh_mean: 146600.0
+  stoh_sd: 219900.0
+  shyh_mean: 183800.0
+  shyh_sd: 147040.0
+  ssth_mean: 14100.0
+  ssth_sd: 14100.0
+  sovh_mean: 35000.0
+  sovh_sd: 52500.0
+  verexewh_mean: 108200.0
+  verexewh_sd: 162300.0
+'2016':
   n_households: 7720787
-2017:
+  bezh_mean: 271300.0
+  bezh_sd: 406950.0
+  finh_mean: 57100.0
+  finh_sd: 85650.0
+  banh_mean: 39900.0
+  banh_sd: 59850.0
+  effh_mean: 105200.0
+  effh_sd: 157800.0
+  onrh_mean: 282700.0
+  onrh_sd: 424050.0
+  wonh_mean: 257500.0
+  wonh_sd: 386250.0
+  ogoh_mean: 244900.0
+  ogoh_sd: 367350.0
+  ondh_mean: 71500.0
+  ondh_sd: 107250.0
+  abeh_mean: 743200.0
+  abeh_sd: 1114800.0
+  oveh_mean: 114200.0
+  oveh_sd: 171300.0
+  stoh_mean: 145700.0
+  stoh_sd: 218550.0
+  shyh_mean: 183700.0
+  shyh_sd: 146960.0
+  ssth_mean: 14000.0
+  ssth_sd: 14000.0
+  sovh_mean: 35000.0
+  sovh_sd: 52500.0
+  verexewh_mean: 109000.0
+  verexewh_sd: 163500.0
+'2017':
   n_households: 7794075
-2018:
+  bezh_mean: 287900.0
+  bezh_sd: 431850.0
+  finh_mean: 57600.0
+  finh_sd: 86400.0
+  banh_mean: 40300.0
+  banh_sd: 60450.0
+  effh_mean: 110600.0
+  effh_sd: 165900.0
+  onrh_mean: 300700.0
+  onrh_sd: 451050.0
+  wonh_mean: 274900.0
+  wonh_sd: 412350.0
+  ogoh_mean: 253100.0
+  ogoh_sd: 379650.0
+  ondh_mean: 75500.0
+  ondh_sd: 113250.0
+  abeh_mean: 799900.0
+  abeh_sd: 1199850.0
+  oveh_mean: 134200.0
+  oveh_sd: 201300.0
+  stoh_mean: 148900.0
+  stoh_sd: 223350.0
+  shyh_mean: 184900.0
+  shyh_sd: 147920.0
+  ssth_mean: 14300.0
+  ssth_sd: 14300.0
+  sovh_mean: 38700.0
+  sovh_sd: 58050.0
+  verexewh_mean: 115300.0
+  verexewh_sd: 172950.0
+'2018':
   n_households: 7857914
-2019:
+  bezh_mean: 307100.0
+  bezh_sd: 460650.0
+  finh_mean: 58900.0
+  finh_sd: 88350.0
+  banh_mean: 40700.0
+  banh_sd: 61050.0
+  effh_mean: 118600.0
+  effh_sd: 177900.0
+  onrh_mean: 324800.0
+  onrh_sd: 487200.0
+  wonh_mean: 297300.0
+  wonh_sd: 445950.0
+  ogoh_mean: 268600.0
+  ogoh_sd: 402900.0
+  ondh_mean: 78400.0
+  ondh_sd: 117600.0
+  abeh_mean: 858100.0
+  abeh_sd: 1287150.0
+  oveh_mean: 131600.0
+  oveh_sd: 197400.0
+  stoh_mean: 150000.0
+  stoh_sd: 225000.0
+  shyh_mean: 187600.0
+  shyh_sd: 150080.0
+  ssth_mean: 14900.0
+  ssth_sd: 14900.0
+  sovh_mean: 38900.0
+  sovh_sd: 58350.0
+  verexewh_mean: 120800.0
+  verexewh_sd: 181200.0
+'2019':
   n_households: 7924691
-2020:
+  bezh_mean: 326300.0
+  bezh_sd: 489450.0
+  finh_mean: 57900.0
+  finh_sd: 86850.0
+  banh_mean: 41100.0
+  banh_sd: 61650.0
+  effh_mean: 108300.0
+  effh_sd: 162450.0
+  onrh_mean: 353200.0
+  onrh_sd: 529800.0
+  wonh_mean: 323600.0
+  wonh_sd: 485400.0
+  ogoh_mean: 285700.0
+  ogoh_sd: 428550.0
+  ondh_mean: 82000.0
+  ondh_sd: 123000.0
+  abeh_mean: 903700.0
+  abeh_sd: 1355550.0
+  oveh_mean: 130000.0
+  oveh_sd: 195000.0
+  stoh_mean: 156200.0
+  stoh_sd: 234300.0
+  shyh_mean: 190400.0
+  shyh_sd: 152320.0
+  ssth_mean: 16700.0
+  ssth_sd: 16700.0
+  sovh_mean: 44100.0
+  sovh_sd: 66150.0
+  verexewh_mean: 124000.0
+  verexewh_sd: 186000.0
+'2020':
   n_households: 7997800
-2021:
+  bezh_mean: 349300.0
+  bezh_sd: 523950.0
+  finh_mean: 61400.0
+  finh_sd: 92100.0
+  banh_mean: 42700.0
+  banh_sd: 64050.0
+  effh_mean: 118300.0
+  effh_sd: 177450.0
+  onrh_mean: 377700.0
+  onrh_sd: 566550.0
+  wonh_mean: 345700.0
+  wonh_sd: 518550.0
+  ogoh_mean: 304300.0
+  ogoh_sd: 456450.0
+  ondh_mean: 84600.0
+  ondh_sd: 126900.0
+  abeh_mean: 977000.0
+  abeh_sd: 1465500.0
+  oveh_mean: 133100.0
+  oveh_sd: 199650.0
+  stoh_mean: 158600.0
+  stoh_sd: 237900.0
+  shyh_mean: 192000.0
+  shyh_sd: 153600.0
+  ssth_mean: 17900.0
+  ssth_sd: 17900.0
+  sovh_mean: 46700.0
+  sovh_sd: 70050.0
+  verexewh_mean: 134100.0
+  verexewh_sd: 201150.0
+'2021':
   n_households: 8043443
-2022:
+  bezh_mean: 372300.0
+  bezh_sd: 558450.0
+  finh_mean: 66600.0
+  finh_sd: 99900.0
+  banh_mean: 47200.0
+  banh_sd: 70800.0
+  effh_mean: 113000.0
+  effh_sd: 169500.0
+  onrh_mean: 414900.0
+  onrh_sd: 622350.0
+  wonh_mean: 380800.0
+  wonh_sd: 571200.0
+  ogoh_mean: 318700.0
+  ogoh_sd: 478050.0
+  ondh_mean: 86500.0
+  ondh_sd: 129750.0
+  abeh_mean: 878700.0
+  abeh_sd: 1318050.0
+  oveh_mean: 133500.0
+  oveh_sd: 200250.0
+  stoh_mean: 161900.0
+  stoh_sd: 242850.0
+  shyh_mean: 195700.0
+  shyh_sd: 156560.0
+  ssth_mean: 18300.0
+  ssth_sd: 18300.0
+  sovh_mean: 50300.0
+  sovh_sd: 75450.0
+  verexewh_mean: 136300.0
+  verexewh_sd: 204450.0
+'2022':
   n_households: 8138591
-2023:
+  bezh_mean: 438600.0
+  bezh_sd: 657900.0
+  finh_mean: 73600.0
+  finh_sd: 110400.0
+  banh_mean: 50400.0
+  banh_sd: 75600.0
+  effh_mean: 121500.0
+  effh_sd: 182250.0
+  onrh_mean: 497000.0
+  onrh_sd: 745500.0
+  wonh_mean: 461400.0
+  wonh_sd: 692100.0
+  ogoh_mean: 336300.0
+  ogoh_sd: 504450.0
+  ondh_mean: 91200.0
+  ondh_sd: 136800.0
+  abeh_mean: 1045400.0
+  abeh_sd: 1568100.0
+  oveh_mean: 142900.0
+  oveh_sd: 214350.0
+  stoh_mean: 165300.0
+  stoh_sd: 247950.0
+  shyh_mean: 200800.0
+  shyh_sd: 160640.0
+  ssth_mean: 19200.0
+  ssth_sd: 19200.0
+  sovh_mean: 49300.0
+  sovh_sd: 73950.0
+  verexewh_mean: 152700.0
+  verexewh_sd: 229050.0
+'2023':
   n_households: 8270244
-2024:
+  bezh_mean: 454800.0
+  bezh_sd: 682200.0
+  finh_mean: 74200.0
+  finh_sd: 111300.0
+  banh_mean: 53600.0
+  banh_sd: 80400.0
+  effh_mean: 105600.0
+  effh_sd: 158400.0
+  onrh_mean: 510200.0
+  onrh_sd: 765300.0
+  wonh_mean: 464800.0
+  wonh_sd: 697200.0
+  ogoh_mean: 408200.0
+  ogoh_sd: 612300.0
+  ondh_mean: 96200.0
+  ondh_sd: 144300.0
+  abeh_mean: 1204000.0
+  abeh_sd: 1806000.0
+  oveh_mean: 144600.0
+  oveh_sd: 216900.0
+  stoh_mean: 167000.0
+  stoh_sd: 250500.0
+  shyh_mean: 206100.0
+  shyh_sd: 164880.0
+  ssth_mean: 20000.0
+  ssth_sd: 20000.0
+  sovh_mean: 45400.0
+  sovh_sd: 68100.0
+  verexewh_mean: 167100.0
+  verexewh_sd: 250650.0
+'2024':
   n_households: 8374404
+  bezh_mean: 456400.0
+  bezh_sd: 684600.0
+  finh_mean: 76000.0
+  finh_sd: 114000.0
+  banh_mean: 54700.0
+  banh_sd: 82050.0
+  effh_mean: 108800.0
+  effh_sd: 163200.0
+  onrh_mean: 515700.0
+  onrh_sd: 773550.0
+  wonh_mean: 471500.0
+  wonh_sd: 707250.0
+  ogoh_mean: 406200.0
+  ogoh_sd: 609300.0
+  ondh_mean: 98200.0
+  ondh_sd: 147300.0
+  abeh_mean: 1092400.0
+  abeh_sd: 1638600.0
+  oveh_mean: 152400.0
+  oveh_sd: 228600.0
+  stoh_mean: 168800.0
+  stoh_sd: 253200.0
+  shyh_mean: 209000.0
+  shyh_sd: 167200.0
+  ssth_mean: 20700.0
+  ssth_sd: 20700.0
+  sovh_mean: 43500.0
+  sovh_sd: 65250.0
+  verexewh_mean: 167200.0
+  verexewh_sd: 250800.0

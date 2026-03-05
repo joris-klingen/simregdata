@@ -26,6 +26,7 @@ columns:
     random_categorical:
       values: ["0", "1"]
       probs:  [0.94, 0.06]
+      from_params: stadsverwarming_categorical
     codelist: STADSW
     label: Stadsverwarming aanwezig
 
