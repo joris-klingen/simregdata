@@ -1,7 +1,7 @@
 # analysis/test_cross_datasets.R
 #
 # Cross-dataset combination tests.
-# Verifies that all 5 datasets can be joined via shared identifiers.
+# Verifies that woonbase + RDW + SPOLIS + VEHTAB + energieverbruik can be joined.
 #
 # Run: Rscript analysis/test_cross_datasets.R
 

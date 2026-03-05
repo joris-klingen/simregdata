@@ -275,7 +275,7 @@ The `analysis/` folder contains per-dataset tests and minimal demos:
 | `test_vehtab.R` | HH identifiers, spine-derived percentiles, wealth components |
 | `test_energieverbruik.R` | Object identifiers, calibrated gas/elek/solar, year shifts |
 | `test_gba.R` | GBA structure, cross-file RINPERSOON, labels, woonbase cross-link |
-| `test_cross_datasets.R` | Full 5-way join: woonbase + RDW + SPOLIS + VEHTAB + energy |
+| `test_cross_datasets.R` | Full 6-way join: woonbase + GBA + RDW + SPOLIS + VEHTAB + energy |
 | `test_columns_pdf.R` | Column names vs CBS PDF documentation |
 | `test_parquet_export.R` | Export/read round-trip, labels, col_select |
 
@@ -283,8 +283,8 @@ The `analysis/` folder contains per-dataset tests and minimal demos:
 
 | Script | What it shows |
 |--------|---------------|
-| `demo_woonbase.R` | Age distribution + HH type bar chart |
-| `demo_rdw.R` | Fuel type time series + weight density shift |
+| `demo_woonbase.R` | Population pyramid, HH type by age, income vs WOZ heatmap |
+| `demo_rdw.R` | EV adoption curve, fuel stacked area, weight vs km scatter |
 | `demo_autobelasting.R` | Cross-dataset policy analysis: car tax by income |
 
 Run all tests:
@@ -298,8 +298,8 @@ for (f in list.files("analysis", pattern = "^test_", full.names = TRUE)) {
 
 ## Updating parameters
 
-Both woonbase and RDW datasets ship with pre-computed parameters.
-To refresh them from CBS StatLine (requires `cbsodataR`):
+All datasets with calibrated parameters ship with pre-computed values.
+To refresh from CBS StatLine (requires `cbsodataR`):
 
 ```r
 # Woonbase -- queries 37230ned and 71486ned

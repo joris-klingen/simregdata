@@ -10,11 +10,10 @@ docs/
 ├── cbs-catalogs/          # Original PDFs (tracked in git)
 │   ├── woonbase/
 │   ├── rdw/
-│   └── spolis/
+│   ├── spolis/
+│   ├── vehtab/
+│   └── energieverbruik/
 └── extracted/             # Plain-text extractions (gitignored, regenerate on demand)
-    ├── woonbase/
-    ├── rdw/
-    └── spolis/
 ```
 
 ## Extracting text from PDFs

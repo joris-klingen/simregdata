@@ -2,7 +2,7 @@
 
 Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
 
-Supports multiple CBS datasets: **Woonbase** (housing + population, 9 file types), **RDW** (vehicle registrations + traffic performance, 2 file types), and **SPOLIS** (employment records with wages, hours, insurance, 1 file type).
+Supports 6 CBS datasets: **Woonbase** (housing + population, 9 file types), **GBA** (population register, 3 file types), **RDW** (vehicle registrations + traffic performance, 2 file types), **SPOLIS** (employment records, 1 file type), **VEHTAB** (household wealth, 1 file type), and **Energieverbruik** (dwelling energy consumption, 1 file type).
 
 ## Background
 
@@ -29,16 +29,18 @@ simcbsradata/
 ├── R/                             # Package R code
 ├── inst/config/datasets/
 │   ├── woonbase/                  # 9 file types, params.yaml, gem_weights.csv
+│   ├── gba/                       # 3 file types (spine-derived, no params)
 │   ├── rdw/                       # 2 file types, params.yaml, gem_vehicle_weights.csv
-│   └── spolis/                    # 1 file type, params.yaml
+│   ├── spolis/                    # 1 file type, params.yaml
+│   ├── vehtab/                    # 1 file type, params.yaml
+│   └── energieverbruik/           # 1 file type, params.yaml
 ├── man/                           # Function documentation
 ├── tests/                         # Unit tests
 ├── vignettes/                     # Package vignettes
 ├── analysis/                      # Analysis & dev scripts (not part of package)
-│   ├── analyse_woonbase.R         # 6 plots + 2 maps from joined Woonbase files
-│   ├── analyse_rdw_woonbase.R     # 5 plots: fuel, car ownership, VKT
-│   ├── housing_type_timeseries.R  # Housing stock composition 2016–2024
-│   └── maps_woonbase.R           # Municipality choropleths
+│   ├── test_*.R                   # Per-dataset validation scripts
+│   ├── demo_*.R                   # Visualization demos
+│   └── benchmark_*.R              # Performance profiling
 ├── docs/                          # CBS variable documentation PDFs + extraction instructions
 ├── DESCRIPTION
 └── NAMESPACE
@@ -67,11 +69,31 @@ simcbsradata/
 | `kentekens` | RDWNPACT | person |
 | `verkeersprestatie` | VERKEERSPRESTATIE | person |
 
+### GBA (3 file types)
+
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `persoontab` | GBAPERSOONTAB | person |
+| `adresobjectbus` | GBAADRESOBJECTBUS | person |
+| `huishoudensbus` | GBAHUISHOUDENSBUS | person |
+
 ### SPOLIS (1 file type)
 
 | Short name | CBS dataset name | Entity |
 |------------|------------------|--------|
 | `spolisbus` | SPOLISBUS | person |
+
+### VEHTAB (1 file type)
+
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `vehtab` | VEH | household |
+
+### Energieverbruik (1 file type)
+
+| Short name | CBS dataset name | Entity |
+|------------|------------------|--------|
+| `energieverbruik` | ENERGIEVERBRUIK | object |
 
 ## Quick start
 
@@ -129,6 +151,8 @@ sim_catalog()
 | `rdw_update_params(years)` | Fetches CBS StatLine data for vehicles (85237NED, 85236NED, 85404NED). |
 | `spolis_cbs_params(year)` | Loads SPOLIS employment parameters from `params.yaml`. |
 | `spolis_update_params(years)` | Fetches CBS StatLine data for employment (81431NED). |
+| `vehtab_cbs_params(year)` | Loads VEHTAB household wealth parameters from `params.yaml`. |
+| `energieverbruik_cbs_params(year)` | Loads energy consumption parameters from `params.yaml`. |
 | `cbs_scaffold_dataset(...)` | Generates skeleton YAML config for a new dataset from PDF documentation. |
 
 Backward-compatible wrappers: `woonbase_init()`, `woonbase_reset()`, `woonbase_catalog()`.
@@ -149,7 +173,9 @@ The simulator uses a YAML-driven config system under `inst/config/datasets/{data
 2. **Households** — linked to objects; TYPHH proportions from `params.yaml`
 3. **Persons** — expanded from households; person roles, birth year, civil status
 
-**RDW and SPOLIS** use the generic spine builder: sample RINPERSOON with replacement from the woonbase person spine, scaled by `n_vehicles / n_persons` or `n_jobs / n_persons`.
+**GBA** reads directly from the shared woonbase spine (no separate spine build).
+
+**RDW, SPOLIS, VEHTAB, and Energieverbruik** use the generic spine builder: sample or link from the woonbase spine, scaled by dataset-specific ratios (e.g. `n_vehicles / n_persons`).
 
 ### CBS parameters
 

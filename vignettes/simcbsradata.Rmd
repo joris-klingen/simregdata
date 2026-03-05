@@ -16,8 +16,8 @@ knitr::opts_chunk$set(
 
 ## What is simcbsradata?
 
-`simcbsradata` generates synthetic CBS Woonbase microdata.
-It provides a drop-in `read_sav()` that intercepts CBS Woonbase file names
+`simcbsradata` generates synthetic CBS microdata for 6 datasets (17 file types).
+It provides a drop-in `read_sav()` that intercepts CBS file names
 and returns simulated data with the same structure as the real `.sav` files
 on the CBS remote-access environment.
 
@@ -27,7 +27,7 @@ using realistic data with:
 - Correct Dutch population sizes (calibrated to CBS StatLine)
 - haven-compatible labelled columns (same as `haven::read_sav()`)
 - Consistent cross-file identifiers (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER)
-- All 7 Woonbase file types
+- 6 datasets: Woonbase (9 files), GBA (3), RDW (2), SPOLIS (1), VEHTAB (1), Energieverbruik (1)
 
 ## Quick start
 
@@ -36,7 +36,7 @@ library(haven)
 library(simcbsradata)   # load after haven so read_sav() masks haven::read_sav()
 
 # See what files are available
-woonbase_catalog()
+sim_catalog()
 ```
 
 ### Initialise the spine
@@ -99,7 +99,7 @@ joined <- merge(pers, hh, by = "HUISHOUDNR1Jan")
 cat(sprintf("Join match rate: %.1f%%\n", nrow(joined) / nrow(pers) * 100))
 ```
 
-## The 7 Woonbase file types
+## Woonbase file types (9 files)
 
 | Key | CBS dataset name | Unit | Description |
 |-----|-----------------|------|-------------|
@@ -110,18 +110,36 @@ cat(sprintf("Join match rate: %.1f%%\n", nrow(joined) / nrow(pers) * 100))
 | populatie_pers | WoonbasePopulatiePersonen | person | Person population (rich: includes HH + object attributes) |
 | populatie_hh | WoonbasePopulatieHuishoudens | household | Household population (includes ref-person + object attributes) |
 | populatie_obj | WoonbasePopulatieWoonruimten | object | Dwelling population (includes HH + ref-person attributes) |
+| ek_hh_welvaart | WOONBASEEKHuishoudensWV | household | Income and wealth (Extra Kenmerken) |
+| ek_obj_panden | ExtraKenmerkenPanden | object | Building characteristics (Extra Kenmerken) |
+
+## Other datasets
+
+All datasets share the same population spine, so cross-dataset joins work
+out of the box:
+
+```{r other-datasets}
+# Auto-builds shared spine if needed
+sim_init("rdw", year = 2023, n = 5000, seed = 42)
+sim_init("spolis", year = 2023)
+
+rdw  <- read_sav("RDWNPACT2023TABV1", n_max = 5)
+head(rdw[, c("RINPERSOON", "RINKENTEKEN", "BRANDSTCODECORVRTG")])
+```
 
 ## Refreshing CBS parameters
 
-Population sizes and household type distributions are stored in a bundled
-YAML file.  To update them from CBS StatLine (requires `cbsodataR`):
+Population sizes and dataset-specific distributions are stored in bundled
+YAML files. To update from CBS StatLine (requires `cbsodataR`):
 ```r
-woonbase_update_params(years = 2016:2024, path = "my_params.yaml")
+woonbase_update_params(years = 2016:2025)
+rdw_update_params(years = 2019:2025)
+spolis_update_params(years = 2010:2025)
 ```
 
-## Non-Woonbase files
+## Unregistered files
 
-For any file name that doesn't match a Woonbase pattern, `read_sav()` falls
+For any file name that doesn't match a registered dataset, `read_sav()` falls
 through to `haven::read_sav()`.  This means you can use a single `read_sav()`
 call throughout your code:
 

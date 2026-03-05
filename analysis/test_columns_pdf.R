@@ -1,6 +1,6 @@
 # Check simulated columns against CBS PDF documentation ----
 #
-# Runs cbs_check_columns() for each of the 7 Woonbase file types and
+# Runs cbs_check_columns() for each of the 9 Woonbase file types and
 # prints a per-file report of matched / missing / extra / case-mismatch
 # columns.
 
