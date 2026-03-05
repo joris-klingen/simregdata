@@ -35,6 +35,23 @@ for (dpath in datasets) {
 # GitHub base URL for codelist links
 gh_base <- "https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets"
 
+# StatLine URL builder: table ID -> clickable link
+statline_link <- function(table_id) {
+  sprintf("[%s](https://opendata.cbs.nl/statline/#/CBS/nl/dataset/%s)", table_id, table_id)
+}
+
+# Extract table IDs from source string and build links
+make_calibration_cell <- function(source_str) {
+  # Match table IDs in parentheses, e.g. "(81431NED)" or "(85237NED, 85236NED)"
+  m <- regmatches(source_str, regexpr("\\(([^)]+)\\)", source_str))
+  if (length(m) == 0L || !nzchar(m)) return("")
+  ids <- trimws(strsplit(gsub("[()]", "", m), ",")[[1L]])
+  # Only link IDs that look like StatLine table codes (alphanumeric)
+  ids <- ids[grepl("^[0-9]+[A-Za-z]+$", ids)]
+  if (length(ids) == 0L) return("")
+  paste(vapply(ids, statline_link, character(1L)), collapse = ", ")
+}
+
 # --- Build markdown ---
 lines <- character()
 add <- function(...) lines <<- c(lines, paste0(...))
@@ -60,8 +77,8 @@ for (ds in unique(dt$dataset)) {
     add("<details>")
     add(sprintf("<summary><code>%s</code></summary>", cbs_name))
     add("")
-    add("| Column | Source | Spatial | Codelist |")
-    add("|--------|--------|---------|----------|")
+    add("| Column | Source | Spatial | Calibration | Codelist |")
+    add("|--------|--------|---------|-------------|----------|")
     for (i in seq_len(nrow(file_dt))) {
       r <- file_dt[i, ]
       # Build codelist link if applicable
@@ -77,7 +94,7 @@ for (ds in unique(dt$dataset)) {
       src_cell <- switch(r$level,
         "spine-derived"       = "spine-derived",
         "computed"            = "computed",
-        "statline-calibrated" = r$source,
+        "statline-calibrated" = sub(" \\([^)]+\\)$", "", r$source),
         "constant"            = r$source,
         "random-id"           = r$source,
         "random-normal"       = paste0("random: ", r$source),
@@ -85,7 +102,9 @@ for (ds in unique(dt$dataset)) {
         "random-categorical"  = paste0("random: ", r$source),
         r$source
       )
-      add("| `", r$column, "` | ", src_cell, " | ", sp_cell, " | ", cl_cell, " |")
+      # Build calibration link for statline-calibrated columns
+      cal_cell <- if (r$level == "statline-calibrated") make_calibration_cell(r$source) else ""
+      add("| `", r$column, "` | ", src_cell, " | ", sp_cell, " | ", cal_cell, " | ", cl_cell, " |")
     }
     add("")
     add("</details>")
