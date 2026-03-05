@@ -4,7 +4,7 @@
 ^analysis$
 ^plots$
 ^docs$
-^project\.Rproj$
+^simcbsradata\.Rproj$
 ^README\.md$
 ^\.claude$
 ^\.gitignore$
