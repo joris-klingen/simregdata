@@ -1,7 +1,7 @@
 library(yaml)
-wb <- yaml::read_yaml("simcbsradata/inst/config/datasets/woonbase/params.yaml")
-rdw <- yaml::read_yaml("simcbsradata/inst/config/datasets/rdw/params.yaml")
-sp <- yaml::read_yaml("simcbsradata/inst/config/datasets/spolis/params.yaml")
+wb <- yaml::read_yaml("inst/config/datasets/woonbase/params.yaml")
+rdw <- yaml::read_yaml("inst/config/datasets/rdw/params.yaml")
+sp <- yaml::read_yaml("inst/config/datasets/spolis/params.yaml")
 
 # Per-row parquet byte rates from 1M benchmark (655.3 MB total)
 # Woonbase: 9 files, mix of person/hh/obj entity

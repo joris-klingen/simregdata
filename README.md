@@ -1,4 +1,4 @@
-# sim_mdata
+# simcbsradata
 
 Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
 
