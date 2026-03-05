@@ -11,7 +11,7 @@ cbs_parse_pdf_columns(txt_path)
 }
 \value{
 A data.frame with columns \code{volgnr} (integer), \code{naam}
-  (character), and \code{formaat} (character).
+(character), and \code{formaat} (character).
 }
 \description{
 Reads the "Bestandsopbouw" variable table from an extracted CBS PDF text

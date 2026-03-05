@@ -20,13 +20,14 @@ cbs_scaffold_dataset(
 \item{files}{Named list of file definitions. Each element should be a list
 with:
 \describe{
-  \item{cbs_name}{CBS CamelCase dataset name}
-  \item{entity}{Entity type: \code{"person"}, \code{"household"}, or \code{"object"}}
-  \item{txt_path}{Path to extracted PDF text file (optional)}
+\item{cbs_name}{CBS CamelCase dataset name}
+\item{entity}{Entity type: \code{"person"}, \code{"household"}, or \code{"object"}}
+\item{txt_path}{Path to extracted PDF text file (optional)}
 }}
 
-\item{spine_builder}{Spine builder type: \code{"woonbase"} (complex HH logic)
-or \code{"generic"} (simple RINPERSOON sampling). Default \code{"generic"}.}
+\item{spine_builder}{Spine builder type: \code{"woonbase"} (reads directly from
+the shared population spine) or \code{"generic"} (samples persons from the
+shared spine). Default \code{"generic"}.}
 
 \item{output_dir}{Base output directory. Defaults to
 \code{inst/config/datasets/{dataset_id}} in the package source.}

@@ -49,9 +49,3 @@ Drop-in replacement for \code{\link[haven:read_spss]{haven::read_sav()}} that in
 dataset file names and returns synthetic microdata.  For all other file
 paths, falls through to \code{haven::read_sav()}.
 }
-\details{
-Supports the same arguments as \code{haven::read_sav()}: \code{n_max}, \code{skip},
-\code{col_select} (tidyselect or character vector).  Extra arguments (\code{year},
-\code{seed}) control the simulation when no spine has been pre-built with
-\code{\link[=sim_init]{sim_init()}}.
-}

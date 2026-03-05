@@ -21,7 +21,11 @@ parameters for \code{year}.}
 Invisibly \code{NULL}.
 }
 \description{
-Builds the shared person/household/object spine for a dataset and caches
-it so that subsequent \code{\link[=read_sav]{read_sav()}} calls can assemble files without
-rebuilding.
+Builds the shared person/household/object spine (if not already cached) and
+prepares dataset-specific state so that subsequent \code{\link[=read_sav]{read_sav()}} calls can
+assemble files without rebuilding.
+}
+\details{
+The spine is shared across all datasets.  Calling \code{sim_init()} for any
+dataset auto-builds the spine from woonbase parameters when needed.
 }

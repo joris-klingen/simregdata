@@ -17,10 +17,10 @@ cbs_check_columns(file, txt_path, year = 2023L, n = 1000L)
 }
 \value{
 A list with elements \code{match}, \code{missing}, \code{extra},
-  and \code{case_mismatch}.
+and \code{case_mismatch}.
 }
 \description{
-Generates a small synthetic dataset for a file type, parses the
+Generates a small synthetic dataset for a Woonbase file type, parses the
 corresponding CBS PDF documentation, and reports matches, missing columns,
 extra columns, and case mismatches.
 }
