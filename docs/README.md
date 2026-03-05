@@ -7,15 +7,18 @@ Source PDFs downloaded from the CBS microdata catalog
 
 ```
 docs/
-├── cbs-catalogs.yaml     # PDF source URLs (tracked in git)
-├── download_pdfs.R       # Downloads PDFs listed in the YAML
-├── cbs-catalogs/         # Downloaded PDFs (gitignored)
-│   ├── woonbase/         # 9 files
-│   ├── rdw/              # 2 files
-│   ├── spolis/           # 1 file
-│   ├── vehtab/           # 1 file
-│   └── energieverbruik/  # 1 file
-└── extracted/            # Plain-text extractions (gitignored, regenerate on demand)
+├── cbs-catalogs.yaml         # PDF source URLs (tracked in git)
+├── download_pdfs.R           # Downloads PDFs from the YAML
+├── extract_pdfs.R            # Extracts full text + column metadata from PDFs
+├── cbs-catalogs/             # Downloaded PDFs (gitignored)
+│   ├── woonbase/             # 9 files
+│   ├── rdw/                  # 2 files
+│   ├── spolis/               # 1 file
+│   ├── vehtab/               # 1 file
+│   └── energieverbruik/      # 1 file
+└── extracted/                # Extracted output (gitignored)
+    ├── full_text/{dataset}/  # Plain text per PDF (one .txt per .pdf)
+    └── meta/                 # Column metadata CSVs (volgnr, naam, formaat)
 ```
 
 ## Downloading PDFs
@@ -26,25 +29,25 @@ The PDFs are not stored in git. Download them with:
 source("docs/download_pdfs.R")
 ```
 
-This reads `cbs-catalogs.yaml` and downloads any missing PDFs to `docs/cbs-catalogs/`.
+## Extracting text and metadata
 
-## Extracting text from PDFs
-
-The extracted `.txt` files are not checked into git. Regenerate them with
-`pdftools` in R:
+After downloading PDFs, extract full text and column metadata:
 
 ```r
-library(pdftools)
-for (pdf in list.files("docs/cbs-catalogs", "\\.pdf$", recursive = TRUE, full.names = TRUE)) {
-  out <- file.path("docs/extracted",
-                   dirname(sub("^docs/cbs-catalogs/", "", pdf)),
-                   sub("\\.pdf$", ".txt", basename(pdf)))
-  dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
-  writeLines(pdf_text(pdf), out)
-}
+source("docs/extract_pdfs.R")
 ```
+
+This produces:
+- `extracted/full_text/{dataset}/{file}.txt` — full text from each PDF
+- `extracted/meta/{file}.csv` — column metadata table (volgnr, naam, formaat)
+
+The meta CSVs are useful for manually checking how the PDFs are parsed and
+comparing against the simulated column specs.
 
 ## How these are used
 
 The `cbs_scaffold_dataset()` function reads extracted text to auto-generate
 skeleton YAML column configs for new datasets. See `R/scaffold.R`.
+
+The `cbs_parse_pdf_columns()` function (in `R/validate.R`) parses the
+"Bestandsopbouw" column table from extracted text files.

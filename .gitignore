@@ -15,7 +15,7 @@ plots/
 # CBS documentation PDFs (download with: Rscript docs/download_pdfs.R)
 docs/cbs-catalogs/**/*.pdf
 
-# Extracted text from PDFs (regenerate with pdftools; see docs/README.md)
+# Extracted text and metadata from PDFs (regenerate with: Rscript docs/extract_pdfs.R)
 docs/extracted/
 
 # Built package tarballs

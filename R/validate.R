@@ -13,8 +13,9 @@ cbs_parse_pdf_columns <- function(txt_path) {
   lines <- readLines(txt_path, warn = FALSE)
 
   # Find all header lines and the first "Toelichting" end marker
-  hdr_idx <- grep("^VolgNr\\s+Naam\\s+Formaat", lines)
-  end_idx <- grep("^Toelichting op de variabelen", lines)
+  # Supports two CBS formats: "VolgNr Naam Formaat" and "Nr Variabele Form."
+  hdr_idx <- grep("^\\s*(VolgNr\\s+Naam\\s+Formaat|Nr\\s+Variabele\\s+Form)", lines)
+  end_idx <- grep("^\\s*Toelichting op de variabelen", lines)
   if (length(hdr_idx) == 0L || length(end_idx) == 0L)
     stop("Could not find Bestandsopbouw table in ", txt_path)
 
@@ -26,9 +27,9 @@ cbs_parse_pdf_columns <- function(txt_path) {
 
   # Drop page-break noise
   noise <- grepl("^\\s*$", block) |
-    grepl("^Microdata Services", block) |
+    grepl("^\\s*Microdata Services", block) |
     grepl("^\\s*documentatie\\s", block) |
-    grepl("^VolgNr\\s+Naam\\s+Formaat", block)
+    grepl("^\\s*(VolgNr\\s+Naam\\s+Formaat|Nr\\s+Variabele\\s+Form)", block)
   block <- block[!noise]
 
   # Parse: number  name-tokens  format (e.g. "15 Indicator PersoonIsGeboren A1")

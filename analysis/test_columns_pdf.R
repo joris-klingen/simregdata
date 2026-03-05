@@ -6,7 +6,7 @@
 
 devtools::load_all(".")
 
-pdf_dir <- "docs/extracted/woonbase"
+pdf_dir <- "docs/extracted/full_text/woonbase"
 
 # Mapping: file_type key → CBS file name, PDF text file
 file_map <- list(
