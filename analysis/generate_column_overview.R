@@ -76,8 +76,8 @@ for (ds in unique(dt$dataset)) {
     add(sprintf("<summary><code>%s</code> — %d columns (%d statline-calibrated)</summary>",
                 cbs_name, n_fcols, n_fcal))
     add("")
-    add("| Column | Level | Source | Codelist |")
-    add("|--------|-------|--------|----------|")
+    add("| Column | Level | Spatial | Source | Codelist |")
+    add("|--------|-------|---------|--------|----------|")
     for (i in seq_len(nrow(file_dt))) {
       r <- file_dt[i, ]
       # Build codelist link if applicable
@@ -88,7 +88,8 @@ for (ds in unique(dt$dataset)) {
       } else {
         cl_cell <- ""
       }
-      add("| `", r$column, "` | ", r$level, " | ", r$source, " | ", cl_cell, " |")
+      sp_cell <- if (!is.na(r$spatial)) r$spatial else ""
+      add("| `", r$column, "` | ", r$level, " | ", sp_cell, " | ", r$source, " | ", cl_cell, " |")
     }
     add("")
     add("</details>")

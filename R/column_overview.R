@@ -16,6 +16,7 @@
 #'     \item{source}{Human-readable source description, e.g.
 #'       `"params: loon_mean (81431NED)"` or `"spine.pers.RINPERSOON"`}
 #'     \item{codelist}{Codelist name if applicable, `NA` otherwise}
+#'     \item{spatial}{Spatial calibration level: `"gemeente"`, `"NL"`, or `NA`}
 #'   }
 #' @export
 sim_column_overview <- function() {
@@ -45,14 +46,15 @@ sim_column_overview <- function() {
       fkey <- tools::file_path_sans_ext(basename(f))
 
       for (col in spec$columns) {
-        info <- .classify_column(col, sl_table)
+        info <- .classify_column(col, sl_table, ds)
         rows[[length(rows) + 1L]] <- data.table::data.table(
           dataset  = ds,
           file     = fkey,
           column   = col$name,
           level    = info$level,
           source   = info$source,
-          codelist = col$codelist %||% NA_character_
+          codelist = col$codelist %||% NA_character_,
+          spatial  = info$spatial
         )
       }
     }
@@ -61,20 +63,34 @@ sim_column_overview <- function() {
 }
 
 
-# Classify a single column spec into level + source description
-.classify_column <- function(col, sl_table) {
+# Classify a single column spec into level + source + spatial description
+.classify_column <- function(col, sl_table, dataset) {
+
+  # Spine fields that are calibrated at gemeente level
+  # (population weights, WOZ means, vehicle weights are per-gemeente)
+  gem_spine_fields <- c(
+    "GemeenteCodeJJJJ", "WijkCodeJJJJ", "BuurtCodeJJJJ",
+    "WOZWaardeObjectBAG", "WOZWaardeObjectBAGKlasse",
+    "RINOBJECTNUMMER", "SOORTOBJECTNUMMER"
+  )
 
   # Spine-derived
   if (!is.null(col$source) && grepl("^spine\\.", col$source)) {
-    return(list(level = "spine-derived", source = col$source))
+    field <- sub("^spine\\.[a-z]+\\.", "", col$source)
+    # Strip suffixes like _Ref, 1Jan, 31Dec, {sfx} for matching
+    field_base <- sub("(_Ref|1Jan|31Dec|\\{sfx\\})$", "", field)
+    sp <- if (field_base %in% gem_spine_fields) "gemeente" else "NL"
+    return(list(level = "spine-derived", source = col$source, spatial = sp))
   }
 
   # Constant / template
   if (!is.null(col$value)) {
-    return(list(level = "constant", source = paste0("value: ", col$value)))
+    return(list(level = "constant", source = paste0("value: ", col$value),
+                spatial = NA_character_))
   }
   if (!is.null(col$template)) {
-    return(list(level = "constant", source = paste0("template: ", col$template)))
+    return(list(level = "constant", source = paste0("template: ", col$template),
+                spatial = NA_character_))
   }
 
   # Random categorical
@@ -83,11 +99,11 @@ sim_column_overview <- function() {
     if (!is.null(rc$from_params)) {
       src <- paste0("params: ", rc$from_params)
       if (!is.na(sl_table)) src <- paste0(src, " (", sl_table, ")")
-      return(list(level = "statline-calibrated", source = src))
+      return(list(level = "statline-calibrated", source = src, spatial = "NL"))
     }
     cl <- col$codelist %||% ""
     src <- if (nzchar(cl)) paste0("codelist: ", cl) else "hardcoded probs"
-    return(list(level = "codelist-hardcoded", source = src))
+    return(list(level = "codelist-hardcoded", source = src, spatial = NA_character_))
   }
 
   # Random numeric
@@ -97,29 +113,32 @@ sim_column_overview <- function() {
       param_key <- rn$mean_from_params %||% rn$sd_from_params
       src <- paste0("params: ", param_key)
       if (!is.na(sl_table)) src <- paste0(src, " (", sl_table, ")")
-      return(list(level = "statline-calibrated", source = src))
+      return(list(level = "statline-calibrated", source = src, spatial = "NL"))
     }
     dist <- rn$distribution %||% "normal"
     if (identical(dist, "uniform")) {
       src <- sprintf("uniform [%s, %s]", rn$min, rn$max)
-      return(list(level = "random-uniform", source = src))
+      return(list(level = "random-uniform", source = src, spatial = NA_character_))
     }
     src <- sprintf("normal (mean=%s, sd=%s)", rn$mean, rn$sd)
-    return(list(level = "random-normal", source = src))
+    return(list(level = "random-normal", source = src, spatial = NA_character_))
   }
 
   # Random ID
   if (!is.null(col$random_id)) {
     return(list(level = "random-id",
-                source = paste0("random hex, width=", col$random_id$width)))
+                source = paste0("random hex, width=", col$random_id$width),
+                spatial = NA_character_))
   }
 
   # Computed
   if (!is.null(col$source) && grepl("^computed\\.", col$source)) {
-    return(list(level = "computed", source = col$source))
+    # GemeenteCode computed fields are gemeente-level
+    sp <- if (grepl("Gemeente", col$source)) "gemeente" else NA_character_
+    return(list(level = "computed", source = col$source, spatial = sp))
   }
 
-  list(level = "other", source = "")
+  list(level = "other", source = "", spatial = NA_character_)
 }
 
 
