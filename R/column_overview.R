@@ -32,7 +32,7 @@ sim_column_overview <- function() {
 
   )
 
-  datasets <- c("woonbase", "rdw", "spolis", "vehtab", "energieverbruik", "gba")
+  datasets <- c("gba", "woonbase", "rdw", "spolis", "vehtab", "energieverbruik")
   base <- .dataset_base_dir()
 
   rows <- list()

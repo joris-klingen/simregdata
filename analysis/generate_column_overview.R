@@ -12,6 +12,7 @@ if (!nzchar(base)) base <- "inst/config/datasets"
 datasets <- list.dirs(base, recursive = FALSE, full.names = TRUE)
 cbs_names <- list()   # dataset -> file_key -> cbs_name
 ds_labels <- list()   # dataset -> label
+file_order <- list()  # dataset -> ordered file keys (from manifest)
 
 for (dpath in datasets) {
   mf <- file.path(dpath, "manifest.yaml")
@@ -20,6 +21,7 @@ for (dpath in datasets) {
   ds_id <- manifest$dataset_id
   ds_labels[[ds_id]] <- manifest$label %||% ds_id
   if (!is.null(manifest$files)) {
+    file_order[[ds_id]] <- names(manifest$files)
     for (fkey in names(manifest$files)) {
       cbs_names[[ds_id]][[fkey]] <- manifest$files[[fkey]]$cbs_name %||% fkey
     }
@@ -51,7 +53,8 @@ for (ds in unique(dt$dataset)) {
               ds_label, n_cols, n_files, n_cal))
   add("")
 
-  for (fkey in unique(ds_dt$file)) {
+  fkeys <- file_order[[ds]] %||% unique(ds_dt$file)
+  for (fkey in fkeys) {
     file_dt <- ds_dt[ds_dt$file == fkey, ]
     cbs_name <- cbs_names[[ds]][[fkey]] %||% fkey
     n_fcols <- nrow(file_dt)
