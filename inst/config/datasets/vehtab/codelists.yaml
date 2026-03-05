@@ -1,0 +1,27 @@
+# Codelists for VEHTAB (household wealth)
+
+RINPERSOONSHKW:
+  c2i:
+    "F": 1
+    "R": 2
+    "S": 3
+  labels:
+    "RINPERSOON niet in GBA/BRP, niet sofinrproef": 1
+    "RINPERSOON wel in GBA/BRP": 2
+    "RINPERSOON niet in GBA/BRP, wel sofinrproef": 3
+
+VEHP100WELVAART:
+  c2i:
+    "-2": -2
+    "-1": -1
+  labels:
+    "Institutioneel huishouden": -2
+    "Particulier huishouden met een onbekend inkomen": -1
+
+VEHP100HVERM:
+  c2i:
+    "-2": -2
+    "-1": -1
+  labels:
+    "Institutioneel huishouden": -2
+    "Particulier huishouden met een onbekend inkomen": -1

@@ -1,4 +1,4 @@
-.wb_build_spine <- function(n_persons, params, seed, year) {
+.build_spine <- function(n_persons, params, seed, year) {
   year <- as.integer(year)
   set.seed(seed)
   t0 <- proc.time()[["elapsed"]]
@@ -293,10 +293,9 @@
 
 
 # Lazy enrichment: build enriched spine tables on first access
-.wb_ensure_enriched <- function(dataset_id, which) {
-  spine_key <- paste0("spine_", dataset_id)
-  spine <- .sim_cache[[spine_key]]
-  if (is.null(spine)) stop("Spine not initialized for ", dataset_id)
+.ensure_enriched <- function(which) {
+  spine <- .sim_cache$spine
+  if (is.null(spine)) stop("Spine not initialized")
 
   if (which == "pers_spatial" && !isTRUE(spine$pers_spatial_enriched)) {
     message("  [lazy] Object \u2192 person spatial join ...")
@@ -365,7 +364,7 @@
     spine$obj_enriched <- TRUE
   }
 
-  .sim_cache[[spine_key]] <- spine
-  if (dataset_id == "woonbase") .wb$spine <- spine
+  .sim_cache$spine <- spine
+  .wb$spine <- spine
   spine
 }

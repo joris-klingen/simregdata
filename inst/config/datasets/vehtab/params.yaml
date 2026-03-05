@@ -1,0 +1,42 @@
+# VEHTAB year-specific parameters
+# n_households: number of households in the population
+# Values for 2016-2024 from CBS woonbase; 2006-2015 estimated
+
+2006:
+  n_households: 7146033
+2007:
+  n_households: 7191548
+2008:
+  n_households: 7242834
+2009:
+  n_households: 7307900
+2010:
+  n_households: 7386144
+2011:
+  n_households: 7459076
+2012:
+  n_households: 7512830
+2013:
+  n_households: 7571682
+2014:
+  n_households: 7621813
+2015:
+  n_households: 7669621
+2016:
+  n_households: 7720787
+2017:
+  n_households: 7794075
+2018:
+  n_households: 7857914
+2019:
+  n_households: 7924691
+2020:
+  n_households: 7997800
+2021:
+  n_households: 8043443
+2022:
+  n_households: 8138591
+2023:
+  n_households: 8270244
+2024:
+  n_households: 8374404

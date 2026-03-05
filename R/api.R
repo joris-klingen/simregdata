@@ -1,8 +1,11 @@
 #' Initialize a dataset spine and cache it for the session
 #'
-#' Builds the shared person/household/object spine for a dataset and caches
-#' it so that subsequent [read_sav()] calls can assemble files without
-#' rebuilding.
+#' Builds the shared person/household/object spine (if not already cached) and
+#' prepares dataset-specific state so that subsequent [read_sav()] calls can
+#' assemble files without rebuilding.
+#'
+#' The spine is shared across all datasets.  Calling `sim_init()` for any
+#' dataset auto-builds the spine from woonbase parameters when needed.
 #'
 #' @param dataset  Dataset identifier (default `"woonbase"`).
 #' @param year  Simulation year (default 2023).
@@ -17,82 +20,127 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
   ds <- .sim_cache$datasets[[dataset]]
   if (is.null(ds)) stop("Unknown dataset: ", dataset)
 
-  # Dispatch to the appropriate spine builder
-  builder <- ds$spine_builder
-  if (identical(builder, "woonbase")) {
+  year <- as.integer(year)
+
+  # ---- Ensure shared spine exists ----
+  # The spine is built from woonbase params and shared by all datasets.
+  spine <- .sim_cache$spine
+  spine_year <- if (!is.null(spine)) spine$year else NULL
+
+  needs_spine <- is.null(spine) || (!is.null(spine_year) && spine_year != year)
+
+  if (needs_spine) {
     params <- woonbase_cbs_params(year)
     n_pers <- if (is.null(n)) params$n_persons else as.integer(n)
-    spine  <- .wb_build_spine(n_pers, params, seed, year)
-    # Cache under the dataset id
-    .sim_cache[[paste0("spine_", dataset)]] <- spine
-    .sim_cache[[paste0("params_", dataset)]] <- params
-    .sim_cache[[paste0("year_", dataset)]] <- year
-    .sim_cache[[paste0("seed_", dataset)]] <- seed
+    spine  <- .build_spine(n_pers, params, seed, year)
+    .sim_cache$spine   <- spine
+    .sim_cache$params  <- params
+    .sim_cache$year    <- year
+    .sim_cache$seed    <- seed
     # Keep .wb in sync for backward compat
     .wb$spine  <- spine
     .wb$params <- params
     .wb$year   <- year
     .wb$seed   <- seed
+    # Legacy per-dataset keys (backward compat for woonbase)
+    .sim_cache$spine_woonbase  <- spine
+    .sim_cache$params_woonbase <- params
+    .sim_cache$year_woonbase   <- year
+    .sim_cache$seed_woonbase   <- seed
+  }
+
+  spine <- .sim_cache$spine
+
+  # ---- Dataset-specific initialization ----
+  builder <- ds$spine_builder
+
+  if (identical(builder, "woonbase")) {
+    # Woonbase reads directly from the shared spine — no extra work
+    .sim_cache$spine_woonbase  <- spine
+    .sim_cache$params_woonbase <- .sim_cache$params
+    .sim_cache$year_woonbase   <- year
+    .sim_cache$seed_woonbase   <- seed
+
   } else if (identical(builder, "generic")) {
-    # Generic spine: just sample RINPERSOON from the woonbase person spine
-    wb_spine <- .sim_cache$spine_woonbase
-    if (is.null(wb_spine))
-      stop("Woonbase spine must be initialized first for linked datasets. ",
-           "Call sim_init('woonbase', ...) first.")
-    # Determine record count: scale n_vehicles to spine size
-    if (is.null(n)) {
-      n_national <- .load_dataset_n(dataset, year)
-      if (!is.null(n_national)) {
-        # Scale proportionally: n_vehicles / n_persons_national * spine_size
-        wb_params <- .sim_cache$params_woonbase
-        if (!is.null(wb_params) && !is.null(wb_params$n_persons)) {
-          ratio <- n_national / wb_params$n_persons
-          n_records <- as.integer(round(nrow(wb_spine$pers) * ratio))
-        } else {
-          n_records <- n_national
-        }
-      } else {
-        n_records <- nrow(wb_spine$pers)
-      }
-    } else {
-      n_records <- as.integer(n)
-    }
-    set.seed(seed)
-    # Weighted sampling: use gemeente vehicle weights if available
-    gem_wt <- .load_gem_vehicle_weights(dataset, year)
-    gem_col <- if (!is.null(gem_wt)) {
-      wb_spine$pers$GemeenteCodeJJJJ1Jan %||% wb_spine$pers_gemeente
-    }
-    if (!is.null(gem_col)) {
-      pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
-      pw[is.na(pw)] <- 1.0
-      # Always sample with replacement — synthetic data, and
-      # sample.int(replace=FALSE, prob=) is O(n*k) in R
-      idx <- sample.int(nrow(wb_spine$pers), n_records,
-        replace = TRUE, prob = pw)
-    } else {
-      idx <- sample.int(nrow(wb_spine$pers), n_records,
-        replace = n_records > nrow(wb_spine$pers))
-    }
-    # Column-pruned generic spine: only copy referenced spine columns
+    # Generic spine: sample from or link to the shared spine
     needed <- .scan_spine_columns(dataset)
-    pers_cols <- needed$pers
-    if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
-    pers_cols <- intersect(pers_cols, names(wb_spine$pers))
-    if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
-    spine <- list(
-      pers = wb_spine$pers[idx, ..pers_cols],
-      year = as.integer(year),
+    has_pers <- length(needed$pers) > 0L
+    has_hh   <- length(needed$hh)   > 0L
+    has_obj  <- length(needed$obj)  > 0L
+
+    set.seed(seed)
+    ds_spine <- list(
+      year = year,
       jan1 = as.Date(paste0(year, "-01-01")),
       dec31 = as.Date(paste0(year, "-12-31"))
     )
-    # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
-    if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(spine$pers)))
-      spine$pers[, RINKENTEKEN := .rand_id(nrow(spine$pers), 32L)]
 
-    .sim_cache[[paste0("spine_", dataset)]] <- spine
+    # Person-level spine: sample RINPERSOON from shared person spine
+    if (has_pers) {
+      if (is.null(n)) {
+        n_national <- .load_dataset_n(dataset, year)
+        if (!is.null(n_national)) {
+          params <- .sim_cache$params
+          if (!is.null(params) && !is.null(params$n_persons)) {
+            ratio <- n_national / params$n_persons
+            n_records <- as.integer(round(nrow(spine$pers) * ratio))
+          } else {
+            n_records <- n_national
+          }
+        } else {
+          n_records <- nrow(spine$pers)
+        }
+      } else {
+        n_records <- as.integer(n)
+      }
+
+      # Weighted sampling: use gemeente vehicle weights if available
+      gem_wt <- .load_gem_vehicle_weights(dataset, year)
+      gem_col <- if (!is.null(gem_wt)) {
+        spine$pers$GemeenteCodeJJJJ1Jan %||% spine$pers_gemeente
+      }
+      if (!is.null(gem_col)) {
+        pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
+        pw[is.na(pw)] <- 1.0
+        idx <- sample.int(nrow(spine$pers), n_records,
+          replace = TRUE, prob = pw)
+      } else {
+        idx <- sample.int(nrow(spine$pers), n_records,
+          replace = n_records > nrow(spine$pers))
+      }
+
+      pers_cols <- needed$pers
+      if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+      pers_cols <- intersect(pers_cols, names(spine$pers))
+      if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+      ds_spine$pers <- spine$pers[idx, ..pers_cols]
+
+      # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
+      if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))
+        ds_spine$pers[, RINKENTEKEN := .rand_id(nrow(ds_spine$pers), 32L)]
+    }
+
+    # Household-level spine: copy shared HH table directly
+    if (has_hh) {
+      .ensure_enriched("hh")
+      spine <- .sim_cache$spine
+      hh_cols <- intersect(needed$hh, names(spine$hh))
+      if (length(hh_cols) == 0L) hh_cols <- "HUISHOUDNR"
+      ds_spine$hh <- spine$hh[, ..hh_cols]
+    }
+
+    # Object-level spine: copy shared object table directly
+    if (has_obj) {
+      obj_cols <- intersect(needed$obj, names(spine$obj_raw %||% spine$obj))
+      if (length(obj_cols) == 0L) obj_cols <- "RINOBJECTNUMMER"
+      obj_tbl <- spine$obj_raw %||% spine$obj
+      ds_spine$obj <- obj_tbl[, ..obj_cols]
+    }
+
+    .sim_cache[[paste0("spine_", dataset)]] <- ds_spine
     .sim_cache[[paste0("year_", dataset)]] <- year
     .sim_cache[[paste0("seed_", dataset)]] <- seed
+
   } else {
     stop("Unknown spine builder: ", builder)
   }
@@ -138,6 +186,11 @@ sim_reset <- function(dataset = NULL) {
       if (exists(key, envir = .sim_cache)) rm(list = key, envir = .sim_cache)
     }
     if (dataset == "woonbase") {
+      # Also clear the shared spine
+      if (exists("spine", envir = .sim_cache)) rm(list = "spine", envir = .sim_cache)
+      if (exists("params", envir = .sim_cache)) rm(list = "params", envir = .sim_cache)
+      if (exists("year", envir = .sim_cache)) rm(list = "year", envir = .sim_cache)
+      if (exists("seed", envir = .sim_cache)) rm(list = "seed", envir = .sim_cache)
       .wb$spine <- NULL
       .wb$params <- NULL
       .wb$year <- NULL
@@ -180,7 +233,8 @@ sim_catalog <- function(dataset = NULL, year = 2023L) {
 
     for (fkey in names(ds$files)) {
       fi <- ds$files[[fkey]]
-      filename <- sprintf("%s%dV1", fi$cbs_name, year)
+      tab <- if (isTRUE(fi$tab_suffix)) "TAB" else ""
+      filename <- sprintf("%s%d%sV1", fi$cbs_name, year, tab)
       cat(sprintf("  %-30s  %-10s  %s\n", fi$cbs_name, fi$entity, filename))
     }
     cat("\n")
@@ -338,12 +392,22 @@ read_sav <- function(file,
   if (!is.null(parsed$year)) year <- parsed$year
 
   # Auto-initialise spine if needed
-  spine_key <- paste0("spine_", dataset_id)
-  year_key  <- paste0("year_", dataset_id)
-  cached_spine <- .sim_cache[[spine_key]]
-  cached_year  <- .sim_cache[[year_key]]
+  # For woonbase: check shared spine; for generic: check dataset-specific spine
+  ds <- .sim_cache$datasets[[dataset_id]]
+  builder <- ds$spine_builder
 
-  if (is.null(cached_spine) || (!is.null(cached_year) && cached_year != year)) {
+  if (identical(builder, "woonbase")) {
+    cached_spine <- .sim_cache$spine
+    cached_year  <- if (!is.null(cached_spine)) cached_spine$year else NULL
+    needs_init <- is.null(cached_spine) || (!is.null(cached_year) && cached_year != year)
+  } else {
+    spine_key <- paste0("spine_", dataset_id)
+    cached_spine <- .sim_cache[[spine_key]]
+    cached_year  <- .sim_cache[[paste0("year_", dataset_id)]]
+    needs_init <- is.null(cached_spine) || (!is.null(cached_year) && cached_year != year)
+  }
+
+  if (needs_init) {
     if (is.infinite(n_max)) {
       message("n_max = Inf: fetching population count for ", year, " and generating full spine.")
       sim_init(dataset = dataset_id, year = year, n = NULL, seed = seed)
@@ -359,7 +423,12 @@ read_sav <- function(file,
     }
   }
 
-  spine <- .sim_cache[[spine_key]]
+  # Get the right spine for assembly
+  if (identical(builder, "woonbase")) {
+    spine <- .sim_cache$spine
+  } else {
+    spine <- .sim_cache[[paste0("spine_", dataset_id)]]
+  }
 
   # Assemble the requested file via generic YAML-driven engine
   dt <- .assemble_generic(dataset_id, file_key, spine, col_q = col_q)
@@ -403,21 +472,13 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
   .load_dataset_registry()
   ds_ids <- if (is.null(dataset)) names(.sim_cache$datasets) else dataset
 
-  # Initialise woonbase first (generic datasets depend on it)
-  if ("woonbase" %in% ds_ids) {
+  # Ensure shared spine is built first
+  if (is.null(.sim_cache$spine)) {
     sim_init("woonbase", year = year, n = n, seed = seed)
-  } else if (any(vapply(ds_ids, function(id) {
-    d <- .sim_cache$datasets[[id]]
-    identical(d$spine_builder, "generic")
-  }, logical(1L)))) {
-    # Need woonbase spine for generic datasets
-    if (is.null(.sim_cache$spine_woonbase))
-      sim_init("woonbase", year = year, n = n, seed = seed)
   }
 
-  # Initialise remaining datasets
+  # Initialise all requested datasets
   for (ds_id in ds_ids) {
-    if (ds_id == "woonbase") next
     sim_init(ds_id, year = year, n = n, seed = seed)
   }
 
@@ -426,7 +487,12 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 
   for (ds_id in ds_ids) {
     ds <- .sim_cache$datasets[[ds_id]]
-    spine <- .sim_cache[[paste0("spine_", ds_id)]]
+    builder <- ds$spine_builder
+    spine <- if (identical(builder, "woonbase")) {
+      .sim_cache$spine
+    } else {
+      .sim_cache[[paste0("spine_", ds_id)]]
+    }
 
     for (fkey in names(ds$files)) {
       fi <- ds$files[[fkey]]
@@ -482,7 +548,8 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       nearest <- avail[which.min(abs(avail - year))]
       yr_data <- all_params[[as.character(nearest)]]
     }
-    n <- yr_data$n_vehicles %||% yr_data$n_jobs
+    n <- yr_data$n_vehicles %||% yr_data$n_jobs %||% yr_data$n_households %||%
+         yr_data$n_dwellings
     if (!is.null(n)) as.integer(n) else NULL
   }, error = function(e) NULL)
 }

@@ -17,8 +17,9 @@
 #'     \item{entity}{Entity type: `"person"`, `"household"`, or `"object"`}
 #'     \item{txt_path}{Path to extracted PDF text file (optional)}
 #'   }
-#' @param spine_builder Spine builder type: `"woonbase"` (complex HH logic)
-#'   or `"generic"` (simple RINPERSOON sampling). Default `"generic"`.
+#' @param spine_builder Spine builder type: `"woonbase"` (reads directly from
+#'   the shared population spine) or `"generic"` (samples persons from the
+#'   shared spine). Default `"generic"`.
 #' @param output_dir Base output directory. Defaults to
 #'   `inst/config/datasets/{dataset_id}` in the package source.
 #' @return Invisibly, the output directory path.

@@ -1,0 +1,82 @@
+# GBAPERSOONTAB column spec
+# Person demographics from the population register.
+# One row per person ever registered in GBA/BRP.
+
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: GBAGEBOORTEJAAR
+    source: spine.pers.GBAGeboorteJaar
+
+  - name: GBAGEBOORTEMAAND
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 12
+      round: 0
+
+  - name: GBAGEBOORTELAND
+    random_categorical:
+      values: ["6030", "7076", "5010", "5013", "7024", "6039", "7003"]
+      probs: [0.85, 0.03, 0.02, 0.02, 0.02, 0.02, 0.04]
+    codelist: geboorteland
+
+  - name: GBAGESLACHT
+    source: spine.pers.GBAGeslachtsAanduiding
+    codelist: geslacht
+
+  - name: GBAAANTALOUDERSBUITENLAND
+    random_categorical:
+      values: ["0", "1", "2"]
+      probs: [0.76, 0.10, 0.14]
+    codelist: aantalouders
+
+  - name: GBAGENERATIE
+    random_categorical:
+      values: ["0", "1", "2"]
+      probs: [0.76, 0.12, 0.12]
+    codelist: generatie
+
+  - name: GBAHERKOMSTGROEPERING
+    random_categorical:
+      values: ["0", "1", "2", "3", "4", "5", "6", "7", "8"]
+      probs: [0.76, 0.03, 0.02, 0.04, 0.03, 0.02, 0.03, 0.04, 0.03]
+    codelist: herkomstgroepering
+
+  - name: GBAGEBOORTELANDMOEDER
+    random_categorical:
+      values: ["6030", "7076", "5010", "5013", "7024", "0000"]
+      probs: [0.80, 0.04, 0.03, 0.03, 0.03, 0.07]
+    codelist: geboorteland
+
+  - name: GBAGEBOORTELANDVADER
+    random_categorical:
+      values: ["6030", "7076", "5010", "5013", "7024", "0000"]
+      probs: [0.80, 0.04, 0.03, 0.03, 0.03, 0.07]
+    codelist: geboorteland
+
+  - name: GBADATUMAANVANGHUIDIGVERBLIJF
+    source: spine.pers.AanvangWoonduur
+
+  - name: GBADATUMVESTIGINGINNEDERLAND
+    random_categorical:
+      values: ["00000000", "20100101", "20150601", "20200101"]
+      probs: [0.76, 0.08, 0.08, 0.08]
+
+  - name: GBADATUMOVERLIJDEN
+    value: "00000000"
+
+  - name: GBADATUMEMIGRATIE
+    value: "00000000"
+
+  - name: GBABURGERLIJKESTAAT
+    source: spine.pers.GBABurgerlijkeStaat
+    codelist: burgerlijkestaat

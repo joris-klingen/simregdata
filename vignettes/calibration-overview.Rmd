@@ -16,124 +16,301 @@ knitr::opts_chunk$set(
 
 ## What does "calibrated" mean?
 
-simcbsradata distinguishes two kinds of simulated variables:
+simcbsradata distinguishes several levels of column realism:
 
-- **Calibrated (year-varying)** — marginal distributions are downloaded from
-  CBS StatLine and stored in `params.yaml`. When you simulate year 2023 vs
-  2019, calibrated variables reflect the real shift in, e.g., fuel-type mix
-  or population size. These are updated with `woonbase_update_params()` or
-  `rdw_update_params()`.
-- **Fixed (hardcoded)** — distributions are baked into the column YAML files
-  and do not change across years. They are plausible but not empirically
-  matched to any particular year.
+| Level | Description | Changes across years? |
+|-------|-------------|-----------------------|
+| **StatLine-calibrated** | Marginal distribution downloaded from CBS StatLine and stored in `params.yaml`. Updated with `*_update_params()`. | Yes |
+| **Spine-derived** | Value copied from the woonbase spine, which itself is built from StatLine-calibrated parameters. | Yes (via spine) |
+| **Codelist-labelled** | Categorical column with hardcoded probabilities and CBS codelist labels. Plausible but not matched to any specific year. | No |
+| **Random numeric** | Drawn from a hardcoded normal/lognormal distribution. Mean/SD are plausible but not empirically calibrated. | No |
+| **Random uniform** | Drawn from a uniform range. Fills structural requirements only. | No |
+| **Constant/template** | Fixed value (e.g., `"R"`, `" "`, `"01"`). | No |
 
-The tables below list every parameter so you know which dimensions of the
-synthetic data track reality and which are placeholders.
+The tables below classify every column across all 6 datasets.
 
-## Summary of StatLine-calibrated parameters
+## Summary: StatLine-calibrated parameters
 
 | Parameter | Dataset | CBS table | Simulated column(s) |
 |-----------|---------|-----------|---------------------|
 | Population size (`n_persons`) | Woonbase | 37230ned | Controls spine row count |
 | Household count (`n_hh`) | Woonbase | 71486ned | Controls HH count in spine |
 | HH-type distribution (`typhh_p`) | Woonbase | 71486ned | TYPHH in all file types |
-| Gemeente population weights | Woonbase | 37230ned | GemeenteCode{YYYY}\* sampling probabilities |
+| Gemeente population weights | Woonbase | 37230ned | GemeenteCode sampling probs |
 | Vehicle fleet size (`n_vehicles`) | RDW | 85236NED | Controls RDW row count |
-| Gemeente vehicle weights | RDW | 85236NED + 37230ned | Spine sampling probabilities per gemeente |
+| Gemeente vehicle weights | RDW | 85236NED + 37230ned | Spine sampling probs per gem |
 | Fuel type (`brandstof_p`) | RDW | 85237NED | BRANDSTCODECORVRTG |
 | Vehicle colour (`kleur_p`) | RDW | 85237NED | KLEURCODEVRTG |
 | Vehicle weight (`gewicht_mean/sd`) | RDW | 85237NED | MASSALEEGCORVRTG |
 | Vehicle type (`vrtgsoort_p`) | RDW | 85236NED | VRTGSOORT |
 | Construction year (`bouwjaar_p`) | RDW | 85237NED | EERSTETOELDAT1VRTG |
 | Annual km (`jaarkm_mean/sd`) | RDW | 85404NED | VPJAARKM |
+| Job count (`n_jobs`) | SPOLIS | 85275NED | Controls SPOLIS row count |
+| Household count (`n_households`) | VEHTAB | (woonbase) | Controls VEHTAB row count |
+| Dwelling count (`n_dwellings`) | Energieverbruik | (woonbase) | Controls row count |
+| Gas consumption (`gas_mean/sd`) | Energieverbruik | CBS energy stats | GAS |
+| Electricity (`elek_mean/sd`) | Energieverbruik | CBS energy stats | ELEK |
+| Solar PV share (`solar_pv_share`) | Energieverbruik | CBS energy stats | ZONPV |
 
-## Woonbase calibration
 
-### Spine
+## Per-dataset column classification
 
-The Woonbase spine (`.wb_build_spine()`) is the foundation of all Woonbase
-files. It constructs a linked set of persons, households, and objects. Three
-things are calibrated from StatLine:
+### Woonbase (9 files, ~200 columns)
 
-| What | CBS table | params.yaml key | Effect |
-|------|-----------|-----------------|--------|
-| National population | 37230ned | `n_persons` | Number of person rows (scaled by user `n`) |
-| National HH count | 71486ned | `n_hh` | Number of household rows |
-| HH-type distribution | 71486ned | `typhh_p` | Proportions of single, couple, family, etc. |
-| Gemeente weights | 37230ned | `gem_weights.csv` | Sampling probability for GemeenteCode |
+The shared population spine is the foundation for all datasets, built from
+woonbase parameters.  Three things are StatLine-calibrated:
 
-The spine also uses several **fixed** distributions that are not year-varying:
+| What | CBS table | params.yaml key |
+|------|-----------|-----------------|
+| National population | 37230ned | `n_persons` |
+| National HH count | 71486ned | `n_hh` |
+| HH-type distribution | 71486ned | `typhh_p` |
+| Gemeente weights | 37230ned | `gem_weights.csv` |
 
-| Variable | Effect |
-|----------|--------|
-| `geslacht_p` | Sex ratio (≈ 50/50) |
-| `soortobj_p` | Object type |
-| `vslsoort_p` | VSL type |
-| `woningtype_p` | Owner/renter dwelling type |
-| `bouwjaar_p` | Construction year class (dwelling) |
-| `woz_p` | WOZ value class |
-| `opp_p` | Surface area class |
-| `eigenaar_p` | Owner type |
+**Spine-derived columns** (present across multiple files, calibrated via spine):
 
-### Column-level calibration (Woonbase)
+- `RINPERSOON`, `RINPERSOONS` -- person identifiers
+- `HUISHOUDNR1Jan` -- household identifier
+- `RINOBJECTNUMMER`, `SOORTOBJECTNUMMER` -- object identifiers
+- `GBAGeboorteJaar1Jan` -- birth year (from spine age distribution)
+- `GBAGeslachtsAanduiding1Jan` -- sex (spine: ~50/50)
+- `TYPHH1Jan` -- household type (**StatLine-calibrated**)
+- `AantalPersonenPerHuishouden1Jan` -- HH size (derived from TYPHH)
+- `GemeenteCodeJJJJ1Jan` -- municipality (**StatLine-calibrated**)
+- `VBOWoningType1Jan` -- dwelling type (fixed distribution)
+- `VBOBouwjaar1Jan` -- construction year (fixed distribution)
+- `VBOOppervlakte1Jan` -- floor area (fixed distribution)
+- `WOZWaardeObjectBAG1Jan` -- WOZ value (fixed distribution)
+- `TypeEigenaar1Jan` -- owner type (fixed distribution)
 
-Woonbase column YAMLs do **not** use `from_params` — all column-level
-distributions are fixed. The spine provides the year-varying realism;
-individual columns are either copied from the spine or drawn from
-hardcoded distributions.
+**Codelist-labelled columns** (hardcoded probabilities):
 
-Notable gaps (fully synthetic, not calibrated):
+- `PLHH1Jan` -- position in household
+- `OplNivCBS1Jan`, `OplNivSOI1Jan` -- education level
+- `GBABURGELIJKESTAAT1Jan` -- civil status
+- `HHBWoonSit1Jan` -- living situation
+- All `*Klasse*` columns -- categorical class versions
 
-- **Income and wealth** (`ek_hh_welvaart` file) — all income, wealth, and
-  debt variables use hardcoded uniform or normal draws.
-- **Education** — `OplNivCBS1Jan` and similar columns use a fixed categorical
-  distribution.
-- **Civil status** — `GBABURGELIJKESTAAT1Jan` uses a fixed distribution.
+**Random numeric / uniform** (NOT calibrated):
 
-## RDW calibration
+- `BESTINKH1JAN`, `INKONTV1JAN`, etc. -- income components (EK files)
+- `P100HBEST1JAN` -- income percentile (uniform 1-100)
+- `VERMHH1JAN`, `SCHULDHH1JAN` -- wealth/debt (random normal)
+- `LeeftijdRefPersoon1Jan` -- ref person age (derived)
+- `AantalKinderenPerHuishouden1Jan` -- children count (derived)
 
-The RDW dataset uses the `from_params` directive extensively, so most key
-columns vary by year.
 
-### RDWNPACT (kentekens)
+### GBA (3 files, ~32 columns)
 
-| Column | Calibration | params.yaml key | CBS table |
-|--------|-------------|-----------------|-----------|
-| RINPERSOON | Spine-derived | — | — |
-| RINKENTEKEN | Random hex ID | — | — |
-| BRANDSTCODECORVRTG | **Calibrated** | `brandstof_p` | 85237NED |
-| KLEURCODEVRTG | **Calibrated** | `kleur_p` | 85237NED |
-| MASSALEEGCORVRTG | **Calibrated** | `gewicht_mean`, `gewicht_sd` | 85237NED |
-| VRTGSOORT | **Calibrated** | `vrtgsoort_p` | 85236NED |
-| EERSTETOELDAT1VRTG | **Calibrated** | `bouwjaar_p` | 85237NED |
+The GBA (Gemeentelijke Basisadministratie / BRP) is the population register.
+All columns are **spine-derived** -- they read directly from the shared
+population spine, which itself is calibrated via woonbase parameters.
 
-### VERKEERSPRESTATIE (verkeersprestatie)
+#### GBAPERSOONTAB
 
-| Column | Calibration | params.yaml key | CBS table |
-|--------|-------------|-----------------|-----------|
-| RINPERSOON | Spine-derived | — | — |
-| RINKENTEKEN | Spine-derived | — | — |
-| VPJAARKM | **Calibrated** | `jaarkm_mean`, `jaarkm_sd` | 85404NED |
-| VPMAANDKM\* | Fixed | — | — |
-| VPBRANDSTOFVERBRUIK | Fixed | — | — |
+| Column | Level | Source |
+|--------|-------|--------|
+| RINPERSOONS | Constant | Always `"R"` (labelled) |
+| RINPERSOON | Spine-derived | Person identifier |
+| GBAGEBOORTEJAAR | Spine-derived | Birth year from spine |
+| GBAGEBOORTEMAAND | Random uniform | 1-12 |
+| GBAGEBOORTELAND | Codelist | Hardcoded probs |
+| GBAGESLACHT | Spine-derived | Sex from spine |
+| GBAAANTALOUDERSBUITENLAND | Codelist | Hardcoded probs |
+| GBAGENERATIE | Codelist | Hardcoded probs |
+| GBAHERKOMSTGROEPERING | Codelist | Hardcoded probs |
+| GBAGEBOORTELANDMOEDER | Codelist | Hardcoded probs |
+| GBAGEBOORTELANDVADER | Codelist | Hardcoded probs |
+| GBADATUMAANVANGHUIDIGVERBLIJF | Spine-derived | From AanvangWoonduur |
+| GBADATUMVESTIGINGINNEDERLAND | Codelist | Hardcoded probs |
+| GBADATUMOVERLIJDEN | Constant | `"00000000"` |
+| GBADATUMEMIGRATIE | Constant | `"00000000"` |
+| GBABURGERLIJKESTAAT | Spine-derived | Civil status from spine |
 
-### Fleet size
+#### GBAADRESOBJECTBUS
 
-The total number of RDW rows is calibrated: `n_vehicles` from params.yaml is
-scaled relative to the Woonbase person spine size
-(`ratio = n_vehicles / n_persons_national * spine_size`).
+| Column | Level | Source |
+|--------|-------|--------|
+| RINPERSOONS | Constant | Always `"R"` (labelled) |
+| RINPERSOON | Spine-derived | Person identifier |
+| SOORTOBJECTNUMMER | Spine-derived | Object type from spine |
+| RINOBJECTNUMMER | Spine-derived | Object identifier from spine |
+| GBADATUMAANVANGADRESHOUDING | Spine-derived | From AanvangWoonduur |
+| GBADATUMEINDEADRESHOUDING | Constant | `"99999999"` |
+| GBAGEMEENTEVANINSCHRIJVING | Spine-derived | Municipality from spine (pers_spatial) |
+| GBAAANTALINGESCHREVENENOPNUMMERAANDUIDING | Random numeric | Hardcoded mean/sd |
+
+#### GBAHUISHOUDENSBUS
+
+| Column | Level | Source |
+|--------|-------|--------|
+| RINPERSOONS | Constant | Always `"R"` (labelled) |
+| RINPERSOON | Spine-derived | Person identifier |
+| HUESSION | Spine-derived | Household number from spine |
+| DAESSION | Spine-derived | HH start date from spine |
+| TYPHH | Spine-derived | HH type (**StatLine-calibrated** via spine) |
+| PLESSION | Spine-derived | Position in HH from spine |
+| AANESSION | Spine-derived | HH size from spine |
+| REFESSION | Spine-derived | Ref person indicator from spine |
+
+
+### RDW (2 files, ~27 columns)
+
+#### RDWNPACT (kentekens)
+
+| Column | Level | Source |
+|--------|-------|--------|
+| RINPERSOONS | Constant | Always `"R"` |
+| RINPERSOON | Spine-derived | From woonbase person spine |
+| SOORTENTITEITTAB | Constant | Always `1` |
+| RINKENTEKEN | Random | 8-char hex string |
+| VRTGSOORT | **StatLine** | `vrtgsoort_p` (85236NED) |
+| BRANDSTCODECORVRTG | **StatLine** | `brandstof_p` (85237NED) |
+| MASSALEEGCORVRTG | **StatLine** | `gewicht_mean/sd` (85237NED) |
+| KLEURCODEVRTG | **StatLine** | `kleur_p` (85237NED) |
+| EERSTETOELDAT1VRTG | **StatLine** | `bouwjaar_p` (85237NED) |
+| MODELCODEVRTG | Codelist | Hardcoded probs |
+| INRICHTINGCODEVRTG | Codelist | Hardcoded probs |
+| TYPENATUURLIJKPERSOON | Constant | Always `1` |
+| TYPERECHTSPERSOON | Constant | Always `""` |
+
+#### VERKEERSPRESTATIE
+
+| Column | Level | Source |
+|--------|-------|--------|
+| RinpersoonVP | Spine-derived | From RDWNPACT |
+| RINKENTEKEN | Spine-derived | Consistent with RDWNPACT |
+| VPJAARKM | **StatLine** | `jaarkm_mean/sd` (85404NED) |
+| VPMAANDKM01-12 | Random uniform | Hardcoded range |
+| VPBRANDSTOFVERBRUIK | Random numeric | Hardcoded mean/sd |
+
+
+### SPOLIS (1 file, 133 columns)
+
+**Calibrated:**
+
+- Row count (`n_jobs`) from CBS 85275NED
+
+**Spine-derived:**
+
+- `RINPERSOON`, `RINPERSOONS` -- from woonbase person spine
+
+**NOT calibrated** (all 131 remaining columns):
+
+- All wage columns (`SVLOON`, `SBASISLOON`, `SLNINGLD`, etc.) -- random normal
+- All days/hours columns (`SDAGENMET`, `SVOLTIJDDAGEN`, etc.) -- random normal
+- All categorical columns (`SCONTRACTSOORT`, `SCAO`, `SPOLESSION`, etc.) -- codelist-labelled with hardcoded probs
+- All SBI sector codes (`SSBI2008V*`) -- codelist-labelled
+- All amount columns (`SBIJZONDEREBELONING`, `SEXTRSAL`, etc.) -- random normal
+
+
+### VEHTAB (1 file, 20 columns)
+
+| Column | Level | Source |
+|--------|-------|--------|
+| RINPERSOONSHKW | Constant | Always `"R"` (labelled) |
+| RINPERSOONHKW | Spine-derived | Ref person from woonbase HH |
+| VEHP100WELVAART | Spine-derived | Income percentile from spine |
+| VEHP100HVERM | Spine-derived | Wealth percentile from spine |
+| VEHW1000VERH | Spine-derived | Total wealth from spine VERMHH |
+| VEHW1110BANK | Random numeric | Hardcoded mean/sd |
+| VEHW1120EFCT | Random numeric | Hardcoded mean/sd |
+| VEHW1130ONDR | Random numeric | Hardcoded mean/sd |
+| VEHW1210LEEF | Random numeric | Hardcoded mean/sd |
+| VEHW1220OPBW | Random numeric | Hardcoded mean/sd |
+| VEHW1310OWON | Random numeric | Hardcoded mean/sd |
+| VEHW1320OONO | Random numeric | Hardcoded mean/sd |
+| VEHW1000BEZH | Random numeric | Hardcoded mean/sd |
+| VEHW2100HYPO | Random numeric | Hardcoded mean/sd |
+| VEHW2200STUD | Random numeric | Hardcoded mean/sd |
+| VEHW2300CONS | Random numeric | Hardcoded mean/sd |
+| VEHW2000SCLH | Random numeric | Hardcoded mean/sd |
+| VEHW3000VRMO | Random numeric | Hardcoded mean/sd |
+| VEHW4000OVVR | Random numeric | Hardcoded mean/sd |
+| VEHW5000SVRM | Random numeric | Hardcoded mean/sd |
+
+VEHTAB row count is calibrated to the woonbase household count.
+Percentile and total wealth columns inherit calibration from the spine.
+All 15 wealth component columns are independent random draws -- they do
+**not** sum to the total, and are not calibrated to any CBS source.
+
+
+### ENERGIEVERBRUIKTAB (1 file, 20 columns)
+
+| Column | Level | Source |
+|--------|-------|--------|
+| SOORTOBJECTNUMMER | Spine-derived | From woonbase obj spine |
+| RINOBJECTNUMMER | Spine-derived | From woonbase obj spine |
+| WONINGT | Constant | `" "` (empty since 2019) |
+| WOONR | Constant | `" "` (empty since 2019) |
+| STADSW | Codelist | Hardcoded 94%/6% |
+| GAS | **StatLine** | `gas_mean/sd` from params |
+| ELEK | **StatLine** | `elek_mean/sd` from params |
+| GASBRON | Codelist | Hardcoded probs |
+| ELEKBRON | Codelist | Hardcoded probs |
+| ELEKTERUG | Random numeric | Hardcoded mean/sd |
+| ELEKNETTO | Random numeric | Hardcoded mean/sd |
+| GASSJV | Random numeric | Hardcoded mean/sd |
+| WARMTESCHATTING | Random numeric | Hardcoded mean/sd |
+| ZONPV | **StatLine** | `solar_pv_share` from params |
+| ZONVERMOGEN1JAN | Random numeric | Hardcoded mean/sd |
+| ZONVERMOGEN31DEC | Random numeric | Hardcoded mean/sd |
+| ZONPVBRON | Codelist | Hardcoded probs |
+| HOOFDVERWARMING31DEC | Codelist | Hardcoded probs |
+| WONINGBEWONING10PROFIELEN | Codelist | Hardcoded probs |
+| KBHOOFDVERWARMING31DEC | Codelist | Hardcoded probs |
+
+
+## Validation scripts
+
+The `analysis/` folder contains per-dataset tests and minimal demos:
+
+**Tests:**
+
+| Script | What it validates |
+|--------|-------------------|
+| `test_woonbase.R` | Structure, cross-file joins, haven labels, spine distributions |
+| `test_rdw.R` | RINKENTEKEN consistency, calibrated fuel/weight/VKT, year shifts |
+| `test_spolis.R` | Identifier links, wage columns, fleet size |
+| `test_vehtab.R` | HH identifiers, spine-derived percentiles, wealth components |
+| `test_energieverbruik.R` | Object identifiers, calibrated gas/elek/solar, year shifts |
+| `test_gba.R` | GBA structure, cross-file RINPERSOON, labels, woonbase cross-link |
+| `test_cross_datasets.R` | Full 5-way join: woonbase + RDW + SPOLIS + VEHTAB + energy |
+| `test_columns_pdf.R` | Column names vs CBS PDF documentation |
+| `test_parquet_export.R` | Export/read round-trip, labels, col_select |
+
+**Demos:**
+
+| Script | What it shows |
+|--------|---------------|
+| `demo_woonbase.R` | Age distribution + HH type bar chart |
+| `demo_rdw.R` | Fuel type time series + weight density shift |
+| `demo_autobelasting.R` | Cross-dataset policy analysis: car tax by income |
+
+Run all tests:
+```r
+for (f in list.files("analysis", pattern = "^test_", full.names = TRUE)) {
+  cat(sprintf("\n>>> %s <<<\n", f))
+  source(f, local = TRUE)
+}
+```
+
 
 ## Updating parameters
 
-Both datasets ship with pre-computed parameters. To refresh them from
-CBS StatLine (requires `cbsodataR`):
+Both woonbase and RDW datasets ship with pre-computed parameters.
+To refresh them from CBS StatLine (requires `cbsodataR`):
+
 ```r
-# Woonbase — queries 37230ned and 71486ned
+# Woonbase -- queries 37230ned and 71486ned
 woonbase_update_params(years = 2016:2025)
 
-# RDW — queries 85237NED, 85236NED, 85404NED
+# RDW -- queries 85237NED, 85236NED, 85404NED
 rdw_update_params(years = 2019:2025)
+
+# SPOLIS -- queries 85275NED
+spolis_update_params(years = 2010:2025)
 ```
 
-RDW params ship with data for 2010–2025. Years 2019–2025 are from CBS
-StatLine; 2010–2018 are extrapolated from the earliest available CBS year.
+VEHTAB and ENERGIEVERBRUIKTAB parameters are currently maintained manually
+in their respective `params.yaml` files.

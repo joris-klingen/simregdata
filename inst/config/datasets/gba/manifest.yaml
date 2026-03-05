@@ -1,0 +1,42 @@
+# GBA dataset manifest
+# Population register (Gemeentelijke Basisadministratie / BRP)
+# The GBA is the true population spine: all other CBS datasets reference it.
+#
+# Three core files:
+#   GBAPERSOONTAB     — person demographics (one row per person)
+#   GBAADRESOBJECTBUS — person-address links (one row per person-period)
+#   GBAHUISHOUDENSBUS — household composition (one row per person)
+
+dataset_id: gba
+label: GBA Bevolkingsregister
+spine_builder: woonbase
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+  household:
+    id_col: HUISHOUDNR
+    id_width: 12
+  object:
+    id_col: RINOBJECTNUMMER
+    id_width: 16
+    id_prefix_col: SOORTOBJECTNUMMER
+
+files:
+  persoontab:
+    cbs_name: GBAPERSOONTAB
+    entity: person
+    columns_file: persoontab.yaml
+    tab_suffix: true
+
+  adresobjectbus:
+    cbs_name: GBAADRESOBJECTBUS
+    entity: person
+    columns_file: adresobjectbus.yaml
+
+  huishoudensbus:
+    cbs_name: GBAHUISHOUDENSBUS
+    entity: person
+    columns_file: huishoudensbus.yaml

@@ -1,0 +1,188 @@
+# VEH{YYYY}TABV{N} — Vermogens van huishoudens
+# Household wealth data: assets, debts, and wealth components
+# One record per household, keyed by RINPERSOONHKW (hoofdkostwinner)
+entity: household
+spine_table: hh
+
+columns:
+  # ---- Identifiers ----
+  - name: RINPERSOONSHKW
+    value: "R"
+    codelist: RINPERSOONSHKW
+    label: Soort persoonsnummer hoofdkostwinner
+
+  - name: RINPERSOONHKW
+    source: spine.hh.RINPERSOON_Ref
+
+  # ---- Percentile rankings ----
+  - name: VEHP100WELVAART
+    source: spine.hh.P100WELVAART
+    label: Percentielgroep welvaart
+
+  - name: VEHP100HVERM
+    source: spine.hh.P100HVERM
+    label: Percentielgroep vermogen
+
+  # ---- Wealth components (euros) ----
+  # Tree structure:
+  #   VEHW1000VERH = VEHW1100BEZH - VEHW1200STOH
+  #   VEHW1100BEZH = FINH + ONRH + ONDH + ABEH + OVEH
+  #   VEHW1110FINH = BANH + EFFH
+  #   VEHW1120ONRH = WONH + OGOH
+  #   VEHW1200STOH = SHYH + SSTH + SOVH
+  #   VEHWVEREXEWH = VERH - WONH + SHYH
+
+  # Total wealth (= bezittingen - schulden)
+  - name: VEHW1000VERH
+    source: spine.hh.VERMHH
+    label: Vermogen van het huishouden
+
+  # ---- Assets (bezittingen) ----
+  # Total assets
+  - name: VEHW1100BEZH
+    random_numeric:
+      distribution: normal
+      mean: 310000
+      sd: 280000
+      min: 0
+      round: 0
+    label: Bezittingen van het huishouden
+
+  # Financial assets (bank + securities)
+  - name: VEHW1110FINH
+    random_numeric:
+      distribution: normal
+      mean: 52000
+      sd: 85000
+      min: 0
+      round: 0
+    label: Financiele bezittingen van het huishouden
+
+  # Bank and savings
+  - name: VEHW1111BANH
+    random_numeric:
+      distribution: normal
+      mean: 35000
+      sd: 55000
+      min: 0
+      round: 0
+    label: Bank- en spaartegoeden van het huishouden
+
+  # Securities (stocks, bonds)
+  - name: VEHW1112EFFH
+    random_numeric:
+      distribution: normal
+      mean: 17000
+      sd: 65000
+      min: 0
+      round: 0
+    label: Effecten van het huishouden
+
+  # Real estate total
+  - name: VEHW1120ONRH
+    random_numeric:
+      distribution: normal
+      mean: 195000
+      sd: 180000
+      min: 0
+      round: 0
+    label: Onroerend goed van het huishouden
+
+  # Own home value
+  - name: VEHW1121WONH
+    random_numeric:
+      distribution: normal
+      mean: 175000
+      sd: 160000
+      min: 0
+      round: 0
+    label: Eigen woning van het huishouden
+
+  # Other real estate
+  - name: VEHW1122OGOH
+    random_numeric:
+      distribution: normal
+      mean: 20000
+      sd: 75000
+      min: 0
+      round: 0
+    label: Overig onroerend goed van het huishouden
+
+  # Business equity
+  - name: VEHW1130ONDH
+    random_numeric:
+      distribution: normal
+      mean: 15000
+      sd: 80000
+      round: 0
+    label: Ondernemingsvermogen van het huishouden
+
+  # Substantial interest (aanmerkelijk belang)
+  - name: VEHW1140ABEH
+    random_numeric:
+      distribution: normal
+      mean: 12000
+      sd: 100000
+      min: 0
+      round: 0
+    label: Aanmerkelijk belang van het huishouden
+
+  # Other assets
+  - name: VEHW1150OVEH
+    random_numeric:
+      distribution: normal
+      mean: 5000
+      sd: 25000
+      min: 0
+      round: 0
+    label: Overige bezittingen van het huishouden
+
+  # ---- Debts (schulden) ----
+  # Total debts
+  - name: VEHW1200STOH
+    random_numeric:
+      distribution: normal
+      mean: 105000
+      sd: 110000
+      min: 0
+      round: 0
+    label: Schulden van het huishouden
+
+  # Mortgage on own home
+  - name: VEHW1210SHYH
+    random_numeric:
+      distribution: normal
+      mean: 90000
+      sd: 100000
+      min: 0
+      round: 0
+    label: Hypotheekschuld eigen woning van het huishouden
+
+  # Student debt
+  - name: VEHW1220SSTH
+    random_numeric:
+      distribution: normal
+      mean: 3000
+      sd: 12000
+      min: 0
+      round: 0
+    label: Studieschuld van het huishouden
+
+  # Other debts
+  - name: VEHW1230SOVH
+    random_numeric:
+      distribution: normal
+      mean: 12000
+      sd: 35000
+      min: 0
+      round: 0
+    label: Overige schulden van het huishouden
+
+  # Wealth excluding own home
+  - name: VEHWVEREXEWH
+    random_numeric:
+      distribution: normal
+      mean: 45000
+      sd: 200000
+      round: 0
+    label: Vermogen van het huishouden exclusief eigen woning

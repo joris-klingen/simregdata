@@ -1,0 +1,156 @@
+# Codelist mappings for GBA files
+# Each entry has:
+#   c2i:    character code -> integer (for spine -> labelled conversion)
+#   labels: human-readable label -> integer (for haven::labelled attribute)
+
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    Registratienummer: 1
+
+geslacht:
+  c2i:
+    "1": 1
+    "2": 2
+  labels:
+    Man: 1
+    Vrouw: 2
+
+burgerlijkestaat:
+  c2i:
+    "O": 1
+    "H": 2
+    "S": 3
+    "W": 4
+    "P": 5
+  labels:
+    Ongehuwd: 1
+    Gehuwd: 2
+    Gescheiden: 3
+    Verweduwd: 4
+    Partnerschap: 5
+
+geboorteland:
+  c2i:
+    "6030": 6030
+    "7076": 7076
+    "5010": 5010
+    "5013": 5013
+    "7024": 7024
+    "6039": 6039
+    "7003": 7003
+    "0000": 0
+  labels:
+    Nederland: 6030
+    Turkije: 7076
+    Marokko: 5010
+    Suriname: 5013
+    Indonesie: 7024
+    Duitsland: 6039
+    Belgie: 7003
+    Onbekend: 0
+
+aantalouders:
+  c2i:
+    "0": 0
+    "1": 1
+    "2": 2
+  labels:
+    Geen ouders in buitenland: 0
+    Een ouder in buitenland: 1
+    Twee ouders in buitenland: 2
+
+generatie:
+  c2i:
+    "0": 0
+    "1": 1
+    "2": 2
+  labels:
+    Autochtoon: 0
+    Eerste generatie: 1
+    Tweede generatie: 2
+
+herkomstgroepering:
+  c2i:
+    "0": 0
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+  labels:
+    Autochtoon: 0
+    Westers EU: 1
+    Westers niet-EU: 2
+    Marokko: 3
+    Turkije: 4
+    Suriname: 5
+    Antillen: 6
+    Overig niet-westers: 7
+    Overig: 8
+
+soortobjectnummer:
+  c2i:
+    "B": 1
+    "H": 2
+    "D": 3
+    "O": 4
+  labels:
+    Verblijfsobject: 1
+    Houseboat: 2
+    Standplaats: 3
+    Overig: 4
+
+typhh:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+  labels:
+    Eenpersoonshuishouden: 1
+    Niet-gehuwd paar zonder kinderen: 2
+    Gehuwd paar zonder kinderen: 3
+    Niet-gehuwd paar met kinderen: 4
+    Gehuwd paar met kinderen: 5
+    Eenouderhuishouden: 6
+    Overig huishouden: 7
+    Institutioneel huishouden: 8
+    Meerdere huishoudens: 9
+
+plhh:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+    "10": 10
+    "99": 99
+  labels:
+    Thuiswonend kind: 1
+    Alleenstaande: 2
+    Partner niet-gehuwd paar zonder k: 3
+    Partner gehuwd paar zonder k: 4
+    Partner niet-gehuwd paar met k: 5
+    Partner gehuwd paar met k: 6
+    Ouder in eenouderhuishouden: 7
+    Ref persoon overig huishouden: 8
+    Overig lid van huishouden: 9
+    Lid institutioneel huishouden: 10
+    Onbekend: 99

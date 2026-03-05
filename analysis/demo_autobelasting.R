@@ -1,10 +1,8 @@
-# analysis/test_autobelasting.R
+# analysis/demo_autobelasting.R
 #
-# Autobelasting chart — ggplot version (side-by-side faceted panels)
-# Rebuilds CPB_autobelasting.png from simulated CBS + RDW data
-#
-# Plots produced:
-#   p1 — Stacked area: car tax burden by income percentile (all HH + car HH)
+# Autobelasting chart — cross-dataset policy analysis.
+# Simulates car tax burden by income percentile from CBS + RDW data.
+# Run: Rscript analysis/demo_autobelasting.R
 
 suppressPackageStartupMessages({
   library(data.table)
@@ -20,9 +18,7 @@ log_msg <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S")
 YEAR   <- 2023L
 N_PERS <- 20000L
 
-# ============================================================================
-# Load and join data
-# ============================================================================
+# Load and join data ----
 
 log_msg("Initialising spines...")
 sim_reset()
@@ -85,9 +81,7 @@ dt_cars[dt_pers, on = "RINPERSOON", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
 dt_cars <- dt_cars[!is.na(HUISHOUDNR1Jan)]
 
 
-# ============================================================================
-# Simulate tax components per vehicle (EUR/year)
-# ============================================================================
+# Simulate tax components per vehicle ----
 
 # mrb: motor vehicle tax — weight-based (roughly €4/kg for first 900kg, €6 above)
 dt_cars[, tax_mrb := fifelse(mass <= 900, mass * 0.45, 900 * 0.45 + (mass - 900) * 0.65)]
@@ -118,9 +112,7 @@ set.seed(123)
 dt_cars[, tax_bijtelling := fifelse(runif(.N) < 0.15, 1500, 0)]
 
 
-# ============================================================================
-# Aggregate to household level
-# ============================================================================
+# Aggregate to household level ----
 
 hh_tax <- dt_cars[, .(
   mrb            = sum(tax_mrb),
@@ -149,9 +141,7 @@ for (i in seq_along(pct_cols)) {
 }
 
 
-# ============================================================================
-# Aggregate by percentile group
-# ============================================================================
+# Aggregate by percentile group ----
 
 build_pct_table <- function(dt) {
   dt[, .(
@@ -183,9 +173,7 @@ tax_names <- c("mrb", "bijtelling", "bpm afschrijving",
                "btw afschrijving", "accijns brandstof", "btw brandstof")
 
 
-# ============================================================================
-# ggplot (side-by-side panels)
-# ============================================================================
+# Plot ----
 
 log_msg("Creating ggplot version...")
 

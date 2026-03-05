@@ -1,0 +1,42 @@
+# GBAADRESOBJECTBUS column spec
+# Links persons to address objects (BAG verblijfsobjecten).
+# One row per person (current address on reference date).
+
+entity: person
+spine_table: pers
+
+pre_compute:
+  - name: GemeenteCodeJJJJ1Jan
+    source: spine.pers.GemeenteCodeJJJJ1Jan
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: SOORTOBJECTNUMMER
+    source: spine.pers.SOORTOBJECTNUMMER
+    codelist: soortobjectnummer
+
+  - name: RINOBJECTNUMMER
+    source: spine.pers.RINOBJECTNUMMER
+
+  - name: GBADATUMAANVANGADRESHOUDING
+    source: spine.pers.AanvangWoonduur
+
+  - name: GBADATUMEINDEADRESHOUDING
+    value: "99999999"
+
+  - name: GBAGEMEENTEVANINSCHRIJVING
+    source: computed.GemeenteCodeJJJJ1Jan
+
+  - name: GBAAANTALINGESCHREVENENOPNUMMERAANDUIDING
+    random_numeric:
+      distribution: normal
+      mean: 2.2
+      sd: 1.5
+      min: 1
+      round: 0

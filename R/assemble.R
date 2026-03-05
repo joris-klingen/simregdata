@@ -128,19 +128,19 @@
   # Determine which spine table to use + row count
   tbl_name <- spec$spine_table
 
-  # Trigger lazy enrichment if needed (woonbase spine has enrichment flags)
+  # Trigger lazy enrichment if needed (shared spine has enrichment flags)
   if (!is.null(spine$hh_enriched)) {
     if (tbl_name == "hh" && !isTRUE(spine$hh_enriched)) {
       if (.spec_needs_hh_enriched(spec)) {
-        spine <- .wb_ensure_enriched(dataset_id, "hh")
+        spine <- .ensure_enriched("hh")
       }
     } else if (tbl_name == "obj" && !isTRUE(spine$obj_enriched)) {
       if (.spec_needs_obj_enriched(spec)) {
-        spine <- .wb_ensure_enriched(dataset_id, "obj")
+        spine <- .ensure_enriched("obj")
       }
     } else if (tbl_name == "pers" && !isTRUE(spine$pers_spatial_enriched)) {
       if (.spec_needs_pers_spatial(spec)) {
-        spine <- .wb_ensure_enriched(dataset_id, "pers_spatial")
+        spine <- .ensure_enriched("pers_spatial")
       }
     }
   }

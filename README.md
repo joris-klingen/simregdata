@@ -102,7 +102,7 @@ dt_hh   <- as.data.table(read_sav("WoonbasePopulatieHuishoudens2023V1",
                                    col_select = c(HUISHOUDNR1Jan, TYPHH1Jan)))
 dt_pers[dt_hh, on = "HUISHOUDNR1Jan", TYPHH1Jan := i.TYPHH1Jan]
 
-# Initialize linked datasets (RDW, SPOLIS) — requires woonbase spine first
+# Initialize linked datasets (auto-builds shared spine if needed)
 sim_init("rdw", year = 2023)
 sim_init("spolis", year = 2023)
 
@@ -119,7 +119,7 @@ sim_catalog()
 
 | Function | Description |
 |----------|-------------|
-| `sim_init(dataset, year, n, seed)` | Builds and caches the shared spine for a dataset. Call once per dataset before reading files. |
+| `sim_init(dataset, year, n, seed)` | Builds the shared population spine (if needed) and prepares dataset-specific state. The spine is auto-built on first call. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Matches registered CBS dataset names and returns synthetic data; infers the year from the filename. Falls through to `haven::read_sav()` for unregistered paths. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names across all datasets. |
 | `sim_reset(dataset)` | Clears the cached spine (forces a rebuild on next call). |

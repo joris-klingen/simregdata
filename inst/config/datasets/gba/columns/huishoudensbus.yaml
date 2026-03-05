@@ -1,0 +1,34 @@
+# GBAHUISHOUDENSBUS column spec
+# Household composition from GBA/BRP.
+# One row per person, linking to household.
+
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: HUESSION
+    source: spine.pers.HUISHOUDNR
+
+  - name: DAESSION
+    source: spine.pers.DATUMAANVANGHH
+
+  - name: TYPHH
+    source: spine.pers.TYPHH
+    codelist: typhh
+
+  - name: PLESSION
+    source: spine.pers.PLHH
+    codelist: plhh
+
+  - name: AANESSION
+    source: spine.pers.AantalPersonenPerHuishouden
+
+  - name: REFESSION
+    source: spine.pers.REFPERSOONHH

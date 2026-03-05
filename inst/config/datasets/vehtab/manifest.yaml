@@ -1,0 +1,22 @@
+# VEHTAB dataset manifest
+# Household wealth data (Vermogens van huishoudens)
+# CBS name pattern: VEH{YYYY}TABV{N}
+# One record per household, keyed by RINPERSOONHKW (hoofdkostwinner)
+# Available 2006-2024
+
+dataset_id: vehtab
+label: Vermogens van huishoudens (VEHTAB)
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  vehtab:
+    cbs_name: VEH
+    entity: household
+    columns_file: vehtab.yaml
+    tab_suffix: true

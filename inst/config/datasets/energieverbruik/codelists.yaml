@@ -1,0 +1,174 @@
+# Codelists for ENERGIEVERBRUIKTAB
+
+SOORTOBJECTNUMMER:
+  c2i:
+    "B": 1
+  labels:
+    "Rinobjectnummer BAG": 1
+
+WONINGT:
+  c2i:
+    "A": 1
+    "T": 2
+    "H": 3
+    "K": 4
+    "V": 5
+    "O": 6
+  labels:
+    Appartement: 1
+    "Tussen- of geschakelde woning": 2
+    Hoekwoning: 3
+    "Twee onder een kap": 4
+    "Vrijstaande woning": 5
+    Onbekend: 6
+
+WOONR:
+  c2i:
+    " ": ~
+    "1": 1
+    "4": 4
+    "5": 5
+    "6": 6
+  labels:
+    Woning: 1
+    Recreatiewoning: 4
+    Wooneenheid: 5
+    "Bijzonder woongebouw": 6
+
+STADSW:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "Nee, geen aansluiting voor stadswarmte aanwezig volgens KB": 0
+    "Ja, stadsverwarming aanwezig volgens KB": 1
+
+GASBRON:
+  c2i:
+    "BW": 1
+    "IM": 2
+    "LG": 3
+    "NT": 4
+    "SW": 5
+    "TP": 6
+    "WG": 7
+    "WP": 8
+    "ZW": 9
+  labels:
+    "Bedrijfswoning, woninggedeelte geimputeerd": 1
+    "Imputatie, al of niet geschaald": 2
+    "Leegstand, geen bewoners, geen gas en geen elektra": 3
+    "Niet toegekend": 4
+    "Stadsverwarmingswoning, laag gasverbruik geaccepteerd of nul geimputeerd": 5
+    "Volgens gastype alleen tapwater, lage waarde geaccepteerd of 300 geimputeerd": 6
+    "Toegekend gevalideerd woningverbruik": 7
+    "Geen gasverbruik en volgens gastype warmtepomp aanwezig": 8
+    "Zorgwoning, geimputeerd": 9
+
+ELEKBRON:
+  c2i:
+    "BW": 1
+    "IM": 2
+    "LG": 3
+    "WG": 4
+    "ZW": 5
+  labels:
+    "Bedrijfswoning, woninggedeelte geimputeerd": 1
+    "Imputatie, al of niet geschaald": 2
+    "Leegstand, geen bewoners, geen gas en geen elektra": 3
+    "Toegekend gevalideerd woningverbruik": 4
+    "Zorgwoning, geimputeerd": 5
+
+ZONPV:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "Nee, geen zonPV aanwezig": 0
+    "Ja, zonPV aanwezig": 1
+
+ZONPVBRON:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+  labels:
+    Zonvermogen: 1
+    Terugleveringen: 2
+    Beiden: 3
+    "Geen indicatie voor zonnestroominstallatie bijgekoppeld": 4
+
+HOOFDVERWARMING31DEC:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+    "8": 8
+    "9": 9
+  labels:
+    "Individuele CV": 1
+    Blokverwarming: 2
+    "Stadsverwarming gas voor ruimteverwarming en warm water en/of koken": 3
+    "Stadsverwarming met gas voor warm water en/of koken": 4
+    "Stadsverwarming zonder gas": 5
+    "Elektrisch verwarmd met gas voor ruimteverwarming en warm water en/of koken": 6
+    "Elektrisch verwarmd met gas voor warm water en/of koken": 7
+    "Elektrisch verwarmd zonder gas": 8
+    Onbekend: 9
+
+WONINGBEWONING10PROFIELEN:
+  c2i:
+    "-1": -1
+    "00": 0
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "19": 19
+  labels:
+    "Geen aardgaswoning": -1
+    "Aardgaswoning, maar niet in een van de profielen": 0
+    "Profiel 1: Een bewoner in nieuw, klein appartement": 1
+    "Profiel 2: Een bewoner in oud, klein appartement": 2
+    "Profiel 3: Twee of meer bewoners in oud, klein appartement": 3
+    "Profiel 4: Een bewoner in oude, kleine rijwoning": 4
+    "Profiel 5: Een bewoner in oude, middelgrote rijwoning": 5
+    "Profiel 6: Twee of meer bewoners in oude, kleine rijwoning": 6
+    "Profiel 7: Twee of meer bewoners in nieuwe, middelgrote rijwoning": 7
+    "Profiel 8: Twee of meer bewoners in oude, middelgrote rijwoning": 8
+    "Profiel 9: Twee of meer bewoners in oude, grote rijwoning": 9
+    "Profiel 10: Twee of meer bewoners in oude, grote vrijstaande woning": 10
+    "Aardgaswoning maar afgekeurd, kenmerken ongeldig/onbekend": 19
+
+KBHOOFDVERWARMING31DEC:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+  labels:
+    "Individuele CV": 1
+    Blokverwarming: 2
+    "Stadsverwarming met hoog gasverbruik": 3
+    "Stadsverwarming met laag gasverbruik": 4
+    "Stadsverwarming zonder gas": 5
+    "Elektrisch verwarmd met hoog gasverbruik": 6
+    "Elektrisch verwarmd met laag gasverbruik": 7
+    "Elektrisch verwarmd zonder gas": 8
+    Onbekend: 9
