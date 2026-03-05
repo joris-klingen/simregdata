@@ -2,10 +2,10 @@
 
 Overview of all simulated columns
 
-<details>
-<summary><strong>GBA Bevolkingsregister</strong></summary>
+## GBA Bevolkingsregister
 
-#### `GBAPERSOONKTAB`
+<details>
+<summary><code>GBAPERSOONKTAB</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -16,7 +16,10 @@ Overview of all simulated columns
 | `GBAGEBOORTEMAAND` | random: uniform [1, 12] |  | [geboortemaand](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
 | `GBAGEBOORTEDAG` | value: 01 |  |  |
 
-#### `GBAADRESOBJECTBUS`
+</details>
+
+<details>
+<summary><code>GBAADRESOBJECTBUS</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -29,7 +32,10 @@ Overview of all simulated columns
 | `GBAGEMEENTEVANINSCHRIJVING` | computed | gemeente |  |
 | `GBAAANTALINGESCHREVENENOPNUMMERAANDUIDING` | random: normal (mean=2.2, sd=1.5) |  |  |
 
-#### `GBAHUISHOUDENSBUS`
+</details>
+
+<details>
+<summary><code>GBAHUISHOUDENSBUS</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -44,10 +50,10 @@ Overview of all simulated columns
 
 </details>
 
-<details>
-<summary><strong>CBS Woonbase</strong></summary>
+## CBS Woonbase
 
-#### `WoonbaseSleutelbestand`
+<details>
+<summary><code>WoonbaseSleutelbestand</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -68,7 +74,10 @@ Overview of all simulated columns
 | `REDENBEGINGELDIGHEID` | random: hardcoded probs |  |  |
 | `REDENEINDGELDIGHEID` | value: NVT |  |  |
 
-#### `WoonbaseKenmerkenPersonen`
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenPersonen</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -90,7 +99,10 @@ Overview of all simulated columns
 | `OPLNIVSOI2021AGG4HGMETNIRWO1Jan, OPLNIVSOI2021AGG4HGMETNIRWO31Dec` | random: hardcoded probs |  |  |
 | `GEWICHTHOOGSTEOPL1Jan, GEWICHTHOOGSTEOPL31Dec` | random: uniform [0.5, 1.5] |  |  |
 
-#### `WoonbaseKenmerkenHuishoudens`
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenHuishoudens</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -104,7 +116,10 @@ Overview of all simulated columns
 | `AantalKinderenPerHuishouden1Jan, AantalKinderenPerHuishouden31Dec` | spine-derived | NL |  |
 | `AantalPersonenPerHuishouden1Jan, AantalPersonenPerHuishouden31Dec` | spine-derived | NL |  |
 
-#### `WoonbaseKenmerkenWoonruimten`
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenWoonruimten</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -122,7 +137,10 @@ Overview of all simulated columns
 | `WOZWaardeObjectBAG1Jan, WOZWaardeObjectBAG31Dec` | spine-derived | gemeente |  |
 | `VBOStatus1Jan, VBOStatus31Dec` | spine-derived | NL | [VBOSTATUS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-#### `WoonbasePopulatiePersonen`
+</details>
+
+<details>
+<summary><code>WoonbasePopulatiePersonen</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -158,7 +176,10 @@ Overview of all simulated columns
 | `VBOOppervlakteKlasse1Jan, VBOOppervlakteKlasse31Dec` | spine-derived | NL | [OPPKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `WOZWaardeObjectBAGKlasse1Jan, WOZWaardeObjectBAGKlasse31Dec` | spine-derived | gemeente | [WOZKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-#### `WoonbasePopulatieHuishoudens`
+</details>
+
+<details>
+<summary><code>WoonbasePopulatieHuishoudens</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -184,7 +205,10 @@ Overview of all simulated columns
 | `TypeEigenaar1Jan, TypeEigenaar31Dec` | spine-derived | NL | [TYPEIGENAAR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `Indicator_HHIsAanwezig1Jan, Indicator_HHIsAanwezig31Dec` | value: 1 |  | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-#### `WoonbasePopulatieWoonruimten`
+</details>
+
+<details>
+<summary><code>WoonbasePopulatieWoonruimten</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -215,7 +239,10 @@ Overview of all simulated columns
 | `Indicator_VBOIsNieuwbouw` | spine-derived | NL | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 | `Indicator_VSLIsNieuw` | spine-derived | NL | [INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-#### `WOONBASEEKHuishoudensWV`
+</details>
+
+<details>
+<summary><code>WOONBASEEKHuishoudensWV</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -251,7 +278,10 @@ Overview of all simulated columns
 | `W1000VERH1JAN, W1000VERH31DEC` | random: uniform [0, 500000] |  |  |
 | `VERSCHILIIV1JAN, VERSCHILIIV31DEC` | random: codelist: VERSCHILIIV |  | [VERSCHILIIV](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
 
-#### `ExtraKenmerkenPanden`
+</details>
+
+<details>
+<summary><code>ExtraKenmerkenPanden</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -276,10 +306,10 @@ Overview of all simulated columns
 
 </details>
 
-<details>
-<summary><strong>RDW Motorvoertuigenpark</strong></summary>
+## RDW Motorvoertuigenpark
 
-#### `RDWNPACT`
+<details>
+<summary><code>RDWNPACT</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -297,7 +327,10 @@ Overview of all simulated columns
 | `CYLININHOUDCORVRTG` | random: normal (mean=1600, sd=600) |  |  |
 | `SOORTBROMFIETSCOR` | random: codelist: SOORTBROMFIETS |  | [SOORTBROMFIETS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/rdw/codelists.yaml) |
 
-#### `VERKEERSPRESTATIE`
+</details>
+
+<details>
+<summary><code>VERKEERSPRESTATIE</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -310,10 +343,10 @@ Overview of all simulated columns
 
 </details>
 
-<details>
-<summary><strong>Banen en lonen (SPOLISBUS)</strong></summary>
+## Banen en lonen (SPOLISBUS)
 
-#### `SPOLISBUS`
+<details>
+<summary><code>SPOLISBUS</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -453,10 +486,10 @@ Overview of all simulated columns
 
 </details>
 
-<details>
-<summary><strong>Vermogens van huishoudens (VEHTAB)</strong></summary>
+## Vermogens van huishoudens (VEHTAB)
 
-#### `VEH`
+<details>
+<summary><code>VEH</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|
@@ -483,10 +516,10 @@ Overview of all simulated columns
 
 </details>
 
-<details>
-<summary><strong>Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)</strong></summary>
+## Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)
 
-#### `ENERGIEVERBRUIK`
+<details>
+<summary><code>ENERGIEVERBRUIK</code></summary>
 
 | Column | Source | Spatial | Codelist |
 |--------|--------|---------|----------|

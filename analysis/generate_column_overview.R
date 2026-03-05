@@ -40,13 +40,12 @@ add("")
 add("Overview of all simulated columns")
 add("")
 
-# Per-dataset sections (collapsible at dataset level only)
+# Per-dataset sections (files are collapsible, dataset headers are not)
 for (ds in unique(dt$dataset)) {
   ds_dt <- dt[dt$dataset == ds, ]
   ds_label <- ds_labels[[ds]] %||% ds
 
-  add("<details>")
-  add(sprintf("<summary><strong>%s</strong></summary>", ds_label))
+  add("## ", ds_label)
   add("")
 
   fkeys <- file_order[[ds]] %||% unique(ds_dt$file)
@@ -54,7 +53,8 @@ for (ds in unique(dt$dataset)) {
     file_dt <- ds_dt[ds_dt$file == fkey, ]
     cbs_name <- cbs_names[[ds]][[fkey]] %||% fkey
 
-    add("#### `", cbs_name, "`")
+    add("<details>")
+    add(sprintf("<summary><code>%s</code></summary>", cbs_name))
     add("")
     add("| Column | Source | Spatial | Codelist |")
     add("|--------|--------|---------|----------|")
@@ -84,10 +84,9 @@ for (ds in unique(dt$dataset)) {
       add("| `", r$column, "` | ", src_cell, " | ", sp_cell, " | ", cl_cell, " |")
     }
     add("")
+    add("</details>")
+    add("")
   }
-
-  add("</details>")
-  add("")
 }
 
 # Write
