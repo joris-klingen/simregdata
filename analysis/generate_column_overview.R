@@ -64,8 +64,8 @@ for (ds in unique(dt$dataset)) {
     add(sprintf("<summary><code>%s</code> — %d columns (%d statline-calibrated)</summary>",
                 cbs_name, n_fcols, n_fcal))
     add("")
-    add("| Column | Level | Spatial | Source | Codelist |")
-    add("|--------|-------|---------|--------|----------|")
+    add("| Column | Source | Spatial | Codelist |")
+    add("|--------|--------|---------|----------|")
     for (i in seq_len(nrow(file_dt))) {
       r <- file_dt[i, ]
       # Build codelist link if applicable
@@ -77,7 +77,19 @@ for (ds in unique(dt$dataset)) {
         cl_cell <- ""
       }
       sp_cell <- if (!is.na(r$spatial)) r$spatial else ""
-      add("| `", r$column, "` | ", r$level, " | ", sp_cell, " | ", r$source, " | ", cl_cell, " |")
+      # Combine level + source into a single description
+      src_cell <- switch(r$level,
+        "spine-derived"       = "spine-derived",
+        "computed"            = "computed",
+        "statline-calibrated" = r$source,
+        "constant"            = r$source,
+        "random-id"           = r$source,
+        "random-normal"       = paste0("random: ", r$source),
+        "random-uniform"      = paste0("random: ", r$source),
+        "random-categorical"  = paste0("random: ", r$source),
+        r$source
+      )
+      add("| `", r$column, "` | ", src_cell, " | ", sp_cell, " | ", cl_cell, " |")
     }
     add("")
     add("</details>")
