@@ -192,6 +192,63 @@ woonbase_catalog <- function(year = 2023L) {
 }
 
 
+# Parquet data root ----
+
+#' Set or clear the parquet data root
+#'
+#' When a data root is set, [read_sav()] looks for pre-exported parquet files
+#' before generating data on-the-fly.  Use [sim_export()] to create the
+#' parquet files.
+#'
+#' @param path  Directory containing exported parquet files (CBS VM-style
+#'   layout), or `NULL` to revert to on-the-fly generation.
+#' @return Invisibly, the previous data root (or `NULL`).
+#' @export
+sim_set_data_root <- function(path) {
+  prev <- .sim_cache$data_root
+  if (!is.null(path)) {
+    path <- normalizePath(path, mustWork = FALSE)
+    if (!dir.exists(path)) warning("Data root does not exist yet: ", path)
+  }
+  .sim_cache$data_root <- path
+  invisible(prev)
+}
+
+#' @rdname sim_set_data_root
+#' @return The current data root path, or `NULL` if not set.
+#' @export
+sim_get_data_root <- function() {
+  .sim_cache$data_root
+}
+
+
+# Parquet lookup helper ----
+
+# Given a file argument (as passed to read_sav), try to find a matching
+# parquet file under data_root.  Returns the full path or NULL.
+.find_parquet <- function(file, data_root) {
+  base <- tools::file_path_sans_ext(basename(file))
+  # Strip .parquet too, in case user passed it
+  base <- sub("\\.parquet$", "", base, ignore.case = TRUE)
+
+  # Extract CBS name from standard or TAB pattern
+  cbs_name <- NULL
+  m <- regmatches(base, regexec("^(.+?)(\\d{4})V\\d+$", base))[[1L]]
+  if (length(m) == 3L) {
+    cbs_name <- m[2L]
+  } else {
+    m2 <- regmatches(base, regexec("^(.+?)(\\d{4})TABV\\d+$", base))[[1L]]
+    if (length(m2) == 3L) cbs_name <- m2[2L]
+  }
+  if (is.null(cbs_name)) cbs_name <- base
+
+  # CBS VM layout: UPPERCASENAME/basename.parquet
+  pq_path <- file.path(data_root, toupper(cbs_name), paste0(base, ".parquet"))
+  if (file.exists(pq_path)) return(pq_path)
+  NULL
+}
+
+
 #' Read a CBS file (synthetic) or any other .sav file (via haven)
 #'
 #' Drop-in replacement for [haven::read_sav()] that intercepts registered CBS
@@ -225,6 +282,42 @@ read_sav <- function(file,
                      ...) {
 
   col_q  <- rlang::enquo(col_select)
+
+  # Parquet-first lookup: if data_root is set, try reading from disk
+
+  data_root <- .sim_cache$data_root
+  if (!is.null(data_root)) {
+    pq_path <- .find_parquet(file, data_root)
+    if (!is.null(pq_path)) {
+      if (!requireNamespace("arrow", quietly = TRUE))
+        stop("Package 'arrow' is required to read parquet files. ",
+             "Install it with: install.packages('arrow')")
+      # Evaluate col_select against parquet schema
+      sel_cols <- NULL
+      if (!rlang::quo_is_null(col_q)) {
+        schema <- arrow::open_dataset(pq_path)$schema
+        all_names <- schema$names
+        names(all_names) <- all_names
+        sel_idx <- tidyselect::eval_select(col_q, data = setNames(
+          as.list(seq_along(all_names)), all_names))
+        sel_cols <- names(sel_idx)
+      }
+      tbl <- if (is.null(sel_cols)) {
+        arrow::read_parquet(pq_path)
+      } else {
+        arrow::read_parquet(pq_path, col_select = tidyselect::all_of(sel_cols))
+      }
+      # Apply skip and n_max
+      if (skip > 0L) {
+        tbl <- tbl[seq_len(nrow(tbl)) > min(skip, nrow(tbl)), , drop = FALSE]
+      }
+      if (!is.infinite(n_max) && n_max < nrow(tbl)) {
+        tbl <- tbl[seq_len(as.integer(n_max)), , drop = FALSE]
+      }
+      return(tibble::as_tibble(tbl))
+    }
+  }
+
   parsed <- .parse_file_registry(file)
 
   # Fall through to haven for unregistered files
@@ -277,6 +370,97 @@ read_sav <- function(file,
 
   # Return as tibble (matches haven::read_sav output class)
   tibble::as_tibble(dt)
+}
+
+
+# Parquet export ----
+
+#' Export simulated datasets to parquet files
+#'
+#' Generates synthetic data for one or all registered datasets and writes
+#' each file as a parquet file in a CBS VM-style folder layout:
+#' `output_dir/UPPERCASECBSNAME/CbsName{YYYY}V1.parquet`.
+#'
+#' @param output_dir  Directory to write parquet files into.
+#' @param dataset  Dataset identifier, or `NULL` (default) to export all
+#'   registered datasets.
+#' @param year  Simulation year (default 2023).
+#' @param n  Number of persons in the spine.  `NULL` (default) uses the
+#'   population count from bundled parameters.
+#' @param seed  RNG seed for reproducibility (default 42).
+#' @return Invisibly, `output_dir`.
+#' @export
+sim_export <- function(output_dir, dataset = NULL, year = 2023L,
+                       n = NULL, seed = 42L) {
+  if (!requireNamespace("arrow", quietly = TRUE))
+    stop("Package 'arrow' is required to write parquet files. ",
+         "Install it with: install.packages('arrow')")
+
+  .load_dataset_registry()
+  ds_ids <- if (is.null(dataset)) names(.sim_cache$datasets) else dataset
+
+  # Initialise woonbase first (generic datasets depend on it)
+  if ("woonbase" %in% ds_ids) {
+    sim_init("woonbase", year = year, n = n, seed = seed)
+  } else if (any(vapply(ds_ids, function(id) {
+    d <- .sim_cache$datasets[[id]]
+    identical(d$spine_builder, "generic")
+  }, logical(1L)))) {
+    # Need woonbase spine for generic datasets
+    if (is.null(.sim_cache$spine_woonbase))
+      sim_init("woonbase", year = year, n = n, seed = seed)
+  }
+
+  # Initialise remaining datasets
+  for (ds_id in ds_ids) {
+    if (ds_id == "woonbase") next
+    sim_init(ds_id, year = year, n = n, seed = seed)
+  }
+
+  output_dir <- normalizePath(output_dir, mustWork = FALSE)
+  files_written <- character()
+
+  for (ds_id in ds_ids) {
+    ds <- .sim_cache$datasets[[ds_id]]
+    spine <- .sim_cache[[paste0("spine_", ds_id)]]
+
+    for (fkey in names(ds$files)) {
+      fi <- ds$files[[fkey]]
+      cbs_name <- fi$cbs_name
+
+      # Build filename: TAB suffix for tab_suffix files
+      tab <- isTRUE(fi$tab_suffix)
+      fname <- if (tab) {
+        sprintf("%s%dTABV1.parquet", cbs_name, year)
+      } else {
+        sprintf("%s%dV1.parquet", cbs_name, year)
+      }
+
+      # Create subdirectory
+      subdir <- file.path(output_dir, toupper(cbs_name))
+      dir.create(subdir, recursive = TRUE, showWarnings = FALSE)
+      out_path <- file.path(subdir, fname)
+
+      # Deterministic seed per file: base seed XOR hash of dataset+file key
+      file_seed <- bitwXor(seed, sum(utf8ToInt(paste0(ds_id, "/", fkey))))
+      set.seed(file_seed)
+
+      # Assemble the full data.table
+      dt <- .assemble_generic(ds_id, fkey, spine)
+      tbl <- tibble::as_tibble(dt)
+
+      # Write parquet
+      arrow::write_parquet(tbl, out_path)
+      files_written <- c(files_written, out_path)
+      message(sprintf("  %s  (%s rows x %s cols)",
+                      out_path, format(nrow(tbl), big.mark = ","),
+                      ncol(tbl)))
+    }
+  }
+
+  message(sprintf("\nExported %d parquet files to %s", length(files_written),
+                  output_dir))
+  invisible(output_dir)
 }
 
 

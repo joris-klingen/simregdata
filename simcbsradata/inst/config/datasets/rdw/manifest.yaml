@@ -17,7 +17,9 @@ files:
     cbs_name: RDWNPACT
     entity: person
     columns_file: kentekens.yaml
+    tab_suffix: true
   verkeersprestatie:
     cbs_name: VERKEERSPRESTATIE
     entity: person
     columns_file: verkeersprestatie.yaml
+    tab_suffix: true

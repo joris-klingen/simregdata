@@ -70,3 +70,4 @@ files:
     cbs_name: ExtraKenmerkenPanden
     entity: object
     columns_file: ek_obj_panden.yaml
+    tab_suffix: true

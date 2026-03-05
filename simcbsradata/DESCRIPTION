@@ -23,6 +23,7 @@ Imports:
     tools,
     yaml
 Suggests:
+    arrow,
     cbsodataR,
     ggplot2,
     glue,
