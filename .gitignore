@@ -12,8 +12,8 @@ Rplots.pdf
 # Generated plots (reproducible from scripts)
 plots/
 
-# Extracted text from PDFs (regenerate with pdftools/pypdf)
-pdfs_cbs_catalog/extracted/
+# Extracted text from PDFs (regenerate with pdftools; see docs/README.md)
+docs/extracted/
 
 # Built package tarballs
 *.tar.gz

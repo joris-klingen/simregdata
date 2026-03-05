@@ -6,24 +6,24 @@
 
 devtools::load_all(".")
 
-pdf_dir <- "pdfs_cbs_catalog/extracted/woonbase"
+pdf_dir <- "docs/extracted/woonbase"
 
 # Mapping: file_type key → CBS file name, PDF text file
 file_map <- list(
   sleutel        = list(file = "WoonbaseSleutelbestand2023V1",
-                        txt  = "Sleutelbestand.txt"),
+                        txt  = "Woonbase-Sleutelbestand.txt"),
   kenmerken_pers = list(file = "WoonbaseKenmerkenPersonen2023V1",
-                        txt  = "Kenmerken-Personen.txt"),
+                        txt  = "Woonbase-Kenmerken-Personen.txt"),
   kenmerken_hh   = list(file = "WoonbaseKenmerkenHuishoudens2023V1",
-                        txt  = "Kenmerken-Huishoudens.txt"),
+                        txt  = "Woonbase-Kenmerken-Huishoudens.txt"),
   kenmerken_obj  = list(file = "WoonbaseKenmerkenWoonruimten2023V1",
-                        txt  = "Kenmerken-Woonruimten.txt"),
+                        txt  = "Woonbase-Kenmerken-Woonruimten.txt"),
   populatie_pers = list(file = "WoonbasePopulatiePersonen2023V1",
-                        txt  = "Populatie-Personen.txt"),
+                        txt  = "Woonbase-Populatie-Personen.txt"),
   populatie_hh   = list(file = "WoonbasePopulatieHuishoudens2023V1",
-                        txt  = "Populatie-Huishoudens.txt"),
+                        txt  = "Woonbase-Populatie-Huishoudens.txt"),
   populatie_obj  = list(file = "WoonbasePopulatieWoonruimten2023V1",
-                        txt  = "Populatie-Woonruimten.txt")
+                        txt  = "Woonbase-Populatie-Woonruimten.txt")
 )
 
 # Run once — spine is cached across calls

@@ -39,7 +39,7 @@ simcbsradata/
 │   ├── analyse_rdw_woonbase.R     # 5 plots: fuel, car ownership, VKT
 │   ├── housing_type_timeseries.R  # Housing stock composition 2016–2024
 │   └── maps_woonbase.R           # Municipality choropleths
-├── pdfs_cbs_catalog/pdf/          # CBS variable documentation PDFs
+├── docs/                          # CBS variable documentation PDFs + extraction instructions
 ├── DESCRIPTION
 └── NAMESPACE
 ```
