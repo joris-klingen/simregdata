@@ -1,6 +1,6 @@
 # simcbsradata
 
-Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real restricted-access data.
+Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real remote access data. Key variables are calibrated to publicly available CBS StatLine statistics, ensuring realistic marginal distributions for demographics, housing, vehicles, employment, wealth, and energy consumption.
 
 ## Background
 
