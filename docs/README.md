@@ -7,14 +7,26 @@ Source PDFs downloaded from the CBS microdata catalog
 
 ```
 docs/
-├── cbs-catalogs/          # Original PDFs (tracked in git)
-│   ├── woonbase/
-│   ├── rdw/
-│   ├── spolis/
-│   ├── vehtab/
-│   └── energieverbruik/
-└── extracted/             # Plain-text extractions (gitignored, regenerate on demand)
+├── cbs-catalogs.yaml     # PDF source URLs (tracked in git)
+├── download_pdfs.R       # Downloads PDFs listed in the YAML
+├── cbs-catalogs/         # Downloaded PDFs (gitignored)
+│   ├── woonbase/         # 9 files
+│   ├── rdw/              # 2 files
+│   ├── spolis/           # 1 file
+│   ├── vehtab/           # 1 file
+│   └── energieverbruik/  # 1 file
+└── extracted/            # Plain-text extractions (gitignored, regenerate on demand)
 ```
+
+## Downloading PDFs
+
+The PDFs are not stored in git. Download them with:
+
+```r
+source("docs/download_pdfs.R")
+```
+
+This reads `cbs-catalogs.yaml` and downloads any missing PDFs to `docs/cbs-catalogs/`.
 
 ## Extracting text from PDFs
 
@@ -31,11 +43,6 @@ for (pdf in list.files("docs/cbs-catalogs", "\\.pdf$", recursive = TRUE, full.na
   writeLines(pdf_text(pdf), out)
 }
 ```
-
-## PDF file names
-
-PDF files keep their original download names from CBS and are not renamed.
-Extracted text files mirror the PDF base name (with `.txt` extension).
 
 ## How these are used
 

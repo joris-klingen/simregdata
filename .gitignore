@@ -12,6 +12,9 @@ Rplots.pdf
 # Generated plots (reproducible from scripts)
 plots/
 
+# CBS documentation PDFs (download with: Rscript docs/download_pdfs.R)
+docs/cbs-catalogs/**/*.pdf
+
 # Extracted text from PDFs (regenerate with pdftools; see docs/README.md)
 docs/extracted/
 

@@ -1,0 +1,42 @@
+# CBS microdata documentation PDFs
+#
+# Source URLs for variable documentation from the CBS microdata catalog.
+# Download locally with: Rscript -e 'source("docs/download_pdfs.R")'
+
+woonbase:
+  - file: woonbase/Woonbase-Sleutelbestand.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-sleutelbestand.pdf
+  - file: woonbase/Woonbase-Kenmerken-Personen.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-kenmerken-personen.pdf
+  - file: woonbase/Woonbase-Kenmerken-Huishoudens.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-kenmerken-huishoudens.pdf
+  - file: woonbase/Woonbase-Kenmerken-Woonruimten.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-kenmerken-woonruimten.pdf
+  - file: woonbase/Woonbase-Populatie-Personen.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-populatie-personen.pdf
+  - file: woonbase/Woonbase-Populatie-Huishoudens.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-populatie-huishoudens.pdf
+  - file: woonbase/Woonbase-Populatie-Woonruimten.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/basis/woonbase-populatie-woonruimten.pdf
+  - file: woonbase/Woonbase-Extra-kenmerken-Huishoudens-Welvaart.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/financieel-economisch/woonbase-extra-kenmerken-huishoudens-welvaart.pdf
+  - file: woonbase/Woonbase-Extra-kenmerken-Woonruimten-Panden.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/maatwerk-microdatabestanden/woonbase/pandkenmerken/woonbase-extra-kenmerken-woonruimten-panden.pdf
+
+rdw:
+  - file: rdw/rdwnpacttab.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2020/17/rdwnpacttab.pdf
+  - file: rdw/verkeersprestatietab.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/47/verkeersprestatietab.pdf
+
+spolis:
+  - file: spolis/spolisbus.pdf
+    url: https://www.cbs.nl/-/media/cbs%20op%20maat/microdatabestanden/documents/2018/04/spolisbus.pdf
+
+vehtab:
+  - file: vehtab/vehtab.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/43/vehtab.pdf
+
+energieverbruik:
+  - file: energieverbruik/energieverbruiktab.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/09/energieverbruiktabzk.pdf
