@@ -35,22 +35,7 @@ add <- function(...) lines <<- c(lines, paste0(...))
 
 add("# Column Overview")
 add("")
-add("Auto-generated overview of all simulated columns, their calibration level, and data source.")
-add("")
-add("Generated: ", Sys.Date())
-add("")
-
-# Summary table
-add("## Summary by calibration level")
-add("")
-lev_counts <- sort(table(dt$level), decreasing = TRUE)
-add("| Level | Count |")
-add("|-------|------:|")
-for (lv in names(lev_counts)) {
-  add("| ", lv, " | ", lev_counts[[lv]], " |")
-}
-add("")
-add("**Total columns:** ", nrow(dt))
+add("Overview of all simulated columns")
 add("")
 
 # Per-dataset sections (collapsible)
