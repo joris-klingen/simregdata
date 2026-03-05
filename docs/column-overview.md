@@ -20,9 +20,10 @@ Generated: 2026-03-05
 **Total columns:** 406
 
 <details>
-<summary><strong>woonbase</strong> — 182 columns across 9 files (0 statline-calibrated)</summary>
+<summary><strong>CBS Woonbase</strong> — 182 columns across 9 files (0 statline-calibrated)</summary>
 
-#### ek_hh_welvaart
+<details>
+<summary><code>WOONBASEEKHuishoudensWV</code> — 31 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -58,7 +59,10 @@ Generated: 2026-03-05
 | `W1000VERH{sfx}` | random-uniform | uniform [0, 500000] |
 | `VERSCHILIIV{sfx}` | codelist-hardcoded | codelist: VERSCHILIIV |
 
-#### ek_obj_panden
+</details>
+
+<details>
+<summary><code>ExtraKenmerkenPanden</code> — 18 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -81,7 +85,10 @@ Generated: 2026-03-05
 | `PandAantalVerdiepingen` | random-uniform | uniform [1, 15] |
 | `PandDaktype` | codelist-hardcoded | codelist: PANDDAKTYPE |
 
-#### kenmerken_hh
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenHuishoudens</code> — 9 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -95,7 +102,10 @@ Generated: 2026-03-05
 | `AantalKinderenPerHuishouden{sfx}` | spine-derived | spine.hh.AantalKinderenPerHuishouden |
 | `AantalPersonenPerHuishouden{sfx}` | spine-derived | spine.hh.AantalPersonenPerHuishouden |
 
-#### kenmerken_obj
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenWoonruimten</code> — 13 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -113,7 +123,10 @@ Generated: 2026-03-05
 | `WOZWaardeObjectBAG{sfx}` | spine-derived | spine.obj.WOZWaardeObjectBAG{sfx} |
 | `VBOStatus{sfx}` | spine-derived | spine.obj.VBOStatus{sfx} |
 
-#### kenmerken_pers
+</details>
+
+<details>
+<summary><code>WoonbaseKenmerkenPersonen</code> — 17 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -135,7 +148,10 @@ Generated: 2026-03-05
 | `OPLNIVSOI2021AGG4HGMETNIRWO{sfx}` | codelist-hardcoded | hardcoded probs |
 | `GEWICHTHOOGSTEOPL{sfx}` | random-uniform | uniform [0.5, 1.5] |
 
-#### populatie_hh
+</details>
+
+<details>
+<summary><code>WoonbasePopulatieHuishoudens</code> — 21 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -161,7 +177,10 @@ Generated: 2026-03-05
 | `TypeEigenaar{sfx}` | spine-derived | spine.hh.TypeEigenaar{sfx} |
 | `Indicator_HHIsAanwezig{sfx}` | constant | value: 1 |
 
-#### populatie_obj
+</details>
+
+<details>
+<summary><code>WoonbasePopulatieWoonruimten</code> — 26 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -192,7 +211,10 @@ Generated: 2026-03-05
 | `Indicator_VBOIsNieuwbouw` | spine-derived | spine.obj.Indicator_VBOIsNieuwbouw |
 | `Indicator_VSLIsNieuw` | spine-derived | spine.obj.Indicator_VSLIsNieuw |
 
-#### populatie_pers
+</details>
+
+<details>
+<summary><code>WoonbasePopulatiePersonen</code> — 31 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -228,7 +250,10 @@ Generated: 2026-03-05
 | `VBOOppervlakteKlasse{sfx}` | spine-derived | spine.pers.VBOOppervlakteKlasse{sfx} |
 | `WOZWaardeObjectBAGKlasse{sfx}` | spine-derived | spine.pers.WOZWaardeObjectBAGKlasse{sfx} |
 
-#### sleutel
+</details>
+
+<details>
+<summary><code>WoonbaseSleutelbestand</code> — 16 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -251,10 +276,13 @@ Generated: 2026-03-05
 
 </details>
 
-<details>
-<summary><strong>rdw</strong> — 19 columns across 2 files (6 statline-calibrated)</summary>
+</details>
 
-#### kentekens
+<details>
+<summary><strong>RDW Motorvoertuigenpark</strong> — 19 columns across 2 files (6 statline-calibrated)</summary>
+
+<details>
+<summary><code>RDWNPACT</code> — 13 columns (5 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -272,7 +300,10 @@ Generated: 2026-03-05
 | `CYLININHOUDCORVRTG` | random-normal | normal (mean=1600, sd=600) |
 | `SOORTBROMFIETSCOR` | codelist-hardcoded | codelist: SOORTBROMFIETS |
 
-#### verkeersprestatie
+</details>
+
+<details>
+<summary><code>VERKEERSPRESTATIE</code> — 6 columns (1 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -285,10 +316,13 @@ Generated: 2026-03-05
 
 </details>
 
-<details>
-<summary><strong>spolis</strong> — 133 columns across 1 files (12 statline-calibrated)</summary>
+</details>
 
-#### spolisbus
+<details>
+<summary><strong>Banen en lonen (SPOLISBUS)</strong> — 133 columns across 1 files (12 statline-calibrated)</summary>
+
+<details>
+<summary><code>SPOLISBUS</code> — 133 columns (12 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -428,10 +462,13 @@ Generated: 2026-03-05
 
 </details>
 
-<details>
-<summary><strong>vehtab</strong> — 20 columns across 1 files (15 statline-calibrated)</summary>
+</details>
 
-#### vehtab
+<details>
+<summary><strong>Vermogens van huishoudens (VEHTAB)</strong> — 20 columns across 1 files (15 statline-calibrated)</summary>
+
+<details>
+<summary><code>VEH</code> — 20 columns (15 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -458,10 +495,13 @@ Generated: 2026-03-05
 
 </details>
 
-<details>
-<summary><strong>energieverbruik</strong> — 20 columns across 1 files (4 statline-calibrated)</summary>
+</details>
 
-#### energieverbruik
+<details>
+<summary><strong>Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)</strong> — 20 columns across 1 files (4 statline-calibrated)</summary>
+
+<details>
+<summary><code>ENERGIEVERBRUIK</code> — 20 columns (4 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -488,10 +528,13 @@ Generated: 2026-03-05
 
 </details>
 
-<details>
-<summary><strong>gba</strong> — 32 columns across 3 files (0 statline-calibrated)</summary>
+</details>
 
-#### adresobjectbus
+<details>
+<summary><strong>GBA Bevolkingsregister</strong> — 32 columns across 3 files (0 statline-calibrated)</summary>
+
+<details>
+<summary><code>GBAADRESOBJECTBUS</code> — 8 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -504,7 +547,10 @@ Generated: 2026-03-05
 | `GBAGEMEENTEVANINSCHRIJVING` | computed | computed.GemeenteCodeJJJJ1Jan |
 | `GBAAANTALINGESCHREVENENOPNUMMERAANDUIDING` | random-normal | normal (mean=2.2, sd=1.5) |
 
-#### huishoudensbus
+</details>
+
+<details>
+<summary><code>GBAHUISHOUDENSBUS</code> — 8 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -517,7 +563,10 @@ Generated: 2026-03-05
 | `AANESSION` | spine-derived | spine.pers.AantalPersonenPerHuishouden |
 | `REFESSION` | spine-derived | spine.pers.REFPERSOONHH |
 
-#### persoontab
+</details>
+
+<details>
+<summary><code>GBAPERSOONTAB</code> — 16 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source |
 |--------|-------|--------|
@@ -537,6 +586,8 @@ Generated: 2026-03-05
 | `GBADATUMOVERLIJDEN` | constant | value: 00000000 |
 | `GBADATUMEMIGRATIE` | constant | value: 00000000 |
 | `GBABURGERLIJKESTAAT` | spine-derived | spine.pers.GBABurgerlijkeStaat |
+
+</details>
 
 </details>
 

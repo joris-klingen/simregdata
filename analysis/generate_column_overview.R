@@ -5,6 +5,27 @@ devtools::load_all()
 
 dt <- sim_column_overview()
 
+# --- Load manifest files to get full CBS names per file key ---
+base <- system.file("config/datasets", package = "simcbsradata")
+if (!nzchar(base)) base <- "inst/config/datasets"
+
+datasets <- list.dirs(base, recursive = FALSE, full.names = TRUE)
+cbs_names <- list()   # dataset -> file_key -> cbs_name
+ds_labels <- list()   # dataset -> label
+
+for (dpath in datasets) {
+  mf <- file.path(dpath, "manifest.yaml")
+  if (!file.exists(mf)) next
+  manifest <- yaml::read_yaml(mf)
+  ds_id <- manifest$dataset_id
+  ds_labels[[ds_id]] <- manifest$label %||% ds_id
+  if (!is.null(manifest$files)) {
+    for (fkey in names(manifest$files)) {
+      cbs_names[[ds_id]][[fkey]] <- manifest$files[[fkey]]$cbs_name %||% fkey
+    }
+  }
+}
+
 # --- Build markdown ---
 lines <- character()
 add <- function(...) lines <<- c(lines, paste0(...))
@@ -35,15 +56,22 @@ for (ds in unique(dt$dataset)) {
   n_cols <- nrow(ds_dt)
   n_files <- length(unique(ds_dt$file))
   n_cal <- sum(ds_dt$level == "statline-calibrated")
+  ds_label <- ds_labels[[ds]] %||% ds
 
   add("<details>")
   add(sprintf("<summary><strong>%s</strong> — %d columns across %d files (%d statline-calibrated)</summary>",
-              ds, n_cols, n_files, n_cal))
+              ds_label, n_cols, n_files, n_cal))
   add("")
 
   for (fkey in unique(ds_dt$file)) {
     file_dt <- ds_dt[ds_dt$file == fkey, ]
-    add("#### ", fkey)
+    cbs_name <- cbs_names[[ds]][[fkey]] %||% fkey
+    n_fcols <- nrow(file_dt)
+    n_fcal <- sum(file_dt$level == "statline-calibrated")
+
+    add("<details>")
+    add(sprintf("<summary><code>%s</code> — %d columns (%d statline-calibrated)</summary>",
+                cbs_name, n_fcols, n_fcal))
     add("")
     add("| Column | Level | Source |")
     add("|--------|-------|--------|")
@@ -51,6 +79,8 @@ for (ds in unique(dt$dataset)) {
       r <- file_dt[i, ]
       add("| `", r$column, "` | ", r$level, " | ", r$source, " |")
     }
+    add("")
+    add("</details>")
     add("")
   }
 
