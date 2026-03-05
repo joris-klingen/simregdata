@@ -18,8 +18,7 @@ columns:
     source: spine.pers.RINPERSOON
 
   - name: RINKENTEKEN
-    random_id:
-      width: 32
+    source: spine.pers.RINKENTEKEN
 
   # Year-specific color distribution from 85237NED
   - name: KLEURCODEVRTG

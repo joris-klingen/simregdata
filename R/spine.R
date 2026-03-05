@@ -172,6 +172,42 @@
   ), by = HUISHOUDNR]
   dt_hh <- merge(dt_hh, hh_sz, by = "HUISHOUDNR")
 
+  # ---- Income & wealth (correlated with WOZ) ---------------------------------
+  # WOZ is 1:1 mapped to households (line 81); use it as the affluence anchor
+  woz <- dt_obj$WOZWaardeObjectBAG1Jan
+  woz_rank <- data.table::frank(woz, ties.method = "random") / (N_HH + 1)
+
+  # BESTINKH: disposable income — lognormal, median ~€35k, P5 ~€15k, P95 ~€90k
+  dt_hh[, BESTINKH := as.integer(pmax(5000L, pmin(250000L, round(
+    stats::qlnorm(woz_rank, meanlog = 10.45, sdlog = 0.45) *
+    exp(stats::rnorm(.N, 0, 0.25)), -2L))))]
+
+  # BELIH: taxable income (higher than disposable)
+  dt_hh[, BELIH := as.integer(round(BESTINKH * stats::runif(.N, 1.1, 1.4), -2L))]
+
+  # GESTINKH: standardized income (equivalized by HH size)
+  dt_hh[, GESTINKH := as.integer(round(
+    BESTINKH / sqrt(pmax(1L, AantalPersonenPerHuishouden)), -2L))]
+
+  # VERMHH: household wealth — correlated with WOZ rank, wider distribution
+  verm_rank <- pmax(0.001, pmin(0.999, woz_rank + stats::rnorm(N_HH, 0, 0.15)))
+  dt_hh[, VERMHH := as.integer(round(
+    stats::qlnorm(verm_rank, meanlog = 11.0, sdlog = 0.8) - 50000, -2L))]
+
+  # VROMHH: freely available wealth (fraction of total)
+  dt_hh[, VROMHH := as.integer(round(VERMHH * stats::runif(.N, 0.3, 0.8), -2L))]
+
+  # Percentile ranks (1–100)
+  dt_hh[, P100HBEST := as.integer(ceiling(
+    data.table::frank(BESTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HGEST := as.integer(ceiling(
+    data.table::frank(GESTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HVERM := as.integer(ceiling(
+    data.table::frank(VERMHH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100WELVAART := as.integer(ceiling(data.table::frank(
+    data.table::frank(BESTINKH) + data.table::frank(VERMHH),
+    ties.method = "random") / .N * 100))]
+
   # Reference persons (precomputed for lazy hh/obj enrichment)
   dt_ref <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1]
   dt_ref[, LeeftijdRefPersoon := as.integer(year - GBAGeboorteJaar)]

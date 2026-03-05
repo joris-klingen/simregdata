@@ -86,6 +86,10 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
       jan1 = as.Date(paste0(year, "-01-01")),
       dec31 = as.Date(paste0(year, "-12-31"))
     )
+    # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
+    if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(spine$pers)))
+      spine$pers[, RINKENTEKEN := .rand_id(nrow(spine$pers), 32L)]
+
     .sim_cache[[paste0("spine_", dataset)]] <- spine
     .sim_cache[[paste0("year_", dataset)]] <- year
     .sim_cache[[paste0("seed_", dataset)]] <- seed

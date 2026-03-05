@@ -7,8 +7,7 @@ spine_table: pers
 
 columns:
   - name: RINKENTEKEN
-    random_id:
-      width: 32
+    source: spine.pers.RINKENTEKEN
 
   - name: RinpersoonsVP
     random_categorical:

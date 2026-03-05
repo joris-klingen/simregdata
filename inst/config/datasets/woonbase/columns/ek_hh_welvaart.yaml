@@ -104,20 +104,12 @@ columns:
   # Belastbaar inkomen huishouden
   - name: "BELIH{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 5000
-      max: 120000
-      round: 0
+    source: spine.hh.BELIH
 
   # Besteedbaar inkomen huishouden
   - name: "BESTINKH{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 5000
-      max: 100000
-      round: 0
+    source: spine.hh.BESTINKH
 
   # Betaalbudget
   - name: "BETAALBUDGET{sfx}"
@@ -156,11 +148,7 @@ columns:
   # Gestandaardiseerd inkomen huishouden
   - name: "GESTINKH{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 5000
-      max: 80000
-      round: 0
+    source: spine.hh.GESTINKH
 
   # Leegrond (eigenwoningforfait o.i.d.)
   - name: "LEERGROND{sfx}"
@@ -174,38 +162,22 @@ columns:
   # Percentiel besteedbaar inkomen
   - name: "P100HBEST{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.hh.P100HBEST
 
   # Percentiel gestandaardiseerd inkomen
   - name: "P100HGEST{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.hh.P100HGEST
 
   # Percentiel vermogen
   - name: "P100HVERM{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.hh.P100HVERM
 
   # Percentiel welvaart
   - name: "P100WELVAART{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.hh.P100WELVAART
 
   # Populatie FEC indicator
   - name: "POPFEC{sfx}"
@@ -237,20 +209,12 @@ columns:
   # Vermogen huishouden
   - name: "VERMHH{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: -50000
-      max: 500000
-      round: 0
+    source: spine.hh.VERMHH
 
   # Vrij opneembaar vermogen huishouden
   - name: "VROMHH{sfx}"
     suffixes: ["1JAN", "31DEC"]
-    random_numeric:
-      distribution: uniform
-      min: -20000
-      max: 400000
-      round: 0
+    source: spine.hh.VROMHH
 
   # Welvaart op de grens van 1000-groepen vermogen
   - name: "W1000VERH{sfx}"
