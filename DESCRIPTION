@@ -1,8 +1,8 @@
 Package: simcbsradata
 Title: Simulate CBS Microdata
 Version: 0.2.0
-Authors@R: person("Author", "Name", role = c("aut", "cre"),
-                  email = "author@example.com")
+Authors@R: person("Joris", "Klingen", role = c("aut", "cre"),
+                  email = "joris.klingen@gmail.com")
 Description: Generates synthetic CBS microdata with realistic Dutch population
     distributions. Supports multiple CBS datasets (Woonbase and others) via
     YAML-driven config files. Provides a drop-in replacement for
