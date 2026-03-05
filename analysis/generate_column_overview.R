@@ -29,15 +29,21 @@ add("")
 add("**Total columns:** ", nrow(dt))
 add("")
 
-# Per-dataset sections
+# Per-dataset sections (collapsible)
 for (ds in unique(dt$dataset)) {
   ds_dt <- dt[dt$dataset == ds, ]
-  add("## ", ds)
+  n_cols <- nrow(ds_dt)
+  n_files <- length(unique(ds_dt$file))
+  n_cal <- sum(ds_dt$level == "statline-calibrated")
+
+  add("<details>")
+  add(sprintf("<summary><strong>%s</strong> — %d columns across %d files (%d statline-calibrated)</summary>",
+              ds, n_cols, n_files, n_cal))
   add("")
 
   for (fkey in unique(ds_dt$file)) {
     file_dt <- ds_dt[ds_dt$file == fkey, ]
-    add("### ", fkey)
+    add("#### ", fkey)
     add("")
     add("| Column | Level | Source |")
     add("|--------|-------|--------|")
@@ -47,6 +53,9 @@ for (ds in unique(dt$dataset)) {
     }
     add("")
   }
+
+  add("</details>")
+  add("")
 }
 
 # Write
