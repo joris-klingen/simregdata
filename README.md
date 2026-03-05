@@ -73,7 +73,7 @@ simcbsradata/
 
 | Short name | CBS dataset name | Entity |
 |------------|------------------|--------|
-| `persoontab` | GBAPERSOONTAB | person |
+| `persoonktab` | GBAPERSOONKTAB | person |
 | `adresobjectbus` | GBAADRESOBJECTBUS | person |
 | `huishoudensbus` | GBAHUISHOUDENSBUS | person |
 

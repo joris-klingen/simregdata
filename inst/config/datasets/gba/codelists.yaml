@@ -11,87 +11,43 @@ rinpersoons:
 
 geslacht:
   c2i:
+    "-": ~
     "1": 1
     "2": 2
   labels:
+    Onbekend: ~
     Man: 1
     Vrouw: 2
 
-burgerlijkestaat:
+geboortemaand:
   c2i:
-    "O": 1
-    "H": 2
-    "S": 3
-    "W": 4
-    "P": 5
+    "--": ~
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+    "09": 9
+    "10": 10
+    "11": 11
+    "12": 12
   labels:
-    Ongehuwd: 1
-    Gehuwd: 2
-    Gescheiden: 3
-    Verweduwd: 4
-    Partnerschap: 5
-
-geboorteland:
-  c2i:
-    "6030": 6030
-    "7076": 7076
-    "5010": 5010
-    "5013": 5013
-    "7024": 7024
-    "6039": 6039
-    "7003": 7003
-    "0000": 0
-  labels:
-    Nederland: 6030
-    Turkije: 7076
-    Marokko: 5010
-    Suriname: 5013
-    Indonesie: 7024
-    Duitsland: 6039
-    Belgie: 7003
-    Onbekend: 0
-
-aantalouders:
-  c2i:
-    "0": 0
-    "1": 1
-    "2": 2
-  labels:
-    Geen ouders in buitenland: 0
-    Een ouder in buitenland: 1
-    Twee ouders in buitenland: 2
-
-generatie:
-  c2i:
-    "0": 0
-    "1": 1
-    "2": 2
-  labels:
-    Autochtoon: 0
-    Eerste generatie: 1
-    Tweede generatie: 2
-
-herkomstgroepering:
-  c2i:
-    "0": 0
-    "1": 1
-    "2": 2
-    "3": 3
-    "4": 4
-    "5": 5
-    "6": 6
-    "7": 7
-    "8": 8
-  labels:
-    Autochtoon: 0
-    Westers EU: 1
-    Westers niet-EU: 2
-    Marokko: 3
-    Turkije: 4
-    Suriname: 5
-    Antillen: 6
-    Overig niet-westers: 7
-    Overig: 8
+    Onbekend: ~
+    Januari: 1
+    Februari: 2
+    Maart: 3
+    April: 4
+    Mei: 5
+    Juni: 6
+    Juli: 7
+    Augustus: 8
+    September: 9
+    Oktober: 10
+    November: 11
+    December: 12
 
 soortobjectnummer:
   c2i:

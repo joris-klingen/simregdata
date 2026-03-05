@@ -8,16 +8,16 @@ Generated: 2026-03-05
 
 | Level | Count |
 |-------|------:|
-| spine-derived | 161 |
-| codelist-hardcoded | 89 |
+| spine-derived | 159 |
+| codelist-hardcoded | 82 |
 | random-normal | 70 |
 | statline-calibrated | 37 |
 | random-uniform | 24 |
-| constant | 18 |
+| constant | 17 |
 | random-id | 5 |
 | computed | 2 |
 
-**Total columns:** 406
+**Total columns:** 396
 
 <details>
 <summary><strong>CBS Woonbase</strong> — 182 columns across 9 files (0 statline-calibrated)</summary>
@@ -531,7 +531,7 @@ Generated: 2026-03-05
 </details>
 
 <details>
-<summary><strong>GBA Bevolkingsregister</strong> — 32 columns across 3 files (0 statline-calibrated)</summary>
+<summary><strong>GBA Bevolkingsregister</strong> — 22 columns across 3 files (0 statline-calibrated)</summary>
 
 <details>
 <summary><code>GBAADRESOBJECTBUS</code> — 8 columns (0 statline-calibrated)</summary>
@@ -566,26 +566,16 @@ Generated: 2026-03-05
 </details>
 
 <details>
-<summary><code>GBAPERSOONTAB</code> — 16 columns (0 statline-calibrated)</summary>
+<summary><code>GBAPERSOONKTAB</code> — 6 columns (0 statline-calibrated)</summary>
 
 | Column | Level | Source | Codelist |
 |--------|-------|--------|----------|
 | `RINPERSOONS` | spine-derived | spine.pers.RINPERSOONS | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
 | `RINPERSOON` | spine-derived | spine.pers.RINPERSOON |  |
-| `GBAGEBOORTEJAAR` | spine-derived | spine.pers.GBAGeboorteJaar |  |
-| `GBAGEBOORTEMAAND` | random-uniform | uniform [1, 12] |  |
-| `GBAGEBOORTELAND` | codelist-hardcoded | codelist: geboorteland | [geboorteland](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
 | `GBAGESLACHT` | spine-derived | spine.pers.GBAGeslachtsAanduiding | [geslacht](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBAAANTALOUDERSBUITENLAND` | codelist-hardcoded | codelist: aantalouders | [aantalouders](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBAGENERATIE` | codelist-hardcoded | codelist: generatie | [generatie](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBAHERKOMSTGROEPERING` | codelist-hardcoded | codelist: herkomstgroepering | [herkomstgroepering](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBAGEBOORTELANDMOEDER` | codelist-hardcoded | codelist: geboorteland | [geboorteland](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBAGEBOORTELANDVADER` | codelist-hardcoded | codelist: geboorteland | [geboorteland](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
-| `GBADATUMAANVANGHUIDIGVERBLIJF` | spine-derived | spine.pers.AanvangWoonduur |  |
-| `GBADATUMVESTIGINGINNEDERLAND` | codelist-hardcoded | hardcoded probs |  |
-| `GBADATUMOVERLIJDEN` | constant | value: 00000000 |  |
-| `GBADATUMEMIGRATIE` | constant | value: 00000000 |  |
-| `GBABURGERLIJKESTAAT` | spine-derived | spine.pers.GBABurgerlijkeStaat | [burgerlijkestaat](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
+| `GBAGEBOORTEJAAR` | spine-derived | spine.pers.GBAGeboorteJaar |  |
+| `GBAGEBOORTEMAAND` | random-uniform | uniform [1, 12] | [geboortemaand](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/gba/codelists.yaml) |
+| `GBAGEBOORTEDAG` | constant | value: 01 |  |
 
 </details>
 

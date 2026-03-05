@@ -37,6 +37,10 @@ vehtab:
   - file: vehtab/vehtab.pdf
     url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/43/vehtab.pdf
 
+gba:
+  - file: gba/gbapersoonktab.pdf
+    url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/34/gbapersoonktab.pdf
+
 energieverbruik:
   - file: energieverbruik/energieverbruiktab.pdf
     url: https://www.cbs.nl/-/media/cbs-op-maat/microdatabestanden/documents/2025/09/energieverbruiktabzk.pdf

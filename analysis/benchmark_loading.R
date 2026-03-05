@@ -157,7 +157,7 @@ other_datasets <- list(
   spolis = "SPOLISBUS2023V1",
   vehtab = "VEH2023TABV1",
   energieverbruik = "ENERGIEVERBRUIK2023TABV1",
-  gba    = "GBAPERSOONTAB2023TABV1"
+  gba    = "GBAPERSOONKTAB2023TABV1"
 )
 
 N_OTHER <- 1e5L

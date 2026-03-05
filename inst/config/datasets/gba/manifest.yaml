@@ -3,7 +3,7 @@
 # The GBA is the true population spine: all other CBS datasets reference it.
 #
 # Three core files:
-#   GBAPERSOONTAB     — person demographics (one row per person)
+#   GBAPERSOONKTAB    — person demographics, limited (one row per person)
 #   GBAADRESOBJECTBUS — person-address links (one row per person-period)
 #   GBAHUISHOUDENSBUS — household composition (one row per person)
 
@@ -25,10 +25,10 @@ entities:
     id_prefix_col: SOORTOBJECTNUMMER
 
 files:
-  persoontab:
-    cbs_name: GBAPERSOONTAB
+  persoonktab:
+    cbs_name: GBAPERSOONKTAB
     entity: person
-    columns_file: persoontab.yaml
+    columns_file: persoonktab.yaml
     tab_suffix: true
 
   adresobjectbus:

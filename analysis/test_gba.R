@@ -32,8 +32,8 @@ cat(sprintf("Catalog shows 3 file(s)\n\n"))
 
 cat("--- 2. Read GBA files ---\n")
 
-dt_pers <- as.data.table(read_sav(sprintf("GBAPERSOONTAB%dTABV1", YEAR)))
-cat(sprintf("  GBAPERSOONTAB:     %6d rows x %2d cols\n", nrow(dt_pers), ncol(dt_pers)))
+dt_pers <- as.data.table(read_sav(sprintf("GBAPERSOONKTAB%dTABV1", YEAR)))
+cat(sprintf("  GBAPERSOONKTAB:    %6d rows x %2d cols\n", nrow(dt_pers), ncol(dt_pers)))
 
 dt_adres <- as.data.table(read_sav(sprintf("GBAADRESOBJECTBUS%dV1", YEAR)))
 cat(sprintf("  GBAADRESOBJECTBUS: %6d rows x %2d cols\n", nrow(dt_adres), ncol(dt_adres)))
@@ -49,16 +49,17 @@ stopifnot(nrow(dt_pers) > 0, nrow(dt_adres) > 0, nrow(dt_hh) > 0)
 cat("--- 3. Cross-file RINPERSOON consistency ---\n")
 match_adres <- mean(dt_adres$RINPERSOON %in% dt_pers$RINPERSOON) * 100
 match_hh    <- mean(dt_hh$RINPERSOON %in% dt_pers$RINPERSOON) * 100
-cat(sprintf("  ADRESOBJECT -> PERSOONTAB: %.1f%% match\n", match_adres))
-cat(sprintf("  HUISHOUDENS -> PERSOONTAB: %.1f%% match\n", match_hh))
+cat(sprintf("  ADRESOBJECT -> PERSOONKTAB: %.1f%% match\n", match_adres))
+cat(sprintf("  HUISHOUDENS -> PERSOONKTAB: %.1f%% match\n", match_hh))
 stopifnot(match_adres > 99, match_hh > 99)
 cat("  PASS\n\n")
 
 
-# 4. Key columns in PERSOONTAB ----
+# 4. Key columns in PERSOONKTAB ----
 
-cat("--- 4. Key PERSOONTAB columns ---\n")
+cat("--- 4. Key PERSOONKTAB columns ---\n")
 cat(sprintf("  Columns: %s\n", paste(names(dt_pers), collapse = ", ")))
+stopifnot(ncol(dt_pers) == 6)
 
 # Birth year range
 cat(sprintf("  GBAGEBOORTEJAAR range: %d - %d\n",
@@ -72,14 +73,15 @@ cat(sprintf("  Sex ratio: %s\n",
             paste(sprintf("%s=%.1f%%", as.character(as_factor(sex$GBAGESLACHT)), sex$pct),
                   collapse = ", ")))
 
-# Civil status
-cs <- dt_pers[, .N, by = GBABURGERLIJKESTAAT]
-cs[, pct := N / sum(N) * 100]
-cs[, label := as.character(as_factor(GBABURGERLIJKESTAAT))]
-cat("  Civil status:\n")
-for (i in seq_len(nrow(cs))) {
-  cat(sprintf("    %-20s %5.1f%%\n", cs$label[i], cs$pct[i]))
-}
+# Birth month (should be uniform 1-12)
+cat(sprintf("  GBAGEBOORTEMAAND range: %s - %s\n",
+            min(as.integer(dt_pers$GBAGEBOORTEMAAND)),
+            max(as.integer(dt_pers$GBAGEBOORTEMAAND))))
+
+# GBAGEBOORTEDAG (always "01")
+cat(sprintf("  GBAGEBOORTEDAG unique values: %s\n",
+            paste(unique(dt_pers$GBAGEBOORTEDAG), collapse = ", ")))
+stopifnot(all(dt_pers$GBAGEBOORTEDAG == "01"))
 cat("\n")
 
 
@@ -114,7 +116,7 @@ cat("--- 7. Haven labels ---\n")
 labelled_pers  <- names(Filter(is.labelled, dt_pers))
 labelled_adres <- names(Filter(is.labelled, dt_adres))
 labelled_hh    <- names(Filter(is.labelled, dt_hh))
-cat(sprintf("  PERSOONTAB labelled:     %d (%s)\n", length(labelled_pers), paste(labelled_pers, collapse = ", ")))
+cat(sprintf("  PERSOONKTAB labelled:    %d (%s)\n", length(labelled_pers), paste(labelled_pers, collapse = ", ")))
 cat(sprintf("  ADRESOBJECTBUS labelled: %d (%s)\n", length(labelled_adres), paste(labelled_adres, collapse = ", ")))
 cat(sprintf("  HUISHOUDENSBUS labelled: %d (%s)\n", length(labelled_hh), paste(labelled_hh, collapse = ", ")))
 cat("\n")
