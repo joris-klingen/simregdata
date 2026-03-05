@@ -5,7 +5,7 @@
 # Available 2004-2024
 
 dataset_id: energieverbruik
-label: Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)
+label: Energieverbruik particuliere woningen
 spine_builder: generic
 
 entities:

@@ -343,7 +343,7 @@ Overview of all simulated columns
 
 </details>
 
-## Banen en lonen (SPOLISBUS)
+## Banen en lonen
 
 <details>
 <summary><code>SPOLISBUS</code></summary>
@@ -486,7 +486,7 @@ Overview of all simulated columns
 
 </details>
 
-## Vermogens van huishoudens (VEHTAB)
+## Vermogens van huishoudens
 
 <details>
 <summary><code>VEH</code></summary>
@@ -516,7 +516,7 @@ Overview of all simulated columns
 
 </details>
 
-## Energieverbruik particuliere woningen (ENERGIEVERBRUIKTAB)
+## Energieverbruik particuliere woningen
 
 <details>
 <summary><code>ENERGIEVERBRUIK</code></summary>

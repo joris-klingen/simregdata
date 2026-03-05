@@ -4,7 +4,7 @@
 # ~110M records nationally (multiple rows per person = job records)
 
 dataset_id: spolis
-label: Banen en lonen (SPOLISBUS)
+label: Banen en lonen
 spine_builder: generic
 
 entities:
