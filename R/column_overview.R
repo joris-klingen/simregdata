@@ -9,7 +9,7 @@
 #'   \describe{
 #'     \item{dataset}{Dataset identifier (e.g. `"woonbase"`, `"rdw"`)}
 #'     \item{file}{File type key (e.g. `"kenmerken_pers"`, `"kentekens"`)}
-#'     \item{column}{Column name pattern (may include `{sfx}` for suffixed columns)}
+#'     \item{column}{Column name (suffixed columns are expanded, e.g. `"AGHT1Jan, AGHT31Dec"`)}
 #'     \item{level}{Calibration level: `"statline-calibrated"`, `"spine-derived"`,
 #'       `"codelist-hardcoded"`, `"random-normal"`, `"random-uniform"`,
 #'       `"constant"`, `"random-id"`, `"computed"`}
@@ -47,10 +47,17 @@ sim_column_overview <- function() {
 
       for (col in spec$columns) {
         info <- .classify_column(col, sl_table, ds)
+        # Expand {sfx} templates into concrete column names
+        col_name <- col$name
+        sfxs <- unlist(col[["suffixes"]])
+        if (length(sfxs) > 0L && grepl("\\{sfx\\}", col_name)) {
+          col_name <- paste(vapply(sfxs, function(s) sub("\\{sfx\\}", s, col_name),
+                                   character(1L)), collapse = ", ")
+        }
         rows[[length(rows) + 1L]] <- data.table::data.table(
           dataset  = ds,
           file     = fkey,
-          column   = col$name,
+          column   = col_name,
           level    = info$level,
           source   = info$source,
           codelist = col$codelist %||% NA_character_,
