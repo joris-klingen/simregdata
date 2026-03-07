@@ -10,3 +10,5 @@
 ^\.gitignore$
 ^Rplots\.pdf$
 ^\.git$
+^CLAUDE\.md$
+^.*\.pdf$

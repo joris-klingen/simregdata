@@ -6,6 +6,9 @@
 Rplots.pdf
 *.log
 
+# Stray PDFs at top level (CBS docs belong in docs/cbs-catalogs/)
+/*.pdf
+
 # Claude Code settings (local only)
 .claude/
 
