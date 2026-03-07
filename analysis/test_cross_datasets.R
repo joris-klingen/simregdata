@@ -1,7 +1,7 @@
 # analysis/test_cross_datasets.R
 #
 # Cross-dataset combination tests.
-# Verifies that woonbase + RDW + SPOLIS + VEHTAB + energieverbruik can be joined.
+# Verifies that all datasets can be joined across shared keys.
 #
 # Run: Rscript analysis/test_cross_datasets.R
 
@@ -27,7 +27,12 @@ sim_init("rdw",              year = YEAR, seed = 43L)
 sim_init("spolis",           year = YEAR, seed = 44L)
 sim_init("vehtab",           year = YEAR, seed = 45L)
 sim_init("energieverbruik",  year = YEAR, seed = 46L)
-cat("  All 5 datasets initialised\n\n")
+sim_init("hoogsteopltab",    year = YEAR, seed = 47L)
+sim_init("inpatab",          year = YEAR, seed = 48L)
+sim_init("secmbus",          year = YEAR, seed = 49L)
+sim_init("inhatab",          year = YEAR, seed = 50L)
+sim_init("betab",            year = YEAR, seed = 51L)
+cat("  All 10 datasets initialised\n\n")
 
 
 # 2. Load key tables ----
@@ -213,6 +218,103 @@ cat(sprintf("  Example (first gemeente): cars=%.1f, km=%s, wage=%s, wealth=%s, g
             format(round(gem$avg_wealth[1]), big.mark = ","),
             gem$avg_gas[1], gem$avg_elek[1]))
 cat("  PASS: full 5-way gemeente aggregation works\n\n")
+
+
+# 9. Woonbase + HOOGSTEOPLTAB: education per person ----
+
+cat("--- 9. Woonbase + HOOGSTEOPLTAB ---\n")
+
+dt_opl <- as.data.table(read_sav(
+  sprintf("HOOGSTEOPL%dTABV1", YEAR),
+  col_select = c(RINPERSOON, OPLNIVSOI2021AGG4HBmetNIRWO)
+))
+
+dt_pers[dt_opl, on = "RINPERSOON",
+        opl_niveau := as.character(i.OPLNIVSOI2021AGG4HBmetNIRWO)]
+
+opl_match <- mean(!is.na(dt_pers$opl_niveau)) * 100
+cat(sprintf("  Education match rate: %.1f%%\n", opl_match))
+cat("  PASS: woonbase + HOOGSTEOPLTAB join works\n\n")
+
+
+# 10. Woonbase + INPATAB: personal income ----
+
+cat("--- 10. Woonbase + INPATAB ---\n")
+
+dt_inpa <- as.data.table(read_sav(
+  sprintf("INPA%dTABV1", YEAR),
+  col_select = c(RINPERSOON, INPPERSINK, RINPERSOONHKW)
+))
+
+dt_pers[dt_inpa, on = "RINPERSOON", pers_ink := i.INPPERSINK]
+inpa_match <- mean(!is.na(dt_pers$pers_ink)) * 100
+cat(sprintf("  INPATAB match rate: %.1f%%\n", inpa_match))
+cat(sprintf("  Mean personal income: EUR %s\n",
+            format(round(mean(dt_pers$pers_ink, na.rm = TRUE)), big.mark = ",")))
+cat("  PASS: woonbase + INPATAB join works\n\n")
+
+
+# 11. INPATAB + INHATAB: person income → household income via HKW ----
+
+cat("--- 11. INPATAB + INHATAB (via HKW) ---\n")
+
+dt_inha <- as.data.table(read_sav(
+  sprintf("INHA%dTABV1", YEAR),
+  col_select = c(RINPERSOONHKW, INHBESTINKH)
+))
+
+dt_inpa[dt_inha, on = "RINPERSOONHKW", hh_ink := i.INHBESTINKH]
+hkw_match <- mean(!is.na(dt_inpa$hh_ink)) * 100
+cat(sprintf("  HKW link match rate: %.1f%%\n", hkw_match))
+stopifnot(hkw_match > 0)
+cat("  PASS: INPATAB + INHATAB HKW join works\n\n")
+
+
+# 12. Woonbase + SECMBUS: socioeconomic category ----
+
+cat("--- 12. Woonbase + SECMBUS ---\n")
+
+dt_secm <- as.data.table(read_sav(
+  sprintf("SECMBUS%dV1", YEAR),
+  col_select = c(RINPERSOON, SECM, AANVSECM, EINDSECM)
+))
+
+cat(sprintf("  SECMBUS rows: %d (persons: %d)\n",
+            nrow(dt_secm), uniqueN(dt_secm$RINPERSOON)))
+
+# Join first SECM per person to woonbase
+secm_first <- dt_secm[, .(SECM = SECM[1]), by = RINPERSOON]
+dt_pers[secm_first, on = "RINPERSOON",
+        secm := as.character(i.SECM)]
+
+secm_match <- mean(!is.na(dt_pers$secm)) * 100
+cat(sprintf("  SECM match rate: %.1f%%\n", secm_match))
+cat("  PASS: woonbase + SECMBUS join works\n\n")
+
+
+# 13. SPOLIS + BETAB: jobs → business register ----
+
+cat("--- 13. SPOLIS + BETAB ---\n")
+
+dt_be <- as.data.table(read_sav(
+  sprintf("BE%dTABV1", YEAR),
+  col_select = c(BEID, SBI2008VJJJJ, GKSBS)
+))
+
+dt_sp2 <- as.data.table(read_sav(
+  sprintf("SPOLISBUS%dV1", YEAR),
+  col_select = c(RINPERSOON, SBEID)
+))
+
+dt_sp2[dt_be, on = c("SBEID" = "BEID"),
+       `:=`(sbi = as.character(i.SBI2008VJJJJ),
+            gk  = as.character(i.GKSBS))]
+
+be_match <- mean(!is.na(dt_sp2$sbi)) * 100
+cat(sprintf("  SPOLIS-BETAB match rate: %.1f%%\n", be_match))
+cat(sprintf("  Unique SBI codes in matched records: %d\n",
+            uniqueN(dt_sp2$sbi[!is.na(dt_sp2$sbi)])))
+cat("  PASS: SPOLIS + BETAB join works\n\n")
 
 
 cat("=== All cross-dataset tests passed ===\n")

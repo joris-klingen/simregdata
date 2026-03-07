@@ -1,0 +1,224 @@
+# tests/testthat/test-new-datasets.R
+# Tests for HOOGSTEOPLTAB, INPATAB, SECMBUS, INHATAB, BETAB
+
+# ---- Helpers ----
+
+check_tibble <- function(dt, min_rows = 1L, min_cols = 1L) {
+  expect_s3_class(dt, "tbl_df")
+  expect_gte(nrow(dt), min_rows)
+  expect_gte(ncol(dt), min_cols)
+}
+
+
+# ---- File name parsing ----
+
+test_that("new dataset file names parse correctly", {
+  new_names <- list(
+    "HOOGSTEOPL2023TABV1"  = list(file_key = "hoogsteopltab", dataset_id = "hoogsteopltab", year = 2023L),
+    "INPA2023TABV1"        = list(file_key = "inpatab",       dataset_id = "inpatab",       year = 2023L),
+    "SECMBUS2023V1"        = list(file_key = "secmbus",       dataset_id = "secmbus",       year = 2023L),
+    "INHA2023TABV1"        = list(file_key = "inhatab",       dataset_id = "inhatab",       year = 2023L),
+    "BE2023TABV1"          = list(file_key = "betab",         dataset_id = "betab",         year = 2023L)
+  )
+
+  for (nm in names(new_names)) {
+    parsed   <- simcbsradata:::.parse_file_registry(nm)
+    expected <- new_names[[nm]]
+    expect_false(is.null(parsed), label = paste("parsed is not NULL for", nm))
+    expect_identical(parsed$file_key,   expected$file_key,   label = paste("file_key for", nm))
+    expect_identical(parsed$dataset_id, expected$dataset_id, label = paste("dataset_id for", nm))
+    expect_identical(parsed$year,       expected$year,       label = paste("year for", nm))
+  }
+})
+
+
+# ---- HOOGSTEOPLTAB ----
+
+test_that("HOOGSTEOPLTAB generates valid education data", {
+  sim_reset()
+  sim_init("hoogsteopltab", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("HOOGSTEOPL2023TABV1")
+
+  check_tibble(dt, min_rows = 200L, min_cols = 16L)
+
+  # Required columns present
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONS" %in% names(dt))
+  expect_true("OPLNRHB" %in% names(dt))
+  expect_true("OPLNRHG" %in% names(dt))
+  expect_true("GEWICHTHOOGSTEOPL" %in% names(dt))
+  expect_true("OPLNIVSOI2021AGG4HBmetNIRWO" %in% names(dt))
+  expect_true("OPLNIVSOI2021AGG4HGmetNIRWO" %in% names(dt))
+
+  # SOI2021 variable is labelled
+  expect_s3_class(dt$OPLNIVSOI2021AGG4HBmetNIRWO, "haven_labelled")
+
+  # RINPERSOON is 9-char
+  expect_true(all(nchar(dt$RINPERSOON) == 9L))
+
+  # Deprecated variables are all "----"
+  expect_true(all(dt$OPLNIVSOI2016AGG4HBMETNIRWO == "----"))
+  expect_true(all(dt$OPLNIVSOI2016AGG4HGMETNIRWO == "----"))
+})
+
+
+# ---- INPATAB ----
+
+test_that("INPATAB generates valid personal income data", {
+  sim_reset()
+  sim_init("inpatab", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("INPA2023TABV1")
+
+  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+
+  # Key columns
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONHKW" %in% names(dt))
+  expect_true("INPPERSINK" %in% names(dt))
+  expect_true("INPPERSPRIM" %in% names(dt))
+  expect_true("INPPERSBESTINK" %in% names(dt))
+  expect_true("INPSECJ" %in% names(dt))
+
+  # Income is numeric
+  expect_true(is.numeric(dt$INPPERSINK))
+
+  # INPSECJ is labelled
+  expect_s3_class(dt$INPSECJ, "haven_labelled")
+
+  # HKW IDs are 9-char
+  expect_true(all(nchar(dt$RINPERSOONHKW) == 9L))
+})
+
+
+# ---- SECMBUS ----
+
+test_that("SECMBUS generates valid period-expanded data", {
+  sim_reset()
+  sim_init("secmbus", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("SECMBUS2023V1")
+
+  # Should have more rows than persons due to multi-period expansion
+  check_tibble(dt, min_rows = 200L, min_cols = 10L)
+
+  # Required columns
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("AANVSECM" %in% names(dt))
+  expect_true("EINDSECM" %in% names(dt))
+  expect_true("SECM" %in% names(dt))
+
+  # SECM is labelled
+  expect_s3_class(dt$SECM, "haven_labelled")
+
+  # Period dates are valid YYYYMMDD strings
+  expect_true(all(nchar(dt$AANVSECM) == 8L))
+  expect_true(all(nchar(dt$EINDSECM) == 8L))
+  expect_true(all(grepl("^2023", dt$AANVSECM)))
+  expect_true(all(grepl("^2023", dt$EINDSECM)))
+
+  # Start <= end for each row
+  expect_true(all(dt$AANVSECM <= dt$EINDSECM))
+
+  # Multiple persons have > 1 period row (multi-period expansion)
+  dt2 <- data.table::as.data.table(dt)
+  n_per_person <- dt2[, .N, by = RINPERSOON]
+  expect_true(any(n_per_person$N > 1L))
+})
+
+
+# ---- INHATAB ----
+
+test_that("INHATAB generates valid household income data", {
+  sim_reset()
+  sim_init("inhatab", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("INHA2023TABV1")
+
+  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+
+  # Key columns
+  expect_true("RINPERSOONSHKW" %in% names(dt))
+  expect_true("RINPERSOONHKW" %in% names(dt))
+  expect_true("INHBESTINKH" %in% names(dt))
+  expect_true("INHGESTINKH" %in% names(dt))
+  expect_true("INHP100HBEST" %in% names(dt))
+
+  # Income is numeric
+  expect_true(is.numeric(dt$INHBESTINKH))
+
+  # All HKW prefixes are "R"
+  hkw_vals <- as.integer(dt$RINPERSOONSHKW)
+  expect_true(all(hkw_vals == 1L, na.rm = TRUE))
+})
+
+
+# ---- BETAB ----
+
+test_that("BETAB generates valid business register data", {
+  sim_reset()
+  sim_init("betab", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("BE2023TABV1")
+
+  check_tibble(dt, min_rows = 200L, min_cols = 7L)
+
+  # Key columns
+  expect_true("BEID" %in% names(dt))
+  expect_true("SBI2008VJJJJ" %in% names(dt))
+  expect_true("SBI2025VJJJJ" %in% names(dt))
+  expect_true("GKSBS" %in% names(dt))
+  expect_true("GEMHVJJJJ" %in% names(dt))
+
+  # SBI2008 is labelled
+  expect_s3_class(dt$SBI2008VJJJJ, "haven_labelled")
+
+  # GKSBS is labelled
+  expect_s3_class(dt$GKSBS, "haven_labelled")
+
+  # Legacy SBI1993 is constant
+  expect_true(all(dt$SBI1993VJJJJ == "-----"))
+})
+
+
+# ---- col_select works for new datasets ----
+
+test_that("col_select works for new datasets", {
+  sim_reset()
+  sim_init("inpatab", year = 2023L, n = 100L, seed = 42L)
+
+  dt_sel <- read_sav("INPA2023TABV1",
+                     col_select = c("RINPERSOON", "INPPERSINK"))
+  expect_equal(ncol(dt_sel), 2L)
+  expect_true("RINPERSOON" %in% names(dt_sel))
+  expect_true("INPPERSINK" %in% names(dt_sel))
+})
+
+
+# ---- Reproducibility ----
+
+test_that("new datasets are reproducible with same seed", {
+  sim_reset()
+  sim_init("hoogsteopltab", year = 2023L, n = 100L, seed = 42L)
+  dt1 <- read_sav("HOOGSTEOPL2023TABV1")
+
+  sim_reset()
+  sim_init("hoogsteopltab", year = 2023L, n = 100L, seed = 42L)
+  dt2 <- read_sav("HOOGSTEOPL2023TABV1")
+
+  expect_identical(dt1$RINPERSOON, dt2$RINPERSOON)
+})
+
+
+# ---- HKW consistency across INPATAB and INHATAB ----
+
+test_that("HKW IDs are consistent across INPATAB and INHATAB", {
+  sim_reset()
+  sim_init("inpatab", year = 2023L, n = 200L, seed = 42L)
+  dt_inpa <- read_sav("INPA2023TABV1",
+                      col_select = c("RINPERSOON", "RINPERSOONHKW"))
+
+  sim_init("inhatab", year = 2023L, n = 200L, seed = 42L)
+  dt_inha <- read_sav("INHA2023TABV1",
+                      col_select = c("RINPERSOONHKW", "INHBESTINKH"))
+
+  # HKW IDs from INPATAB should link to INHATAB
+  common_hkw <- intersect(dt_inpa$RINPERSOONHKW, dt_inha$RINPERSOONHKW)
+  expect_gt(length(common_hkw), 0L)
+})

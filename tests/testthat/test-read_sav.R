@@ -2,6 +2,7 @@
 # Ported from scripts/test_read_sav_woonbase.R
 
 test_that("spine initialisation works", {
+  sim_reset()
   woonbase_init(year = 2023L, n = 5000L, seed = 42L)
 
   expect_false(is.null(.wb$spine))

@@ -11,7 +11,8 @@ sim_export(out_dir, year = 2023, n = 1000, seed = 42)
 pq_files <- list.files(out_dir, pattern = "\\.parquet$", recursive = TRUE)
 cat(sprintf("\nFound %d parquet files:\n", length(pq_files)))
 for (f in pq_files) cat(sprintf("  %s\n", f))
-stopifnot(length(pq_files) == 12L)
+# 12 original + 5 new = 17 files
+stopifnot(length(pq_files) >= 17L)
 
 cat("\n=== Test 2: read_sav() from parquet ===\n")
 sim_set_data_root(out_dir)

@@ -185,17 +185,20 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         if ("HUISHOUDNR" %in% names(ds_spine$pers)) {
           ds_spine$pers <- .add_hkw_to_spine(ds_spine$pers)
         } else if ("HUISHOUDNR" %in% names(spine$pers)) {
-          # Generate HKW IDs from shared spine's HUISHOUDNR
-          hh_all <- spine$pers$HUISHOUDNR
-          hh_unique <- unique(hh_all)
-          hkw_map <- data.table(
+          # Build RINPERSOON -> RINPERSOONHKW map from shared spine
+          hh_unique <- unique(spine$pers$HUISHOUDNR)
+          hkw_lookup <- data.table(
             HUISHOUDNR = hh_unique,
             RINPERSOONHKW = .deterministic_hkw_id(hh_unique)
           )
-          # Look up each sampled person's HUISHOUDNR from the shared spine
-          sampled_hh <- hh_all[seq_len(nrow(ds_spine$pers))]
-          ds_spine$pers[, RINPERSOONHKW := hkw_map$RINPERSOONHKW[
-            match(sampled_hh, hkw_map$HUISHOUDNR)]]
+          pers_hh <- data.table(
+            RINPERSOON = spine$pers$RINPERSOON,
+            HUISHOUDNR = spine$pers$HUISHOUDNR
+          )
+          pers_hh <- merge(pers_hh, hkw_lookup, by = "HUISHOUDNR", sort = FALSE)
+          # Match sampled persons to their HKW
+          ds_spine$pers[, RINPERSOONHKW := pers_hh$RINPERSOONHKW[
+            match(ds_spine$pers$RINPERSOON, pers_hh$RINPERSOON)]]
         } else {
           # Fallback: generate random HKW IDs
           ds_spine$pers[, RINPERSOONHKW := .rand_id(nrow(ds_spine$pers), 9L)]
