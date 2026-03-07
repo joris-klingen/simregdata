@@ -1,8 +1,9 @@
-# ENERGIEVERBRUIKTAB dataset manifest
+# ENERGIEVERBRUIK dataset manifest
 # Energy consumption of private dwellings
-# CBS name pattern: ENERGIEVERBRUIK{YYYY}TABV{N}
+# CBS name patterns:
+#   ENERGIEVERBRUIK{YYYY}TABV{N}      — annual totals (2004-2024)
+#   ENERGIEVERBRUIKMAAND{YYYY}TABV{N} — monthly smart meter data (2021-2024)
 # One record per dwelling (object), keyed by SOORTOBJECTNUMMER + RINOBJECTNUMMER
-# Available 2004-2024
 
 dataset_id: energieverbruik
 label: Energieverbruik particuliere woningen
@@ -19,4 +20,9 @@ files:
     cbs_name: ENERGIEVERBRUIK
     entity: object
     columns_file: energieverbruik.yaml
+    tab_suffix: true
+  energieverbruikmaand:
+    cbs_name: ENERGIEVERBRUIKMAAND
+    entity: object
+    columns_file: energieverbruikmaand.yaml
     tab_suffix: true

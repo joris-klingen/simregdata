@@ -285,3 +285,48 @@ test_that("zonnestroominstallaties seasonal pattern is correct", {
   winter <- mean(dt[["Productie_januari"]])
   expect_gt(summer, winter)
 })
+
+
+# ---- ENERGIEVERBRUIKMAANDTAB ----
+
+test_that("energieverbruikmaand generates correct structure", {
+  sim_reset()
+  sim_init("energieverbruik", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("ENERGIEVERBRUIKMAAND2023TABV1")
+
+  check_tibble(dt, min_rows = 1L, min_cols = 62L)
+  expect_equal(ncol(dt), 62L)
+
+  # All monthly columns present
+  for (prefix in c("GASLEV", "ELKLEV", "ELKTLV", "ELKLEVLAAG", "ELKTLVLAAG")) {
+    for (m in sprintf("%02d", 1:12)) {
+      expect_true(paste0(prefix, m) %in% names(dt))
+    }
+  }
+
+  # Numeric values
+  expect_true(is.numeric(dt[["GASLEV01"]]))
+  expect_true(all(dt[["GASLEV01"]] >= 0))
+})
+
+test_that("energieverbruikmaand gas has seasonal pattern", {
+  sim_reset()
+  sim_init("energieverbruik", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("ENERGIEVERBRUIKMAAND2023TABV1")
+
+  jan <- mean(dt[["GASLEV01"]])
+  jul <- mean(dt[["GASLEV07"]])
+  expect_gt(jan, jul)
+})
+
+test_that("energieverbruikmaand shares objects with annual", {
+  sim_reset()
+  sim_init("energieverbruik", year = 2023L, n = 200L, seed = 42L)
+
+  dt_month <- read_sav("ENERGIEVERBRUIKMAAND2023TABV1",
+                         col_select = c(RINOBJECTNUMMER))
+  dt_annual <- read_sav("ENERGIEVERBRUIK2023TABV1",
+                          col_select = c(RINOBJECTNUMMER))
+
+  expect_equal(sort(dt_month$RINOBJECTNUMMER), sort(dt_annual$RINOBJECTNUMMER))
+})

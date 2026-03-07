@@ -49,6 +49,32 @@ Overview of all simulated columns
 
 </details>
 
+<details>
+<summary><code>ENERGIEVERBRUIKMAANDTAB</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `SOORTOBJECTNUMMER` | spine-derived | gemeente |  | [SOORTOBJECTNUMMER](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `RINOBJECTNUMMER` | spine-derived | gemeente |  |  |
+| `GASLEV01` | random: normal (mean=200, sd=100) |  |  |  |
+| `GASLEV02` | random: normal (mean=180, sd=90) |  |  |  |
+| `GASLEV03` | random: normal (mean=140, sd=70) |  |  |  |
+| `GASLEV04` | random: normal (mean=70, sd=40) |  |  |  |
+| `GASLEV05` | random: normal (mean=25, sd=15) |  |  |  |
+| `GASLEV06` | random: normal (mean=15, sd=10) |  |  |  |
+| `GASLEV07` | random: normal (mean=10, sd=8) |  |  |  |
+| `GASLEV08` | random: normal (mean=10, sd=8) |  |  |  |
+| `GASLEV09` | random: normal (mean=20, sd=12) |  |  |  |
+| `GASLEV10` | random: normal (mean=60, sd=35) |  |  |  |
+| `GASLEV11` | random: normal (mean=140, sd=70) |  |  |  |
+| `GASLEV12` | random: normal (mean=190, sd=95) |  |  |  |
+| `ELKLEV01, ELKLEV02, ELKLEV03, ELKLEV04, ELKLEV05, ELKLEV06, ELKLEV07, ELKLEV08, ELKLEV09, ELKLEV10, ELKLEV11, ELKLEV12` | random: normal (mean=150, sd=80) |  |  |  |
+| `ELKTLV01, ELKTLV02, ELKTLV03, ELKTLV04, ELKTLV05, ELKTLV06, ELKTLV07, ELKTLV08, ELKTLV09, ELKTLV10, ELKTLV11, ELKTLV12` | random: normal (mean=30, sd=50) |  |  |  |
+| `ELKLEVLAAG01, ELKLEVLAAG02, ELKLEVLAAG03, ELKLEVLAAG04, ELKLEVLAAG05, ELKLEVLAAG06, ELKLEVLAAG07, ELKLEVLAAG08, ELKLEVLAAG09, ELKLEVLAAG10, ELKLEVLAAG11, ELKLEVLAAG12` | random: normal (mean=60, sd=35) |  |  |  |
+| `ELKTLVLAAG01, ELKTLVLAAG02, ELKTLVLAAG03, ELKTLVLAAG04, ELKTLVLAAG05, ELKTLVLAAG06, ELKTLVLAAG07, ELKTLVLAAG08, ELKTLVLAAG09, ELKTLVLAAG10, ELKTLVLAAG11, ELKTLVLAAG12` | random: normal (mean=5, sd=10) |  |  |  |
+
+</details>
+
 ## GBA Bevolkingsregister
 
 <details>

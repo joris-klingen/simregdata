@@ -38,7 +38,8 @@ test_that("file name parsing matches exact CBS names", {
       list(file_key = "populatie_pers", year = 2023L),
     "GBAPERSOONKTAB2023TABV1"                       = list(file_key = "persoonktab",    year = 2023L),
     "RDWNPACT2023TABV1"                             = list(file_key = "kentekens",      year = 2023L),
-    "SPOLISBUS2023V1"                               = list(file_key = "spolisbus",      year = 2023L)
+    "SPOLISBUS2023V1"                               = list(file_key = "spolisbus",      year = 2023L),
+    "ENERGIEVERBRUIKMAAND2023TABV1"                  = list(file_key = "energieverbruikmaand", year = 2023L)
   )
 
   for (nm in names(names_should_match)) {
