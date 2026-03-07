@@ -23,16 +23,23 @@ sim_column_overview <- function() {
 
   # StatLine table mapping: dataset -> table IDs used for calibration
   statline_tables <- list(
-    woonbase        = "37230ned",
-    rdw             = "85237NED, 85236NED, 85404NED",
-    spolis          = "81431NED",
-    vehtab          = "83834NED",
-    energieverbruik = "Kerncijfers wijken en buurten",
-    gba             = NA_character_
-
+    woonbase                = "37230ned",
+    rdw                     = "85237NED, 85236NED, 85404NED",
+    spolis                  = "81431NED",
+    vehtab                  = "83834NED",
+    energieverbruik         = "Kerncijfers wijken en buurten",
+    gba                     = NA_character_,
+    hoogsteopltab           = "82275NED",
+    inpatab                 = NA_character_,
+    secmbus                 = NA_character_,
+    inhatab                 = NA_character_,
+    betab                   = NA_character_,
+    zonnestroominstallaties = NA_character_
   )
 
-  datasets <- c("gba", "woonbase", "rdw", "spolis", "vehtab", "energieverbruik")
+  # Auto-discover all datasets from config directory
+  base <- .dataset_base_dir()
+  datasets <- basename(list.dirs(base, recursive = FALSE))
   base <- .dataset_base_dir()
 
   rows <- list()

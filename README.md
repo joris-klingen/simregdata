@@ -19,11 +19,26 @@ remotes::install_github("joris-klingen/simcbsradata")
 
 ## Supported datasets
 
-Currently supports 6 CBS datasets across 17 file types: **GBA** (population register), **Woonbase** (housing + population), **RDW** (vehicle registrations), **SPOLIS** (employment records), **VEHTAB** (household wealth), and **Energieverbruik** (dwelling energy consumption). More datasets will be added over time.
+Currently supports 12 CBS datasets across 23 file types:
 
-All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER), so cross-file joins work exactly as on the real CBS Remote Access.
+| Dataset | Description | Key |
+|---------|-------------|-----|
+| **GBA** | Population register (3 files) | RINPERSOON |
+| **Woonbase** | Housing + population (9 files) | RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER |
+| **RDW** | Vehicle registrations (2 files) | RINPERSOON, RINKENTEKEN |
+| **SPOLIS** | Employment records with monthly job structure | RINPERSOON, SBEID |
+| **VEHTAB** | Household wealth | RINPERSOONHKW |
+| **Energieverbruik** | Dwelling energy consumption | RINOBJECTNUMMER |
+| **HOOGSTEOPLTAB** | Highest attained education level | RINPERSOON |
+| **INPATAB** | Personal income | RINPERSOON, RINPERSOONHKW |
+| **SECMBUS** | Socioeconomic category (monthly periods) | RINPERSOON |
+| **INHATAB** | Household income | RINPERSOONHKW |
+| **BETAB** | Business register | BEID |
+| **Zonnestroominstallaties** | Solar PV installations + monthly production | RINOBJECTNUMMER |
 
-See the full [column overview](docs/column-overview.md) for all 396 simulated columns with their source, spatial level, calibration links, and codelists.
+All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, RINPERSOONHKW), so cross-file joins work exactly as on the real CBS Remote Access.
+
+See the full [column overview](docs/column-overview.md) for all 519 simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Quick start
 
