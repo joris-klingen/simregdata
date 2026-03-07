@@ -213,6 +213,13 @@
     }, error = function(e) NULL)   # fallback: generate all columns
   }
 
+  # Detect job-group structure (for SPOLIS monthly data)
+  has_job_groups <- "job_group" %in% names(base_tbl)
+  if (has_job_groups) {
+    job_groups   <- base_tbl$job_group
+    n_unique_jobs <- max(job_groups)
+  }
+
   # Build result data.table column by column
   n_cols <- length(spec$columns) * 2L  # upper bound (suffixes expand)
   result_cols <- vector("list", n_cols)
@@ -262,9 +269,18 @@
     } else {
       # Skip if not selected
       if (!is.null(selected_set) && !(cs$name %in% selected_set)) next
-      val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31,
-                             computed, params)
-      val <- .apply_codelist(val, cs, codelists)
+
+      # Job-level columns: generate once per unique job, then expand to rows
+      if (has_job_groups && identical(cs$level, "job")) {
+        val <- .resolve_column(cs, spine, n_unique_jobs, codelists, jan1,
+                               dec31, computed, params)
+        val <- .apply_codelist(val, cs, codelists)
+        val <- val[job_groups]
+      } else {
+        val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31,
+                               computed, params)
+        val <- .apply_codelist(val, cs, codelists)
+      }
       idx <- idx + 1L
       result_cols[[idx]] <- val
       result_names[[idx]] <- cs$name

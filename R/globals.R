@@ -45,7 +45,10 @@ utils::globalVariables(c(
   "BESTINKH", "BELIH", "GESTINKH", "VERMHH",
   "VROMHH", "P100HBEST", "P100HGEST", "P100HVERM", "P100WELVAART",
   "veh_weight", "vehicles", "pop",
-  "gem_code", "RINKENTEKEN", "..hh_cols", "..obj_cols"
+  "gem_code", "RINKENTEKEN", "..hh_cols", "..obj_cols",
+  "job_group", "month", "period_start", "period_end",
+  "ikv_start", "ikv_end", "ikv_start_prev",
+  "IKVID", "SBEID", "RINPERSOONS"
 ))
 
 # Session cache environment — per-dataset spine + config caches

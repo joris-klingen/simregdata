@@ -94,26 +94,44 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         n_records <- as.integer(n)
       }
 
-      # Weighted sampling: use gemeente vehicle weights if available
-      gem_wt <- .load_gem_vehicle_weights(dataset, year)
-      gem_col <- if (!is.null(gem_wt)) {
-        spine$pers$GemeenteCodeJJJJ1Jan %||% spine$pers_gemeente
-      }
-      if (!is.null(gem_col)) {
-        pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
-        pw[is.na(pw)] <- 1.0
-        idx <- sample.int(nrow(spine$pers), n_records,
-          replace = TRUE, prob = pw)
-      } else {
+      # SPOLIS: build job structure with monthly expansion
+      if (identical(dataset, "spolis")) {
+        # Sample persons first (these are the workers)
         idx <- sample.int(nrow(spine$pers), n_records,
           replace = n_records > nrow(spine$pers))
-      }
+        pers_cols <- intersect(
+          c("RINPERSOON", needed$pers), names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+        sampled_pers <- spine$pers[idx, ..pers_cols]
 
-      pers_cols <- needed$pers
-      if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
-      pers_cols <- intersect(pers_cols, names(spine$pers))
-      if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
-      ds_spine$pers <- spine$pers[idx, ..pers_cols]
+        # Build job-month expanded spine
+        ds_spine$pers <- .build_spolis_jobs(
+          sampled_pers, n_jobs = n_records, year = year, seed = seed,
+          params = NULL)
+
+      } else {
+        # Standard generic sampling
+        # Weighted sampling: use gemeente vehicle weights if available
+        gem_wt <- .load_gem_vehicle_weights(dataset, year)
+        gem_col <- if (!is.null(gem_wt)) {
+          spine$pers$GemeenteCodeJJJJ1Jan %||% spine$pers_gemeente
+        }
+        if (!is.null(gem_col)) {
+          pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
+          pw[is.na(pw)] <- 1.0
+          idx <- sample.int(nrow(spine$pers), n_records,
+            replace = TRUE, prob = pw)
+        } else {
+          idx <- sample.int(nrow(spine$pers), n_records,
+            replace = n_records > nrow(spine$pers))
+        }
+
+        pers_cols <- needed$pers
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+        pers_cols <- intersect(pers_cols, names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+        ds_spine$pers <- spine$pers[idx, ..pers_cols]
+      }
 
       # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
       if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))

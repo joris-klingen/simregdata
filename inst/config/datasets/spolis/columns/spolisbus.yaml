@@ -20,16 +20,15 @@ columns:
     source: spine.pers.RINPERSOON
 
   - name: IKVID
-    random_id:
-      width: 32
+    source: spine.pers.IKVID
 
   # --- Dates ---
 
   - name: SDATUMAANVANGIKO
-    template: "{jan1}"
+    source: spine.pers.period_start
 
   - name: SDATUMEINDEIKO
-    template: "{dec31}"
+    source: spine.pers.period_end
 
   # --- Monetary / numeric columns (F10 / F10.2 / F8.2) ---
 
@@ -420,6 +419,7 @@ columns:
   - name: SCAO_crypt
     random_id:
       width: 32
+    level: job
 
   - name: SCDAARD
     random_categorical:
@@ -427,6 +427,7 @@ columns:
       probs:  [0.45, 0.20, 0.05, 0.02, 0.03, 0.01, 0.01, 0.02, 0.01, 0.03, 0.08, 0.03, 0.02, 0.04]
     codelist: SCDAARD
     label: Aard arbeidsverhouding
+    level: job
 
   - name: SCDAGH
     random_categorical:
@@ -434,6 +435,7 @@ columns:
       probs:  [0.05, 0.85, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.01, 0.01]
     codelist: SCDAGH
     label: Arbeidsgehandicaptenkorting
+    level: job
 
   - name: SCDINCINKVERM
     random_categorical:
@@ -441,6 +443,7 @@ columns:
       probs:  [0.02, 0.95, 0.03]
     codelist: SCDINCINKVERM
     label: Inkomensvermindering
+    level: job
 
   - name: SCDINVLVPL1
     random_categorical:
@@ -448,6 +451,7 @@ columns:
       probs:  [0.02, 0.90, 0.01, 0.01, 0.005, 0.01, 0.005, 0.005, 0.005, 0.01, 0.02]
     codelist: SCDINVLVPL
     label: Invloed op voorlopige teruggaaf 1
+    level: job
 
   - name: SCDINVLVPL2
     random_categorical:
@@ -455,6 +459,7 @@ columns:
       probs:  [0.02, 0.93, 0.005, 0.005, 0.002, 0.005, 0.003, 0.003, 0.003, 0.005, 0.02]
     codelist: SCDINVLVPL
     label: Invloed op voorlopige teruggaaf 2
+    level: job
 
   - name: SCDINVLVPL3
     random_categorical:
@@ -462,6 +467,7 @@ columns:
       probs:  [0.02, 0.93, 0.005, 0.005, 0.002, 0.005, 0.003, 0.003, 0.003, 0.005, 0.02]
     codelist: SCDINVLVPL
     label: Invloed op voorlopige teruggaaf 3
+    level: job
 
   - name: SCDRDNGNBIJT
     random_categorical:
@@ -469,6 +475,7 @@ columns:
       probs:  [0.02, 0.80, 0.08, 0.05, 0.02, 0.02, 0.01]
     codelist: SCDRDNGNBIJT
     label: Reden geen bijtelling
+    level: job
 
   - name: SCDZVW
     random_categorical:
@@ -476,6 +483,7 @@ columns:
       probs:  [0.05, 0.02, 0.02, 0.01, 0.01, 0.75, 0.01, 0.10, 0.03]
     codelist: SCDZVW
     label: Code Zvw
+    level: job
 
   - name: SCONTRACTSOORT
     random_categorical:
@@ -483,9 +491,10 @@ columns:
       probs:  [0.30, 0.65, 0.05]
     codelist: SCONTRACTSOORT
     label: Soort contract
+    level: job
 
   - name: SDATUMAANVANGIKVORG
-    template: "{jan1}"
+    source: spine.pers.ikv_start_prev
 
   - name: SFSINDFZ
     random_categorical:
@@ -493,6 +502,7 @@ columns:
       probs:  [0.05, 0.60, 0.08, 0.06, 0.05, 0.04, 0.06, 0.06]
     codelist: SFSINDFZ
     label: Fase flexibiliteit en zekerheid
+    level: job
 
   - name: SINDLHKORT
     random_categorical:
@@ -500,6 +510,7 @@ columns:
       probs:  [0.10, 0.90]
     codelist: JN_INDICATOR
     label: Loonheffingskorting
+    level: job
 
   - name: SINDSA03
     random_categorical:
@@ -507,6 +518,7 @@ columns:
       probs:  [0.05, 0.95]
     codelist: JN_INDICATOR
     label: Indicatie SA03
+    level: job
 
   - name: SINDSA43
     random_categorical:
@@ -514,6 +526,7 @@ columns:
       probs:  [0.02, 0.98]
     codelist: JN_INDICATOR
     label: Indicatie SA43
+    level: job
 
   - name: SINDSA71
     random_categorical:
@@ -521,6 +534,7 @@ columns:
       probs:  [0.02, 0.98]
     codelist: JN_INDICATOR
     label: Indicatie SA71
+    level: job
 
   - name: SINDSA72
     random_categorical:
@@ -528,6 +542,7 @@ columns:
       probs:  [0.02, 0.98]
     codelist: JN_INDICATOR
     label: Indicatie SA72
+    level: job
 
   - name: SINDVAKBN
     random_categorical:
@@ -535,6 +550,7 @@ columns:
       probs:  [0.05, 0.05, 0.90]
     codelist: JN_INDICATOR
     label: Indicatie vakantiebonnen
+    level: job
 
   - name: SINDZW
     random_categorical:
@@ -542,6 +558,7 @@ columns:
       probs:  [0.85, 0.15]
     codelist: JN_INDICATOR
     label: Indicatie verzekerd ZW
+    level: job
 
   - name: SINLEGLEVENSLOOP
     random_categorical:
@@ -549,6 +566,7 @@ columns:
       probs:  [0.05, 0.02, 0.93]
     codelist: JN_INDICATOR
     label: Inleg levensloopregeling
+    level: job
 
   - name: SOVERWERK
     random_categorical:
@@ -556,6 +574,7 @@ columns:
       probs:  [0.85, 0.15]
     codelist: INDICATOR_01
     label: Indicatie overwerk
+    level: job
 
   # Year-specific dienstverband from 81431NED
   - name: SPOLISDIENSTVERBAND
@@ -565,6 +584,7 @@ columns:
       probs:  [0.50, 0.50]
     codelist: SPOLISDIENSTVERBAND
     label: Dienstverband voltijd/deeltijd
+    level: job
 
   - name: SRISGRP
     random_categorical:
@@ -572,6 +592,7 @@ columns:
       probs:  [0.05, 0.30, 0.40, 0.15, 0.10]
     codelist: SRISGRP
     label: Risicopremiegroep
+    level: job
 
   - name: SSRTIV
     random_categorical:
@@ -579,6 +600,7 @@ columns:
       probs:  [0.35, 0.25, 0.02, 0.03, 0.02, 0.02, 0.01, 0.05, 0.08, 0.05, 0.03, 0.02, 0.04, 0.03]
     codelist: SSRTIV
     label: Soort inkomstenverhouding
+    level: job
 
   # Year-specific working hours class from 81431NED
   - name: SWEKARBDUURKLASSE
@@ -588,6 +610,7 @@ columns:
       probs:  [0.10, 0.10, 0.08, 0.07, 0.15, 0.50]
     codelist: SWEKARBDUURKLASSE
     label: Wekelijkse arbeidsduurklasse
+    level: job
 
   - name: SARBEIDSRELATIE
     random_categorical:
@@ -595,6 +618,7 @@ columns:
       probs:  [0.80, 0.20]
     codelist: SARBEIDSRELATIE
     label: Arbeidsrelatie
+    level: job
 
   - name: SAUTOVANDEZAAK
     random_categorical:
@@ -602,10 +626,10 @@ columns:
       probs:  [0.88, 0.12]
     codelist: SAUTOVANDEZAAK
     label: Auto van de zaak
+    level: job
 
   - name: SBEID
-    random_id:
-      width: 8
+    source: spine.pers.SBEID
 
   - name: SCAOSECTOR
     random_categorical:
@@ -613,12 +637,13 @@ columns:
       probs:  [0.70, 0.10, 0.05, 0.03, 0.08, 0.04]
     codelist: SCAOSECTOR
     label: CAO-sector
+    level: job
 
   - name: SDATUMAANVANGIKV
-    template: "{jan1}"
+    source: spine.pers.ikv_start
 
   - name: SDATUMEINDEIKV
-    template: "{dec31}"
+    source: spine.pers.ikv_end
 
   - name: SINDWAO
     random_categorical:
@@ -626,6 +651,7 @@ columns:
       probs:  [0.82, 0.18]
     codelist: JN_INDICATOR
     label: Indicatie verzekerd WAO
+    level: job
 
   - name: SINDWW
     random_categorical:
@@ -633,6 +659,7 @@ columns:
       probs:  [0.82, 0.18]
     codelist: JN_INDICATOR
     label: Indicatie verzekerd WW
+    level: job
 
   - name: SLBTAB
     random_categorical:
@@ -640,10 +667,12 @@ columns:
       probs:  [0.02, 0.65, 0.01, 0.15, 0.01, 0.02, 0.01, 0.02, 0.01, 0.02, 0.08]
     codelist: SLBTAB
     label: Loonbelastingtabel
+    level: job
 
   - name: SLHNR_crypt
     random_id:
       width: 32
+    level: job
 
   # Year-specific sector distribution from 81431NED
   - name: SSECT
@@ -653,6 +682,7 @@ columns:
       probs:  [0.03, 0.04, 0.03, 0.02, 0.12, 0.03, 0.03, 0.05, 0.04, 0.02, 0.03, 0.05, 0.05, 0.05, 0.04, 0.08, 0.08, 0.06, 0.05, 0.03, 0.07]
     codelist: SSECT
     label: Sectorcode
+    level: job
 
   # Year-specific soort baan from 81431NED
   - name: SSOORTBAAN
@@ -662,6 +692,7 @@ columns:
       probs:  [0.03, 0.02, 0.01, 0.08, 0.05, 0.81]
     codelist: SSOORTBAAN
     label: Soort baan
+    level: job
 
   - name: STIJDVAKTYPE
     random_categorical:
@@ -669,6 +700,7 @@ columns:
       probs:  [0.10, 0.01, 0.01, 0.88]
     codelist: STIJDVAKTYPE
     label: Tijdvaktype
+    level: job
 
   # --- Additional premium / monetary columns ---
 
@@ -705,6 +737,7 @@ columns:
       probs:  [0.90, 0.10]
     codelist: INDICATOR_01
     label: Indicatie tijdelijke heffingskorting
+    level: job
 
   - name: SIMPUTATIE
     random_categorical:
@@ -712,6 +745,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Indicatie imputatie
+    level: job
 
   # --- Columns added from 2015 ---
 
@@ -721,6 +755,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Premiekorting jongere werknemer
+    level: job
 
   - name: SINDPKAGH
     random_categorical:
@@ -728,6 +763,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Premiekorting arbeidsgehandicapte
+    level: job
 
   - name: SINDPKNWARBVOUDWN
     random_categorical:
@@ -735,6 +771,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Premiekorting nieuwe arbeid oudere werknemer
+    level: job
 
   - name: SINDPMA
     random_categorical:
@@ -742,6 +779,7 @@ columns:
       probs:  [0.90, 0.10]
     codelist: INDICATOR_01
     label: Premie mobiliteitsbonus arbeidsgehandicapte
+    level: job
 
   - name: SCTRCTLN
     random_numeric:
@@ -751,6 +789,7 @@ columns:
       min: 0
       max: 25000
       round: 2
+    level: job
 
   - name: SAANTCTRCTURENPWK
     random_numeric:
@@ -760,6 +799,7 @@ columns:
       min: 0
       max: 60
       round: 2
+    level: job
 
   - name: SBEDRRNTKSTVPERSL
     random_numeric:
@@ -776,6 +816,7 @@ columns:
       probs:  [0.10, 0.90]
     codelist: INDICATOR_01
     label: Indicatie waarneming
+    level: job
 
   - name: SModelramingPensioenpremieWn
     random_numeric:
@@ -830,6 +871,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Loonkostenvoordeel oudere werknemer
+    level: job
 
   - name: SIndAvrLkvAgWn
     random_categorical:
@@ -837,6 +879,7 @@ columns:
       probs:  [0.97, 0.03]
     codelist: INDICATOR_01
     label: Loonkostenvoordeel arbeidsgehandicapte werknemer
+    level: job
 
   - name: SIndAvrLkvDgBafSb
     random_categorical:
@@ -844,6 +887,7 @@ columns:
       probs:  [0.97, 0.03]
     codelist: INDICATOR_01
     label: Loonkostenvoordeel doelgroep banenafspraak
+    level: job
 
   - name: SIndAvrLkvHpAgWn
     random_categorical:
@@ -851,6 +895,7 @@ columns:
       probs:  [0.97, 0.03]
     codelist: INDICATOR_01
     label: Loonkostenvoordeel herplaatste arbeidsgehandicapte
+    level: job
 
   # --- Columns added from 2020 ---
 
@@ -860,10 +905,12 @@ columns:
       probs:  [0.60, 0.05, 0.03, 0.08, 0.05, 0.06, 0.01, 0.01, 0.03, 0.02, 0.01, 0.05]
     codelist: CDRDNEINDARB
     label: Reden einde arbeidsovereenkomst
+    level: job
 
   - name: CdCaoInl_crypt
     random_id:
       width: 32
+    level: job
 
   - name: IndArbovOnbepTd
     random_categorical:
@@ -871,6 +918,7 @@ columns:
       probs:  [0.35, 0.65]
     codelist: INDICATOR_01
     label: Arbeidsovereenkomst onbepaalde tijd
+    level: job
 
   - name: IndSchriftArbov
     random_categorical:
@@ -878,6 +926,7 @@ columns:
       probs:  [0.10, 0.90]
     codelist: INDICATOR_01
     label: Schriftelijke arbeidsovereenkomst
+    level: job
 
   - name: IndOprov
     random_categorical:
@@ -885,6 +934,7 @@ columns:
       probs:  [0.85, 0.15]
     codelist: INDICATOR_01
     label: Indicatie oproepovereenkomst
+    level: job
 
   - name: IndJrurennrm
     random_categorical:
@@ -892,6 +942,7 @@ columns:
       probs:  [0.90, 0.10]
     codelist: INDICATOR_01
     label: Indicatie jaarurennorm
+    level: job
 
   - name: PRLNUFO
     random_numeric:
@@ -964,6 +1015,7 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Publiekrechtelijke aanstelling onbepaalde tijd
+    level: job
 
   # --- Columns added from 2022 ---
 
@@ -1085,3 +1137,4 @@ columns:
       probs:  [0.95, 0.05]
     codelist: INDICATOR_01
     label: Indicatie deelname tijdspaarfonds
+    level: job
