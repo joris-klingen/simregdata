@@ -1,0 +1,224 @@
+# Zonnnestroominstallaties{YYYY}V{N} — Solar PV installations
+# One record per installation, linked to objects via RINOBJECTNUMMER
+entity: object
+spine_table: pers
+
+columns:
+  # ---- Identifiers ----
+  - name: EAN_installatie_crypt
+    random_id:
+      width: 64
+    label: Versleutelde EAN-code productie-installatie
+
+  - name: EAN_aansluiting_crypt
+    random_id:
+      width: 64
+    label: Versleutelde EAN-code energie-aansluiting
+
+  - name: RINObjectnummer
+    source: spine.pers.RINOBJECTNUMMER
+
+  - name: SOORTOBJECTNUMMER
+    source: spine.pers.SOORTOBJECTNUMMER
+    codelist: SOORTOBJECTNUMMER
+    label: Herkomst identificatienummer object
+
+  # ---- Location ----
+  - name: GWB
+    random_id:
+      width: 8
+    label: Gemeente-wijk-buurtcode
+
+  - name: PC4
+    random_numeric:
+      distribution: uniform
+      min: 1000
+      max: 9999
+      round: 0
+    label: Numeriek deel postcode
+
+  # ---- Capacity ----
+  - name: Vermogen_panelen
+    random_numeric:
+      distribution: normal
+      mean: 4.2
+      sd: 2.5
+      mean_from_params: panel_capacity_mean
+      sd_from_params: panel_capacity_sd
+      min: 0.5
+      round: 3
+    label: Vermogen zonnepanelen in kWp
+
+  - name: Vermogen_omvormer
+    random_numeric:
+      distribution: normal
+      mean: 3.8
+      sd: 2.3
+      min: 0.3
+      round: 3
+    label: Vermogen omvormer in kW
+
+  # ---- Annual production (GWh) ----
+  - name: Jaarproductie
+    random_numeric:
+      distribution: normal
+      mean: 0.003700
+      sd: 0.002200
+      min: 0.000001
+      round: 6
+    label: Jaarproductie zonnestroom in GWh
+
+  # ---- Monthly production (GWh) ----
+  # Seasonal pattern: summer months higher, winter months lower
+  - name: Productie_januari
+    random_numeric:
+      distribution: normal
+      mean: 0.000090
+      sd: 0.000060
+      min: 0
+      round: 6
+    label: Productie januari in GWh
+
+  - name: Productie_februari
+    random_numeric:
+      distribution: normal
+      mean: 0.000155
+      sd: 0.000100
+      min: 0
+      round: 6
+    label: Productie februari in GWh
+
+  - name: Productie_maart
+    random_numeric:
+      distribution: normal
+      mean: 0.000310
+      sd: 0.000190
+      min: 0
+      round: 6
+    label: Productie maart in GWh
+
+  - name: Productie_april
+    random_numeric:
+      distribution: normal
+      mean: 0.000420
+      sd: 0.000250
+      min: 0
+      round: 6
+    label: Productie april in GWh
+
+  - name: Productie_mei
+    random_numeric:
+      distribution: normal
+      mean: 0.000500
+      sd: 0.000300
+      min: 0
+      round: 6
+    label: Productie mei in GWh
+
+  - name: Productie_juni
+    random_numeric:
+      distribution: normal
+      mean: 0.000520
+      sd: 0.000310
+      min: 0
+      round: 6
+    label: Productie juni in GWh
+
+  - name: Productie_juli
+    random_numeric:
+      distribution: normal
+      mean: 0.000510
+      sd: 0.000300
+      min: 0
+      round: 6
+    label: Productie juli in GWh
+
+  - name: Productie_augustus
+    random_numeric:
+      distribution: normal
+      mean: 0.000440
+      sd: 0.000260
+      min: 0
+      round: 6
+    label: Productie augustus in GWh
+
+  - name: Productie_september
+    random_numeric:
+      distribution: normal
+      mean: 0.000330
+      sd: 0.000200
+      min: 0
+      round: 6
+    label: Productie september in GWh
+
+  - name: Productie_oktober
+    random_numeric:
+      distribution: normal
+      mean: 0.000210
+      sd: 0.000130
+      min: 0
+      round: 6
+    label: Productie oktober in GWh
+
+  - name: Productie_november
+    random_numeric:
+      distribution: normal
+      mean: 0.000110
+      sd: 0.000070
+      min: 0
+      round: 6
+    label: Productie november in GWh
+
+  - name: Productie_december
+    random_numeric:
+      distribution: normal
+      mean: 0.000075
+      sd: 0.000050
+      min: 0
+      round: 6
+    label: Productie december in GWh
+
+  # ---- Installation type ----
+  - name: Type
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.92, 0.06, 0.02]
+    codelist: Type
+    label: Type installatie (dak/veld/water)
+
+  - name: Prod_waargenomen
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.25, 0.75]
+    codelist: Prod_waargenomen
+    label: Productie waargenomen via register
+
+  - name: Actief_op_31_12
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.03, 0.97]
+    codelist: Actief_op_31_12
+    label: Installatie actief op 31 december
+
+  - name: Hele_jaar_actief
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.12, 0.88]
+    codelist: Hele_jaar_actief
+    label: Installatie hele jaar actief
+
+  - name: Datum_in
+    value: ""
+    label: Datum ingebruikname
+
+  - name: Datum_uit
+    value: ""
+    label: Datum uitgebruikname
+
+  - name: Installatiejaar
+    random_numeric:
+      distribution: uniform
+      min: 2010
+      max: 2023
+      round: 0
+    label: Jaar van installatie

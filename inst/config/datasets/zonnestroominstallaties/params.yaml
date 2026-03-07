@@ -1,0 +1,15 @@
+'2022':
+  n_installations: 2400000
+  panel_capacity_mean: 3.8
+  panel_capacity_sd: 2.3
+  specific_yield: 875
+'2023':
+  n_installations: 3000000
+  panel_capacity_mean: 4.2
+  panel_capacity_sd: 2.5
+  specific_yield: 900
+'2024':
+  n_installations: 3500000
+  panel_capacity_mean: 4.5
+  panel_capacity_sd: 2.6
+  specific_yield: 910

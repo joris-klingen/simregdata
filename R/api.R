@@ -151,6 +151,19 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           RINPERSOONS = rep("R", length(beids))
         )
 
+      } else if (identical(dataset, "zonnestroominstallaties")) {
+        # Solar installations: sample from objects (not persons)
+        obj_tbl <- spine$obj_raw %||% spine$obj
+        n_obj <- nrow(obj_tbl)
+        n_solar <- min(n_records, n_obj)
+        idx <- sample.int(n_obj, n_solar,
+          replace = n_solar > n_obj)
+        ds_spine$pers <- data.table(
+          RINOBJECTNUMMER = obj_tbl$RINOBJECTNUMMER[idx],
+          SOORTOBJECTNUMMER = if ("SOORTOBJECTNUMMER" %in% names(obj_tbl))
+            obj_tbl$SOORTOBJECTNUMMER[idx] else rep("B", n_solar)
+        )
+
       } else {
         # Standard generic sampling
         # Weighted sampling: use gemeente vehicle weights if available
@@ -635,7 +648,8 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       yr_data <- all_params[[as.character(nearest)]]
     }
     n <- yr_data$n_vehicles %||% yr_data$n_jobs %||% yr_data$n_households %||%
-         yr_data$n_dwellings %||% yr_data$n_persons %||% yr_data$n_businesses
+         yr_data$n_dwellings %||% yr_data$n_persons %||% yr_data$n_businesses %||%
+         yr_data$n_installations
     if (!is.null(n)) as.integer(n) else NULL
   }, error = function(e) NULL)
 }

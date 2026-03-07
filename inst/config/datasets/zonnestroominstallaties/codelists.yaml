@@ -1,0 +1,41 @@
+# Codelists for ZONNESTROOMINSTALLATIES
+
+SOORTOBJECTNUMMER:
+  c2i:
+    "B": 1
+  labels:
+    "Rinobjectnummer BAG": 1
+
+Type:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    "dak": 1
+    "veld": 2
+    "water": 3
+
+Prod_waargenomen:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "nee": 0
+    "ja": 1
+
+Actief_op_31_12:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "nee": 0
+    "ja": 1
+
+Hele_jaar_actief:
+  c2i:
+    "0": 0
+    "1": 1
+  labels:
+    "nee": 0
+    "ja": 1

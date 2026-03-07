@@ -1,0 +1,22 @@
+# ZONNESTROOMINSTALLATIES dataset manifest
+# Solar PV installation characteristics and electricity production
+# CBS name pattern: Zonnnestroominstallaties{YYYY}V{N}  (note: triple 'n' is CBS original)
+# One record per installation, keyed by EAN, linked to objects via RINOBJECTNUMMER
+# Available 2022-2024
+
+dataset_id: zonnestroominstallaties
+label: Kenmerken en elektriciteitsproductie van zonnestroominstallaties
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  zonnestroominstallaties:
+    cbs_name: Zonnnestroominstallaties
+    entity: object
+    columns_file: zonnestroominstallaties.yaml
+    tab_suffix: false

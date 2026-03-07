@@ -1,5 +1,5 @@
 # tests/testthat/test-new-datasets.R
-# Tests for HOOGSTEOPLTAB, INPATAB, SECMBUS, INHATAB, BETAB
+# Tests for HOOGSTEOPLTAB, INPATAB, SECMBUS, INHATAB, BETAB, ZONNESTROOMINSTALLATIES
 
 # ---- Helpers ----
 
@@ -18,7 +18,8 @@ test_that("new dataset file names parse correctly", {
     "INPA2023TABV1"        = list(file_key = "inpatab",       dataset_id = "inpatab",       year = 2023L),
     "SECMBUS2023V1"        = list(file_key = "secmbus",       dataset_id = "secmbus",       year = 2023L),
     "INHA2023TABV1"        = list(file_key = "inhatab",       dataset_id = "inhatab",       year = 2023L),
-    "BE2023TABV1"          = list(file_key = "betab",         dataset_id = "betab",         year = 2023L)
+    "BE2023TABV1"          = list(file_key = "betab",         dataset_id = "betab",         year = 2023L),
+    "Zonnnestroominstallaties2023V1" = list(file_key = "zonnestroominstallaties", dataset_id = "zonnestroominstallaties", year = 2023L)
   )
 
   for (nm in names(new_names)) {
@@ -221,4 +222,66 @@ test_that("HKW IDs are consistent across INPATAB and INHATAB", {
   # HKW IDs from INPATAB should link to INHATAB
   common_hkw <- intersect(dt_inpa$RINPERSOONHKW, dt_inha$RINPERSOONHKW)
   expect_gt(length(common_hkw), 0L)
+})
+
+
+# ---- ZONNESTROOMINSTALLATIES ----
+
+test_that("zonnestroominstallaties generates correct structure", {
+  sim_reset()
+  sim_init("zonnestroominstallaties", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("Zonnnestroominstallaties2023V1")
+
+  check_tibble(dt, min_rows = 1L, min_cols = 28L)
+  expect_equal(ncol(dt), 28L)
+
+  # Identifiers
+  expect_true("EAN_installatie_crypt" %in% names(dt))
+  expect_true("RINObjectnummer" %in% names(dt))
+  expect_true("SOORTOBJECTNUMMER" %in% names(dt))
+
+  # Capacity
+  expect_true(is.numeric(dt[["Vermogen_panelen"]]))
+  expect_true(all(dt[["Vermogen_panelen"]] >= 0.5))
+
+  # Production
+  expect_true(is.numeric(dt[["Jaarproductie"]]))
+  expect_true(all(dt[["Jaarproductie"]] >= 0))
+
+  # Monthly columns present
+  months <- c("januari", "februari", "maart", "april", "mei", "juni",
+              "juli", "augustus", "september", "oktober", "november", "december")
+  for (m in months) {
+    expect_true(paste0("Productie_", m) %in% names(dt))
+  }
+
+  # Labelled categoricals
+  expect_s3_class(dt[["Type"]], "haven_labelled")
+  expect_true(all(as.integer(dt[["Type"]]) %in% 1:3))
+  expect_s3_class(dt[["Actief_op_31_12"]], "haven_labelled")
+})
+
+test_that("zonnestroominstallaties links to energieverbruik objects", {
+  sim_reset()
+  sim_init("zonnestroominstallaties", year = 2023L, n = 200L, seed = 42L)
+  sim_init("energieverbruik", year = 2023L, seed = 42L)
+
+  dt_solar <- read_sav("Zonnnestroominstallaties2023V1",
+                        col_select = c(RINObjectnummer))
+  dt_ev <- read_sav("ENERGIEVERBRUIK2023TABV1",
+                     col_select = c(RINOBJECTNUMMER))
+
+  common <- intersect(dt_solar$RINObjectnummer, dt_ev$RINOBJECTNUMMER)
+  match_rate <- length(common) / nrow(dt_solar)
+  expect_gt(match_rate, 0.95)
+})
+
+test_that("zonnestroominstallaties seasonal pattern is correct", {
+  sim_reset()
+  sim_init("zonnestroominstallaties", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("Zonnnestroominstallaties2023V1")
+
+  summer <- mean(dt[["Productie_juni"]])
+  winter <- mean(dt[["Productie_januari"]])
+  expect_gt(summer, winter)
 })
