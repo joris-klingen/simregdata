@@ -1,0 +1,65 @@
+# Codelists for INPATAB
+
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    Registratienummer: 1
+
+inpsecj:
+  c2i:
+    "--": ~
+    "11": 1
+    "12": 2
+    "13": 3
+    "14": 4
+    "15": 5
+    "21": 6
+    "22": 7
+    "23": 8
+    "24": 9
+    "25": 10
+    "26": 11
+    "31": 12
+  labels:
+    Onbekend: ~
+    Werknemer: 1
+    Directeur-grootaandeelhouder: 2
+    Zelfstandige: 3
+    Overig actief: 4
+    Meewerkend gezinslid: 5
+    Ontvanger werkloosheidsuitkering: 6
+    Ontvanger bijstandsuitkering: 7
+    Ontvanger AO-uitkering: 8
+    Ontvanger overige uitkering: 9
+    Pensioenontvangers: 10
+    Scholier/student: 11
+    Overig zonder inkomen: 12
+
+popiiv:
+  c2i:
+    "1": 1
+    "2": 2
+  labels:
+    Particulier huishouden: 1
+    Institutioneel huishouden: 2
+
+samhh:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+  labels:
+    Alleenstaand: 1
+    Partner niet-gehuwd zonder kinderen: 2
+    Partner gehuwd zonder kinderen: 3
+    Partner niet-gehuwd met kinderen: 4
+    Partner gehuwd met kinderen: 5
+    Eenouder: 6
+    Thuiswonend kind: 7
+    Overig: 8

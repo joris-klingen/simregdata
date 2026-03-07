@@ -1,0 +1,20 @@
+# SECMBUS dataset manifest
+# Socioeconomic category (monthly, bus-type with start/end dates)
+# CBS name pattern: SECMBUS{YYYY}V{N}
+# ~20M records nationally (one row per person-period)
+
+dataset_id: secmbus
+label: Sociaaleconomische categorie (maandelijks)
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  secmbus:
+    cbs_name: SECMBUS
+    entity: person
+    columns_file: secmbus.yaml

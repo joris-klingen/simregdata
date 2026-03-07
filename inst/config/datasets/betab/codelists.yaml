@@ -1,0 +1,99 @@
+# Codelists for BETAB
+
+sbi2008:
+  c2i:
+    "-----": ~
+    "01": 1
+    "10": 2
+    "25": 3
+    "41": 4
+    "45": 5
+    "46": 6
+    "47": 7
+    "49": 8
+    "55": 9
+    "56": 10
+    "62": 11
+    "64": 12
+    "68": 13
+    "69": 14
+    "70": 15
+    "71": 16
+    "72": 17
+    "74": 18
+    "78": 19
+    "80": 20
+    "81": 21
+    "84": 22
+    "85": 23
+    "86": 24
+    "87": 25
+    "88": 26
+    "94": 27
+    "96": 28
+  labels:
+    Onbekend: ~
+    Landbouw: 1
+    Voedingsmiddelenindustrie: 2
+    Metaalproductenindustrie: 3
+    Bouwnijverheid: 4
+    Autohandel en -reparatie: 5
+    Groothandel: 6
+    Detailhandel: 7
+    Vervoer over land: 8
+    Logiesverstrekking: 9
+    Eet- en drinkgelegenheden: 10
+    IT-dienstverlening: 11
+    Financiele dienstverlening: 12
+    Verhuur en handel onroerend goed: 13
+    Juridisch en accountancy: 14
+    Management advies: 15
+    Architecten en ingenieurs: 16
+    Research: 17
+    Overige professionele diensten: 18
+    Uitzendbureaus: 19
+    Beveiliging en opsporing: 20
+    Schoonmaak: 21
+    Openbaar bestuur: 22
+    Onderwijs: 23
+    Gezondheidszorg: 24
+    Verpleging en verzorging: 25
+    Maatschappelijke dienstverlening: 26
+    Werkgevers- en werknemersorg.: 27
+    Overige persoonlijke dienstverlening: 28
+
+gksbs:
+  c2i:
+    "--": ~
+    "00": 0
+    "10": 1
+    "21": 2
+    "22": 3
+    "30": 4
+    "40": 5
+    "50": 6
+    "60": 7
+    "71": 8
+    "72": 9
+    "81": 10
+    "82": 11
+    "91": 12
+    "92": 13
+    "93": 14
+  labels:
+    Onbekend: ~
+    0 werkzame personen: 0
+    1 werkzame persoon: 1
+    2 werkzame personen: 2
+    3-4 werkzame personen: 3
+    5-9 werkzame personen: 4
+    10-19 werkzame personen: 5
+    20-49 werkzame personen: 6
+    50-99 werkzame personen: 7
+    100-149 werkzame personen: 8
+    150-199 werkzame personen: 9
+    200-249 werkzame personen: 10
+    250-499 werkzame personen: 11
+    500-999 werkzame personen: 12
+    1000-1999 werkzame personen: 13
+    2000+ werkzame personen: 14

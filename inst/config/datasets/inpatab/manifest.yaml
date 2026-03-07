@@ -1,0 +1,21 @@
+# INPATAB dataset manifest
+# Personal income: annual income of persons
+# CBS name pattern: INPA{YYYY}TABV{N}
+# ~13M records nationally (one row per person with income)
+
+dataset_id: inpatab
+label: Inkomen van personen
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  inpatab:
+    cbs_name: INPA
+    entity: person
+    columns_file: inpatab.yaml
+    tab_suffix: true

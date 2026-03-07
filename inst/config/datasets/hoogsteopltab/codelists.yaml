@@ -1,0 +1,77 @@
+# Codelists for HOOGSTEOPLTAB
+
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    Registratienummer: 1
+
+oplniv_soi2021:
+  c2i:
+    "----": ~
+    "1111": 1
+    "1211": 2
+    "1212": 3
+    "1213": 4
+    "2111": 5
+    "2112": 6
+    "2120": 7
+    "2130": 8
+    "3111": 9
+    "3112": 10
+    "3113": 11
+    "3211": 12
+    "3212": 13
+    "3213": 14
+    "3214": 15
+    "3215": 16
+    "9999": 17
+  labels:
+    Onbekend: ~
+    Basisonderwijs: 1
+    Vmbo-b/k, mbo1: 2
+    Vmbo-g/t, havo/vwo-onderbouw: 3
+    Mbo1: 4
+    Havo, vwo: 5
+    Mbo2, mbo3: 6
+    Mbo4: 7
+    Mbo overig: 8
+    Hbo-bachelor: 9
+    Wo-bachelor: 10
+    Hbo-associate degree: 11
+    Hbo-master: 12
+    Wo-master: 13
+    Doctor: 14
+    Hbo overig: 15
+    Wo overig: 16
+    Niet ingevuld (NIRWO): 17
+
+bronopl:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "99": 99
+  labels:
+    Onderwijsnummerbestand VO: 1
+    Onderwijsnummerbestand MBO: 2
+    CRIHO (HO): 3
+    Volwasseneneducatie: 4
+    UWV werkbestand: 5
+    EBB: 6
+    Volimputatie: 7
+    Onbekend: 99
+
+rgebb:
+  c2i:
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    Register: 1
+    EBB: 2
+    Volimputatie: 3

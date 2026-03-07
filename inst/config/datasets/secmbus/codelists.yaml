@@ -1,0 +1,47 @@
+# Codelists for SECMBUS
+
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    Registratienummer: 1
+
+secm:
+  c2i:
+    "----": ~
+    "1111": 1
+    "1112": 2
+    "1121": 3
+    "1122": 4
+    "1131": 5
+    "1199": 6
+    "1210": 7
+    "1221": 8
+    "1222": 9
+    "1311": 10
+    "1312": 11
+    "1313": 12
+    "1314": 13
+    "1315": 14
+    "1321": 15
+    "2111": 16
+    "2121": 17
+  labels:
+    Onbekend: ~
+    Werknemer voltijd: 1
+    Werknemer deeltijd: 2
+    DGA voltijd: 3
+    DGA deeltijd: 4
+    Zelfstandige: 5
+    Overig actief: 6
+    Ontvanger WW-uitkering: 7
+    Ontvanger bijstandsuitkering: 8
+    Ontvanger bijstand overig: 9
+    Ontvanger AO-uitkering: 10
+    Ontvanger Ziektewet: 11
+    Ontvanger WAZO: 12
+    Ontvanger overige SV-uitkering: 13
+    Ontvanger overige sociale voorz.: 14
+    Pensioenontvangers: 15
+    Scholier/student met inkomen: 16
+    Overig zonder inkomen: 17

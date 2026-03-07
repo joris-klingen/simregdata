@@ -1,0 +1,48 @@
+# BETAB column spec
+# Business register: economic activity, size class, municipality
+# One row per business unit (BEID)
+# See: https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/betab-activiteiten-en-grootteklasse-van-bedrijven
+
+entity: person
+spine_table: pers
+
+columns:
+  # Business unit ID (matches SBEID in SPOLIS)
+  - name: BEID
+    source: spine.pers.BEID
+
+  # SBI 2008 economic activity code
+  - name: SBI2008VJJJJ
+    random_categorical:
+      from_params: sbi2008_dist
+    codelist: sbi2008
+
+  # SBI 2025 economic activity code
+  - name: SBI2025VJJJJ
+    random_categorical:
+      from_params: sbi2008_dist
+    codelist: sbi2008
+
+  # SBI 1993 (legacy, mostly empty for recent years)
+  - name: SBI1993VJJJJ
+    value: "-----"
+
+  # Size class (EU SBS classification)
+  - name: GKSBS
+    random_categorical:
+      from_params: gksbs_dist
+    codelist: gksbs
+
+  # Municipality of main establishment
+  - name: GEMHVJJJJ
+    random_categorical:
+      values: ["0363", "0518", "0599", "0344", "0034", "0193", "0307", "0772", "0014", "0153",
+               "0200", "0402", "0268", "0479", "0503", "0505", "0546", "0757", "0855", "0984",
+               "0080", "0606", "0654", "0289", "0392"]
+      probs:  [0.10,   0.06,   0.08,   0.04,   0.03,   0.02,   0.02,   0.02,   0.03,   0.02,
+               0.02,   0.02,   0.02,   0.02,   0.02,   0.02,   0.02,   0.02,   0.02,   0.02,
+               0.02,   0.02,   0.02,   0.02,   0.39]
+
+  # Old size class (by employees, legacy 1999-2005)
+  - name: GK
+    value: "-"

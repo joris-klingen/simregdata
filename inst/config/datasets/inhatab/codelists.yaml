@@ -1,0 +1,35 @@
+# Codelists for INHATAB
+
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    Registratienummer: 1
+
+popiiv:
+  c2i:
+    "1": 1
+    "2": 2
+  labels:
+    Particulier huishouden: 1
+    Institutioneel huishouden: 2
+
+samhh:
+  c2i:
+    "01": 1
+    "02": 2
+    "03": 3
+    "04": 4
+    "05": 5
+    "06": 6
+    "07": 7
+    "08": 8
+  labels:
+    Alleenstaand: 1
+    Partner niet-gehuwd zonder kinderen: 2
+    Partner gehuwd zonder kinderen: 3
+    Partner niet-gehuwd met kinderen: 4
+    Partner gehuwd met kinderen: 5
+    Eenouder: 6
+    Thuiswonend kind: 7
+    Overig: 8

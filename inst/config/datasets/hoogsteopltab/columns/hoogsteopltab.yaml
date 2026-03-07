@@ -1,0 +1,92 @@
+# HOOGSTEOPLTAB column spec
+# Highest attained/followed education level and direction
+# One row per person, reference date Oct 1 of reporting year
+# See: https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/hoogsteopltab-hoogst-behaald-gevolgd-opleidingsniveau
+
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  # Detailed education number (highest attained)
+  - name: OPLNRHB
+    random_categorical:
+      values: ["011100", "012100", "021200", "031100", "031200", "041100", "041200", "051100", "051200", "061100", "061200", "071100", "071200", "------"]
+      probs:  [0.08,     0.04,     0.12,     0.08,     0.06,     0.10,     0.08,     0.12,     0.08,     0.08,     0.04,     0.04,     0.02,     0.06]
+
+  # Detailed education number (highest followed)
+  - name: OPLNRHG
+    random_categorical:
+      values: ["011100", "012100", "021200", "031100", "031200", "041100", "041200", "051100", "051200", "061100", "061200", "071100", "071200", "------"]
+      probs:  [0.06,     0.03,     0.10,     0.07,     0.06,     0.10,     0.09,     0.14,     0.09,     0.09,     0.05,     0.04,     0.02,     0.06]
+
+  # Survey weight
+  - name: GEWICHTHOOGSTEOPL
+    random_categorical:
+      values: ["1.000000", "1.000000", "1.000000", "2.500000", "5.000000"]
+      probs:  [0.85, 0.05, 0.02, 0.05, 0.03]
+
+  # SOI2021 aggregated level (highest attained) — 18 categories
+  # This is the most commonly used variable
+  - name: OPLNIVSOI2021AGG4HBmetNIRWO
+    random_categorical:
+      from_params: opl_niveau_hb
+    codelist: oplniv_soi2021
+
+  # SOI2021 aggregated level (highest followed)
+  - name: OPLNIVSOI2021AGG4HGmetNIRWO
+    random_categorical:
+      from_params: opl_niveau_hg
+    codelist: oplniv_soi2021
+
+  # ISCED-F 2013 direction (highest attained)
+  - name: RICHTSOI2021SCEDF2013HBNIRWO
+    random_categorical:
+      values: ["0000", "0100", "0200", "0300", "0400", "0500", "0600", "0700", "0800", "0900", "1000", "----"]
+      probs:  [0.10,   0.08,   0.06,   0.08,   0.10,   0.12,   0.06,   0.10,   0.08,   0.08,   0.06,   0.08]
+
+  # ISCED-F 2013 direction (highest followed)
+  - name: RICHTSOI2021SCEDF2013HGNIRWO
+    random_categorical:
+      values: ["0000", "0100", "0200", "0300", "0400", "0500", "0600", "0700", "0800", "0900", "1000", "----"]
+      probs:  [0.09,   0.08,   0.06,   0.08,   0.10,   0.13,   0.06,   0.10,   0.08,   0.08,   0.06,   0.08]
+
+  # Source of highest attained education
+  - name: BRONOPLARCHIEFHB
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "07", "99"]
+      probs:  [0.30,  0.25,  0.10,  0.05,  0.08,  0.10,  0.05,  0.07]
+    codelist: bronopl
+
+  # Source of highest followed education
+  - name: BRONOPLARCHIEFHG
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "07", "99"]
+      probs:  [0.28,  0.25,  0.12,  0.05,  0.08,  0.10,  0.05,  0.07]
+    codelist: bronopl
+
+  # Register/EBB indicator
+  - name: RGEBB
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.85, 0.10, 0.05]
+    codelist: rgebb
+
+  # Deprecated SOI2016 variables (empty from 2019V2+)
+  - name: OPLNIVSOI2016AGG4HBMETNIRWO
+    value: "----"
+
+  - name: OPLNIVSOI2016AGG4HGMETNIRWO
+    value: "----"
+
+  - name: RICHTdetailISCEDF2013HBmetNIRWO
+    value: "----"
+
+  - name: RICHTdetailISCEDF2013HGmetNIRWO
+    value: "----"

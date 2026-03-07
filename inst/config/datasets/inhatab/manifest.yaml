@@ -1,0 +1,21 @@
+# INHATAB dataset manifest
+# Household income: annual income of households
+# CBS name pattern: INHA{YYYY}TABV{N}
+# ~8M records nationally (one row per household)
+
+dataset_id: inhatab
+label: Inkomen van huishoudens
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  inhatab:
+    cbs_name: INHA
+    entity: person
+    columns_file: inhatab.yaml
+    tab_suffix: true

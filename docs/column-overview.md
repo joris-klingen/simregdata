@@ -352,9 +352,9 @@ Overview of all simulated columns
 |--------|--------|---------|-------------|----------|
 | `RINPERSOONS` | random: codelist: RINPERSOONS_SPOLIS |  |  | [RINPERSOONS_SPOLIS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `RINPERSOON` | spine-derived | NL |  |  |
-| `IKVID` | random hex, width=32 |  |  |  |
-| `SDATUMAANVANGIKO` | template: {jan1} |  |  |  |
-| `SDATUMEINDEIKO` | template: {dec31} |  |  |  |
+| `IKVID` | spine-derived | NL |  |  |
+| `SDATUMAANVANGIKO` | spine-derived | NL |  |  |
+| `SDATUMEINDEIKO` | spine-derived | NL |  |  |
 | `SAANTSV` | random: normal (mean=18, sd=6) |  |  |  |
 | `SAANTVERLU` | random: normal (mean=130, sd=40) |  |  |  |
 | `SAUTOZAAK` | params: autozaak_mean | NL | [81431NED](https://opendata.cbs.nl/statline/#/CBS/nl/dataset/81431NED) |  |
@@ -406,7 +406,7 @@ Overview of all simulated columns
 | `SCDRDNGNBIJT` | random: codelist: SCDRDNGNBIJT |  |  | [SCDRDNGNBIJT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SCDZVW` | random: codelist: SCDZVW |  |  | [SCDZVW](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SCONTRACTSOORT` | random: codelist: SCONTRACTSOORT |  |  | [SCONTRACTSOORT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SDATUMAANVANGIKVORG` | template: {jan1} |  |  |  |
+| `SDATUMAANVANGIKVORG` | spine-derived | NL |  |  |
 | `SFSINDFZ` | random: codelist: SFSINDFZ |  |  | [SFSINDFZ](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SINDLHKORT` | random: codelist: JN_INDICATOR |  |  | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SINDSA03` | random: codelist: JN_INDICATOR |  |  | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
@@ -423,10 +423,10 @@ Overview of all simulated columns
 | `SWEKARBDUURKLASSE` | params: wekarbduur_p | NL | [81431NED](https://opendata.cbs.nl/statline/#/CBS/nl/dataset/81431NED) | [SWEKARBDUURKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SARBEIDSRELATIE` | random: codelist: SARBEIDSRELATIE |  |  | [SARBEIDSRELATIE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SAUTOVANDEZAAK` | random: codelist: SAUTOVANDEZAAK |  |  | [SAUTOVANDEZAAK](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SBEID` | random hex, width=8 |  |  |  |
+| `SBEID` | spine-derived | NL |  |  |
 | `SCAOSECTOR` | random: codelist: SCAOSECTOR |  |  | [SCAOSECTOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
-| `SDATUMAANVANGIKV` | template: {jan1} |  |  |  |
-| `SDATUMEINDEIKV` | template: {dec31} |  |  |  |
+| `SDATUMAANVANGIKV` | spine-derived | NL |  |  |
+| `SDATUMEINDEIKV` | spine-derived | NL |  |  |
 | `SINDWAO` | random: codelist: JN_INDICATOR |  |  | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SINDWW` | random: codelist: JN_INDICATOR |  |  | [JN_INDICATOR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |
 | `SLBTAB` | random: codelist: SLBTAB |  |  | [SLBTAB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/spolis/codelists.yaml) |

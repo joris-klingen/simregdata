@@ -1,0 +1,89 @@
+# SECMBUS column spec
+# Socioeconomic category, monthly bus-type file
+# One row per person-period (variable number of rows per person per year)
+# See: https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/secmbus-sociaaleconomische-categorie
+
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  # Period start date (YYYYMMDD)
+  - name: AANVSECM
+    source: spine.pers.period_start
+
+  # Period end date (YYYYMMDD)
+  - name: EINDSECM
+    source: spine.pers.period_end
+
+  # Socioeconomic category
+  - name: SECM
+    source: spine.pers.SECM
+    codelist: secm
+
+  # Encrypted education number
+  - name: ONDERWIJSNR_crypt
+    random_id:
+      width: 20
+
+  # Income source indicators (XKOPPEL series)
+  # These are deterministic from SECM but we simplify to random
+  - name: XKOPPELBBAVBDZ
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.40, 0.60]
+
+  - name: XKOPPELBBARBEID
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.35, 0.65]
+
+  - name: XKOPPELBBSZELF
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.90, 0.10]
+
+  - name: XKOPPELBBPENSIOEN
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.78, 0.22]
+
+  - name: XKOPPELBBBIJSTUITK
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+
+  - name: XKOPPELBBARBONGESCHUITK
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.93, 0.07]
+
+  - name: XKOPPELBBWW
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.95, 0.05]
+
+  - name: XKOPPELBBANDERUITK
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.92, 0.08]
+
+  - name: XKOPPELBBSTUDFINANC
+    level: period
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.90, 0.10]

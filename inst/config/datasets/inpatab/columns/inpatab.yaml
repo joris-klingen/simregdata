@@ -1,0 +1,215 @@
+# INPATAB column spec
+# Personal income of persons
+# One row per person, annual data
+# See: https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/inpatab-inkomen-van-personen
+
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  # Household key (links to INHATAB/VEHTAB)
+  - name: RINPERSOONSHKW
+    value: "R"
+    codelist: rinpersoons
+
+  - name: RINPERSOONHKW
+    source: spine.pers.RINPERSOONHKW
+
+  # Socioeconomic category (annual)
+  - name: INPSECJ
+    random_categorical:
+      from_params: secj_dist
+    codelist: inpsecj
+
+  # Personal income
+  - name: INPPERSINK
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_persink
+      sd_from_params: sd_persink
+      min: -50000
+      round: 0
+
+  # Primary income (wages + self-employment)
+  - name: INPPERSPRIM
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_prim
+      sd_from_params: sd_prim
+      min: -50000
+      round: 0
+
+  # Gross income
+  - name: INPPERSBRUT
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_brut
+      sd_from_params: sd_brut
+      min: -50000
+      round: 0
+
+  # Disposable income
+  - name: INPPERSBESTINK
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_bestink
+      sd_from_params: sd_bestink
+      min: -50000
+      round: 0
+
+  # Taxable income
+  - name: INPBELI
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_beli
+      sd_from_params: sd_beli
+      min: 0
+      round: 0
+
+  # Wages (loon)
+  - name: INPLHP
+    random_numeric:
+      distribution: normal
+      mean: 32000
+      sd: 25000
+      min: 0
+      round: 0
+
+  # Income from self-employment
+  - name: INPWINST
+    random_numeric:
+      distribution: normal
+      mean: 2000
+      sd: 15000
+      round: 0
+
+  # Social benefits
+  - name: INPUITKERINGS
+    random_numeric:
+      distribution: normal
+      mean: 3000
+      sd: 6000
+      min: 0
+      round: 0
+
+  # Pension income
+  - name: INPPENSINK
+    random_numeric:
+      distribution: normal
+      mean: 4000
+      sd: 8000
+      min: 0
+      round: 0
+
+  # Transfer income
+  - name: INPTRANSFER
+    random_numeric:
+      distribution: normal
+      mean: 1500
+      sd: 4000
+      min: 0
+      round: 0
+
+  # Premium income (volksverzekeringen)
+  - name: INPPREMVV
+    random_numeric:
+      distribution: normal
+      mean: 5000
+      sd: 4000
+      min: 0
+      round: 0
+
+  # Income tax
+  - name: INPBELASTING
+    random_numeric:
+      distribution: normal
+      mean: 8000
+      sd: 10000
+      min: 0
+      round: 0
+
+  # Standardized personal income
+  - name: INPPERSGESTINK
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_gestink
+      sd_from_params: sd_gestink
+      min: -50000
+      round: 0
+
+  # Income percentiles
+  - name: INPP100PERSINK
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INPP100PERSBEST
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INPP100PERSPRIM
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Poverty indicators
+  - name: INPARMLAG
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  - name: INPARMSOC
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  - name: INPARMEUR
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Population indicator
+  - name: INPPOPIIV
+    random_categorical:
+      values: ["1", "2"]
+      probs:  [0.97, 0.03]
+    codelist: popiiv
+
+  # Household composition of the person
+  - name: INPSAMHH
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "07", "08"]
+      probs:  [0.17, 0.08, 0.10, 0.08, 0.22, 0.08, 0.07, 0.20]
+    codelist: samhh
+
+  # Student finance indicator
+  - name: INPSTUDFIN
+    random_categorical:
+      values: ["0", "1"]
+      probs:  [0.92, 0.08]
+
+  # Standardized AOW composition
+  - name: INPSAMAOW
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "99"]
+      probs:  [0.15, 0.10, 0.10, 0.05, 0.05, 0.05, 0.50]

@@ -1,0 +1,26 @@
+# INHATAB household income parameters by year
+# Source: StatLine 83932NED
+
+2023:
+  mean_belih: 18000
+  sd_belih: 20000
+  mean_bestinkh: 42000
+  sd_bestinkh: 30000
+  mean_brutinkh: 55000
+  sd_brutinkh: 40000
+  mean_gestinkh: 32000
+  sd_gestinkh: 20000
+  mean_priminkh: 48000
+  sd_priminkh: 45000
+
+2020:
+  mean_belih: 16000
+  sd_belih: 18000
+  mean_bestinkh: 38000
+  sd_bestinkh: 28000
+  mean_brutinkh: 50000
+  sd_brutinkh: 38000
+  mean_gestinkh: 30000
+  sd_gestinkh: 18000
+  mean_priminkh: 44000
+  sd_priminkh: 42000

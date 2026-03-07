@@ -1,0 +1,222 @@
+# INHATAB column spec
+# Household income
+# One row per household, annual data
+# See: https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/microdatabestanden/inhatab-inkomen-van-huishoudens
+
+entity: person
+spine_table: pers
+
+columns:
+  # Household key (main earner identifies the household)
+  - name: RINPERSOONSHKW
+    value: "R"
+    codelist: rinpersoons
+
+  - name: RINPERSOONHKW
+    source: spine.pers.RINPERSOONHKW
+
+  # Household size
+  - name: INHAHL
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 6
+      round: 0
+
+  # Household members with income
+  - name: INHAHLMI
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 4
+      round: 0
+
+  # Income vs European poverty line (%)
+  - name: INHARMEUR
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Longitudinal European poverty
+  - name: INHARMEURL
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Income vs low-income threshold (%)
+  - name: INHARMLAG
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Longitudinal low-income
+  - name: INHARMLAGL
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Income vs social minimum (%)
+  - name: INHARMSOC
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Longitudinal social minimum
+  - name: INHARMSOCL
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 300
+      round: 0
+
+  # Social assistance type
+  - name: INHBBIHJ
+    random_categorical:
+      values: ["00", "01", "02", "03", "04", "05", "99"]
+      probs:  [0.70, 0.05, 0.03, 0.02, 0.05, 0.10, 0.05]
+
+  # Taxable household income
+  - name: INHBELIH
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_belih
+      sd_from_params: sd_belih
+      min: 0
+      round: 0
+
+  # Disposable household income
+  - name: INHBESTINKH
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_bestinkh
+      sd_from_params: sd_bestinkh
+      min: -50000
+      round: 0
+
+  # Gross household income
+  - name: INHBRUTINKH
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_brutinkh
+      sd_from_params: sd_brutinkh
+      min: -50000
+      round: 0
+
+  # Main income earner indicator
+  - name: INHEHALGR
+    random_categorical:
+      values: ["1", "2", "9"]
+      probs:  [0.85, 0.10, 0.05]
+
+  # Standardized household income
+  - name: INHGESTINKH
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_gestinkh
+      sd_from_params: sd_gestinkh
+      min: -50000
+      round: 0
+
+  # Income percentiles
+  - name: INHP100HBEST
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INHP100HBESTES
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INHP100HBRUT
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INHP100HGEST
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INHP100HGESTES
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  - name: INHP100HPRIM
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 100
+      round: 0
+
+  # Population indicator
+  - name: INHPOPIIV
+    random_categorical:
+      values: ["1", "2"]
+      probs:  [0.97, 0.03]
+    codelist: popiiv
+
+  # Primary household income
+  - name: INHPRIMINKH
+    random_numeric:
+      distribution: normal
+      mean_from_params: mean_priminkh
+      sd_from_params: sd_priminkh
+      min: -50000
+      round: 0
+
+  # AOW composition
+  - name: INHSAMAOW
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "99"]
+      probs:  [0.15, 0.10, 0.10, 0.05, 0.05, 0.05, 0.50]
+
+  # Household composition
+  - name: INHSAMHH
+    random_categorical:
+      values: ["01", "02", "03", "04", "05", "06", "07", "08"]
+      probs:  [0.17, 0.08, 0.10, 0.08, 0.22, 0.08, 0.07, 0.20]
+    codelist: samhh
+
+  # UAF indicator
+  - name: INHUAF
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 3
+      round: 0
+
+  # Longitudinal UAF
+  - name: INHUAFL
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 3
+      round: 0
+
+  # UAF type
+  - name: INHUAFTYP
+    random_categorical:
+      values: ["0", "1", "2", "3"]
+      probs:  [0.85, 0.05, 0.05, 0.05]

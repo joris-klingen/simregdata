@@ -1,0 +1,54 @@
+# INPATAB income parameters by year
+# Source: StatLine 83931NED, 84493NED (Personen; inkomen)
+
+2023:
+  secj_dist:
+    "11": 0.45
+    "12": 0.02
+    "13": 0.07
+    "14": 0.02
+    "21": 0.02
+    "22": 0.03
+    "23": 0.03
+    "24": 0.02
+    "25": 0.18
+    "26": 0.08
+    "31": 0.08
+  mean_persink: 36000
+  sd_persink: 30000
+  mean_prim: 28000
+  sd_prim: 32000
+  mean_brut: 34000
+  sd_brut: 28000
+  mean_bestink: 28000
+  sd_bestink: 22000
+  mean_beli: 30000
+  sd_beli: 28000
+  mean_gestink: 28000
+  sd_gestink: 18000
+
+2020:
+  secj_dist:
+    "11": 0.44
+    "12": 0.02
+    "13": 0.07
+    "14": 0.02
+    "21": 0.03
+    "22": 0.03
+    "23": 0.03
+    "24": 0.02
+    "25": 0.17
+    "26": 0.09
+    "31": 0.08
+  mean_persink: 33000
+  sd_persink: 28000
+  mean_prim: 26000
+  sd_prim: 30000
+  mean_brut: 31000
+  sd_brut: 26000
+  mean_bestink: 26000
+  sd_bestink: 20000
+  mean_beli: 28000
+  sd_beli: 26000
+  mean_gestink: 26000
+  sd_gestink: 17000

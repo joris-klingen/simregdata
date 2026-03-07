@@ -1,0 +1,21 @@
+# HOOGSTEOPLTAB dataset manifest
+# Highest attained and followed education level of the Dutch population
+# CBS name pattern: HOOGSTEOPL{YYYY}TABV{N}
+# ~11.5M records nationally (one row per person)
+
+dataset_id: hoogsteopltab
+label: Hoogst behaald opleidingsniveau
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  hoogsteopltab:
+    cbs_name: HOOGSTEOPL
+    entity: person
+    columns_file: hoogsteopltab.yaml
+    tab_suffix: true

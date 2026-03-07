@@ -109,6 +109,48 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           sampled_pers, n_jobs = n_records, year = year, seed = seed,
           params = NULL)
 
+      } else if (identical(dataset, "secmbus")) {
+        # SECMBUS: build person-period expansion
+        idx <- sample.int(nrow(spine$pers), n_records,
+          replace = n_records > nrow(spine$pers))
+        pers_cols <- intersect(
+          c("RINPERSOON", needed$pers), names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+        sampled_pers <- spine$pers[idx, ..pers_cols]
+
+        ds_params <- tryCatch({
+          pp <- file.path(.dataset_dir(dataset), "params.yaml")
+          if (file.exists(pp)) {
+            ap <- yaml::read_yaml(pp)
+            yk <- as.character(year)
+            yd <- ap[[yk]]
+            if (is.null(yd)) {
+              av <- sort(as.integer(names(ap)))
+              yd <- ap[[as.character(av[which.min(abs(av - year))])]]
+            }
+            lapply(yd, function(x) if (is.list(x)) unlist(x) else x)
+          }
+        }, error = function(e) NULL)
+
+        ds_spine$pers <- .build_secm_periods(
+          sampled_pers, year = year, seed = seed, params = ds_params)
+
+      } else if (identical(dataset, "betab")) {
+        # BETAB: generate unique business IDs
+        # Try to reuse BEIDs from SPOLIS if available
+        spolis_spine <- .sim_cache$spine_spolis
+        if (!is.null(spolis_spine) && "SBEID" %in% names(spolis_spine$pers)) {
+          beids <- unique(spolis_spine$pers$SBEID)
+          if (length(beids) > n_records) beids <- beids[seq_len(n_records)]
+        } else {
+          beids <- .rand_id(n_records, 8L)
+        }
+        ds_spine$pers <- data.table(
+          BEID = beids,
+          RINPERSOON = .rand_id(length(beids), 9L),
+          RINPERSOONS = rep("R", length(beids))
+        )
+
       } else {
         # Standard generic sampling
         # Weighted sampling: use gemeente vehicle weights if available
@@ -136,6 +178,29 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
       # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
       if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))
         ds_spine$pers[, RINKENTEKEN := .rand_id(nrow(ds_spine$pers), 32L)]
+
+      # Add HKW household key if needed (for INPATAB, INHATAB, VEHTAB_VERMOGEN)
+      if ("RINPERSOONHKW" %in% needed$pers &&
+          !("RINPERSOONHKW" %in% names(ds_spine$pers))) {
+        if ("HUISHOUDNR" %in% names(ds_spine$pers)) {
+          ds_spine$pers <- .add_hkw_to_spine(ds_spine$pers)
+        } else if ("HUISHOUDNR" %in% names(spine$pers)) {
+          # Generate HKW IDs from shared spine's HUISHOUDNR
+          hh_all <- spine$pers$HUISHOUDNR
+          hh_unique <- unique(hh_all)
+          hkw_map <- data.table(
+            HUISHOUDNR = hh_unique,
+            RINPERSOONHKW = .deterministic_hkw_id(hh_unique)
+          )
+          # Look up each sampled person's HUISHOUDNR from the shared spine
+          sampled_hh <- hh_all[seq_len(nrow(ds_spine$pers))]
+          ds_spine$pers[, RINPERSOONHKW := hkw_map$RINPERSOONHKW[
+            match(sampled_hh, hkw_map$HUISHOUDNR)]]
+        } else {
+          # Fallback: generate random HKW IDs
+          ds_spine$pers[, RINPERSOONHKW := .rand_id(nrow(ds_spine$pers), 9L)]
+        }
+      }
     }
 
     # Household-level spine: copy shared HH table directly
@@ -567,7 +632,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       yr_data <- all_params[[as.character(nearest)]]
     }
     n <- yr_data$n_vehicles %||% yr_data$n_jobs %||% yr_data$n_households %||%
-         yr_data$n_dwellings
+         yr_data$n_dwellings %||% yr_data$n_persons %||% yr_data$n_businesses
     if (!is.null(n)) as.integer(n) else NULL
   }, error = function(e) NULL)
 }
