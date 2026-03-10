@@ -6,10 +6,14 @@
 
 # Generate deterministic HKW IDs from household numbers ----
 # Same HUISHOUDNR always produces the same RINPERSOONHKW.
+# Vectorized multiplicative hash (no per-element R loop).
 .deterministic_hkw_id <- function(huishoudnr) {
-  keys <- paste0("hkw_", huishoudnr)
-  hashes <- vapply(keys, rlang::hash, character(1), USE.NAMES = FALSE)
-  substr(hashes, 1L, 9L)
+  hh_num <- as.double(huishoudnr)
+  mod <- 2147483647  # 2^31 - 1
+  mixed <- (hh_num * 48271 + 12345) %% mod
+  # Second mix for better distribution
+  mixed <- (mixed * 69069 + 1) %% mod
+  sprintf("%09d", as.integer(mixed %% 1e9))
 }
 
 # Add RINPERSOONHKW to a person spine table ----

@@ -164,12 +164,14 @@
   dt_pers[, c("HHSize", "NKids", "rank") := NULL]
 
   # ---- Lightweight aggregation (always needed) --------------------------------
-  dt_pers[, AantalPersonenPerHuishouden := .N, by = HUISHOUDNR]
-  dt_pers[, AantalKinderenPerHuishouden := sum(PLHH == "1"), by = HUISHOUDNR]
   hh_sz <- dt_pers[, .(
     AantalPersonenPerHuishouden = .N,
     AantalKinderenPerHuishouden = sum(PLHH == "1")
   ), by = HUISHOUDNR]
+  dt_pers[hh_sz, `:=`(
+    AantalPersonenPerHuishouden = i.AantalPersonenPerHuishouden,
+    AantalKinderenPerHuishouden = i.AantalKinderenPerHuishouden
+  ), on = "HUISHOUDNR"]
   dt_hh <- merge(dt_hh, hh_sz, by = "HUISHOUDNR")
 
   # ---- Income & wealth (correlated with WOZ) ---------------------------------

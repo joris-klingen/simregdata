@@ -153,8 +153,11 @@
   dec31 <- .yyyymmdd(spine$dec31)
 
   # Load dataset params (year-specific calibrated distributions)
-  params <- .sim_cache[[paste0("params_", dataset_id)]]
-  if (is.null(params)) {
+  params_key <- paste0("params_", dataset_id)
+  params_yr_key <- paste0("params_year_", dataset_id)
+  params <- .sim_cache[[params_key]]
+  cached_yr <- .sim_cache[[params_yr_key]]
+  if (is.null(params) || !identical(cached_yr, spine$year)) {
     # Try loading from YAML
     params <- tryCatch({
       params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
@@ -173,6 +176,10 @@
         })
       }
     }, error = function(e) NULL)
+    if (!is.null(params)) {
+      .sim_cache[[params_key]] <- params
+      .sim_cache[[params_yr_key]] <- spine$year
+    }
   }
 
   # Pre-compute derived columns if specified
@@ -191,20 +198,28 @@
 
   # Pre-filter columns via col_select (skip generating unneeded columns)
   selected_set <- NULL
-  if (!is.null(col_q) && !rlang::quo_is_null(col_q)) {
+  has_col_select <- !is.null(col_q) && !rlang::quo_is_null(col_q)
+  if (has_col_select) {
     # Expand all column names to know the full set
-    all_names <- character()
+    all_names <- character(length(spec$columns) * 2L)
+    idx_n <- 0L
     for (cs in spec$columns) {
       if (!is.null(cs[["suffixes"]])) {
-        for (sfx in cs[["suffixes"]])
-          all_names <- c(all_names, gsub("\\{sfx\\}", sfx, cs$name))
+        for (sfx in cs[["suffixes"]]) {
+          idx_n <- idx_n + 1L
+          all_names[[idx_n]] <- gsub("\\{sfx\\}", sfx, cs$name)
+        }
       } else if (!is.null(cs[["suffixes_custom"]])) {
-        for (sc in cs[["suffixes_custom"]])
-          all_names <- c(all_names, gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name))
+        for (sc in cs[["suffixes_custom"]]) {
+          idx_n <- idx_n + 1L
+          all_names[[idx_n]] <- gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name)
+        }
       } else {
-        all_names <- c(all_names, cs$name)
+        idx_n <- idx_n + 1L
+        all_names[[idx_n]] <- cs$name
       }
     }
+    all_names <- all_names[seq_len(idx_n)]
     # Evaluate col_select against a dummy with all names
     selected_set <- tryCatch({
       dummy <- stats::setNames(as.list(seq_along(all_names)), all_names)
