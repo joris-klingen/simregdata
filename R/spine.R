@@ -164,15 +164,12 @@
   dt_pers[, c("HHSize", "NKids", "rank") := NULL]
 
   # ---- Lightweight aggregation (always needed) --------------------------------
-  hh_sz <- dt_pers[, .(
-    AantalPersonenPerHuishouden = .N,
-    AantalKinderenPerHuishouden = sum(PLHH == "1")
-  ), by = HUISHOUDNR]
-  dt_pers[hh_sz, `:=`(
-    AantalPersonenPerHuishouden = i.AantalPersonenPerHuishouden,
-    AantalKinderenPerHuishouden = i.AantalKinderenPerHuishouden
-  ), on = "HUISHOUDNR"]
-  dt_hh <- merge(dt_hh, hh_sz, by = "HUISHOUDNR")
+  dt_pers[, AantalPersonenPerHuishouden := .N, by = HUISHOUDNR]
+  dt_pers[, AantalKinderenPerHuishouden := sum(PLHH == "1"), by = HUISHOUDNR]
+  hh_sz <- unique(dt_pers[, .(HUISHOUDNR, AantalPersonenPerHuishouden,
+                               AantalKinderenPerHuishouden)])
+  agg_cols <- c("AantalPersonenPerHuishouden", "AantalKinderenPerHuishouden")
+  dt_hh[hh_sz, (agg_cols) := mget(agg_cols), on = "HUISHOUDNR"]
 
   # ---- Income & wealth (correlated with WOZ) ---------------------------------
   # WOZ is 1:1 mapped to households (line 81); use it as the affluence anchor
@@ -302,15 +299,15 @@
   if (which == "pers_spatial" && !isTRUE(spine$pers_spatial_enriched)) {
     message("  [lazy] Object \u2192 person spatial join ...")
     dt_obj <- spine$obj_raw
-    obj_join_cols <- c("RINOBJECTNUMMER",
+    obj_value_cols <- c(
       paste0(c("GemeenteCodeJJJJ","WijkCodeJJJJ","BuurtCodeJJJJ","VSLSoort",
                "TypeEigenaar","VBOWoningType","VBOBouwJaarKlasse",
                "VBOOppervlakteKlasse","WOZWaardeObjectBAGKlasse"), "1Jan"),
       paste0(c("GemeenteCodeJJJJ","WijkCodeJJJJ","BuurtCodeJJJJ","VSLSoort",
                "TypeEigenaar","VBOWoningType","VBOBouwJaarKlasse",
                "VBOOppervlakteKlasse","WOZWaardeObjectBAGKlasse"), "31Dec"))
-    spine$pers <- merge(spine$pers, dt_obj[, ..obj_join_cols],
-                        by = "RINOBJECTNUMMER")
+    spine$pers[dt_obj, (obj_value_cols) := mget(obj_value_cols),
+               on = "RINOBJECTNUMMER"]
     spine$pers_spatial_enriched <- TRUE
   }
 
@@ -318,31 +315,37 @@
     message("  [lazy] Household enrichment (ref-person + object) ...")
     dt_ref <- spine$dt_ref
     dt_obj <- spine$obj_raw
+    dt_hh  <- spine$hh
 
+    # Join ref-person columns onto hh by reference
     ref_for_hh <- dt_ref[, .(HUISHOUDNR,
       RINPERSOON_Ref = RINPERSOON, RINPERSOONS_Ref = RINPERSOONS,
       REFPERSOONHH_Ref = REFPERSOONHH,
       PLHH_Ref = PLHH, GBAGeslachtsAanduiding_Ref = GBAGeslachtsAanduiding,
       LeeftijdRefPersoon)]
-    dt_hh2 <- merge(spine$hh, ref_for_hh, by = "HUISHOUDNR")
+    ref_cols <- c("RINPERSOON_Ref", "RINPERSOONS_Ref", "REFPERSOONHH_Ref",
+                  "PLHH_Ref", "GBAGeslachtsAanduiding_Ref", "LeeftijdRefPersoon")
+    dt_hh[ref_for_hh, (ref_cols) := mget(ref_cols), on = "HUISHOUDNR"]
 
-    ref_obj_cols <- c("RINOBJECTNUMMER",
+    # Join object columns onto hh by reference
+    obj_value_cols <- c(
       paste0(c("VSLSoort","WOZWaardeObjectBAGKlasse","VBOBouwJaarKlasse",
                "VBOOppervlakteKlasse","VBOWoningType","TypeEigenaar",
                "GemeenteCodeJJJJ"), "1Jan"),
       paste0(c("VSLSoort","WOZWaardeObjectBAGKlasse","VBOBouwJaarKlasse",
                "VBOOppervlakteKlasse","VBOWoningType","TypeEigenaar",
                "GemeenteCodeJJJJ"), "31Dec"))
-    dt_hh2 <- merge(dt_hh2, dt_obj[, ..ref_obj_cols], by = "RINOBJECTNUMMER")
+    dt_hh[dt_obj, (obj_value_cols) := mget(obj_value_cols),
+           on = "RINOBJECTNUMMER"]
 
-    spine$hh <- dt_hh2
+    spine$hh <- dt_hh
     spine$hh_enriched <- TRUE
   }
 
   if (which == "obj" && !isTRUE(spine$obj_enriched)) {
     message("  [lazy] Object enrichment (kids + ref-person) ...")
     dt_pers <- spine$pers
-    dt_obj  <- spine$obj_raw
+    dt_obj  <- data.table::copy(spine$obj_raw)
     dt_ref  <- spine$dt_ref
     year    <- spine$year
 
@@ -353,16 +356,24 @@
       AantalPersonenPerVSL = .N
     ), by = RINOBJECTNUMMER]
 
+    # Join kids aggregation onto obj by reference
+    kids_cols <- c("AantalKinderenPerVSL", "LeeftijdJongsteKindPerVSL",
+                   "AantalPersonenPerVSL")
+    dt_obj[obj_kids, (kids_cols) := mget(kids_cols), on = "RINOBJECTNUMMER"]
+    dt_obj[is.na(AantalKinderenPerVSL), AantalKinderenPerVSL := 0L]
+    dt_obj[is.na(LeeftijdJongsteKindPerVSL), LeeftijdJongsteKindPerVSL := 99L]
+    dt_obj[is.na(AantalPersonenPerVSL), AantalPersonenPerVSL := 0L]
+
+    # Join ref-person columns onto obj by reference
     ref_for_obj <- dt_ref[, .(RINOBJECTNUMMER,
       HUISHOUDNR, DATUMAANVANGHH, TYPHH, AantalPersonenPerHuishouden,
       RINPERSOON_Ref2 = RINPERSOON, RINPERSOONS_Ref2 = RINPERSOONS)]
-    dt_obj2 <- merge(dt_obj, obj_kids, by = "RINOBJECTNUMMER", all.x = TRUE)
-    dt_obj2 <- merge(dt_obj2, ref_for_obj, by = "RINOBJECTNUMMER", all.x = TRUE)
-    dt_obj2[is.na(AantalKinderenPerVSL), AantalKinderenPerVSL := 0L]
-    dt_obj2[is.na(LeeftijdJongsteKindPerVSL), LeeftijdJongsteKindPerVSL := 99L]
-    dt_obj2[is.na(AantalPersonenPerVSL), AantalPersonenPerVSL := 0L]
+    ref_cols <- c("HUISHOUDNR", "DATUMAANVANGHH", "TYPHH",
+                  "AantalPersonenPerHuishouden",
+                  "RINPERSOON_Ref2", "RINPERSOONS_Ref2")
+    dt_obj[ref_for_obj, (ref_cols) := mget(ref_cols), on = "RINOBJECTNUMMER"]
 
-    spine$obj <- dt_obj2
+    spine$obj <- dt_obj
     spine$obj_enriched <- TRUE
   }
 

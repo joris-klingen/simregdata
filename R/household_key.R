@@ -27,6 +27,6 @@
     HUISHOUDNR = hh_ids,
     RINPERSOONHKW = .deterministic_hkw_id(hh_ids)
   )
-  pers_dt <- merge(pers_dt, hkw_map, by = "HUISHOUDNR", sort = FALSE)
+  pers_dt[hkw_map, RINPERSOONHKW := RINPERSOONHKW, on = "HUISHOUDNR"]
   pers_dt
 }

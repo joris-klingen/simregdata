@@ -208,7 +208,8 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
             RINPERSOON = spine$pers$RINPERSOON,
             HUISHOUDNR = spine$pers$HUISHOUDNR
           )
-          pers_hh <- merge(pers_hh, hkw_lookup, by = "HUISHOUDNR", sort = FALSE)
+          pers_hh[hkw_lookup, RINPERSOONHKW := RINPERSOONHKW,
+                  on = "HUISHOUDNR"]
           # Match sampled persons to their HKW
           ds_spine$pers[, RINPERSOONHKW := pers_hh$RINPERSOONHKW[
             match(ds_spine$pers$RINPERSOON, pers_hh$RINPERSOON)]]
