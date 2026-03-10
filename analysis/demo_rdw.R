@@ -13,8 +13,8 @@ devtools::load_all(".")
 
 dir.create("plots", showWarnings = FALSE)
 
-YEARS <- seq(2010, 2025, by = 1)
-N     <- 5000L
+YEARS <- seq(2010, 2025, by = 5)
+N     <- 1000L
 
 theme_set(theme_minimal(base_size = 11) +
   theme(plot.title = element_text(face = "bold"),

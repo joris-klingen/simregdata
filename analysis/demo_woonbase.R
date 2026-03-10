@@ -17,7 +17,7 @@ YEAR <- 2023L
 
 # Load data ----
 
-woonbase_init(year = YEAR, n = 1e5, seed = 42L)
+woonbase_init(year = YEAR, n = 5000L, seed = 42L)
 
 dt <- as.data.table(read_sav(
   sprintf("WoonbasePopulatiePersonen%dV1", YEAR),

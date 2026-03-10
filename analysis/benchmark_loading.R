@@ -16,7 +16,7 @@ log_msg <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S")
 
 YEAR <- 2023L
 SEED <- 42L
-SIZES <- c(1e4, 1e5, 5e5)
+SIZES <- c(1e3, 1e4, 5e4)
 
 results <- data.table(
   scenario = character(),
@@ -48,7 +48,7 @@ for (sz in SIZES) {
 # Enrichment cost ----
 
 log_msg("Benchmarking lazy enrichment...")
-N_ENRICH <- 1e5L
+N_ENRICH <- 1e4L
 sim_reset()
 sim_init("woonbase", year = YEAR, n = N_ENRICH, seed = SEED)
 
@@ -80,7 +80,7 @@ for (f in files_with_enrichment) {
 # Assembly: full file vs col_select ----
 
 log_msg("Benchmarking col_select impact...")
-N_COL <- 1e5L
+N_COL <- 1e4L
 sim_reset()
 sim_init("woonbase", year = YEAR, n = N_COL, seed = SEED)
 
@@ -120,7 +120,7 @@ log_msg(sprintf("  full=%d cols: %.3f s | 5 cols: %.3f s | 2 cols: %.3f s",
 # Per-file assembly times (all woonbase files) ----
 
 log_msg("Benchmarking all woonbase file types...")
-N_FILE <- 1e5L
+N_FILE <- 1e4L
 sim_reset()
 sim_init("woonbase", year = YEAR, n = N_FILE, seed = SEED)
 # Pre-warm enrichment
@@ -160,7 +160,7 @@ other_datasets <- list(
   gba    = "GBAPERSOONKTAB2023TABV1"
 )
 
-N_OTHER <- 1e5L
+N_OTHER <- 1e4L
 # Ensure shared spine exists
 sim_reset()
 sim_init("woonbase", year = YEAR, n = N_OTHER, seed = SEED)
@@ -188,7 +188,7 @@ for (ds in names(other_datasets)) {
 # Multi-dataset init from scratch ----
 
 log_msg("Benchmarking full multi-dataset init from scratch...")
-N_MULTI <- 1e5L
+N_MULTI <- 1e4L
 all_datasets <- c("woonbase", "rdw", "spolis", "vehtab", "energieverbruik", "gba")
 
 sim_reset()
@@ -206,7 +206,7 @@ log_msg(sprintf("  All 6 datasets: %.2f s", t_multi[["elapsed"]]))
 # Repeated reads (test caching) ----
 
 log_msg("Benchmarking repeated reads (cache effectiveness)...")
-N_REPEAT <- 1e5L
+N_REPEAT <- 1e4L
 sim_reset()
 sim_init("woonbase", year = YEAR, n = N_REPEAT, seed = SEED)
 

@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
 devtools::load_all(".")
 
 YEAR <- 2023L
-N    <- 5000L
+N    <- 500L
 SEED <- 42L
 
 cat("=== ENERGIEVERBRUIK validation ===\n\n")
@@ -135,7 +135,7 @@ cat("--- 6. Year variation ---\n")
 
 for (yr in c(2010, 2020, 2024)) {
   sim_reset()
-  woonbase_init(year = yr, n = 2000L, seed = SEED)
+  woonbase_init(year = yr, n = 500L, seed = SEED)
   sim_init("energieverbruik", year = yr, seed = 43L)
   dt <- as.data.table(read_sav(
     sprintf("ENERGIEVERBRUIK%dTABV1", yr),

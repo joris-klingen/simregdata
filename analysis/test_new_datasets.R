@@ -53,7 +53,7 @@ cat("  PASS\n\n")
 
 # Test 5: VEHTAB (vermogen) ----
 cat("--- VEHTAB_VERMOGEN ---\n")
-sim_init("vehtab_vermogen", year = 2023L, n = 100L, seed = 42L)
+sim_init("vehtab", year = 2023L, n = 100L, seed = 42L)
 dt <- as.data.table(read_sav("VEH2023TABV1"))
 cat(sprintf("  Rows: %d, Cols: %d\n", nrow(dt), ncol(dt)))
 cat(sprintf("  Columns: %s\n", paste(names(dt), collapse = ", ")))

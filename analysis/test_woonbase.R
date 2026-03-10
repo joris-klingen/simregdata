@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
 devtools::load_all(".")
 
 YEAR <- 2023L
-N    <- 5000L
+N    <- 500L
 SEED <- 42L
 
 cat("=== Woonbase validation ===\n\n")

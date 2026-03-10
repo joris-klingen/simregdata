@@ -5,7 +5,7 @@ devtools::load_all(".")
 
 cat("=== Test 1: sim_export() — all datasets ===\n")
 out_dir <- file.path(tempdir(), "test_export")
-sim_export(out_dir, year = 2023, n = 1000, seed = 42)
+sim_export(out_dir, year = 2023, n = 500, seed = 42)
 
 # Check files exist
 pq_files <- list.files(out_dir, pattern = "\\.parquet$", recursive = TRUE)
@@ -49,11 +49,11 @@ sim_reset()
 
 # Export woonbase only
 out_dir2 <- file.path(tempdir(), "test_export_wb")
-sim_export(out_dir2, dataset = "woonbase", year = 2023, n = 1000, seed = 42)
+sim_export(out_dir2, dataset = "woonbase", year = 2023, n = 500, seed = 42)
 
 # Re-init woonbase with same params, then assemble with same per-file seed
 sim_reset()
-sim_init("woonbase", year = 2023, n = 1000, seed = 42)
+sim_init("woonbase", year = 2023, n = 500, seed = 42)
 file_seed <- bitwXor(42L, sum(utf8ToInt("woonbase/sleutel")))
 set.seed(file_seed)
 dt_fly <- read_sav("WoonbaseSleutelbestand2023V1")

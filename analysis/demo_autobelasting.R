@@ -16,7 +16,7 @@ dir.create("plots", showWarnings = FALSE)
 log_msg <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))
 
 YEAR   <- 2023L
-N_PERS <- 20000L
+N_PERS <- 2000L
 
 # Load and join data ----
 

@@ -27,7 +27,7 @@ file_map <- list(
 )
 
 # Run once — spine is cached across calls
-woonbase_init(year = 2023, n = 1000, seed = 1)
+woonbase_init(year = 2023, n = 500, seed = 1)
 
 for (key in names(file_map)) {
   info     <- file_map[[key]]

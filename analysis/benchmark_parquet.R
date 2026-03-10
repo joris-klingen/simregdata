@@ -3,7 +3,7 @@ library(data.table)
 library(haven)
 devtools::load_all(".")
 
-N <- 1e6L
+N <- 1e4L
 YEAR <- 2023L
 SEED <- 42L
 out_dir <- file.path(tempdir(), "bench_export")

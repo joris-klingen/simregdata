@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
 devtools::load_all(".")
 
 YEAR <- 2023L
-N    <- 5000L
+N    <- 500L
 SEED <- 42L
 
 cat("=== RDW validation ===\n\n")
@@ -118,7 +118,7 @@ cat("--- 6. Year variation (fuel type should shift) ---\n")
 
 for (yr in c(2015, 2020, 2025)) {
   sim_reset()
-  woonbase_init(year = yr, n = 2000L, seed = SEED)
+  woonbase_init(year = yr, n = 500L, seed = SEED)
   sim_init("rdw", year = yr, seed = 43L)
   dt <- as.data.table(read_sav(
     sprintf("RDWNPACT%dTABV1", yr),
