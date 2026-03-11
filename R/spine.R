@@ -14,7 +14,7 @@
 
 
 # Minimum observations per gemeente ----
-.MIN_PER_GEM <- 100L
+.MIN_PER_GEM <- 10L
 
 # Stratified gemeente assignment: guarantee a floor per gemeente, then
 # distribute remaining objects proportionally.
