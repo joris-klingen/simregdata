@@ -19,3 +19,4 @@ files:
     entity: person
     columns_file: inhatab.yaml
     tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON]

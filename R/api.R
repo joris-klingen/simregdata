@@ -188,9 +188,9 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         ds_spine$pers <- spine$pers[idx, ..pers_cols]
       }
 
-      # Generate shared random IDs for cross-file joins (e.g. RINKENTEKEN)
+      # Generate deterministic RINKENTEKEN from RINPERSOON (longitudinally stable)
       if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))
-        ds_spine$pers[, RINKENTEKEN := .rand_id(nrow(ds_spine$pers), 32L)]
+        ds_spine$pers[, RINKENTEKEN := .deterministic_kenteken(RINPERSOON)]
 
       # Add HKW household key if needed (for INPATAB, INHATAB, VEHTAB_VERMOGEN)
       if ("RINPERSOONHKW" %in% needed$pers &&
@@ -561,10 +561,15 @@ read_sav <- function(file,
 #' @param n  Number of persons in the spine.  `NULL` (default) uses the
 #'   population count from bundled parameters.
 #' @param seed  RNG seed for reproducibility (default 42).
+#' @param col_select  Optional named list of character vectors specifying
+#'   which columns to include per CBS file.  Keys are CBS file names (e.g.
+#'   `"SPOLISBUS"`) or file keys (e.g. `"spolisbus"`).  Identity/join key
+#'   columns (defined in each manifest's `key_columns`) are always included.
+#'   Files not listed get all columns.  Default `NULL` exports all columns.
 #' @return Invisibly, `output_dir`.
 #' @export
 sim_export <- function(output_dir, dataset = NULL, year = 2023L,
-                       n = NULL, seed = 42L) {
+                       n = NULL, seed = 42L, col_select = NULL) {
   if (!requireNamespace("arrow", quietly = TRUE))
     stop("Package 'arrow' is required to write parquet files. ",
          "Install it with: install.packages('arrow')")
@@ -615,8 +620,25 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       file_seed <- bitwXor(seed, sum(utf8ToInt(paste0(ds_id, "/", fkey))))
       set.seed(file_seed)
 
-      # Assemble the full data.table
-      dt <- .assemble_generic(ds_id, fkey, spine)
+      # Resolve col_select for this file (match by CBS name or file key)
+      file_col_q <- NULL
+      if (!is.null(col_select)) {
+        file_cols <- col_select[[cbs_name]] %||%
+                     col_select[[toupper(cbs_name)]] %||%
+                     col_select[[tolower(cbs_name)]] %||%
+                     col_select[[fkey]]
+        if (!is.null(file_cols)) {
+          # Always include key columns from manifest
+          key_cols <- fi$key_columns
+          if (!is.null(key_cols)) {
+            file_cols <- unique(c(unlist(key_cols), file_cols))
+          }
+          file_col_q <- rlang::quo(tidyselect::all_of(file_cols))
+        }
+      }
+
+      # Assemble the data.table (with optional column subset)
+      dt <- .assemble_generic(ds_id, fkey, spine, col_q = file_col_q)
       tbl <- tibble::as_tibble(dt)
 
       # Write parquet

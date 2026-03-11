@@ -21,8 +21,10 @@ files:
     entity: object
     columns_file: energieverbruik.yaml
     tab_suffix: true
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]
   energieverbruikmaand:
     cbs_name: ENERGIEVERBRUIKMAAND
     entity: object
     columns_file: energieverbruikmaand.yaml
     tab_suffix: true
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]

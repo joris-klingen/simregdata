@@ -29,45 +29,54 @@ files:
     cbs_name: WoonbaseSleutelbestand
     entity: person
     columns_file: sleutel.yaml
+    key_columns: [RINPERSOONS, RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER]
 
   kenmerken_pers:
     cbs_name: WoonbaseKenmerkenPersonen
     entity: person
     columns_file: kenmerken_pers.yaml
+    key_columns: [RINPERSOONS, RINPERSOON]
 
   kenmerken_hh:
     cbs_name: WoonbaseKenmerkenHuishoudens
     entity: household
     columns_file: kenmerken_hh.yaml
+    key_columns: [HUISHOUDNR]
 
   kenmerken_obj:
     cbs_name: WoonbaseKenmerkenWoonruimten
     entity: object
     columns_file: kenmerken_obj.yaml
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]
 
   populatie_pers:
     cbs_name: WoonbasePopulatiePersonen
     entity: person
     columns_file: populatie_pers.yaml
+    key_columns: [RINPERSOONS, RINPERSOON]
 
   populatie_hh:
     cbs_name: WoonbasePopulatieHuishoudens
     entity: household
     columns_file: populatie_hh.yaml
+    key_columns: [HUISHOUDNR]
 
   populatie_obj:
     cbs_name: WoonbasePopulatieWoonruimten
     entity: object
     columns_file: populatie_obj.yaml
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]
 
   # Extra Kenmerken extension files
   ek_hh_welvaart:
     cbs_name: WOONBASEEKHuishoudensWV
     entity: household
     columns_file: ek_hh_welvaart.yaml
+    key_columns: [HUISHOUDNR]
 
   ek_obj_panden:
     cbs_name: ExtraKenmerkenPanden
     entity: object
     columns_file: ek_obj_panden.yaml
     tab_suffix: true
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]

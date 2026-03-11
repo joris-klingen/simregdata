@@ -20,3 +20,4 @@ files:
     entity: person
     columns_file: betab.yaml
     tab_suffix: true
+    key_columns: [BEID]

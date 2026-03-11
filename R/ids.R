@@ -14,6 +14,23 @@
     substr(do.call(paste0, chunks), 1L, w)
   }
 }
+# Deterministic kenteken (license plate) from RINPERSOON ----
+# Same RINPERSOON always produces the same RINKENTEKEN, regardless of year
+# or RNG state.  Vectorized multiplicative hash producing 32-char hex IDs.
+.deterministic_kenteken <- function(rinpersoon) {
+  rp_num <- as.double(rinpersoon)
+  mod <- 2147483647  # 2^31 - 1
+  m1 <- (rp_num * 48271 + 12345) %% mod
+  m2 <- (m1 * 69069 + 1) %% mod
+  m3 <- (m2 * 48271 + 56789) %% mod
+  m4 <- (m3 * 69069 + 98765) %% mod
+  sprintf("%08x%08x%08x%08x",
+          as.integer(m1 %% .Machine$integer.max),
+          as.integer(m2 %% .Machine$integer.max),
+          as.integer(m3 %% .Machine$integer.max),
+          as.integer(m4 %% .Machine$integer.max))
+}
+
 .rcat    <- function(n, v, p = NULL) sample(v, n, replace = TRUE, prob = p)
 .yyyymmdd <- function(d) {
   lt <- as.POSIXlt(d)

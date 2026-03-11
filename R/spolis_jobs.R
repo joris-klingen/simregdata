@@ -2,7 +2,8 @@
 #
 # Generates a realistic job table with:
 # - Multiple jobs per person (configurable distribution)
-# - Persistent IKVIDs across months and years
+# - Persistent IKVIDs: same person+job slot = same IKVID across years
+# - Year-varying job turnover: ~15% of jobs change each year
 # - Monthly row expansion (one row per job-month)
 # - Job-level attributes that stay constant within a job
 
@@ -20,22 +21,59 @@
 # @param seed        RNG seed
 .build_spolis_jobs <- function(spine_pers, n_jobs, params, year, seed) {
 
-  set.seed(seed)
   n_pers <- nrow(spine_pers)
 
-  # Job-count distribution: how many jobs does each person have ----
+  # ==== Phase 1: Year-invariant job structure ================================
+  # Same seed -> same job capacity per person, same potential job slots
+  set.seed(seed)
+
+  # Job-count distribution: how many jobs does each person have
   # ~70% have 1 job, ~20% have 2 jobs, ~7% have 3, ~3% have 4
   jobs_prob <- c(0.70, 0.20, 0.07, 0.03)
-  jobs_per_person <- sample(1:4, n_pers, replace = TRUE, prob = jobs_prob)
+  base_jobs_per_person <- sample(1:4, n_pers, replace = TRUE, prob = jobs_prob)
+
+  # Each person gets a pool of potential job slots (base + extra for turnover)
+  # Over multiple years, a person may cycle through more jobs than they hold
+  # at any one time. The pool size determines how many distinct IKVIDs they
+  # can have across their career.
+  max_extra_slots <- 2L
+  pool_size <- base_jobs_per_person + max_extra_slots
+
+  # ==== Phase 2: Year-varying job activation =================================
+  # Year-dependent seed: determines which job slots are active this year
+  set.seed(seed + year * 1000L)
+
+  # For each person, select which job slots are active this year.
+  # Primary slot (1) has high retention (~92%), secondary slots lower (~85%).
+  # Slots beyond base_jobs are "new job" candidates that activate with ~15% prob.
+  jobs_per_person <- integer(n_pers)
+  active_slots <- vector("list", n_pers)
+
+  for (i in seq_len(n_pers)) {
+    n_base <- base_jobs_per_person[i]
+    n_pool <- pool_size[i]
+
+    # Activation probability per slot
+    slot_probs <- numeric(n_pool)
+    slot_probs[1L] <- 0.92                                   # primary job
+    if (n_base >= 2L) slot_probs[2:n_base] <- 0.85           # secondary jobs
+    if (n_pool > n_base) slot_probs[(n_base + 1L):n_pool] <- 0.15  # turnover slots
+
+    active <- which(runif(n_pool) < slot_probs)
+    if (length(active) == 0L) active <- 1L  # everyone has at least 1 job
+    active_slots[[i]] <- active
+    jobs_per_person[i] <- length(active)
+  }
+
   n_total_jobs <- sum(jobs_per_person)
 
-  # Expand person index -> one row per job ----
+  # Expand person index -> one row per active job
   person_idx <- rep(seq_len(n_pers), jobs_per_person)
-  job_within_person <- unlist(lapply(jobs_per_person, seq_len))
+  job_within_person <- unlist(active_slots)
 
-  rinpersoon <- spine_pers$RINPERSOON[person_idx]
+  rinpersoon <- spine_pers[["RINPERSOON"]][person_idx]
 
-  # Generate persistent IKVIDs (deterministic per person+job_index) ----
+  # Generate persistent IKVIDs (deterministic per person+job_slot) ----
   ikvid <- .deterministic_job_id(rinpersoon, job_within_person, width = 32L)
 
   # Generate persistent employer IDs (SBEID) ----
@@ -43,8 +81,8 @@
                                   salt = "beid")
 
   # Determine active months per job ----
-  # Primary jobs (index 1) mostly run all 12 months
-  # Secondary jobs have shorter durations
+  # Primary jobs (slot 1) mostly run all 12 months
+  # Secondary/turnover jobs have shorter durations
   start_month <- integer(n_total_jobs)
   end_month   <- integer(n_total_jobs)
 
@@ -58,7 +96,6 @@
   primary_partial <- is_primary & !primary_full
   n_pp <- sum(primary_partial)
   if (n_pp > 0L) {
-    # Half start mid-year, half end mid-year
     pp_starts_late <- runif(n_pp) < 0.5
     start_month[primary_partial] <- ifelse(pp_starts_late,
       sample(2:6, n_pp, replace = TRUE), 1L)
@@ -66,7 +103,7 @@
       12L, sample(6:11, n_pp, replace = TRUE))
   }
 
-  # Secondary jobs: shorter, more variable duration
+  # Secondary/turnover jobs: shorter, more variable duration
   secondary <- !is_primary
   n_sec <- sum(secondary)
   if (n_sec > 0L) {
@@ -97,7 +134,7 @@
 
   # Copy RINPERSOONS from spine if available
   if ("RINPERSOONS" %in% names(spine_pers)) {
-    job_tbl[, RINPERSOONS := spine_pers$RINPERSOONS[person_idx]]
+    job_tbl[, RINPERSOONS := spine_pers[["RINPERSOONS"]][person_idx]]
   }
 
   # Expand to monthly rows ----
@@ -113,7 +150,6 @@
 
   # Last day of each month
   month_days <- c(31L, 28L, 31L, 30L, 31L, 30L, 31L, 31L, 30L, 31L, 30L, 31L)
-  # Leap year check
   is_leap <- (year %% 4L == 0L & year %% 100L != 0L) | (year %% 400L == 0L)
   if (is_leap) month_days[2L] <- 29L
   expanded[, period_end := sprintf("%d%02d%02d", year, month,

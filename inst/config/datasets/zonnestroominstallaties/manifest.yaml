@@ -20,3 +20,4 @@ files:
     entity: object
     columns_file: zonnestroominstallaties.yaml
     tab_suffix: false
+    key_columns: [SOORTOBJECTNUMMER, RINOBJECTNUMMER]

@@ -119,6 +119,39 @@
 }
 
 
+# Filter spec to only columns in selected_set (for enrichment checks)
+.filter_spec_to_selected <- function(spec, selected_set) {
+  filtered <- spec
+  filtered$columns <- Filter(function(cs) {
+    if (!is.null(cs[["suffixes"]])) {
+      expanded <- vapply(cs[["suffixes"]], function(sfx)
+        gsub("\\{sfx\\}", sfx, cs$name), character(1L))
+      any(expanded %in% selected_set)
+    } else if (!is.null(cs[["suffixes_custom"]])) {
+      expanded <- vapply(cs[["suffixes_custom"]], function(sc)
+        gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name), character(1L))
+      any(expanded %in% selected_set)
+    } else {
+      cs$name %in% selected_set
+    }
+  }, spec$columns)
+  # Also filter pre_compute to only those referenced by remaining columns
+  if (!is.null(filtered$pre_compute)) {
+    needed_computed <- character()
+    for (cs in filtered$columns) {
+      if (!is.null(cs$source) && grepl("^computed\\.", cs$source))
+        needed_computed <- c(needed_computed, sub("^computed\\.", "", cs$source))
+    }
+    if (length(needed_computed) > 0L) {
+      filtered$pre_compute <- Filter(function(pc) pc$name %in% needed_computed,
+                                     filtered$pre_compute)
+    } else {
+      filtered$pre_compute <- list()
+    }
+  }
+  filtered
+}
+
 # Main generic assembly: builds a data.table from YAML column spec
 .assemble_generic <- function(dataset_id, file_key, spine, col_q = NULL) {
 
@@ -128,75 +161,7 @@
   # Determine which spine table to use + row count
   tbl_name <- spec$spine_table
 
-  # Trigger lazy enrichment if needed (shared spine has enrichment flags)
-  if (!is.null(spine$hh_enriched)) {
-    if (tbl_name == "hh" && !isTRUE(spine$hh_enriched)) {
-      if (.spec_needs_hh_enriched(spec)) {
-        spine <- .ensure_enriched("hh")
-      }
-    } else if (tbl_name == "obj" && !isTRUE(spine$obj_enriched)) {
-      if (.spec_needs_obj_enriched(spec)) {
-        spine <- .ensure_enriched("obj")
-      }
-    } else if (tbl_name == "pers" && !isTRUE(spine$pers_spatial_enriched)) {
-      if (.spec_needs_pers_spatial(spec)) {
-        spine <- .ensure_enriched("pers_spatial")
-      }
-    }
-  }
-
-  base_tbl <- spine[[tbl_name]]
-  if (is.null(base_tbl)) stop("Spine table '", tbl_name, "' not found")
-  n_rows <- nrow(base_tbl)
-
-  jan1  <- .yyyymmdd(spine$jan1)
-  dec31 <- .yyyymmdd(spine$dec31)
-
-  # Load dataset params (year-specific calibrated distributions)
-  params_key <- paste0("params_", dataset_id)
-  params_yr_key <- paste0("params_year_", dataset_id)
-  params <- .sim_cache[[params_key]]
-  cached_yr <- .sim_cache[[params_yr_key]]
-  if (is.null(params) || !identical(cached_yr, spine$year)) {
-    # Try loading from YAML
-    params <- tryCatch({
-      params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
-      if (file.exists(params_path)) {
-        all_p <- yaml::read_yaml(params_path)
-        yr_key <- as.character(spine$year)
-        yr_data <- all_p[[yr_key]]
-        if (is.null(yr_data)) {
-          avail <- sort(as.integer(names(all_p)))
-          nearest <- avail[which.min(abs(avail - spine$year))]
-          yr_data <- all_p[[as.character(nearest)]]
-        }
-        # Unlist named vectors so they're usable as values/probs
-        lapply(yr_data, function(x) {
-          if (is.list(x)) unlist(x) else x
-        })
-      }
-    }, error = function(e) NULL)
-    if (!is.null(params)) {
-      .sim_cache[[params_key]] <- params
-      .sim_cache[[params_yr_key]] <- spine$year
-    }
-  }
-
-  # Pre-compute derived columns if specified
-  computed <- list()
-  if (!is.null(spec$pre_compute)) {
-    for (pc in spec$pre_compute) {
-      src_val <- .resolve_column(pc, spine, n_rows, codelists, jan1, dec31,
-                                 computed, params)
-      if (identical(pc$transform, "persklasse")) {
-        computed[[pc$name]] <- .compute_persklasse(as.integer(src_val))
-      } else {
-        computed[[pc$name]] <- src_val
-      }
-    }
-  }
-
-  # Pre-filter columns via col_select (skip generating unneeded columns)
+  # Pre-filter columns via col_select (compute early so enrichment can use it)
   selected_set <- NULL
   has_col_select <- !is.null(col_q) && !rlang::quo_is_null(col_q)
   if (has_col_select) {
@@ -226,6 +191,100 @@
       dummy <- as.data.frame(dummy, check.names = FALSE)
       names(tidyselect::eval_select(col_q, dummy))
     }, error = function(e) NULL)   # fallback: generate all columns
+  }
+
+  # Trigger lazy enrichment if needed (shared spine has enrichment flags)
+  # When col_select is active, only enrich if selected columns need it
+  if (!is.null(spine$hh_enriched)) {
+    check_spec <- if (!is.null(selected_set)) {
+      .filter_spec_to_selected(spec, selected_set)
+    } else {
+      spec
+    }
+    if (tbl_name == "hh" && !isTRUE(spine$hh_enriched)) {
+      if (.spec_needs_hh_enriched(check_spec)) {
+        spine <- .ensure_enriched("hh")
+      }
+    } else if (tbl_name == "obj" && !isTRUE(spine$obj_enriched)) {
+      if (.spec_needs_obj_enriched(check_spec)) {
+        spine <- .ensure_enriched("obj")
+      }
+    } else if (tbl_name == "pers" && !isTRUE(spine$pers_spatial_enriched)) {
+      if (.spec_needs_pers_spatial(check_spec)) {
+        spine <- .ensure_enriched("pers_spatial")
+      }
+    }
+  }
+
+  base_tbl <- spine[[tbl_name]]
+  if (is.null(base_tbl)) stop("Spine table '", tbl_name, "' not found")
+  n_rows <- nrow(base_tbl)
+
+  jan1  <- .yyyymmdd(spine$jan1)
+  dec31 <- .yyyymmdd(spine$dec31)
+
+  # Load dataset params (year-specific calibrated distributions)
+  params_key <- paste0("params_", dataset_id)
+  params_yr_key <- paste0("params_year_", dataset_id)
+  params <- .sim_cache[[params_key]]
+  cached_yr <- .sim_cache[[params_yr_key]]
+  if (is.null(params) || !identical(cached_yr, spine$year)) {
+    params <- tryCatch({
+      params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
+      if (file.exists(params_path)) {
+        all_p <- yaml::read_yaml(params_path)
+        yr_key <- as.character(spine$year)
+        yr_data <- all_p[[yr_key]]
+        if (is.null(yr_data)) {
+          avail <- sort(as.integer(names(all_p)))
+          nearest <- avail[which.min(abs(avail - spine$year))]
+          yr_data <- all_p[[as.character(nearest)]]
+        }
+        lapply(yr_data, function(x) {
+          if (is.list(x)) unlist(x) else x
+        })
+      }
+    }, error = function(e) NULL)
+    if (!is.null(params)) {
+      .sim_cache[[params_key]] <- params
+      .sim_cache[[params_yr_key]] <- spine$year
+    }
+  }
+
+  # Pre-compute derived columns if specified (skip unneeded when col_select active)
+  computed <- list()
+  if (!is.null(spec$pre_compute)) {
+    # Find which computed columns are actually referenced by selected columns
+    needed_computed <- NULL
+    if (!is.null(selected_set)) {
+      needed_computed <- character()
+      for (cs in spec$columns) {
+        # Only check columns that will be generated
+        col_names <- if (!is.null(cs[["suffixes"]])) {
+          vapply(cs[["suffixes"]], function(sfx)
+            gsub("\\{sfx\\}", sfx, cs$name), character(1L))
+        } else if (!is.null(cs[["suffixes_custom"]])) {
+          vapply(cs[["suffixes_custom"]], function(sc)
+            gsub("\\{sfx_lower\\}", sc$output_suffix, cs$name), character(1L))
+        } else {
+          cs$name
+        }
+        if (any(col_names %in% selected_set) && !is.null(cs$source) &&
+            grepl("^computed\\.", cs$source)) {
+          needed_computed <- c(needed_computed, sub("^computed\\.", "", cs$source))
+        }
+      }
+    }
+    for (pc in spec$pre_compute) {
+      if (!is.null(needed_computed) && !(pc$name %in% needed_computed)) next
+      src_val <- .resolve_column(pc, spine, n_rows, codelists, jan1, dec31,
+                                 computed, params)
+      if (identical(pc$transform, "persklasse")) {
+        computed[[pc$name]] <- .compute_persklasse(as.integer(src_val))
+      } else {
+        computed[[pc$name]] <- src_val
+      }
+    }
   }
 
   # Detect job-group structure (for SPOLIS monthly data)
@@ -314,7 +373,11 @@
     sel <- tryCatch(
       names(tidyselect::eval_select(col_q, dt)),
       error = function(e) {
-        cs <- eval(rlang::quo_get_expr(col_q))
+        cs <- tryCatch(
+          rlang::eval_tidy(col_q),
+          error = function(e2) eval(rlang::quo_get_expr(col_q),
+                                     rlang::quo_get_env(col_q))
+        )
         intersect(as.character(cs), names(dt))
       })
     dt <- dt[, sel, with = FALSE]

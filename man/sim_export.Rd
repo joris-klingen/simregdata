@@ -4,7 +4,14 @@
 \alias{sim_export}
 \title{Export simulated datasets to parquet files}
 \usage{
-sim_export(output_dir, dataset = NULL, year = 2023L, n = NULL, seed = 42L)
+sim_export(
+  output_dir,
+  dataset = NULL,
+  year = 2023L,
+  n = NULL,
+  seed = 42L,
+  col_select = NULL
+)
 }
 \arguments{
 \item{output_dir}{Directory to write parquet files into.}
@@ -18,6 +25,12 @@ registered datasets.}
 population count from bundled parameters.}
 
 \item{seed}{RNG seed for reproducibility (default 42).}
+
+\item{col_select}{Optional named list of character vectors specifying
+which columns to include per CBS file.  Keys are CBS file names (e.g.
+\code{"SPOLISBUS"}) or file keys (e.g. \code{"spolisbus"}).  Identity/join key
+columns (defined in each manifest's \code{key_columns}) are always included.
+Files not listed get all columns.  Default \code{NULL} exports all columns.}
 }
 \value{
 Invisibly, \code{output_dir}.

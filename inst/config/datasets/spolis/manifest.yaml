@@ -18,3 +18,4 @@ files:
     cbs_name: SPOLISBUS
     entity: person
     columns_file: spolisbus.yaml
+    key_columns: [RINPERSOONS, RINPERSOON, IKVID]

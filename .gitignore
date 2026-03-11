@@ -28,3 +28,6 @@ docs/extracted/
 /doc/
 /Meta/
 vignettes/*.html
+
+# Test project (user experience sandbox)
+eb_reb_test/

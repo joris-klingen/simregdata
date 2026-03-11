@@ -177,9 +177,33 @@
   dt_obj[, Indicator_VSLIsNieuw         := .rcat(.N, c("-","0","1"), c(0.01,0.97,0.02))]
   data.table::setkey(dt_obj, RINOBJECTNUMMER)
 
+  # ---- Housing mobility (year-varying) ----
+  # ~6% of households move to a different object each year.
+  # Movers swap RINOBJECTNUMMER among themselves so every object stays occupied.
+  move_rate <- 0.06
+  n_movers <- max(2L, round(N_HH * move_rate))
+  mover_idx <- sample.int(N_HH, n_movers)
+
+  # Shuffle objects among movers (circular permutation: no one stays in place)
+  mover_obj <- dt_hh[["RINOBJECTNUMMER"]][mover_idx]
+  shifted <- c(mover_obj[-1L], mover_obj[1L])
+  data.table::set(dt_hh, i = mover_idx, j = "RINOBJECTNUMMER", value = shifted)
+  data.table::set(dt_hh, i = mover_idx, j = "SOORTOBJECTNUMMER",
+    value = dt_obj[["SOORTOBJECTNUMMER"]][match(shifted, dt_obj[["RINOBJECTNUMMER"]])])
+
+  # Propagate new object to persons in moved households
+  moved_hh <- dt_hh[["HUISHOUDNR"]][mover_idx]
+  pers_in_moved <- dt_pers[["HUISHOUDNR"]] %in% moved_hh
+  dt_pers[pers_in_moved, RINOBJECTNUMMER := dt_hh[["RINOBJECTNUMMER"]][
+    match(dt_pers[["HUISHOUDNR"]][pers_in_moved], dt_hh[["HUISHOUDNR"]])]]
+  dt_pers[pers_in_moved, SOORTOBJECTNUMMER := dt_hh[["SOORTOBJECTNUMMER"]][
+    match(dt_pers[["HUISHOUDNR"]][pers_in_moved], dt_hh[["HUISHOUDNR"]])]]
+
   # ---- Person indicators (year-varying) ----
+  # Set Indicator_PersoonIsVerhuisd based on actual movers
+  dt_pers[, Indicator_PersoonIsVerhuisd := as.character(as.integer(pers_in_moved))]
+
   ind_specs <- list(
-    c("Indicator_PersoonIsVerhuisd",                0.06),
     c("Indicator_PersoonIsGeboren",                 0.012),
     c("Indicator_PersoonIsOverleden",               0.010),
     c("Indicator_PersoonIsGeemigreerd",             0.008),
@@ -194,7 +218,7 @@
       value = as.character(rbinom(N_PERS_actual, 1L, as.numeric(sp[[2L]]))))
   }
 
-  # AantalKeerVerhuisd: sample only for the ~6% who moved
+  # AantalKeerVerhuisd: based on actual movers
   dt_pers[, AantalKeerVerhuisd := 0L]
   dt_pers[Indicator_PersoonIsVerhuisd == "1",
     AantalKeerVerhuisd := sample(1:3, .N, replace = TRUE, prob = c(0.80, 0.15, 0.05))]

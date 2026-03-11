@@ -18,8 +18,10 @@ files:
     entity: person
     columns_file: kentekens.yaml
     tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON, RINKENTEKEN]
   verkeersprestatie:
     cbs_name: VERKEERSPRESTATIE
     entity: person
     columns_file: verkeersprestatie.yaml
     tab_suffix: true
+    key_columns: [RinpersoonVP, RINKENTEKEN]

@@ -20,3 +20,4 @@ files:
     entity: household
     columns_file: vehtab.yaml
     tab_suffix: true
+    key_columns: [RINPERSOONHKW, RINPERSOONS]

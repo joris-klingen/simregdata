@@ -30,13 +30,16 @@ files:
     entity: person
     columns_file: persoonktab.yaml
     tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON]
 
   adresobjectbus:
     cbs_name: GBAADRESOBJECTBUS
     entity: person
     columns_file: adresobjectbus.yaml
+    key_columns: [RINPERSOONS, RINPERSOON]
 
   huishoudensbus:
     cbs_name: GBAHUISHOUDENSBUS
     entity: person
     columns_file: huishoudensbus.yaml
+    key_columns: [RINPERSOONS, RINPERSOON]

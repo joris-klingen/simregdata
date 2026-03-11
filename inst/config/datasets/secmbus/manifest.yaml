@@ -18,3 +18,4 @@ files:
     cbs_name: SECMBUS
     entity: person
     columns_file: secmbus.yaml
+    key_columns: [RINPERSOONS, RINPERSOON]

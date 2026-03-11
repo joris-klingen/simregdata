@@ -124,6 +124,11 @@ cat(sprintf("  Person overlap: %d / %d (%.0f%%)\n",
 stopifnot(overlap > 0)
 cat("  Cross-year person overlap: PASS\n")
 
+# Same RINPERSOON must have the same RINKENTEKEN across years
+rdw_m <- merge(rdw_2020, rdw_2023, by = "RINPERSOON", suffixes = c("_20", "_23"))
+stopifnot(all(rdw_m$RINKENTEKEN_20 == rdw_m$RINKENTEKEN_23))
+cat("  Same RINKENTEKEN across years: PASS\n")
+
 
 # Test 6: Natural aging ----
 cat("\n--- 6. Natural aging ---\n")
@@ -145,6 +150,63 @@ age_2020_val <- 2020L - age_m$GBAGeboorteJaar.x
 age_2023_val <- 2023L - age_m$GBAGeboorteJaar.y
 stopifnot(all(age_2023_val - age_2020_val == 3L))
 cat("  Age increases by 3 years (2020 -> 2023): PASS\n")
+
+
+# Test 7: SPOLIS job turnover ----
+cat("\n--- 7. SPOLIS job turnover ---\n")
+sim_reset()
+sim_init("spolis", year = 2020L, n = N, seed = SEED)
+sp_2020 <- unique(as.data.table(read_sav("SPOLISBUS2020V1",
+  col_select = c("RINPERSOON", "IKVID")))[, .(RINPERSOON, IKVID)])
+
+sim_reset()
+sim_init("spolis", year = 2021L, n = N, seed = SEED)
+sp_2021 <- unique(as.data.table(read_sav("SPOLISBUS2021V1",
+  col_select = c("RINPERSOON", "IKVID")))[, .(RINPERSOON, IKVID)])
+
+k20 <- sp_2020[, paste(RINPERSOON, IKVID)]
+k21 <- sp_2021[, paste(RINPERSOON, IKVID)]
+
+overlap_pct <- length(intersect(k20, k21)) / length(k20)
+new_pct     <- length(setdiff(k21, k20)) / length(k21)
+cat(sprintf("  Job overlap 2020-2021: %.0f%%\n", 100 * overlap_pct))
+cat(sprintf("  New jobs in 2021: %.0f%%\n", 100 * new_pct))
+# Most jobs should persist (>60%), but there should be some turnover (>5%)
+stopifnot(overlap_pct > 0.60 && overlap_pct < 0.95)
+cat("  Job persistence in realistic range: PASS\n")
+stopifnot(new_pct > 0.05)
+cat("  Job turnover present: PASS\n")
+
+
+# Test 8: Housing mobility ----
+cat("\n--- 8. Housing mobility ---\n")
+sim_reset()
+sim_init("woonbase", year = 2020L, n = N, seed = SEED)
+obj_2020 <- as.data.table(read_sav("WoonbaseSleutelbestand2020V1",
+  col_select = c("RINPERSOON", "RINOBJECTNUMMER")))
+
+sim_reset()
+sim_init("woonbase", year = 2023L, n = N, seed = SEED)
+obj_2023 <- as.data.table(read_sav("WoonbaseSleutelbestand2023V1",
+  col_select = c("RINPERSOON", "RINOBJECTNUMMER")))
+
+obj_m <- merge(obj_2020, obj_2023, by = "RINPERSOON", suffixes = c("_20", "_23"))
+n_moved <- sum(obj_m$RINOBJECTNUMMER_20 != obj_m$RINOBJECTNUMMER_23)
+move_pct <- n_moved / nrow(obj_m)
+cat(sprintf("  Persons who moved: %d / %d (%.1f%%)\n",
+            n_moved, nrow(obj_m), 100 * move_pct))
+# With ~6% HH move rate per year and 3 years, expect some movers
+stopifnot(move_pct > 0.01)
+cat("  Housing mobility present: PASS\n")
+
+# Movers should have valid RINOBJECTNUMMERs (not NA or empty)
+stopifnot(!any(is.na(obj_m$RINOBJECTNUMMER_23)))
+cat("  All movers have valid RINOBJECTNUMMER: PASS\n")
+
+# Non-movers should keep the same RINOBJECTNUMMER
+stayers <- obj_m[RINOBJECTNUMMER_20 == RINOBJECTNUMMER_23]
+cat(sprintf("  Stayers: %d / %d (%.1f%%)\n",
+            nrow(stayers), nrow(obj_m), 100 * nrow(stayers) / nrow(obj_m)))
 
 
 cat("\n=== All longitudinal consistency tests passed ===\n")
