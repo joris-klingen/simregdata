@@ -13,6 +13,81 @@
 .REF_YEAR <- 2020L
 
 
+# Minimum observations per gemeente ----
+.MIN_PER_GEM <- 100L
+
+# Stratified gemeente assignment: guarantee a floor per gemeente, then
+# distribute remaining objects proportionally.
+.rcat_gem_floor <- function(n, codes, probs, floor = .MIN_PER_GEM) {
+  n_gem <- length(codes)
+  total_floor <- as.integer(n_gem) * floor
+  if (total_floor >= n) {
+    # Not enough objects: allocate proportionally but at least 1 each
+    counts <- pmax(1L, round(probs * n))
+    # Adjust to hit exactly n
+    diff <- n - sum(counts)
+    if (diff != 0L) {
+      idx <- order(probs, decreasing = (diff > 0L))
+      for (i in idx) {
+        counts[i] <- counts[i] + sign(diff)
+        if (sum(counts) == n) break
+      }
+    }
+  } else {
+    # Floor per gemeente + proportional remainder
+    remainder <- n - total_floor
+    extra <- round(probs * remainder)
+    diff <- remainder - sum(extra)
+    if (diff != 0L) {
+      idx <- order(probs, decreasing = (diff > 0L))
+      for (i in idx) {
+        extra[i] <- extra[i] + sign(diff)
+        if (sum(extra) == remainder) break
+      }
+    }
+    counts <- floor + extra
+  }
+  rep(codes, times = counts)[sample.int(n)]
+}
+
+
+# Gemeente-conditional categorical sampling ----
+# Adjusts one target category's probability per gemeente while preserving
+# the relative shares of all other categories.
+# @param n Total number of draws.
+# @param gem Character vector of gemeente codes (length n).
+# @param base_p Named probability vector (national distribution).
+# @param gem_target Named numeric vector: gem_code -> target category share
+#   (e.g., apartment share per gemeente). NULL falls back to national i.i.d.
+# @param target_cat Name of the category to adjust (e.g., "05" for apartments).
+# @return Character vector of length n.
+.rcat_gem_adjusted <- function(n, gem, base_p, gem_target, target_cat) {
+  if (is.null(gem_target)) {
+    return(.rcat(n, names(base_p), base_p))
+  }
+
+  cat_names <- names(base_p)
+  nat_target <- base_p[[target_cat]]
+  nat_other  <- base_p[cat_names != target_cat]
+  other_sum  <- sum(nat_other)
+
+  result <- character(n)
+  for (g in unique(gem)) {
+    mask <- which(gem == g)
+    n_g <- length(mask)
+    local_share <- gem_target[g]
+    if (is.na(local_share)) local_share <- nat_target
+    # Clamp to (0, 1) to avoid degenerate probabilities
+    local_share <- max(0.001, min(0.999, local_share))
+    local_p <- base_p
+    local_p[[target_cat]] <- local_share
+    local_p[cat_names != target_cat] <- nat_other * ((1 - local_share) / other_sum)
+    result[mask] <- .rcat(n_g, cat_names, local_p)
+  }
+  result
+}
+
+
 .build_spine <- function(n_persons, params, seed, year) {
   year <- as.integer(year)
   t0 <- proc.time()[["elapsed"]]
@@ -136,15 +211,23 @@
   woz_sd <- 0.45
 
   for (sfx in c("1Jan","31Dec")) {
-    gem <- .rcat(N_OBJ, params$gem_codes, params$gem_probs)
+    gem <- .rcat_gem_floor(N_OBJ, params$gem_codes, params$gem_probs)
     data.table::set(dt_obj, j = paste0("GemeenteCodeJJJJ",       sfx), value = gem)
     data.table::set(dt_obj, j = paste0("WijkCodeJJJJ",           sfx), value = paste0(gem, sprintf("%02d", sample(1:20, N_OBJ, replace=TRUE))))
     data.table::set(dt_obj, j = paste0("BuurtCodeJJJJ",          sfx), value = paste0(gem, sprintf("%04d", sample(1:200,N_OBJ, replace=TRUE))))
     data.table::set(dt_obj, j = paste0("VSLSoort",               sfx), value = .rcat(N_OBJ, names(params$vslsoort_p),  params$vslsoort_p))
-    data.table::set(dt_obj, j = paste0("VBOWoningType",          sfx), value = .rcat(N_OBJ, names(params$woningtype_p),params$woningtype_p))
     data.table::set(dt_obj, j = paste0("VBOBouwJaarKlasse",      sfx), value = .rcat(N_OBJ, as.character(1:15),        params$bouwjaar_p))
     data.table::set(dt_obj, j = paste0("VBOOppervlakteKlasse",   sfx), value = .rcat(N_OBJ, names(params$opp_p),       params$opp_p))
-    data.table::set(dt_obj, j = paste0("TypeEigenaar",           sfx), value = .rcat(N_OBJ, names(params$eigenaar_p),  params$eigenaar_p))
+
+    # VBOWoningType: gemeente-conditional apartment share
+    data.table::set(dt_obj, j = paste0("VBOWoningType", sfx),
+      value = .rcat_gem_adjusted(N_OBJ, gem, params$woningtype_p,
+                                 params$gem_pct_apartment, "05"))
+
+    # TypeEigenaar: gemeente-conditional owner-occupied share
+    data.table::set(dt_obj, j = paste0("TypeEigenaar", sfx),
+      value = .rcat_gem_adjusted(N_OBJ, gem, params$eigenaar_p,
+                                 params$gem_pct_owner, "E"))
     data.table::set(dt_obj, j = paste0("VBOBouwjaar",            sfx), value = sample(1850L:year, N_OBJ, replace=TRUE))
     opp_vec <- as.integer(pmax(15L, round(stats::rlnorm(N_OBJ, log(85), 0.45))))
     data.table::set(dt_obj, j = paste0("VBOOppervlakte",         sfx), value = opp_vec)

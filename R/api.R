@@ -472,6 +472,9 @@ read_sav <- function(file,
       if (!is.infinite(n_max) && n_max < nrow(tbl)) {
         tbl <- tbl[seq_len(as.integer(n_max)), , drop = FALSE]
       }
+      if (is.function(.name_repair)) {
+        names(tbl) <- .name_repair(names(tbl))
+      }
       return(tibble::as_tibble(tbl))
     }
   }
@@ -509,8 +512,17 @@ read_sav <- function(file,
 
   if (needs_init) {
     if (is.infinite(n_max)) {
-      message("n_max = Inf: fetching population count for ", year, " and generating full spine.")
-      sim_init(dataset = dataset_id, year = year, n = NULL, seed = seed)
+      # Reuse existing spine size when only the year changed
+      shared <- .sim_cache$spine
+      prev_n <- if (!is.null(shared)) nrow(shared$pers) else NULL
+      if (!is.null(prev_n)) {
+        message(sprintf("Year changed to %d: rebuilding spine with %s persons.",
+                        year, format(prev_n, big.mark = ",")))
+      } else {
+        message("n_max = Inf: fetching population count for ", year,
+                " and generating full spine.")
+      }
+      sim_init(dataset = dataset_id, year = year, n = prev_n, seed = seed)
     } else {
       n_pers <- switch(entity,
         person    = ceiling(n_max * 1.05),
@@ -533,6 +545,12 @@ read_sav <- function(file,
   # Assemble the requested file via generic YAML-driven engine
   dt <- .assemble_generic(dataset_id, file_key, spine, col_q = col_q)
 
+  # Post-processing: income-conditional EV share for RDW kentekens
+  if (identical(dataset_id, "rdw") && "BRANDSTCODECORVRTG" %in% names(dt) &&
+      "RINPERSOON" %in% names(dt)) {
+    dt <- .adjust_ev_by_income(dt, .sim_cache$spine)
+  }
+
   # Apply skip and n_max
   if (skip > 0L) {
     dt <- dt[seq_len(nrow(dt)) > min(skip, nrow(dt))]
@@ -541,8 +559,63 @@ read_sav <- function(file,
     dt <- dt[seq_len(as.integer(n_max))]
   }
 
+  # Apply .name_repair to column names (matches haven::read_sav behaviour)
+  if (is.function(.name_repair)) {
+    names(dt) <- .name_repair(names(dt))
+  }
+
   # Return as tibble (matches haven::read_sav output class)
   tibble::as_tibble(dt)
+}
+
+
+# Income-conditional EV share ----
+# Adjusts BRANDSTCODECORVRTG so EV adoption correlates with household income.
+# Higher-income households are more likely to own electric vehicles.
+.adjust_ev_by_income <- function(dt, shared_spine) {
+  if (is.null(shared_spine) || is.null(shared_spine$hh)) return(dt)
+
+  hh_tbl <- shared_spine$hh
+  if (!("P100HBEST" %in% names(hh_tbl))) return(dt)
+
+  # Build RINPERSOON -> income percentile map from shared spine
+  pers_tbl <- shared_spine$pers
+  if (is.null(pers_tbl)) return(dt)
+  income_map <- hh_tbl$P100HBEST[match(pers_tbl$HUISHOUDNR,
+                                        hh_tbl$HUISHOUDNR)]
+  names(income_map) <- pers_tbl$RINPERSOON
+
+  # Look up income for each vehicle row
+  inc_pct <- income_map[dt$RINPERSOON]
+  inc_pct[is.na(inc_pct)] <- 50L
+
+  # Strip haven labels for clean comparison, then restore
+  fuel_raw <- as.character(dt$BRANDSTCODECORVRTG)
+  fuel_tab <- table(fuel_raw)
+  n_total <- nrow(dt)
+  ev_code <- "4"
+  n_ev <- as.integer(fuel_tab[ev_code] %||% 0L)
+  if (n_ev < 2L || n_ev >= n_total) return(dt)
+
+  # Income-based EV probability: logistic tilt
+  # Top decile ~3x more likely than bottom decile
+  ev_score <- exp(0.025 * (inc_pct - 50))
+
+  # Assign EV by weighted sampling without replacement
+  ev_idx <- sample.int(n_total, n_ev, replace = FALSE, prob = ev_score)
+  is_ev <- rep(FALSE, n_total)
+  is_ev[ev_idx] <- TRUE
+
+  # Non-EV fuel distribution (preserve relative shares)
+  non_ev_fuels <- fuel_tab[names(fuel_tab) != ev_code]
+  non_ev_p <- as.numeric(non_ev_fuels) / sum(non_ev_fuels)
+  non_ev_names <- names(non_ev_fuels)
+
+  # Reassign: overwrite the whole column to avoid type mismatch
+  fuel_raw[is_ev] <- ev_code
+  fuel_raw[!is_ev] <- .rcat(sum(!is_ev), non_ev_names, non_ev_p)
+  data.table::set(dt, j = "BRANDSTCODECORVRTG", value = fuel_raw)
+  dt
 }
 
 

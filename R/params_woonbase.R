@@ -79,6 +79,30 @@ woonbase_cbs_params <- function(year = 2023L) {
     p$gem_probs <- NULL
   }
 
+  # ---- Gemeente housing type (CSV or urbanity proxy) ----
+  housing_csv <- .wb_housing_gem_csv()
+  if (nzchar(housing_csv) && file.exists(housing_csv)) {
+    ht_all <- data.table::fread(housing_csv,
+      colClasses = c("character", "integer", "numeric", "numeric"))
+    yr_filter <- as.integer(year)
+    ht <- ht_all[year == yr_filter]
+    if (nrow(ht) == 0L) {
+      avail_ht <- sort(unique(ht_all$year))
+      nearest_ht <- avail_ht[which.min(abs(avail_ht - yr_filter))]
+      ht <- ht_all[year == nearest_ht]
+    }
+    p$gem_pct_apartment <- stats::setNames(ht$pct_apartment, ht$gem_code)
+    p$gem_pct_owner     <- stats::setNames(ht$pct_owner, ht$gem_code)
+  } else if (length(p$gem_probs) > 0L) {
+    # Urbanity proxy: larger gemeenten tend to have more apartments and fewer
+    # owner-occupied dwellings.  Rank by population weight as a proxy.
+    gem_rank <- rank(p$gem_probs) / length(p$gem_probs)
+    p$gem_pct_apartment <- stats::setNames(
+      0.15 + 0.35 * gem_rank^0.6, p$gem_codes)
+    p$gem_pct_owner <- stats::setNames(
+      0.70 - 0.25 * gem_rank^0.6, p$gem_codes)
+  }
+
   # ---- WOZ means per gemeente (CSV) ----
   woz_csv <- .wb_woz_means_csv()
   if (nzchar(woz_csv) && file.exists(woz_csv)) {
@@ -108,10 +132,13 @@ woonbase_cbs_params <- function(year = 2023L) {
 #' Fetch CBS StatLine data and write to params.yaml and gem_weights.csv
 #'
 #' Queries CBS StatLine via `cbsodataR` for population and household counts
-#' for the requested years, and writes the results to two files:
+#' for the requested years, and writes the results to:
 #' \itemize{
 #'   \item `params.yaml` — n_persons, n_hh, typhh_p per year
 #'   \item `gem_weights.csv` — gemeente population weights per year
+#'   \item `woz_means.csv` — mean WOZ value per gemeente per year
+#'   \item `housing_gem.csv` — apartment share and owner-occupied share per
+#'     gemeente per year (from table 71446ned)
 #' }
 #' Run once (or whenever CBS publishes new data) to refresh the parameters.
 #'
@@ -239,6 +266,60 @@ woonbase_update_params <- function(years = 2016:2024,
   data.table::setorder(woz_all, year, gem_code)
   data.table::fwrite(woz_all, woz_path)
   cat(sprintf("Written woz_means.csv (%d rows)\n", nrow(woz_all)))
+
+  # ---- Housing type + ownership per gemeente (table 71446ned) ----
+  housing_path <- file.path(config_dir, "housing_gem.csv")
+  if (file.exists(housing_path)) {
+    ht_all <- data.table::fread(housing_path,
+      colClasses = c("character", "integer", "numeric", "numeric"))
+  } else {
+    ht_all <- data.table::data.table(
+      gem_code = character(), year = integer(),
+      pct_apartment = numeric(), pct_owner = numeric())
+  }
+
+  cat("Fetching gemeente housing type + ownership (71446ned):\n")
+
+  for (yr in years) {
+    yr_code <- paste0(yr, "JJ00")
+    cat(sprintf("  %d: ", yr))
+
+    tryCatch({
+      t446 <- cbsodataR::cbs_get_data(
+        "71446ned", Perioden = yr_code,
+        select = c("RegioS", "Perioden",
+                    "TotaalWoningvoorraad_1",
+                    "Meergezinswoning_3",
+                    "Koopwoning_4"))
+      gem_h <- t446[grepl("^GM", trimws(t446$RegioS)), ]
+      gem_h$code   <- sub("^GM", "", trimws(gem_h$RegioS))
+      gem_h$total  <- as.numeric(gem_h$TotaalWoningvoorraad_1)
+      gem_h$multi  <- as.numeric(gem_h$Meergezinswoning_3)
+      gem_h$owner  <- as.numeric(gem_h$Koopwoning_4)
+      gem_h <- gem_h[!is.na(gem_h$total) & gem_h$total > 0, ]
+      gem_h$pct_apt <- round(gem_h$multi / gem_h$total, 4)
+      gem_h$pct_own <- round(gem_h$owner / gem_h$total, 4)
+
+      ht_all <- ht_all[year != yr]
+      ht_new <- data.table::data.table(
+        gem_code = gem_h$code, year = yr,
+        pct_apartment = gem_h$pct_apt, pct_owner = gem_h$pct_own)
+      ht_all <- data.table::rbindlist(list(ht_all, ht_new))
+
+      cat(sprintf("%d gemeenten, apt %.0f-%.0f%%, owner %.0f-%.0f%%\n",
+                  nrow(gem_h),
+                  min(gem_h$pct_apt, na.rm = TRUE) * 100,
+                  max(gem_h$pct_apt, na.rm = TRUE) * 100,
+                  min(gem_h$pct_own, na.rm = TRUE) * 100,
+                  max(gem_h$pct_own, na.rm = TRUE) * 100))
+    }, error = function(e) {
+      cat(sprintf("FAILED (%s)\n", conditionMessage(e)))
+    })
+  }
+
+  data.table::setorder(ht_all, year, gem_code)
+  data.table::fwrite(ht_all, housing_path)
+  cat(sprintf("Written housing_gem.csv (%d rows)\n", nrow(ht_all)))
 
   invisible(all_annual)
 }

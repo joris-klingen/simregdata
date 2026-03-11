@@ -22,3 +22,7 @@
 .wb_woz_means_csv <- function() {
   file.path(.dataset_dir("woonbase"), "woz_means.csv")
 }
+
+.wb_housing_gem_csv <- function() {
+  file.path(.dataset_dir("woonbase"), "housing_gem.csv")
+}
