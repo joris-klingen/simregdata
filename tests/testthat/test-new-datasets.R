@@ -431,3 +431,56 @@ test_that("netwerk persons come from shared spine", {
   match_rate <- length(common) / length(unique(dt_buren$RINPERSOON))
   expect_equal(match_rate, 1.0)
 })
+
+
+# ---- Longitudinal consistency: network stability across years ----
+
+test_that("buren network is stable for non-movers across years", {
+  sim_reset()
+  sim_init("burennetwerktab", year = 2020L, n = 200L, seed = 42L)
+  dt_2020 <- data.table::as.data.table(
+    read_sav("BURENNETWERK2020TABV1"))
+
+  sim_reset()
+  sim_init("burennetwerktab", year = 2021L, n = 200L, seed = 42L)
+  dt_2021 <- data.table::as.data.table(
+    read_sav("BURENNETWERK2021TABV1"))
+
+  # Same set of ego persons (Phase 1 determinism)
+  expect_equal(sort(unique(dt_2020$RINPERSOON)),
+               sort(unique(dt_2021$RINPERSOON)))
+
+  # For persons in the same gemeente both years, their buren should match
+  # Build ego-alter pairs as sets per person
+  pairs_2020 <- dt_2020[, .(alter = list(sort(RINPERSOONRELATIE))),
+                          by = RINPERSOON]
+  pairs_2021 <- dt_2021[, .(alter = list(sort(RINPERSOONRELATIE))),
+                          by = RINPERSOON]
+
+  # Merge and compute overlap
+  both <- pairs_2020[pairs_2021, on = "RINPERSOON", nomatch = 0L]
+  n_stable <- sum(mapply(function(a, b) identical(a, b),
+                          both$alter, both$i.alter))
+
+  # Most persons should have identical networks (only movers differ)
+  stability <- n_stable / nrow(both)
+  expect_gt(stability, 0.80)
+})
+
+test_that("familie network is fully stable across years", {
+  sim_reset()
+  sim_init("familienetwerktab", year = 2020L, n = 200L, seed = 42L)
+  dt_2020 <- data.table::as.data.table(
+    read_sav("FAMILIENETWERK2020TABV1"))
+
+  sim_reset()
+  sim_init("familienetwerktab", year = 2021L, n = 200L, seed = 42L)
+  dt_2021 <- data.table::as.data.table(
+    read_sav("FAMILIENETWERK2021TABV1"))
+
+  # Familie uses year-invariant seed: identical across years
+  expect_equal(nrow(dt_2020), nrow(dt_2021))
+  expect_equal(dt_2020$RINPERSOON, dt_2021$RINPERSOON)
+  expect_equal(dt_2020$RINPERSOONRELATIE, dt_2021$RINPERSOONRELATIE)
+  expect_equal(as.integer(dt_2020$RELATIE), as.integer(dt_2021$RELATIE))
+})

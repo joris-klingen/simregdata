@@ -1,22 +1,26 @@
 # Network dataset helpers ----
 # Builds dyadic relation tables for burennetwerktab, colleganetwerktab,
 # familienetwerktab.
+#
+# Longitudinal consistency:
+#   - Partner assignment is deterministic from sorted position within
+#     gemeente (buren) or SBEID (collega) groups.
+#   - Same person + same gemeente = same buren across years.
+#   - When someone moves (spine Phase 2 housing mobility), their buren
+#     change naturally because they enter a different gemeente group.
+#   - Collega changes track SPOLIS job turnover (same SBEID = same colleagues).
+#   - Familie uses year-invariant seed only — fully stable across years.
 
 .NETWERK_DATASETS <- c("burennetwerktab", "colleganetwerktab",
                         "familienetwerktab")
 
 # Build an expanded person-pair relation table.
 #
-# Generates spatially/employer-clustered relations:
-#   - burennetwerktab:  buren (101) from same RINOBJECTNUMMER or gemeente,
-#                       buurtgenoten (102) from same gemeente
-#   - colleganetwerktab: collega (201) from same SBEID, fallback to random
-#   - familienetwerktab: random assignment (for now)
-#
-# @param sampled_pers data.table with RINPERSOON + optional GemeenteCodeJJJJ1Jan, SBEID.
+# @param sampled_pers data.table with RINPERSOON + optional
+#   GemeenteCodeJJJJ1Jan, SBEID.
 # @param dataset_id   One of the .NETWERK_DATASETS.
 # @param year         Simulation year (for params lookup).
-# @param seed         RNG seed.
+# @param seed         RNG seed (year-invariant from sim_init Phase 1).
 # @return data.table with columns: RINPERSOON, RINPERSOONRELATIE, RELATIE.
 .build_netwerk_relations <- function(sampled_pers, dataset_id, year, seed) {
   set.seed(seed)
@@ -48,107 +52,95 @@
 
   # Dispatch to dataset-specific builder
   if (identical(dataset_id, "burennetwerktab")) {
-    .build_buren_relations(sampled_pers, n_rel_pp, rel_codes, rel_probs)
+    .build_buren_relations(sampled_pers, n_rel_pp, seed)
   } else if (identical(dataset_id, "colleganetwerktab")) {
-    .build_collega_relations(sampled_pers, n_rel_pp)
+    .build_collega_relations(sampled_pers, n_rel_pp, seed)
   } else {
     .build_random_relations(sampled_pers, n_rel_pp, rel_codes, rel_probs)
   }
 }
 
 
-# Buren: spatially clustered neighbours ----
-# Buren (101) sampled from same gemeente, buurtgenoten (102) also from same
-# gemeente but a separate draw.  Falls back to random when gemeente is missing
-# or too small.
-.build_buren_relations <- function(sampled_pers, n_rel_pp, rel_codes, rel_probs) {
-  persons <- sampled_pers$RINPERSOON
-  n_pers  <- length(persons)
+# Buren: deterministic circular assignment within gemeente ----
+# Persons are sorted by gemeente + RINPERSOON.  Each person is paired with
+# the next K persons in circular order within their gemeente group.
+# Offsets 1..n_buren → code 101 (Buur), rest → code 102 (Buurtgenoot).
+# Deterministic: same person in same gemeente = same neighbors across years.
+.build_buren_relations <- function(sampled_pers, n_rel_pp, seed) {
+  set.seed(seed)
+
   gem_col <- sampled_pers[["GemeenteCodeJJJJ1Jan"]]
-
-  # Partition: ~half buren (101), ~half buurtgenoten (102)
-  n_buren <- as.integer(ceiling(n_rel_pp / 2))
-  n_buurt <- n_rel_pp - n_buren
-
-  # Pre-index persons by gemeente for fast within-group sampling
   has_gem <- !is.null(gem_col) && !all(is.na(gem_col))
-  if (has_gem) {
-    gem_idx <- split(seq_len(n_pers), gem_col)
-    pers_gem <- as.character(gem_col)
+
+  # Build work table sorted deterministically
+  dt <- data.table(
+    RINPERSOON = sampled_pers$RINPERSOON,
+    gem = if (has_gem) as.character(gem_col) else rep("ALL", nrow(sampled_pers))
+  )
+  setorder(dt, gem, RINPERSOON)
+  n <- nrow(dt)
+
+  # Group metadata (vectorized)
+  dt[, `:=`(gpos = seq_len(.N), gsize = .N, gstart = .I[1L]),
+     by = gem]
+
+  # Relation counts: Poisson, deterministic from seed
+  n_buren <- as.integer(ceiling(n_rel_pp / 2))
+  k <- pmax(1L, rpois(n, n_rel_pp))
+  total <- sum(k)
+
+  # Expand: one row per relation
+  ego_row <- rep.int(seq_len(n), k)
+  offs <- sequence(k)   # offset 1,2,...,k[1], 1,2,...,k[2], ...
+
+  # Circular alter assignment within gemeente group
+  gpos   <- dt$gpos[ego_row]
+  gsize  <- dt$gsize[ego_row]
+  gstart <- dt$gstart[ego_row]
+
+  alter_gpos <- ((gpos - 1L + offs) %% gsize) + 1L
+  alter_row  <- gstart + alter_gpos - 1L
+
+  # Handle self-pairs (gem_size == 1: circular wraps to self)
+  is_self <- (alter_row == ego_row)
+  if (any(is_self)) {
+    # Replace with random from global pool
+    alt <- sample.int(n, sum(is_self), replace = TRUE)
+    # Ensure no self
+    still <- (alt == ego_row[is_self])
+    if (any(still)) alt[still] <- ((ego_row[is_self][still] %% n) + 1L)
+    alter_row[is_self] <- alt
   }
 
-  # For each person, draw relations
-  ego_list   <- vector("list", n_pers)
-  alter_list <- vector("list", n_pers)
-  rel_list   <- vector("list", n_pers)
-
-  for (i in seq_len(n_pers)) {
-    k_buren <- max(1L, rpois(1L, n_buren))
-    k_buurt <- max(0L, rpois(1L, n_buurt))
-    k_total <- k_buren + k_buurt
-
-    if (has_gem) {
-      pool <- gem_idx[[pers_gem[i]]]
-      # Remove self from pool
-      pool <- pool[pool != i]
-    } else {
-      pool <- integer(0L)
-    }
-
-    if (length(pool) >= 2L) {
-      # Sample buren and buurtgenoten from same gemeente
-      n_draw <- min(k_total, length(pool))
-      drawn <- pool[sample.int(length(pool), n_draw, replace = n_draw > length(pool))]
-      # Fill remainder from global pool if needed
-      if (n_draw < k_total) {
-        n_extra <- k_total - n_draw
-        extra <- sample.int(n_pers, n_extra, replace = TRUE)
-        extra[extra == i] <- ((i %% n_pers) + 1L)
-        drawn <- c(drawn, extra)
-      }
-    } else {
-      # Fallback: random from entire population
-      drawn <- sample.int(n_pers, k_total, replace = TRUE)
-      drawn[drawn == i] <- ((i %% n_pers) + 1L)
-    }
-
-    # Ensure no self-pairs
-    drawn[drawn == i] <- ((i %% n_pers) + 1L)
-
-    ego_list[[i]]   <- rep(persons[i], k_total)
-    alter_list[[i]] <- persons[drawn]
-    # First k_buren are buren (101), rest are buurtgenoten (102)
-    rel_list[[i]]   <- c(rep("101", min(k_buren, k_total)),
-                         rep("102", max(0L, k_total - k_buren)))
-  }
+  # Relation codes: first n_buren offsets = 101 (Buur), rest = 102 (Buurtgenoot)
+  rel <- ifelse(offs <= n_buren, "101", "102")
 
   data.table(
-    RINPERSOON        = unlist(ego_list, use.names = FALSE),
-    RINPERSOONRELATIE = unlist(alter_list, use.names = FALSE),
-    RELATIE           = unlist(rel_list, use.names = FALSE)
+    RINPERSOON        = dt$RINPERSOON[ego_row],
+    RINPERSOONRELATIE = dt$RINPERSOON[alter_row],
+    RELATIE           = rel
   )
 }
 
 
-# Collega: employer-based colleagues ----
-# If SBEID is available, pairs persons who share the same employer.
-# Persons without an employer get no colleague relations (matching CBS:
-# only employed persons appear in COLLEGANETWERKTAB).
-# Falls back to random pairing when SBEID is unavailable.
-.build_collega_relations <- function(sampled_pers, n_rel_pp) {
-  persons <- sampled_pers$RINPERSOON
-  n_pers  <- length(persons)
-  sbeid   <- sampled_pers[["SBEID"]]
+# Collega: deterministic circular assignment within SBEID ----
+# Only employed persons (with SBEID) get colleague relations.
+# Sorted by SBEID + RINPERSOON, circular assignment within employer group.
+# Deterministic: same person at same employer = same colleagues across years.
+.build_collega_relations <- function(sampled_pers, n_rel_pp, seed) {
+  set.seed(seed)
 
+  sbeid <- sampled_pers[["SBEID"]]
   has_sbeid <- !is.null(sbeid) && !all(is.na(sbeid))
 
   if (!has_sbeid) {
+    # Fallback: random pairing among all persons
     return(.build_random_relations(sampled_pers, n_rel_pp, "201", 1.0))
   }
 
-  # Only employed persons (with SBEID) get colleague relations
-  employed <- which(!is.na(sbeid))
-  if (length(employed) < 2L) {
+  # Only employed persons
+  employed_mask <- !is.na(sbeid)
+  if (sum(employed_mask) < 2L) {
     return(data.table(
       RINPERSOON = character(0L),
       RINPERSOONRELATIE = character(0L),
@@ -156,54 +148,53 @@
     ))
   }
 
-  # Index employed persons by SBEID
-  emp_sbeid <- as.character(sbeid[employed])
-  sbeid_idx <- split(employed, emp_sbeid)
+  dt <- data.table(
+    RINPERSOON = sampled_pers$RINPERSOON[employed_mask],
+    sbeid = as.character(sbeid[employed_mask])
+  )
+  setorder(dt, sbeid, RINPERSOON)
+  n <- nrow(dt)
 
-  ego_list   <- vector("list", length(employed))
-  alter_list <- vector("list", length(employed))
+  # Group metadata
+  dt[, `:=`(gpos = seq_len(.N), gsize = .N, gstart = .I[1L]),
+     by = sbeid]
 
-  for (j in seq_along(employed)) {
-    i <- employed[j]
-    k <- max(1L, rpois(1L, n_rel_pp))
+  # Relation counts
+  k <- pmax(1L, rpois(n, n_rel_pp))
+  total <- sum(k)
 
-    # Pool: same-employer colleagues
-    pool <- sbeid_idx[[emp_sbeid[j]]]
-    pool <- pool[pool != i]
+  # Expand
+  ego_row <- rep.int(seq_len(n), k)
+  offs <- sequence(k)
 
-    if (length(pool) >= 1L) {
-      # Sample from same employer, up to k
-      n_same <- min(k, length(pool))
-      drawn <- pool[sample.int(length(pool), n_same,
-                               replace = n_same > length(pool))]
-      # Fill remainder from other employed persons (different employer)
-      if (n_same < k) {
-        n_extra <- k - n_same
-        extra <- employed[sample.int(length(employed), n_extra, replace = TRUE)]
-        extra[extra == i] <- employed[((j %% length(employed)) + 1L)]
-        drawn <- c(drawn, extra)
-      }
-    } else {
-      # Solo employee: draw from all employed
-      drawn <- employed[sample.int(length(employed), k, replace = TRUE)]
-    }
+  # Circular alter within employer group
+  gpos   <- dt$gpos[ego_row]
+  gsize  <- dt$gsize[ego_row]
+  gstart <- dt$gstart[ego_row]
 
-    # Ensure no self-pairs
-    drawn[drawn == i] <- employed[((j %% length(employed)) + 1L)]
+  alter_gpos <- ((gpos - 1L + offs) %% gsize) + 1L
+  alter_row  <- gstart + alter_gpos - 1L
 
-    ego_list[[j]]   <- rep(persons[i], length(drawn))
-    alter_list[[j]] <- persons[drawn]
+  # Handle self-pairs (solo employees)
+  is_self <- (alter_row == ego_row)
+  if (any(is_self)) {
+    alt <- sample.int(n, sum(is_self), replace = TRUE)
+    still <- (alt == ego_row[is_self])
+    if (any(still)) alt[still] <- ((ego_row[is_self][still] %% n) + 1L)
+    alter_row[is_self] <- alt
   }
 
   data.table(
-    RINPERSOON        = unlist(ego_list, use.names = FALSE),
-    RINPERSOONRELATIE = unlist(alter_list, use.names = FALSE),
-    RELATIE           = rep("201", sum(lengths(ego_list)))
+    RINPERSOON        = dt$RINPERSOON[ego_row],
+    RINPERSOONRELATIE = dt$RINPERSOON[alter_row],
+    RELATIE           = rep("201", total)
   )
 }
 
 
 # Random (fallback): uniform partner sampling ----
+# Used for familienetwerktab and as fallback.  Year-invariant seed
+# gives fully stable relations across years.
 .build_random_relations <- function(sampled_pers, n_rel_pp, rel_codes,
                                     rel_probs) {
   persons <- sampled_pers$RINPERSOON
