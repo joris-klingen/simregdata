@@ -498,15 +498,15 @@ test_that("sim_population generates all non-network datasets", {
              verbose = FALSE)
 
   dirs <- basename(list.dirs(out, recursive = FALSE))
-  # Should have folders for woonbase, rdw, spolis, etc.
-  expect_true("RDWNPACT" %in% dirs)
+  # Should have folders for woonbase, rdw, spolis, etc. (TAB suffix where applicable)
+  expect_true("RDWNPACTTAB" %in% dirs)
   expect_true("SPOLISBUS" %in% dirs)
-  expect_true("INPA" %in% dirs)
+  expect_true("INPATAB" %in% dirs)
 
   # Network dirs should NOT exist
-  expect_false("BURENNETWERK" %in% dirs)
-  expect_false("COLLEGANETWERK" %in% dirs)
-  expect_false("FAMILIENETWERK" %in% dirs)
+  expect_false("BURENNETWERKTAB" %in% dirs)
+  expect_false("COLLEGAENETWERKTAB" %in% dirs)
+  expect_false("FAMILIENETWERKTAB" %in% dirs)
 })
 
 test_that("sim_population include_network adds network datasets", {
@@ -519,8 +519,8 @@ test_that("sim_population include_network adds network datasets", {
              include_network = TRUE, verbose = FALSE)
 
   dirs <- basename(list.dirs(out, recursive = FALSE))
-  expect_true("BURENNETWERK" %in% dirs)
-  expect_true("FAMILIENETWERK" %in% dirs)
+  expect_true("BURENNETWERKTAB" %in% dirs)
+  expect_true("FAMILIENETWERKTAB" %in% dirs)
 })
 
 test_that("sim_population validates fraction", {

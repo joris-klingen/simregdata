@@ -427,7 +427,14 @@ sim_get_data_root <- function() {
   }
   if (is.null(cbs_name)) cbs_name <- base
 
-  # CBS VM layout: UPPERCASENAME/basename.parquet
+  # CBS VM layout: try CBSNAMETAB/ first (for TAB datasets), then CBSNAME/
+  is_tab <- grepl("TABV\\d+$", base)
+  if (is_tab) {
+    pq_path <- file.path(data_root, paste0(toupper(cbs_name), "TAB"),
+                          paste0(base, ".parquet"))
+    if (file.exists(pq_path)) return(pq_path)
+  }
+  # Fallback: plain folder name (backward compat)
   pq_path <- file.path(data_root, toupper(cbs_name), paste0(base, ".parquet"))
   if (file.exists(pq_path)) return(pq_path)
   NULL
@@ -711,8 +718,9 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
         sprintf("%s%dV1.parquet", cbs_name, year)
       }
 
-      # Create subdirectory
-      subdir <- file.path(output_dir, toupper(cbs_name))
+      # Create subdirectory (include TAB suffix to match CBS VM layout)
+      folder_name <- if (tab) paste0(toupper(cbs_name), "TAB") else toupper(cbs_name)
+      subdir <- file.path(output_dir, folder_name)
       dir.create(subdir, recursive = TRUE, showWarnings = FALSE)
       out_path <- file.path(subdir, fname)
 
