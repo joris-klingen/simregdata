@@ -20,10 +20,13 @@ Invisibly, the full annual parameter list.
 }
 \description{
 Queries CBS StatLine via \code{cbsodataR} for population and household counts
-for the requested years, and writes the results to two files:
+for the requested years, and writes the results to:
 \itemize{
 \item \code{params.yaml} — n_persons, n_hh, typhh_p per year
 \item \code{gem_weights.csv} — gemeente population weights per year
+\item \code{woz_means.csv} — mean WOZ value per gemeente per year
+\item \code{housing_gem.csv} — apartment share and owner-occupied share per
+gemeente per year (from table 71446ned)
 }
 Run once (or whenever CBS publishes new data) to refresh the parameters.
 }

@@ -484,3 +484,47 @@ test_that("familie network is fully stable across years", {
   expect_equal(dt_2020$RINPERSOONRELATIE, dt_2021$RINPERSOONRELATIE)
   expect_equal(as.integer(dt_2020$RELATIE), as.integer(dt_2021$RELATIE))
 })
+
+
+# ---- sim_sample ----
+
+test_that("sim_sample generates all non-network datasets", {
+  skip_if_not_installed("arrow")
+  out <- file.path(tempdir(), "sim_sample_test")
+  on.exit(unlink(out, recursive = TRUE), add = TRUE)
+
+  sim_reset()
+  sim_sample(out, fraction = 0.0005, year = 2023L, seed = 1L,
+             verbose = FALSE)
+
+  dirs <- basename(list.dirs(out, recursive = FALSE))
+  # Should have folders for woonbase, rdw, spolis, etc.
+  expect_true("RDWNPACT" %in% dirs)
+  expect_true("SPOLISBUS" %in% dirs)
+  expect_true("INPA" %in% dirs)
+
+  # Network dirs should NOT exist
+  expect_false("BURENNETWERK" %in% dirs)
+  expect_false("COLLEGANETWERK" %in% dirs)
+  expect_false("FAMILIENETWERK" %in% dirs)
+})
+
+test_that("sim_sample include_network adds network datasets", {
+  skip_if_not_installed("arrow")
+  out <- file.path(tempdir(), "sim_sample_net_test")
+  on.exit(unlink(out, recursive = TRUE), add = TRUE)
+
+  sim_reset()
+  sim_sample(out, fraction = 0.0005, year = 2023L, seed = 1L,
+             include_network = TRUE, verbose = FALSE)
+
+  dirs <- basename(list.dirs(out, recursive = FALSE))
+  expect_true("BURENNETWERK" %in% dirs)
+  expect_true("FAMILIENETWERK" %in% dirs)
+})
+
+test_that("sim_sample validates fraction", {
+  expect_error(sim_sample(tempdir(), fraction = 0))
+  expect_error(sim_sample(tempdir(), fraction = 1.5))
+  expect_error(sim_sample(tempdir(), fraction = -0.1))
+})

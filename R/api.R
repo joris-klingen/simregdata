@@ -756,6 +756,74 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 }
 
 
+#' Generate a fractional sample of all datasets
+#'
+#' Convenience wrapper around [sim_export()] that generates a percentage of the
+#' full CBS population for all datasets and writes parquet files in CBS VM-style
+#' folder layout.
+#'
+#' Network datasets (buren, collega, familie) are excluded by default because
+#' they produce O(n * relations_per_person) rows and can be very large.
+#'
+#' @param output_dir  Directory to write parquet files into.
+#' @param fraction    Fraction of the full population to simulate (default 0.10
+#'   = 10%).  Must be between 0 (exclusive) and 1 (inclusive).
+#' @param year        Simulation year (default 2023).
+#' @param seed        RNG seed for reproducibility (default 42).
+#' @param include_network  Logical; include network datasets (buren, collega,
+#'   familie)?  Default `FALSE`.
+#' @param col_select  Optional named list passed to [sim_export()].
+#' @param verbose     Print progress summary (default `TRUE`).
+#' @return Invisibly, `output_dir`.
+#' @export
+sim_sample <- function(output_dir, fraction = 0.10, year = 2023L,
+                       seed = 42L, include_network = FALSE,
+                       col_select = NULL, verbose = TRUE) {
+  stopifnot(is.numeric(fraction), length(fraction) == 1L,
+            fraction > 0, fraction <= 1)
+  year <- as.integer(year)
+
+  # Compute n from fraction of full population
+  params <- woonbase_cbs_params(year)
+  n <- as.integer(round(fraction * params$n_persons))
+
+  # Determine which datasets to export
+  .load_dataset_registry()
+  ds_ids <- names(.sim_cache$datasets)
+  if (!include_network) {
+    ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
+  }
+
+  if (verbose) {
+    message(sprintf(
+      "sim_sample: %.0f%% of %s persons = %s persons, year %d, seed %d",
+      fraction * 100, format(params$n_persons, big.mark = ","),
+      format(n, big.mark = ","), year, seed))
+    message(sprintf("Exporting %d datasets to %s\n",
+                    length(ds_ids), output_dir))
+  }
+
+  # Pre-init spolis so SBEID is available for collega (if included)
+  if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
+    sim_init("spolis", year = year, n = n, seed = seed)
+  }
+
+  for (ds_id in ds_ids) {
+    if (!verbose) {
+      suppressMessages(
+        sim_export(output_dir, dataset = ds_id, year = year, n = n,
+                   seed = seed, col_select = col_select))
+    } else {
+      sim_export(output_dir, dataset = ds_id, year = year, n = n,
+                 seed = seed, col_select = col_select)
+    }
+  }
+
+  if (verbose) message("\nDone.")
+  invisible(output_dir)
+}
+
+
 # Try to load n_vehicles from a dataset's params.yaml
 .load_dataset_n <- function(dataset_id, year) {
   params_path <- file.path(.dataset_dir(dataset_id), "params.yaml")
