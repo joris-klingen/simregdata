@@ -719,7 +719,12 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       }
 
       # Create subdirectory (include TAB suffix to match CBS VM layout)
-      folder_name <- if (tab) paste0(toupper(cbs_name), "TAB") else toupper(cbs_name)
+      up_name <- toupper(cbs_name)
+      folder_name <- if (tab && !grepl("TAB$", up_name)) {
+        paste0(up_name, "TAB")
+      } else {
+        up_name
+      }
       subdir <- file.path(output_dir, folder_name)
       dir.create(subdir, recursive = TRUE, showWarnings = FALSE)
       out_path <- file.path(subdir, fname)
@@ -827,11 +832,13 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   # Always prompt in interactive mode
   if (interactive()) {
     msg <- sprintf(paste0(
-      "\nsim_population: %s persons (%.1f%%), %d year%s, %d datasets\n",
+      "\nCBS population %d: %s persons\n",
+      "Simulating %.1f%% = %s persons, %d year%s, %d datasets\n",
       "  Estimated size: %s\n",
       "  Estimated time: %s\n",
       "Continue? (y/n) "),
-      format(n, big.mark = ","), fraction * 100,
+      years[1L], format(params$n_persons, big.mark = ","),
+      fraction * 100, format(n, big.mark = ","),
       n_years, if (n_years > 1L) "s" else "",
       n_datasets, size_str, time_str)
     ans <- readline(msg)
@@ -842,6 +849,16 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   }
 
   t0 <- proc.time()
+
+  # Collect folder names per dataset for display
+  ds_folders <- vapply(ds_ids, function(ds_id) {
+    ds <- .sim_cache$datasets[[ds_id]]
+    folders <- vapply(ds$files, function(fi) {
+      up <- toupper(fi$cbs_name)
+      if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) paste0(up, "TAB") else up
+    }, character(1L))
+    paste(folders, collapse = ", ")
+  }, character(1L))
 
   for (yr in years) {
     yr_idx <- which(years == yr)
@@ -857,17 +874,11 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
     }
 
     # Export all datasets for this year (suppress internal messages)
-    for (ds_id in ds_ids) {
+    for (i in seq_along(ds_ids)) {
       suppressMessages(
-        sim_export(output_dir, dataset = ds_id, year = yr, n = n,
+        sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
                    seed = seed, col_select = col_select))
-      if (verbose) {
-        ds <- .sim_cache$datasets[[ds_id]]
-        n_files <- length(ds$files)
-        message(sprintf("  %s (%d file%s)",
-                        ds$label %||% ds_id, n_files,
-                        if (n_files > 1L) "s" else ""))
-      }
+      if (verbose) message(sprintf("  %s", ds_folders[i]))
     }
   }
 
