@@ -792,7 +792,7 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   years <- as.integer(years)
 
   # Compute n from fraction (use first year for population reference)
-  params <- woonbase_cbs_params(years[1L])
+  params <- suppressMessages(woonbase_cbs_params(years[1L]))
   n <- as.integer(round(fraction * params$n_persons))
 
   # Determine which datasets to export
@@ -841,33 +841,46 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
     }
   }
 
+  t0 <- proc.time()
+
   for (yr in years) {
+    yr_idx <- which(years == yr)
     if (verbose) {
-      yr_idx <- which(years == yr)
-      message(sprintf(
-        "\n=== Year %d (%d/%d) ===", yr, yr_idx, n_years))
+      message(sprintf("\n[%d/%d] Year %d", yr_idx, n_years, yr))
     }
 
-    sim_reset()
+    suppressMessages(sim_reset())
 
     # Pre-init spolis so SBEID is available for collega (if included)
     if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
-      sim_init("spolis", year = yr, n = n, seed = seed)
+      suppressMessages(sim_init("spolis", year = yr, n = n, seed = seed))
     }
 
+    # Export all datasets for this year (suppress internal messages)
     for (ds_id in ds_ids) {
-      if (!verbose) {
-        suppressMessages(
-          sim_export(output_dir, dataset = ds_id, year = yr, n = n,
-                     seed = seed, col_select = col_select))
-      } else {
+      suppressMessages(
         sim_export(output_dir, dataset = ds_id, year = yr, n = n,
-                   seed = seed, col_select = col_select)
+                   seed = seed, col_select = col_select))
+      if (verbose) {
+        ds <- .sim_cache$datasets[[ds_id]]
+        n_files <- length(ds$files)
+        message(sprintf("  %s (%d file%s)",
+                        ds$label %||% ds_id, n_files,
+                        if (n_files > 1L) "s" else ""))
       }
     }
   }
 
-  if (verbose) message("\nDone.")
+  elapsed <- (proc.time() - t0)[["elapsed"]]
+  if (verbose) {
+    # Count total files written
+    all_files <- list.files(output_dir, pattern = "\\.parquet$",
+                            recursive = TRUE)
+    total_mb <- sum(file.size(
+      file.path(output_dir, all_files)), na.rm = TRUE) / 1e6
+    message(sprintf("\nDone: %d files, %.0f MB, %.0f sec",
+                    length(all_files), total_mb, elapsed))
+  }
   invisible(output_dir)
 }
 
