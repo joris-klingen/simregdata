@@ -766,8 +766,8 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' they produce O(n * relations_per_person) rows and can be very large.
 #'
 #' @param output_dir  Directory to write parquet files into.
-#' @param fraction    Fraction of the full population to simulate (default 0.10
-#'   = 10%).  Must be between 0 (exclusive) and 1 (inclusive).
+#' @param fraction    Fraction of the full population to simulate (default 0.01
+#'   = 1%).  Must be between 0 (exclusive) and 1 (inclusive).
 #' @param year        Simulation year (default 2023).
 #' @param seed        RNG seed for reproducibility (default 42).
 #' @param include_network  Logical; include network datasets (buren, collega,
@@ -776,7 +776,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' @param verbose     Print progress summary (default `TRUE`).
 #' @return Invisibly, `output_dir`.
 #' @export
-sim_sample <- function(output_dir, fraction = 0.10, year = 2023L,
+sim_sample <- function(output_dir, fraction = 0.01, year = 2023L,
                        seed = 42L, include_network = FALSE,
                        col_select = NULL, verbose = TRUE) {
   stopifnot(is.numeric(fraction), length(fraction) == 1L,
@@ -794,13 +794,33 @@ sim_sample <- function(output_dir, fraction = 0.10, year = 2023L,
     ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
   }
 
+  # Estimate output size and prompt if > 1 GB
+  # Rough multipliers: ~20x person rows without network, ~82x with network
+  # ~50 bytes/row in parquet on average
+  row_mult <- if (include_network) 82 else 20
+  est_gb <- as.numeric(n) * row_mult * 50 / 1e9
+  if (est_gb > 1) {
+    if (interactive()) {
+      msg <- sprintf(
+        "Estimated output size: %.1f GB. Continue? (y/n) ", est_gb)
+      ans <- readline(msg)
+      if (!tolower(trimws(ans)) %in% c("y", "yes")) {
+        message("Aborted.")
+        return(invisible(NULL))
+      }
+    } else {
+      warning(sprintf("Estimated output size: %.1f GB", est_gb),
+              call. = FALSE)
+    }
+  }
+
   if (verbose) {
     message(sprintf(
       "sim_sample: %.0f%% of %s persons = %s persons, year %d, seed %d",
       fraction * 100, format(params$n_persons, big.mark = ","),
       format(n, big.mark = ","), year, seed))
-    message(sprintf("Exporting %d datasets to %s\n",
-                    length(ds_ids), output_dir))
+    message(sprintf("Exporting %d datasets to %s (est. %.1f GB)\n",
+                    length(ds_ids), output_dir, est_gb))
   }
 
   # Pre-init spolis so SBEID is available for collega (if included)

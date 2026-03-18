@@ -6,7 +6,7 @@
 \usage{
 sim_sample(
   output_dir,
-  fraction = 0.1,
+  fraction = 0.01,
   year = 2023L,
   seed = 42L,
   include_network = FALSE,
@@ -17,8 +17,8 @@ sim_sample(
 \arguments{
 \item{output_dir}{Directory to write parquet files into.}
 
-\item{fraction}{Fraction of the full population to simulate (default 0.10
-= 10\%).  Must be between 0 (exclusive) and 1 (inclusive).}
+\item{fraction}{Fraction of the full population to simulate (default 0.01
+= 1\%).  Must be between 0 (exclusive) and 1 (inclusive).}
 
 \item{year}{Simulation year (default 2023).}
 
