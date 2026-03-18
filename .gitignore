@@ -30,4 +30,4 @@ docs/extracted/
 vignettes/*.html
 
 # Test project (user experience sandbox)
-eb_reb_test/
+evrb/
