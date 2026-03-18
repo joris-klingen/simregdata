@@ -82,11 +82,11 @@ jobs <- read_sav("SPOLISBUS2023V1")
 # See all available files
 sim_catalog()
 
-# Generate a 1% sample of all datasets as parquet files (default)
+# Generate a 1% sample of all datasets as parquet (prompts with size/time estimate)
 sim_sample("output/sim_data")
 
-# 10% sample (prompts if estimated size > 1 GB)
-sim_sample("output/sim_data", fraction = 0.10)
+# Multiple years at once
+sim_sample("output/sim_data", fraction = 0.01, years = 2019:2023)
 ```
 
 ## How the simulator works

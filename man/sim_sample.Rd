@@ -7,7 +7,7 @@
 sim_sample(
   output_dir,
   fraction = 0.01,
-  year = 2023L,
+  years = 2023L,
   seed = 42L,
   include_network = FALSE,
   col_select = NULL,
@@ -20,7 +20,7 @@ sim_sample(
 \item{fraction}{Fraction of the full population to simulate (default 0.01
 = 1\%).  Must be between 0 (exclusive) and 1 (inclusive).}
 
-\item{year}{Simulation year (default 2023).}
+\item{years}{Integer vector of simulation years (default 2023).}
 
 \item{seed}{RNG seed for reproducibility (default 42).}
 
@@ -37,7 +37,7 @@ Invisibly, \code{output_dir}.
 \description{
 Convenience wrapper around \code{\link[=sim_export]{sim_export()}} that generates a percentage of the
 full CBS population for all datasets and writes parquet files in CBS VM-style
-folder layout.
+folder layout.  Supports multiple years in a single call.
 }
 \details{
 Network datasets (buren, collega, familie) are excluded by default because

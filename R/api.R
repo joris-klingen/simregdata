@@ -760,7 +760,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #'
 #' Convenience wrapper around [sim_export()] that generates a percentage of the
 #' full CBS population for all datasets and writes parquet files in CBS VM-style
-#' folder layout.
+#' folder layout.  Supports multiple years in a single call.
 #'
 #' Network datasets (buren, collega, familie) are excluded by default because
 #' they produce O(n * relations_per_person) rows and can be very large.
@@ -768,7 +768,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' @param output_dir  Directory to write parquet files into.
 #' @param fraction    Fraction of the full population to simulate (default 0.01
 #'   = 1%).  Must be between 0 (exclusive) and 1 (inclusive).
-#' @param year        Simulation year (default 2023).
+#' @param years       Integer vector of simulation years (default 2023).
 #' @param seed        RNG seed for reproducibility (default 42).
 #' @param include_network  Logical; include network datasets (buren, collega,
 #'   familie)?  Default `FALSE`.
@@ -776,15 +776,15 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' @param verbose     Print progress summary (default `TRUE`).
 #' @return Invisibly, `output_dir`.
 #' @export
-sim_sample <- function(output_dir, fraction = 0.01, year = 2023L,
+sim_sample <- function(output_dir, fraction = 0.01, years = 2023L,
                        seed = 42L, include_network = FALSE,
                        col_select = NULL, verbose = TRUE) {
   stopifnot(is.numeric(fraction), length(fraction) == 1L,
             fraction > 0, fraction <= 1)
-  year <- as.integer(year)
+  years <- as.integer(years)
 
-  # Compute n from fraction of full population
-  params <- woonbase_cbs_params(year)
+  # Compute n from fraction (use first year for population reference)
+  params <- woonbase_cbs_params(years[1L])
   n <- as.integer(round(fraction * params$n_persons))
 
   # Determine which datasets to export
@@ -794,48 +794,56 @@ sim_sample <- function(output_dir, fraction = 0.01, year = 2023L,
     ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
   }
 
-  # Estimate output size and prompt if > 1 GB
-  # Rough multipliers: ~20x person rows without network, ~82x with network
-  # ~50 bytes/row in parquet on average
+  n_years <- length(years)
+  n_datasets <- length(ds_ids)
+
+  # Estimate output size and time
+  # ~20x person rows without network, ~82x with; ~50 bytes/row parquet
+  # ~2s per 100k persons per year for spine + assembly
   row_mult <- if (include_network) 82 else 20
-  est_gb <- as.numeric(n) * row_mult * 50 / 1e9
-  if (est_gb > 1) {
-    if (interactive()) {
-      msg <- sprintf(
-        "Estimated output size: %.1f GB. Continue? (y/n) ", est_gb)
-      ans <- readline(msg)
-      if (!tolower(trimws(ans)) %in% c("y", "yes")) {
-        message("Aborted.")
-        return(invisible(NULL))
-      }
-    } else {
-      warning(sprintf("Estimated output size: %.1f GB", est_gb),
-              call. = FALSE)
+  est_gb <- as.numeric(n) * row_mult * 50 * n_years / 1e9
+  est_min <- n / 1e5 * 2 * n_years / 60
+
+  # Always prompt in interactive mode
+  if (interactive()) {
+    msg <- sprintf(paste0(
+      "\nsim_sample: %s persons (%.0f%%), %d year%s, %d datasets\n",
+      "  Estimated size: %.1f GB\n",
+      "  Estimated time: %.0f min\n",
+      "Continue? (y/n) "),
+      format(n, big.mark = ","), fraction * 100,
+      n_years, if (n_years > 1L) "s" else "",
+      n_datasets, est_gb, est_min)
+    ans <- readline(msg)
+    if (!tolower(trimws(ans)) %in% c("y", "yes")) {
+      message("Aborted.")
+      return(invisible(NULL))
     }
   }
 
-  if (verbose) {
-    message(sprintf(
-      "sim_sample: %.0f%% of %s persons = %s persons, year %d, seed %d",
-      fraction * 100, format(params$n_persons, big.mark = ","),
-      format(n, big.mark = ","), year, seed))
-    message(sprintf("Exporting %d datasets to %s (est. %.1f GB)\n",
-                    length(ds_ids), output_dir, est_gb))
-  }
+  for (yr in years) {
+    if (verbose) {
+      yr_idx <- which(years == yr)
+      message(sprintf(
+        "\n=== Year %d (%d/%d) ===", yr, yr_idx, n_years))
+    }
 
-  # Pre-init spolis so SBEID is available for collega (if included)
-  if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
-    sim_init("spolis", year = year, n = n, seed = seed)
-  }
+    sim_reset()
 
-  for (ds_id in ds_ids) {
-    if (!verbose) {
-      suppressMessages(
-        sim_export(output_dir, dataset = ds_id, year = year, n = n,
-                   seed = seed, col_select = col_select))
-    } else {
-      sim_export(output_dir, dataset = ds_id, year = year, n = n,
-                 seed = seed, col_select = col_select)
+    # Pre-init spolis so SBEID is available for collega (if included)
+    if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
+      sim_init("spolis", year = yr, n = n, seed = seed)
+    }
+
+    for (ds_id in ds_ids) {
+      if (!verbose) {
+        suppressMessages(
+          sim_export(output_dir, dataset = ds_id, year = yr, n = n,
+                     seed = seed, col_select = col_select))
+      } else {
+        sim_export(output_dir, dataset = ds_id, year = yr, n = n,
+                   seed = seed, col_select = col_select)
+      }
     }
   }
 
