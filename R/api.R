@@ -153,12 +153,27 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
 
       } else if (dataset %in% .NETWERK_DATASETS) {
         # Network datasets: build dyadic person-pair relation table
+        # Include gemeente for spatial clustering (buren)
+        extra_cols <- "GemeenteCodeJJJJ1Jan"
+        pers_cols <- intersect(
+          unique(c("RINPERSOON", needed$pers, extra_cols)),
+          names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+
         idx <- sample.int(nrow(spine$pers), n_records,
           replace = n_records > nrow(spine$pers))
-        pers_cols <- intersect(
-          c("RINPERSOON", needed$pers), names(spine$pers))
-        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
         sampled_pers <- spine$pers[idx, ..pers_cols]
+        # Deduplicate: network relations are per unique person
+        sampled_pers <- unique(sampled_pers, by = "RINPERSOON")
+
+        # For collega: attach SBEID from SPOLIS spine if available
+        spolis_spine <- .sim_cache$spine_spolis
+        if (identical(dataset, "colleganetwerktab") &&
+            !is.null(spolis_spine) &&
+            "SBEID" %in% names(spolis_spine$pers)) {
+          sbeid_map <- unique(spolis_spine$pers[, .(RINPERSOON, SBEID)])
+          sampled_pers[sbeid_map, SBEID := i.SBEID, on = "RINPERSOON"]
+        }
 
         ds_spine$pers <- .build_netwerk_relations(
           sampled_pers, dataset, year = year, seed = seed)
