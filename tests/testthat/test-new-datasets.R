@@ -486,15 +486,15 @@ test_that("familie network is fully stable across years", {
 })
 
 
-# ---- sim_sample ----
+# ---- sim_population ----
 
-test_that("sim_sample generates all non-network datasets", {
+test_that("sim_population generates all non-network datasets", {
   skip_if_not_installed("arrow")
-  out <- file.path(tempdir(), "sim_sample_test")
+  out <- file.path(tempdir(), "sim_population_test")
   on.exit(unlink(out, recursive = TRUE), add = TRUE)
 
   sim_reset()
-  sim_sample(out, fraction = 0.0005, year = 2023L, seed = 1L,
+  sim_population(out, fraction = 0.0005, year = 2023L, seed = 1L,
              verbose = FALSE)
 
   dirs <- basename(list.dirs(out, recursive = FALSE))
@@ -509,13 +509,13 @@ test_that("sim_sample generates all non-network datasets", {
   expect_false("FAMILIENETWERK" %in% dirs)
 })
 
-test_that("sim_sample include_network adds network datasets", {
+test_that("sim_population include_network adds network datasets", {
   skip_if_not_installed("arrow")
-  out <- file.path(tempdir(), "sim_sample_net_test")
+  out <- file.path(tempdir(), "sim_population_net_test")
   on.exit(unlink(out, recursive = TRUE), add = TRUE)
 
   sim_reset()
-  sim_sample(out, fraction = 0.0005, year = 2023L, seed = 1L,
+  sim_population(out, fraction = 0.0005, year = 2023L, seed = 1L,
              include_network = TRUE, verbose = FALSE)
 
   dirs <- basename(list.dirs(out, recursive = FALSE))
@@ -523,8 +523,8 @@ test_that("sim_sample include_network adds network datasets", {
   expect_true("FAMILIENETWERK" %in% dirs)
 })
 
-test_that("sim_sample validates fraction", {
-  expect_error(sim_sample(tempdir(), fraction = 0))
-  expect_error(sim_sample(tempdir(), fraction = 1.5))
-  expect_error(sim_sample(tempdir(), fraction = -0.1))
+test_that("sim_population validates fraction", {
+  expect_error(sim_population(tempdir(), fraction = 0))
+  expect_error(sim_population(tempdir(), fraction = 1.5))
+  expect_error(sim_population(tempdir(), fraction = -0.1))
 })

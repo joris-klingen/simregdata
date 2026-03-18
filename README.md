@@ -83,10 +83,10 @@ jobs <- read_sav("SPOLISBUS2023V1")
 sim_catalog()
 
 # Generate a 1% sample of all datasets as parquet (prompts with size/time estimate)
-sim_sample("output/sim_data")
+sim_population("output/sim_data")
 
 # Multiple years at once
-sim_sample("output/sim_data", fraction = 0.01, years = 2019:2023)
+sim_population("output/sim_data", fraction = 0.01, years = 2019:2023)
 ```
 
 ## How the simulator works
@@ -95,7 +95,7 @@ sim_sample("output/sim_data", fraction = 0.01, years = 2019:2023)
 
 | Function | Description |
 |----------|-------------|
-| `sim_sample(output_dir, fraction, year, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
+| `sim_population(output_dir, fraction, year, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
 | `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names. |

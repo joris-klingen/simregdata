@@ -776,7 +776,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' @param verbose     Print progress summary (default `TRUE`).
 #' @return Invisibly, `output_dir`.
 #' @export
-sim_sample <- function(output_dir, fraction = 0.01, years = 2023L,
+sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
                        seed = 42L, include_network = FALSE,
                        col_select = NULL, verbose = TRUE) {
   stopifnot(is.numeric(fraction), length(fraction) == 1L,
@@ -807,7 +807,7 @@ sim_sample <- function(output_dir, fraction = 0.01, years = 2023L,
   # Always prompt in interactive mode
   if (interactive()) {
     msg <- sprintf(paste0(
-      "\nsim_sample: %s persons (%.0f%%), %d year%s, %d datasets\n",
+      "\nsim_population: %s persons (%.0f%%), %d year%s, %d datasets\n",
       "  Estimated size: %.1f GB\n",
       "  Estimated time: %.0f min\n",
       "Continue? (y/n) "),
