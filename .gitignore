@@ -29,5 +29,6 @@ docs/extracted/
 /Meta/
 vignettes/*.html
 
-# Test project (user experience sandbox)
+# Test projects (user experience sandboxes)
 evrb/
+test_ux_ebrb/
