@@ -805,23 +805,35 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   n_years <- length(years)
   n_datasets <- length(ds_ids)
 
-  # Estimate output size and time
-  # ~20x person rows without network, ~82x with; ~50 bytes/row parquet
-  # ~2s per 100k persons per year for spine + assembly
-  row_mult <- if (include_network) 82 else 20
-  est_gb <- as.numeric(n) * row_mult * 50 * n_years / 1e9
-  est_min <- n / 1e5 * 2 * n_years / 60
+  # Estimate output size and time (calibrated empirically)
+  # Without network: ~2,800 bytes/person/year; with network: ~12,000 bytes/person/year
+  # ~30s per 100k persons per year for spine + assembly
+  bytes_pp <- if (include_network) 12000 else 2800
+  est_mb <- as.numeric(n) * bytes_pp * n_years / 1e6
+  est_sec <- n / 1e5 * 30 * n_years
+
+  # Format size and time with appropriate units
+  size_str <- if (est_mb >= 1000) {
+    sprintf("%.1f GB", est_mb / 1000)
+  } else {
+    sprintf("%.0f MB", est_mb)
+  }
+  time_str <- if (est_sec >= 120) {
+    sprintf("%.1f min", est_sec / 60)
+  } else {
+    sprintf("%.0f sec", est_sec)
+  }
 
   # Always prompt in interactive mode
   if (interactive()) {
     msg <- sprintf(paste0(
-      "\nsim_population: %s persons (%.0f%%), %d year%s, %d datasets\n",
-      "  Estimated size: %.1f GB\n",
-      "  Estimated time: %.0f min\n",
+      "\nsim_population: %s persons (%.1f%%), %d year%s, %d datasets\n",
+      "  Estimated size: %s\n",
+      "  Estimated time: %s\n",
       "Continue? (y/n) "),
       format(n, big.mark = ","), fraction * 100,
       n_years, if (n_years > 1L) "s" else "",
-      n_datasets, est_gb, est_min)
+      n_datasets, size_str, time_str)
     ans <- readline(msg)
     if (!tolower(trimws(ans)) %in% c("y", "yes")) {
       message("Aborted.")
