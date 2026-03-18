@@ -1,0 +1,4 @@
+2023:
+  n_relations_per_person: 20
+  relatie_dist:
+    "201": 1.0

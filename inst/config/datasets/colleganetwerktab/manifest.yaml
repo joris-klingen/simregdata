@@ -1,0 +1,22 @@
+# COLLEGANETWERKTAB dataset manifest
+# Colleague network: all colleague relations (same employer)
+# CBS name pattern: COLLEGANETWERK{YYYY}TABV{N}
+# Available 2009-2023
+
+dataset_id: colleganetwerktab
+label: Colleganetwerk
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  colleganetwerktab:
+    cbs_name: COLLEGANETWERK
+    entity: person
+    columns_file: colleganetwerktab.yaml
+    tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON]

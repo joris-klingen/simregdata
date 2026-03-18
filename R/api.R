@@ -151,6 +151,18 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           RINPERSOONS = rep("R", length(beids))
         )
 
+      } else if (dataset %in% .NETWERK_DATASETS) {
+        # Network datasets: build dyadic person-pair relation table
+        idx <- sample.int(nrow(spine$pers), n_records,
+          replace = n_records > nrow(spine$pers))
+        pers_cols <- intersect(
+          c("RINPERSOON", needed$pers), names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+        sampled_pers <- spine$pers[idx, ..pers_cols]
+
+        ds_spine$pers <- .build_netwerk_relations(
+          sampled_pers, dataset, year = year, seed = seed)
+
       } else if (identical(dataset, "zonnestroominstallaties")) {
         # Solar installations: sample from objects (not persons)
         obj_tbl <- spine$obj_raw %||% spine$obj

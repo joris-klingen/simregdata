@@ -1,0 +1,13 @@
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    RINPERSOON WEL IN GBA/BRP: 1
+
+relatie:
+  c2i:
+    "101": 101
+    "102": 102
+  labels:
+    Buur: 101
+    Buurtgenoot: 102

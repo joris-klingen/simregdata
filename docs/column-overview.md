@@ -19,6 +19,36 @@ Overview of all simulated columns
 
 </details>
 
+## Burennetwerk
+
+<details>
+<summary><code>BURENNETWERKTAB</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/burennetwerktab/codelists.yaml) |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `RINPERSOONSRELATIE` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/burennetwerktab/codelists.yaml) |
+| `RINPERSOONRELATIE` | spine-derived | NL |  |  |
+| `RELATIE` | spine-derived | NL |  | [relatie](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/burennetwerktab/codelists.yaml) |
+
+</details>
+
+## Colleganetwerk
+
+<details>
+<summary><code>COLLEGANETWERKTAB</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/colleganetwerktab/codelists.yaml) |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `RINPERSOONSRELATIE` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/colleganetwerktab/codelists.yaml) |
+| `RINPERSOONRELATIE` | spine-derived | NL |  |  |
+| `RELATIE` | spine-derived | NL |  | [relatie](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/colleganetwerktab/codelists.yaml) |
+
+</details>
+
 ## Energieverbruik particuliere woningen
 
 <details>
@@ -72,6 +102,21 @@ Overview of all simulated columns
 | `ELKTLV01, ELKTLV02, ELKTLV03, ELKTLV04, ELKTLV05, ELKTLV06, ELKTLV07, ELKTLV08, ELKTLV09, ELKTLV10, ELKTLV11, ELKTLV12` | random: normal (mean=30, sd=50) |  |  |  |
 | `ELKLEVLAAG01, ELKLEVLAAG02, ELKLEVLAAG03, ELKLEVLAAG04, ELKLEVLAAG05, ELKLEVLAAG06, ELKLEVLAAG07, ELKLEVLAAG08, ELKLEVLAAG09, ELKLEVLAAG10, ELKLEVLAAG11, ELKLEVLAAG12` | random: normal (mean=60, sd=35) |  |  |  |
 | `ELKTLVLAAG01, ELKTLVLAAG02, ELKTLVLAAG03, ELKTLVLAAG04, ELKTLVLAAG05, ELKTLVLAAG06, ELKTLVLAAG07, ELKTLVLAAG08, ELKTLVLAAG09, ELKTLVLAAG10, ELKTLVLAAG11, ELKTLVLAAG12` | random: normal (mean=5, sd=10) |  |  |  |
+
+</details>
+
+## Familienetwerk
+
+<details>
+<summary><code>FAMILIENETWERKTAB</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/familienetwerktab/codelists.yaml) |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `RINPERSOONSRELATIE` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/familienetwerktab/codelists.yaml) |
+| `RINPERSOONRELATIE` | spine-derived | NL |  |  |
+| `RELATIE` | spine-derived | NL |  | [relatie](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/familienetwerktab/codelists.yaml) |
 
 </details>
 

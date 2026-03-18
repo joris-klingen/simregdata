@@ -546,6 +546,54 @@ Energy consumption data for private dwellings.
 
 ---
 
+## Netwerk (Social Network Datasets)
+
+All three network datasets share the same 5-column structure. Each row represents one directed relation between two persons. Available 2009--2023. Part of the CBS netwerkbestandenset (also includes HUISGENOTENNETWERKTAB, KLASGENOTENNETWERKTAB -- not yet implemented).
+
+---
+
+### BURENNETWERKTAB
+
+**Neighbour and community-member relations.** Observation unit: directed person-pair. Neighbours are persons at the 10 nearest addresses. Community members are 20 randomly selected persons within 200m. Excludes persons in institutional households (>10 members). Not symmetric.
+
+| Variable | Type | Description | Codes/Values |
+|---|---|---|---|
+| RINPERSOONS | A1 | Indicator oorsprong persoon-id | `R`=In GBA/BRP |
+| RINPERSOON | A9 | Persoon-id (ego) | 9-char ID |
+| RINPERSOONSRELATIE | A1 | Indicator oorsprong persoon-id relatie | `R`=In GBA/BRP |
+| RINPERSOONRELATIE | A9 | Persoon-id relatie (alter) | 9-char ID |
+| RELATIE | A3 | Type netwerkrelatie | `101`=Buur, `102`=Buurtgenoot |
+
+---
+
+### COLLEGANETWERKTAB
+
+**Colleague relations (same employer).** Observation unit: directed person-pair. Max 100 colleagues per person, selected by proximity of home address. Based on SPOLIS employer (SBEID). Not symmetric.
+
+| Variable | Type | Description | Codes/Values |
+|---|---|---|---|
+| RINPERSOONS | A1 | Indicator oorsprong persoon-id | `R`=In GBA/BRP |
+| RINPERSOON | A9 | Persoon-id (ego) | 9-char ID |
+| RINPERSOONSRELATIE | A1 | Indicator oorsprong persoon-id relatie | `R`=In GBA/BRP |
+| RINPERSOONRELATIE | A9 | Persoon-id relatie (alter) | 9-char ID |
+| RELATIE | A3 | Type netwerkrelatie | `201`=Collega |
+
+---
+
+### FAMILIENETWERKTAB
+
+**Family relations (biological, adoptive, partner, in-law, step).** Observation unit: directed person-pair. Based on KINDOUDERTAB, GBASAMENWONERS, GBAVERBINTENISPARTNER. Partners must cohabitate. Not symmetric.
+
+| Variable | Type | Description | Codes/Values |
+|---|---|---|---|
+| RINPERSOONS | A1 | Indicator oorsprong persoon-id | `R`=In GBA/BRP |
+| RINPERSOON | A9 | Persoon-id (ego) | 9-char ID |
+| RINPERSOONSRELATIE | A1 | Indicator oorsprong persoon-id relatie | `R`=In GBA/BRP |
+| RINPERSOONRELATIE | A9 | Persoon-id relatie (alter) | 9-char ID |
+| RELATIE | A3 | Type netwerkrelatie | `301`=Ouder, `302`=Co-ouder, `303`=Grootouder, `304`=Kind, `305`=Kleinkind, `306`=Zus/broer vol, `307`=Zus/broer half, `308`=Zus/broer onbekend, `309`=Volle nicht/neef, `310`=Nicht/neef, `311`=Tante/oom, `312`=Partner gehuwd, `313`=Partner niet gehuwd, `314`=Schoonouder, `315`=Schoonkind, `316`=Schoonzus/broer, `317`=Stiefouder, `318`=Stiefkind, `319`=Stiefzus/broer, `320`=Aangetrouwde volle nicht/neef, `321`=Aangetrouwde nicht/neef, `322`=Aangetrouwde tante/oom |
+
+---
+
 ## Key linking variables across datasets
 
 | Variable | Links | Notes |
@@ -558,3 +606,4 @@ Energy consumption data for private dwellings.
 | SBEID | Employer in SPOLIS | Links to BETAB |
 | IKVID | Job in SPOLIS | Unique per person-job |
 | PandID | Building in EKWoonruimtenPand | Links VBOs to their building |
+| RINPERSOONRELATIE | Alter person in network datasets | Links to RINPERSOON in any person-level dataset |

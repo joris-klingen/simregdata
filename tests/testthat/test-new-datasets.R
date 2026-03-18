@@ -1,5 +1,6 @@
 # tests/testthat/test-new-datasets.R
-# Tests for HOOGSTEOPLTAB, INPATAB, SECMBUS, INHATAB, BETAB, ZONNESTROOMINSTALLATIES
+# Tests for HOOGSTEOPLTAB, INPATAB, SECMBUS, INHATAB, BETAB, ZONNESTROOMINSTALLATIES,
+# BURENNETWERKTAB, COLLEGANETWERKTAB, FAMILIENETWERKTAB
 
 # ---- Helpers ----
 
@@ -19,7 +20,10 @@ test_that("new dataset file names parse correctly", {
     "SECMBUS2023V1"        = list(file_key = "secmbus",       dataset_id = "secmbus",       year = 2023L),
     "INHA2023TABV1"        = list(file_key = "inhatab",       dataset_id = "inhatab",       year = 2023L),
     "BE2023TABV1"          = list(file_key = "betab",         dataset_id = "betab",         year = 2023L),
-    "Zonnnestroominstallaties2023V1" = list(file_key = "zonnestroominstallaties", dataset_id = "zonnestroominstallaties", year = 2023L)
+    "Zonnnestroominstallaties2023V1" = list(file_key = "zonnestroominstallaties", dataset_id = "zonnestroominstallaties", year = 2023L),
+    "BURENNETWERK2023TABV1"   = list(file_key = "burennetwerktab",  dataset_id = "burennetwerktab",  year = 2023L),
+    "COLLEGANETWERK2023TABV1" = list(file_key = "colleganetwerktab", dataset_id = "colleganetwerktab", year = 2023L),
+    "FAMILIENETWERK2023TABV1" = list(file_key = "familienetwerktab", dataset_id = "familienetwerktab", year = 2023L)
   )
 
   for (nm in names(new_names)) {
@@ -329,4 +333,101 @@ test_that("energieverbruikmaand shares objects with annual", {
                           col_select = c(RINOBJECTNUMMER))
 
   expect_equal(sort(dt_month$RINOBJECTNUMMER), sort(dt_annual$RINOBJECTNUMMER))
+})
+
+
+# ---- BURENNETWERKTAB ----
+
+test_that("BURENNETWERKTAB generates valid neighbour network", {
+  sim_reset()
+  sim_init("burennetwerktab", year = 2023L, n = 100L, seed = 42L)
+  dt <- read_sav("BURENNETWERK2023TABV1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 5L)
+  expect_equal(ncol(dt), 5L)
+
+  # Required columns present
+  expect_true("RINPERSOONS" %in% names(dt))
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONSRELATIE" %in% names(dt))
+  expect_true("RINPERSOONRELATIE" %in% names(dt))
+  expect_true("RELATIE" %in% names(dt))
+
+  # RELATIE is labelled with codes 101 and 102
+  expect_s3_class(dt$RELATIE, "haven_labelled")
+  expect_true(all(as.integer(dt$RELATIE) %in% c(101L, 102L)))
+
+  # RINPERSOON is 9-char
+  expect_true(all(nchar(dt$RINPERSOON) == 9L))
+  expect_true(all(nchar(dt$RINPERSOONRELATIE) == 9L))
+
+  # Multiple relations per person (dyadic expansion)
+  dt2 <- data.table::as.data.table(dt)
+  n_per_person <- dt2[, .N, by = RINPERSOON]
+  expect_true(all(n_per_person$N >= 1L))
+  expect_gt(mean(n_per_person$N), 5)
+
+  # No self-relations
+  expect_true(all(dt$RINPERSOON != dt$RINPERSOONRELATIE))
+})
+
+
+# ---- COLLEGANETWERKTAB ----
+
+test_that("COLLEGANETWERKTAB generates valid colleague network", {
+  sim_reset()
+  sim_init("colleganetwerktab", year = 2023L, n = 100L, seed = 42L)
+  dt <- read_sav("COLLEGANETWERK2023TABV1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 5L)
+  expect_equal(ncol(dt), 5L)
+
+  # All RELATIE codes are 201 (Collega)
+  expect_s3_class(dt$RELATIE, "haven_labelled")
+  expect_true(all(as.integer(dt$RELATIE) == 201L))
+
+  # No self-relations
+  expect_true(all(dt$RINPERSOON != dt$RINPERSOONRELATIE))
+})
+
+
+# ---- FAMILIENETWERKTAB ----
+
+test_that("FAMILIENETWERKTAB generates valid family network", {
+  sim_reset()
+  sim_init("familienetwerktab", year = 2023L, n = 100L, seed = 42L)
+  dt <- read_sav("FAMILIENETWERK2023TABV1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 5L)
+  expect_equal(ncol(dt), 5L)
+
+  # RELATIE codes in 301-322 range
+  expect_s3_class(dt$RELATIE, "haven_labelled")
+  rel_codes <- as.integer(dt$RELATIE)
+  expect_true(all(rel_codes >= 301L & rel_codes <= 322L))
+
+  # Multiple distinct family relationship types
+  expect_gt(length(unique(rel_codes)), 5L)
+
+  # No self-relations
+  expect_true(all(dt$RINPERSOON != dt$RINPERSOONRELATIE))
+})
+
+
+# ---- Netwerk datasets share persons with woonbase ----
+
+test_that("netwerk persons come from shared spine", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
+  dt_pers <- read_sav("WoonbasePopulatiePersonen2023V1",
+                       col_select = c(RINPERSOON))
+
+  sim_init("burennetwerktab", year = 2023L, seed = 42L)
+  dt_buren <- read_sav("BURENNETWERK2023TABV1",
+                         col_select = c(RINPERSOON))
+
+  # All ego persons in buren should come from spine
+  common <- intersect(unique(dt_buren$RINPERSOON), dt_pers$RINPERSOON)
+  match_rate <- length(common) / length(unique(dt_buren$RINPERSOON))
+  expect_equal(match_rate, 1.0)
 })

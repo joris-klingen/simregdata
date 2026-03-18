@@ -19,7 +19,7 @@ remotes::install_github("joris-klingen/simcbsradata")
 
 ## Supported datasets
 
-Currently supports 12 CBS datasets across 24 file types:
+Currently supports 15 CBS datasets across 27 file types:
 
 | Dataset | Description | Key |
 |---------|-------------|-----|
@@ -35,10 +35,13 @@ Currently supports 12 CBS datasets across 24 file types:
 | **INHATAB** | Household income | RINPERSOONHKW |
 | **BETAB** | Business register | BEID |
 | **Zonnestroominstallaties** | Solar PV installations + monthly production | RINOBJECTNUMMER |
+| **Burennetwerktab** | Neighbour network (neighbours + community members) | RINPERSOON |
+| **Colleganetwerktab** | Colleague network (same employer) | RINPERSOON |
+| **Familienetwerktab** | Family network (biological, in-law, step) | RINPERSOON |
 
 All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, RINPERSOONHKW), so cross-file joins work exactly as on the real CBS Remote Access.
 
-See the full [column overview](docs/column-overview.md) for all 537 simulated columns with their source, spatial level, calibration links, and codelists.
+See the full [column overview](docs/column-overview.md) for all 552 simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Quick start
 

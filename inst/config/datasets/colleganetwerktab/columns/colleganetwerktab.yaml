@@ -1,0 +1,21 @@
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    value: "R"
+    codelist: rinpersoons
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  - name: RINPERSOONSRELATIE
+    value: "R"
+    codelist: rinpersoons
+
+  - name: RINPERSOONRELATIE
+    source: spine.pers.RINPERSOONRELATIE
+
+  - name: RELATIE
+    source: spine.pers.RELATIE
+    codelist: relatie

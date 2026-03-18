@@ -1,0 +1,11 @@
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    RINPERSOON WEL IN GBA/BRP: 1
+
+relatie:
+  c2i:
+    "201": 201
+  labels:
+    Collega: 201
