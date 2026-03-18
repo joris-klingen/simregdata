@@ -1,0 +1,22 @@
+# FAMILIENETWERKTAB dataset manifest
+# Family network: all family relations (biological, adoptive, in-law, step)
+# CBS name pattern: FAMILIENETWERK{YYYY}TABV{N}
+# Available 2009-2023
+
+dataset_id: familienetwerktab
+label: Familienetwerk
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  familienetwerktab:
+    cbs_name: FAMILIENETWERK
+    entity: person
+    columns_file: familienetwerktab.yaml
+    tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON]

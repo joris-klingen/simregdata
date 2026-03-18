@@ -22,7 +22,7 @@ test_that("sim_export with col_select produces subset of columns", {
 
   # Read the exported file
   pq <- arrow::read_parquet(
-    file.path(out, "RDWNPACT", "RDWNPACT2023TABV1.parquet"))
+    file.path(out, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet"))
 
   # Should have key columns (RINPERSOONS, RINPERSOON, RINKENTEKEN) + requested
   expect_true("RINPERSOON" %in% names(pq))
@@ -32,7 +32,7 @@ test_that("sim_export with col_select produces subset of columns", {
 
   # Should NOT have other columns that the full file would have
   full_cols <- ncol(arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIE", "VERKEERSPRESTATIE2023TABV1.parquet")))
+    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet")))
   expect_lt(ncol(pq), 13L)  # full RDWNPACT has 13 columns
 
   unlink(out, recursive = TRUE)
@@ -57,7 +57,7 @@ test_that("sim_export col_select=NULL exports all columns (backward compat)", {
   )
 
   pq <- arrow::read_parquet(
-    file.path(out_full, "RDWNPACT", "RDWNPACT2023TABV1.parquet"))
+    file.path(out_full, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet"))
   expect_equal(ncol(pq), 13L)
 
   unlink(out_full, recursive = TRUE)
@@ -84,7 +84,7 @@ test_that("sim_export col_select with file key (lowercase) works", {
   )
 
   pq <- arrow::read_parquet(
-    file.path(out, "RDWNPACT", "RDWNPACT2023TABV1.parquet"))
+    file.path(out, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet"))
   expect_true("BRANDSTCODECORVRTG" %in% names(pq))
   expect_true("RINPERSOON" %in% names(pq))
   expect_lt(ncol(pq), 13L)
@@ -114,7 +114,7 @@ test_that("sim_export col_select: unlisted files get all columns", {
 
   # VERKEERSPRESTATIE was not in col_select -> should have all columns
   vp <- arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIE", "VERKEERSPRESTATIE2023TABV1.parquet"))
+    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet"))
   expect_equal(ncol(vp), 6L)
 
   unlink(out, recursive = TRUE)

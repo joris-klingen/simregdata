@@ -1,0 +1,53 @@
+rinpersoons:
+  c2i:
+    "R": 1
+  labels:
+    RINPERSOON WEL IN GBA/BRP: 1
+
+relatie:
+  c2i:
+    "301": 301
+    "302": 302
+    "303": 303
+    "304": 304
+    "305": 305
+    "306": 306
+    "307": 307
+    "308": 308
+    "309": 309
+    "310": 310
+    "311": 311
+    "312": 312
+    "313": 313
+    "314": 314
+    "315": 315
+    "316": 316
+    "317": 317
+    "318": 318
+    "319": 319
+    "320": 320
+    "321": 321
+    "322": 322
+  labels:
+    Ouder: 301
+    Co-ouder: 302
+    Grootouder: 303
+    Kind: 304
+    Kleinkind: 305
+    Zus/broer vol: 306
+    Zus/broer half: 307
+    Zus/broer onbekend: 308
+    Volle nicht/neef: 309
+    Nicht/neef: 310
+    Tante/oom: 311
+    Partner - gehuwd: 312
+    Partner - niet gehuwd: 313
+    Schoonouder: 314
+    Schoonkind: 315
+    Schoonzus/broer: 316
+    Stiefouder: 317
+    Stiefkind: 318
+    Stiefzus/broer: 319
+    Aangetrouwde volle nicht/neef: 320
+    Aangetrouwde nicht/neef: 321
+    Aangetrouwde tante/oom: 322

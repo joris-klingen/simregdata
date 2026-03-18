@@ -32,7 +32,10 @@ sim_init("inpatab",          year = YEAR, seed = 48L)
 sim_init("secmbus",          year = YEAR, seed = 49L)
 sim_init("inhatab",          year = YEAR, seed = 50L)
 sim_init("betab",            year = YEAR, seed = 51L)
-cat("  All 10 datasets initialised\n\n")
+sim_init("burennetwerktab",  year = YEAR, seed = 52L)
+sim_init("colleganetwerktab", year = YEAR, seed = 53L)
+sim_init("familienetwerktab", year = YEAR, seed = 54L)
+cat("  All 13 datasets initialised\n\n")
 
 
 # 2. Load key tables ----
@@ -315,6 +318,45 @@ cat(sprintf("  SPOLIS-BETAB match rate: %.1f%%\n", be_match))
 cat(sprintf("  Unique SBI codes in matched records: %d\n",
             uniqueN(dt_sp2$sbi[!is.na(dt_sp2$sbi)])))
 cat("  PASS: SPOLIS + BETAB join works\n\n")
+
+
+# 14. Woonbase + network datasets ----
+
+cat("--- 14. Woonbase + network datasets ---\n")
+
+dt_buren <- as.data.table(read_sav(
+  sprintf("BURENNETWERK%dTABV1", YEAR),
+  col_select = c(RINPERSOON, RINPERSOONRELATIE, RELATIE)
+))
+
+dt_collega <- as.data.table(read_sav(
+  sprintf("COLLEGANETWERK%dTABV1", YEAR),
+  col_select = c(RINPERSOON, RINPERSOONRELATIE, RELATIE)
+))
+
+dt_familie <- as.data.table(read_sav(
+  sprintf("FAMILIENETWERK%dTABV1", YEAR),
+  col_select = c(RINPERSOON, RINPERSOONRELATIE, RELATIE)
+))
+
+cat(sprintf("  Buren rows: %s, Collega rows: %s, Familie rows: %s\n",
+            format(nrow(dt_buren), big.mark = ","),
+            format(nrow(dt_collega), big.mark = ","),
+            format(nrow(dt_familie), big.mark = ",")))
+
+# All ego persons should exist in woonbase
+buren_match <- mean(unique(dt_buren$RINPERSOON) %in% dt_pers$RINPERSOON) * 100
+collega_match <- mean(unique(dt_collega$RINPERSOON) %in% dt_pers$RINPERSOON) * 100
+familie_match <- mean(unique(dt_familie$RINPERSOON) %in% dt_pers$RINPERSOON) * 100
+cat(sprintf("  Spine match: buren=%.0f%%, collega=%.0f%%, familie=%.0f%%\n",
+            buren_match, collega_match, familie_match))
+stopifnot(buren_match == 100, collega_match == 100, familie_match == 100)
+
+# Both ego and alter persons should come from the spine
+alter_match <- mean(unique(dt_buren$RINPERSOONRELATIE) %in% dt_pers$RINPERSOON) * 100
+cat(sprintf("  Alter match (buren): %.0f%%\n", alter_match))
+stopifnot(alter_match == 100)
+cat("  PASS: woonbase + network datasets join works\n\n")
 
 
 cat("=== All cross-dataset tests passed ===\n")

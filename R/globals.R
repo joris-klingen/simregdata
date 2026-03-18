@@ -51,7 +51,8 @@ utils::globalVariables(c(
   "IKVID", "SBEID", "RINPERSOONS",
   "RINPERSOONHKW", "RINPERSOONSHKW", "HUISHOUDNR",
   "SECM", "period_group", "n_periods", "BEID",
-  "BRANDSTCODECORVRTG", "pct_apartment", "pct_owner"
+  "BRANDSTCODECORVRTG", "pct_apartment", "pct_owner",
+  "RINPERSOONRELATIE", "RINPERSOONSRELATIE", "RELATIE"
 ))
 
 # Session cache environment — per-dataset spine + config caches

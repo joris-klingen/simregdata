@@ -19,7 +19,7 @@ remotes::install_github("joris-klingen/simcbsradata")
 
 ## Supported datasets
 
-Currently supports 12 CBS datasets across 24 file types:
+Currently supports 15 CBS datasets across 27 file types:
 
 | Dataset | Description | Key |
 |---------|-------------|-----|
@@ -35,10 +35,13 @@ Currently supports 12 CBS datasets across 24 file types:
 | **INHATAB** | Household income | RINPERSOONHKW |
 | **BETAB** | Business register | BEID |
 | **Zonnestroominstallaties** | Solar PV installations + monthly production | RINOBJECTNUMMER |
+| **Burennetwerktab** | Neighbour network (neighbours + community members) | RINPERSOON |
+| **Colleganetwerktab** | Colleague network (same employer) | RINPERSOON |
+| **Familienetwerktab** | Family network (biological, in-law, step) | RINPERSOON |
 
 All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, RINPERSOONHKW), so cross-file joins work exactly as on the real CBS Remote Access.
 
-See the full [column overview](docs/column-overview.md) for all 537 simulated columns with their source, spatial level, calibration links, and codelists.
+See the full [column overview](docs/column-overview.md) for all 552 simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Quick start
 
@@ -78,6 +81,28 @@ jobs <- read_sav("SPOLISBUS2023V1")
 
 # See all available files
 sim_catalog()
+
+# Generate a 1% sample of all datasets as parquet (prompts with size/time estimate)
+sim_population("output/sim_data")
+
+# Multiple years at once
+sim_population("output/sim_data", fraction = 0.01, years = 2019:2023)
+```
+
+## Custom datasets
+
+Define your own datasets with a simple YAML file. Columns link to the shared spine via RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, or RINKENTEKEN.
+
+```r
+# Create a template
+sim_create_custom("my_survey.yaml")
+
+# Edit the YAML, then register it
+sim_register("my_survey.yaml")
+
+# Use it like any built-in dataset
+sim_init("my_survey", year = 2023, n = 100000)
+dt <- read_sav("my_survey2023V1")
 ```
 
 ## How the simulator works
@@ -86,6 +111,9 @@ sim_catalog()
 
 | Function | Description |
 |----------|-------------|
+| `sim_population(output_dir, fraction, years, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
+| `sim_register(path)` | Registers a user-defined custom dataset from a simple YAML file. |
+| `sim_create_custom(path)` | Writes a template YAML for defining a custom dataset. |
 | `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names. |

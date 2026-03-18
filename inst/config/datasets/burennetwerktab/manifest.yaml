@@ -1,0 +1,22 @@
+# BURENNETWERKTAB dataset manifest
+# Neighbour network: all neighbour/community-member relations
+# CBS name pattern: BURENNETWERK{YYYY}TABV{N}
+# Available 2009-2023
+
+dataset_id: burennetwerktab
+label: Burennetwerk
+spine_builder: generic
+
+entities:
+  person:
+    id_col: RINPERSOON
+    id_width: 9
+    id_prefix_col: RINPERSOONS
+
+files:
+  burennetwerktab:
+    cbs_name: BURENNETWERK
+    entity: person
+    columns_file: burennetwerktab.yaml
+    tab_suffix: true
+    key_columns: [RINPERSOONS, RINPERSOON]

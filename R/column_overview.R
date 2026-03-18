@@ -34,7 +34,10 @@ sim_column_overview <- function() {
     secmbus                 = NA_character_,
     inhatab                 = NA_character_,
     betab                   = NA_character_,
-    zonnestroominstallaties = NA_character_
+    zonnestroominstallaties = NA_character_,
+    burennetwerktab         = NA_character_,
+    colleganetwerktab       = NA_character_,
+    familienetwerktab       = NA_character_
   )
 
   # Auto-discover all datasets from config directory

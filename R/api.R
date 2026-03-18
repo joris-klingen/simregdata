@@ -151,6 +151,33 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           RINPERSOONS = rep("R", length(beids))
         )
 
+      } else if (dataset %in% .NETWERK_DATASETS) {
+        # Network datasets: build dyadic person-pair relation table
+        # Include gemeente for spatial clustering (buren)
+        extra_cols <- "GemeenteCodeJJJJ1Jan"
+        pers_cols <- intersect(
+          unique(c("RINPERSOON", needed$pers, extra_cols)),
+          names(spine$pers))
+        if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
+
+        idx <- sample.int(nrow(spine$pers), n_records,
+          replace = n_records > nrow(spine$pers))
+        sampled_pers <- spine$pers[idx, ..pers_cols]
+        # Deduplicate: network relations are per unique person
+        sampled_pers <- unique(sampled_pers, by = "RINPERSOON")
+
+        # For collega: attach SBEID from SPOLIS spine if available
+        spolis_spine <- .sim_cache$spine_spolis
+        if (identical(dataset, "colleganetwerktab") &&
+            !is.null(spolis_spine) &&
+            "SBEID" %in% names(spolis_spine$pers)) {
+          sbeid_map <- unique(spolis_spine$pers[, .(RINPERSOON, SBEID)])
+          sampled_pers[sbeid_map, SBEID := i.SBEID, on = "RINPERSOON"]
+        }
+
+        ds_spine$pers <- .build_netwerk_relations(
+          sampled_pers, dataset, year = year, seed = seed)
+
       } else if (identical(dataset, "zonnestroominstallaties")) {
         # Solar installations: sample from objects (not persons)
         obj_tbl <- spine$obj_raw %||% spine$obj
@@ -400,7 +427,14 @@ sim_get_data_root <- function() {
   }
   if (is.null(cbs_name)) cbs_name <- base
 
-  # CBS VM layout: UPPERCASENAME/basename.parquet
+  # CBS VM layout: try CBSNAMETAB/ first (for TAB datasets), then CBSNAME/
+  is_tab <- grepl("TABV\\d+$", base)
+  if (is_tab) {
+    pq_path <- file.path(data_root, paste0(toupper(cbs_name), "TAB"),
+                          paste0(base, ".parquet"))
+    if (file.exists(pq_path)) return(pq_path)
+  }
+  # Fallback: plain folder name (backward compat)
   pq_path <- file.path(data_root, toupper(cbs_name), paste0(base, ".parquet"))
   if (file.exists(pq_path)) return(pq_path)
   NULL
@@ -684,8 +718,14 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
         sprintf("%s%dV1.parquet", cbs_name, year)
       }
 
-      # Create subdirectory
-      subdir <- file.path(output_dir, toupper(cbs_name))
+      # Create subdirectory (include TAB suffix to match CBS VM layout)
+      up_name <- toupper(cbs_name)
+      folder_name <- if (tab && !grepl("TAB$", up_name)) {
+        paste0(up_name, "TAB")
+      } else {
+        up_name
+      }
+      subdir <- file.path(output_dir, folder_name)
       dir.create(subdir, recursive = TRUE, showWarnings = FALSE)
       out_path <- file.path(subdir, fname)
 
@@ -725,6 +765,133 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 
   message(sprintf("\nExported %d parquet files to %s", length(files_written),
                   output_dir))
+  invisible(output_dir)
+}
+
+
+#' Generate a fractional sample of all datasets
+#'
+#' Convenience wrapper around [sim_export()] that generates a percentage of the
+#' full CBS population for all datasets and writes parquet files in CBS VM-style
+#' folder layout.  Supports multiple years in a single call.
+#'
+#' Network datasets (buren, collega, familie) are excluded by default because
+#' they produce O(n * relations_per_person) rows and can be very large.
+#'
+#' @param output_dir  Directory to write parquet files into.
+#' @param fraction    Fraction of the full population to simulate (default 0.01
+#'   = 1%).  Must be between 0 (exclusive) and 1 (inclusive).
+#' @param years       Integer vector of simulation years (default 2023).
+#' @param seed        RNG seed for reproducibility (default 42).
+#' @param include_network  Logical; include network datasets (buren, collega,
+#'   familie)?  Default `FALSE`.
+#' @param col_select  Optional named list passed to [sim_export()].
+#' @param verbose     Print progress summary (default `TRUE`).
+#' @return Invisibly, `output_dir`.
+#' @export
+sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
+                       seed = 42L, include_network = FALSE,
+                       col_select = NULL, verbose = TRUE) {
+  stopifnot(is.numeric(fraction), length(fraction) == 1L,
+            fraction > 0, fraction <= 1)
+  years <- as.integer(years)
+
+  # Compute n from fraction (use first year for population reference)
+  params <- suppressMessages(woonbase_cbs_params(years[1L]))
+  n <- as.integer(round(fraction * params$n_persons))
+
+  # Determine which datasets to export
+  .load_dataset_registry()
+  ds_ids <- names(.sim_cache$datasets)
+  if (!include_network) {
+    ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
+  }
+
+  n_years <- length(years)
+  n_datasets <- length(ds_ids)
+
+  # Estimate output size and time (calibrated empirically)
+  # Without network: ~2,800 bytes/person/year; with network: ~12,000 bytes/person/year
+  # ~30s per 100k persons per year for spine + assembly
+  bytes_pp <- if (include_network) 12000 else 2800
+  est_mb <- as.numeric(n) * bytes_pp * n_years / 1e6
+  est_sec <- n / 1e5 * 30 * n_years
+
+  # Format size and time with appropriate units
+  size_str <- if (est_mb >= 1000) {
+    sprintf("%.1f GB", est_mb / 1000)
+  } else {
+    sprintf("%.0f MB", est_mb)
+  }
+  time_str <- if (est_sec >= 120) {
+    sprintf("%.1f min", est_sec / 60)
+  } else {
+    sprintf("%.0f sec", est_sec)
+  }
+
+  # Always prompt in interactive mode
+  if (interactive()) {
+    msg <- sprintf(paste0(
+      "\nCBS population %d: %s persons\n",
+      "Simulating %.1f%% = %s persons, %d year%s, %d datasets\n",
+      "  Estimated size: %s\n",
+      "  Estimated time: %s\n",
+      "Continue? (y/n) "),
+      years[1L], format(params$n_persons, big.mark = ","),
+      fraction * 100, format(n, big.mark = ","),
+      n_years, if (n_years > 1L) "s" else "",
+      n_datasets, size_str, time_str)
+    ans <- readline(msg)
+    if (!tolower(trimws(ans)) %in% c("y", "yes")) {
+      message("Aborted.")
+      return(invisible(NULL))
+    }
+  }
+
+  t0 <- proc.time()
+
+  # Collect folder names per dataset for display
+  ds_folders <- vapply(ds_ids, function(ds_id) {
+    ds <- .sim_cache$datasets[[ds_id]]
+    folders <- vapply(ds$files, function(fi) {
+      up <- toupper(fi$cbs_name)
+      if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) paste0(up, "TAB") else up
+    }, character(1L))
+    paste(folders, collapse = ", ")
+  }, character(1L))
+
+  for (yr in years) {
+    yr_idx <- which(years == yr)
+    if (verbose) {
+      message(sprintf("\n[%d/%d] Year %d", yr_idx, n_years, yr))
+    }
+
+    suppressMessages(sim_reset())
+
+    # Pre-init spolis so SBEID is available for collega (if included)
+    if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
+      suppressMessages(sim_init("spolis", year = yr, n = n, seed = seed))
+    }
+
+    # Export all datasets for this year (suppress internal messages)
+    for (i in seq_along(ds_ids)) {
+      suppressMessages(
+        sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
+                   seed = seed, col_select = col_select))
+      if (verbose) message(sprintf("  %s", ds_folders[i]))
+    }
+  }
+
+  elapsed <- (proc.time() - t0)[["elapsed"]]
+  if (verbose) {
+    # Count total files written
+    all_files <- list.files(output_dir, pattern = "\\.parquet$",
+                            recursive = TRUE)
+    total_mb <- sum(file.size(
+      file.path(output_dir, all_files)), na.rm = TRUE) / 1e6
+    message(sprintf("\nDone: %d files, %.0f MB, %.0f sec",
+                    length(all_files), total_mb, elapsed))
+  }
   invisible(output_dir)
 }
 
