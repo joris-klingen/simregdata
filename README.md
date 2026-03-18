@@ -89,13 +89,31 @@ sim_population("output/sim_data")
 sim_population("output/sim_data", fraction = 0.01, years = 2019:2023)
 ```
 
+## Custom datasets
+
+Define your own datasets with a simple YAML file. Columns link to the shared spine via RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, or RINKENTEKEN.
+
+```r
+# Create a template
+sim_create_custom("my_survey.yaml")
+
+# Edit the YAML, then register it
+sim_register("my_survey.yaml")
+
+# Use it like any built-in dataset
+sim_init("my_survey", year = 2023, n = 100000)
+dt <- read_sav("my_survey2023V1")
+```
+
 ## How the simulator works
 
 ### Public functions
 
 | Function | Description |
 |----------|-------------|
-| `sim_population(output_dir, fraction, year, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
+| `sim_population(output_dir, fraction, years, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
+| `sim_register(path)` | Registers a user-defined custom dataset from a simple YAML file. |
+| `sim_create_custom(path)` | Writes a template YAML for defining a custom dataset. |
 | `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names. |

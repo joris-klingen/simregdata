@@ -528,3 +528,150 @@ test_that("sim_population validates fraction", {
   expect_error(sim_population(tempdir(), fraction = 1.5))
   expect_error(sim_population(tempdir(), fraction = -0.1))
 })
+
+
+# ---- Custom datasets (sim_register) ----
+
+test_that("sim_create_custom writes a template YAML", {
+  tmp <- tempfile(fileext = ".yaml")
+  on.exit(unlink(tmp), add = TRUE)
+
+  sim_create_custom(tmp)
+  expect_true(file.exists(tmp))
+
+  content <- readLines(tmp)
+  expect_true(any(grepl("^name:", content)))
+  expect_true(any(grepl("^key:", content)))
+  expect_true(any(grepl("type: categorical", content)))
+})
+
+test_that("sim_register creates a working person-keyed dataset", {
+  tmp <- tempfile(fileext = ".yaml")
+  on.exit(unlink(tmp), add = TRUE)
+
+  writeLines(c(
+    "name: test_survey",
+    "label: Test Survey",
+    "key: rinpersoon",
+    "columns:",
+    "  - name: satisfaction",
+    "    type: categorical",
+    "    values: [1, 2, 3]",
+    "    labels: [Low, Medium, High]",
+    "    probs: [0.3, 0.4, 0.3]",
+    "  - name: score",
+    "    type: numeric",
+    "    mean: 50",
+    "    sd: 10",
+    "    min: 0",
+    "    max: 100",
+    "  - name: rid",
+    "    type: id",
+    "    width: 6",
+    "  - name: status",
+    "    type: constant",
+    "    value: active"
+  ), tmp)
+
+  sim_reset()
+  sim_register(tmp)
+  sim_init("test_survey", year = 2023L, n = 100L, seed = 42L)
+  dt <- read_sav("test_survey2023V1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 6L)
+
+  # Key columns auto-added
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONS" %in% names(dt))
+
+  # User columns present
+  expect_true("satisfaction" %in% names(dt))
+  expect_true("score" %in% names(dt))
+  expect_true("rid" %in% names(dt))
+  expect_true("status" %in% names(dt))
+
+  # Categorical is haven-labelled
+  expect_s3_class(dt$satisfaction, "haven_labelled")
+  expect_true(all(as.integer(dt$satisfaction) %in% 1:3))
+
+  # Score is numeric in range
+  expect_true(is.numeric(dt$score))
+  expect_true(all(dt$score >= 0 & dt$score <= 100))
+
+  # ID is 6-char
+  expect_true(all(nchar(dt$rid) == 6L))
+
+  # Constant
+  expect_true(all(dt$status == "active"))
+
+  # Persons come from shared spine
+  sim_init("woonbase", year = 2023L, n = 100L, seed = 42L)
+  wb <- read_sav("WoonbasePopulatiePersonen2023V1",
+                  col_select = c(RINPERSOON))
+  common <- intersect(dt$RINPERSOON, wb$RINPERSOON)
+  expect_gt(length(common), 0L)
+})
+
+test_that("sim_register works with rinkenteken key", {
+  tmp <- tempfile(fileext = ".yaml")
+  on.exit(unlink(tmp), add = TRUE)
+
+  writeLines(c(
+    "name: test_vehicles",
+    "label: Test Vehicles",
+    "key: rinkenteken",
+    "columns:",
+    "  - name: mileage",
+    "    type: numeric",
+    "    mean: 15000",
+    "    sd: 8000",
+    "    min: 0"
+  ), tmp)
+
+  sim_reset()
+  sim_register(tmp)
+  sim_init("test_vehicles", year = 2023L, n = 100L, seed = 42L)
+  dt <- read_sav("test_vehicles2023V1")
+
+  expect_true("RINKENTEKEN" %in% names(dt))
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("mileage" %in% names(dt))
+  expect_true(is.numeric(dt$mileage))
+})
+
+test_that("sim_register appears in sim_catalog", {
+  tmp <- tempfile(fileext = ".yaml")
+  on.exit(unlink(tmp), add = TRUE)
+
+  writeLines(c(
+    "name: test_cat",
+    "key: rinpersoon",
+    "columns:",
+    "  - name: x",
+    "    type: constant",
+    "    value: a"
+  ), tmp)
+
+  sim_reset()
+  sim_register(tmp)
+
+  out <- capture.output(sim_catalog("test_cat"))
+  expect_true(any(grepl("test_cat", out)))
+})
+
+test_that("sim_register validates input", {
+  tmp <- tempfile(fileext = ".yaml")
+  on.exit(unlink(tmp), add = TRUE)
+
+  # Missing name
+  writeLines("key: rinpersoon\ncolumns:\n  - name: x\n    type: constant\n    value: a", tmp)
+  expect_error(sim_register(tmp), "name")
+
+  # Bad key
+  writeLines("name: t\nkey: badkey\ncolumns:\n  - name: x\n    type: constant\n    value: a", tmp)
+  expect_error(sim_register(tmp), "Unknown key")
+
+  # No columns
+  writeLines("name: t\nkey: rinpersoon", tmp)
+  expect_error(sim_register(tmp), "column")
+})
