@@ -190,7 +190,24 @@
       dummy <- stats::setNames(as.list(seq_along(all_names)), all_names)
       dummy <- as.data.frame(dummy, check.names = FALSE)
       names(tidyselect::eval_select(col_q, dummy))
-    }, error = function(e) NULL)   # fallback: generate all columns
+    }, error = function(e) {
+      # Case-insensitive fallback: extract the character vector from the quo
+      # environment (handles all_of(file_cols) where file_cols has wrong case)
+      requested <- tryCatch({
+        env <- rlang::quo_get_env(col_q)
+        if (exists("file_cols", envir = env, inherits = TRUE)) {
+          get("file_cols", envir = env, inherits = TRUE)
+        } else {
+          as.character(eval(rlang::quo_get_expr(col_q), env))
+        }
+      }, error = function(e2) NULL)
+      if (!is.null(requested)) {
+        all_lower <- tolower(all_names)
+        matched <- all_names[all_lower %in% tolower(requested)]
+        if (length(matched) > 0L) return(matched)
+      }
+      NULL
+    })
   }
 
   # Trigger lazy enrichment if needed (shared spine has enrichment flags)
@@ -373,14 +390,19 @@
     sel <- tryCatch(
       names(tidyselect::eval_select(col_q, dt)),
       error = function(e) {
-        cs <- tryCatch(
-          rlang::eval_tidy(col_q),
-          error = function(e2) eval(rlang::quo_get_expr(col_q),
-                                     rlang::quo_get_env(col_q))
-        )
-        intersect(as.character(cs), names(dt))
+        requested <- tryCatch({
+          env <- rlang::quo_get_env(col_q)
+          if (exists("file_cols", envir = env, inherits = FALSE)) {
+            get("file_cols", envir = env, inherits = FALSE)
+          } else {
+            as.character(eval(rlang::quo_get_expr(col_q), env))
+          }
+        }, error = function(e2) character(0L))
+        # Case-insensitive match against assembled columns
+        dt_lower <- tolower(names(dt))
+        names(dt)[dt_lower %in% tolower(requested)]
       })
-    dt <- dt[, sel, with = FALSE]
+    if (length(sel) > 0L) dt <- dt[, sel, with = FALSE]
   }
 
   dt

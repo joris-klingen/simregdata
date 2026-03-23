@@ -785,13 +785,20 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #' @param seed        RNG seed for reproducibility (default 42).
 #' @param include_network  Logical; include network datasets (buren, collega,
 #'   familie)?  Default `FALSE`.
-#' @param col_select  Optional named list passed to [sim_export()].
+#' @param datasets   Optional character vector of dataset identifiers to
+#'   include (e.g. `c("woonbase", "rdw")`).  Default `NULL` exports all
+#'   registered datasets.  Takes precedence over `include_network`.
+#' @param col_select  Optional named list passed to [sim_export()].  Keys are
+#'   CBS file names (e.g. `"WoonbasePopulatiePersonen"`, `"RDWNPACT"`) and
+#'   values are character vectors of column names.  Key columns (RINPERSOON
+#'   etc.) are always included automatically.
 #' @param verbose     Print progress summary (default `TRUE`).
 #' @return Invisibly, `output_dir`.
 #' @export
 sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
                        seed = 42L, include_network = FALSE,
-                       col_select = NULL, verbose = TRUE) {
+                       datasets = NULL, col_select = NULL,
+                       verbose = TRUE) {
   stopifnot(is.numeric(fraction), length(fraction) == 1L,
             fraction > 0, fraction <= 1)
   years <- as.integer(years)
@@ -802,9 +809,18 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
   # Determine which datasets to export
   .load_dataset_registry()
-  ds_ids <- names(.sim_cache$datasets)
-  if (!include_network) {
-    ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
+  if (!is.null(datasets)) {
+    unknown <- setdiff(datasets, names(.sim_cache$datasets))
+    if (length(unknown) > 0L) {
+      stop("Unknown dataset(s): ", paste(unknown, collapse = ", "),
+           "\nAvailable: ", paste(names(.sim_cache$datasets), collapse = ", "))
+    }
+    ds_ids <- datasets
+  } else {
+    ds_ids <- names(.sim_cache$datasets)
+    if (!include_network) {
+      ds_ids <- setdiff(ds_ids, .NETWERK_DATASETS)
+    }
   }
 
   n_years <- length(years)
