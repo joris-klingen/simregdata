@@ -215,9 +215,33 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         ds_spine$pers <- spine$pers[idx, ..pers_cols]
       }
 
-      # Generate deterministic RINKENTEKEN from RINPERSOON (longitudinally stable)
-      if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))
-        ds_spine$pers[, RINKENTEKEN := .deterministic_kenteken(RINPERSOON)]
+      # Generate deterministic RINKENTEKEN from RINPERSOON
+      # ~12% annual car turnover: persons who "buy a new car" get a different
+      # kenteken derived from RINPERSOON + year (deterministic per person-year)
+      if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers))) {
+        rp <- ds_spine$pers$RINPERSOON
+        base_kt <- .deterministic_kenteken(rp)
+        # Deterministic turnover: hash RINPERSOON to a "car birth year"
+        # that is stable per person. ~12% chance of new car each year.
+        car_age_seed <- (as.double(rp) * 48271 + 99991) %% 2147483647
+        car_birth_year <- 2010L + as.integer(car_age_seed %% 15L)
+        # Person gets a new car if year > car_birth_year + ownership_duration
+        # ownership_duration ~6 years (deterministic per person)
+        own_dur <- 3L + as.integer((car_age_seed * 69069) %% 2147483647 %% 8L)
+        # How many cars has this person had by this year?
+        car_gen <- pmax(0L, as.integer((year - car_birth_year) %/% own_dur))
+        # New kenteken for each generation (salt with generation number)
+        needs_new <- car_gen > 0L
+        if (any(needs_new)) {
+          new_id <- paste0(rp[needs_new], "_", car_gen[needs_new])
+          # Hash the composite ID to get a new kenteken
+          new_kt <- .deterministic_kenteken(
+            as.double(as.double(rp[needs_new]) * 48271 + car_gen[needs_new] * 69069) %%
+              2147483647)
+          base_kt[needs_new] <- new_kt
+        }
+        ds_spine$pers[, RINKENTEKEN := base_kt]
+      }
 
       # Add HKW household key if needed (for INPATAB, INHATAB, VEHTAB_VERMOGEN)
       if ("RINPERSOONHKW" %in% needed$pers &&

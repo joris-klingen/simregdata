@@ -84,10 +84,10 @@
 .deterministic_categorical <- function(id_vec, values, probs, salt) {
   u <- .hash_to_uniform(id_vec, salt)
   cum_p <- cumsum(probs)
-  # findInterval: values in (cum_p[i-1], cum_p[i]] map to bin i
-  # Shift by adding 0 prefix so bin 1 = (0, cum_p[1]]
-  bins <- findInterval(u, c(0, cum_p[-length(cum_p)]), left.open = TRUE) + 1L
-  bins <- pmin(bins, length(values))
+  # findInterval with breakpoints [0, cum_p[1], ..., cum_p[n-1]]
+  # returns bin index 1..n matching values[1..n]
+  bins <- findInterval(u, c(0, cum_p[-length(cum_p)]), left.open = TRUE)
+  bins <- pmax(1L, pmin(bins, length(values)))
   values[bins]
 }
 
