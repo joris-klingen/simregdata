@@ -10,6 +10,7 @@ sim_population(
   years = 2023L,
   seed = 42L,
   include_network = FALSE,
+  datasets = NULL,
   col_select = NULL,
   verbose = TRUE
 )
@@ -27,7 +28,14 @@ sim_population(
 \item{include_network}{Logical; include network datasets (buren, collega,
 familie)?  Default \code{FALSE}.}
 
-\item{col_select}{Optional named list passed to \code{\link[=sim_export]{sim_export()}}.}
+\item{datasets}{Optional character vector of dataset identifiers to
+include (e.g. \code{c("woonbase", "rdw")}).  Default \code{NULL} exports all
+registered datasets.  Takes precedence over \code{include_network}.}
+
+\item{col_select}{Optional named list passed to \code{\link[=sim_export]{sim_export()}}.  Keys are
+CBS file names (e.g. \code{"WoonbasePopulatiePersonen"}, \code{"RDWNPACT"}) and
+values are character vectors of column names.  Key columns (RINPERSOON
+etc.) are always included automatically.}
 
 \item{verbose}{Print progress summary (default \code{TRUE}).}
 }
