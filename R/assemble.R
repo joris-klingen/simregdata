@@ -2,7 +2,7 @@
 
 # Resolve a single column value from spec + spine
 .resolve_column <- function(col_spec, spine, n_rows, codelists, jan1, dec31,
-                            computed, params = NULL) {
+                            computed, params = NULL, base_tbl = NULL) {
 
   # Constant value
   if (!is.null(col_spec$value)) {
@@ -20,6 +20,17 @@
   # Random categorical (optionally from params)
   if (!is.null(col_spec$random_categorical)) {
     rc <- col_spec$random_categorical
+    stable_id <- col_spec$stable_per
+    # stable_per: deterministic assignment by identifier (skip from_params)
+    if (!is.null(stable_id) && !is.null(base_tbl) &&
+        stable_id %in% names(base_tbl)) {
+      vals <- as.character(rc$values)
+      probs <- if (!is.null(rc$probs)) as.numeric(rc$probs) else
+        rep(1 / length(vals), length(vals))
+      return(.deterministic_categorical(
+        as.character(base_tbl[[stable_id]]), vals, probs,
+        salt = col_spec$name))
+    }
     # from_params: look up named probability vector from cached dataset params
     if (!is.null(rc$from_params) && !is.null(params)) {
       pv <- params[[rc$from_params]]
@@ -43,6 +54,20 @@
   # Random numeric (optionally from params)
   if (!is.null(col_spec$random_numeric)) {
     rn <- col_spec$random_numeric
+    stable_id <- col_spec$stable_per
+    # stable_per: deterministic numeric by identifier (skip from_params)
+    if (!is.null(stable_id) && !is.null(base_tbl) &&
+        stable_id %in% names(base_tbl)) {
+      return(.deterministic_numeric(
+        as.character(base_tbl[[stable_id]]),
+        distribution = rn$distribution,
+        mean = as.numeric(rn$mean %||% 0),
+        sd = as.numeric(rn$sd %||% 1),
+        min = as.numeric(rn$min %||% -Inf),
+        max = as.numeric(rn$max %||% Inf),
+        round = rn$round,
+        salt = col_spec$name))
+    }
     # Override mean/sd from params if specified
     if (!is.null(params)) {
       if (!is.null(rn$mean_from_params))
@@ -191,21 +216,6 @@
       dummy <- as.data.frame(dummy, check.names = FALSE)
       names(tidyselect::eval_select(col_q, dummy))
     }, error = function(e) {
-      # Case-insensitive fallback: extract the character vector from the quo
-      # environment (handles all_of(file_cols) where file_cols has wrong case)
-      requested <- tryCatch({
-        env <- rlang::quo_get_env(col_q)
-        if (exists("file_cols", envir = env, inherits = TRUE)) {
-          get("file_cols", envir = env, inherits = TRUE)
-        } else {
-          as.character(eval(rlang::quo_get_expr(col_q), env))
-        }
-      }, error = function(e2) NULL)
-      if (!is.null(requested)) {
-        all_lower <- tolower(all_names)
-        matched <- all_names[all_lower %in% tolower(requested)]
-        if (length(matched) > 0L) return(matched)
-      }
       NULL
     })
   }
@@ -312,6 +322,8 @@
   }
 
   # Build result data.table column by column
+  # Copy base_tbl so we can progressively add resolved columns (for stable_per)
+  base_tbl <- data.table::copy(base_tbl)
   n_cols <- length(spec$columns) * 2L  # upper bound (suffixes expand)
   result_cols <- vector("list", n_cols)
   result_names <- character(n_cols)
@@ -332,11 +344,12 @@
         cs2$suffixes <- NULL
 
         val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
-                               computed, params)
+                               computed, params, base_tbl = base_tbl)
         val <- .apply_codelist(val, cs2, codelists)
         idx <- idx + 1L
         result_cols[[idx]] <- val
         result_names[[idx]] <- cs2$name
+        data.table::set(base_tbl, j = cs2$name, value = val)
       }
     } else if (!is.null(cs[["suffixes_custom"]])) {
       for (sc in cs[["suffixes_custom"]]) {
@@ -351,11 +364,12 @@
         cs2$suffixes_custom <- NULL
 
         val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
-                               computed, params)
+                               computed, params, base_tbl = base_tbl)
         val <- .apply_codelist(val, cs2, codelists)
         idx <- idx + 1L
         result_cols[[idx]] <- val
         result_names[[idx]] <- cs2$name
+        data.table::set(base_tbl, j = cs2$name, value = val)
       }
     } else {
       # Skip if not selected
@@ -364,17 +378,19 @@
       # Job-level columns: generate once per unique job, then expand to rows
       if (has_job_groups && identical(cs$level, "job")) {
         val <- .resolve_column(cs, spine, n_unique_jobs, codelists, jan1,
-                               dec31, computed, params)
+                               dec31, computed, params, base_tbl = base_tbl)
         val <- .apply_codelist(val, cs, codelists)
         val <- val[job_groups]
       } else {
         val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31,
-                               computed, params)
+                               computed, params, base_tbl = base_tbl)
         val <- .apply_codelist(val, cs, codelists)
       }
       idx <- idx + 1L
       result_cols[[idx]] <- val
       result_names[[idx]] <- cs$name
+      if (length(val) == nrow(base_tbl))
+        data.table::set(base_tbl, j = cs$name, value = val)
     }
   }
 
@@ -389,19 +405,7 @@
   if (!is.null(col_q) && !rlang::quo_is_null(col_q)) {
     sel <- tryCatch(
       names(tidyselect::eval_select(col_q, dt)),
-      error = function(e) {
-        requested <- tryCatch({
-          env <- rlang::quo_get_env(col_q)
-          if (exists("file_cols", envir = env, inherits = FALSE)) {
-            get("file_cols", envir = env, inherits = FALSE)
-          } else {
-            as.character(eval(rlang::quo_get_expr(col_q), env))
-          }
-        }, error = function(e2) character(0L))
-        # Case-insensitive match against assembled columns
-        dt_lower <- tolower(names(dt))
-        names(dt)[dt_lower %in% tolower(requested)]
-      })
+      error = function(e) character(0L))
     if (length(sel) > 0L) dt <- dt[, sel, with = FALSE]
   }
 

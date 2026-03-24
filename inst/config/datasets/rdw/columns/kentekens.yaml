@@ -3,6 +3,7 @@
 # One row per vehicle per person
 # Calibrated from CBS StatLine 85237NED + 85236NED via rdw_update_params()
 # Columns with from_params use year-specific distributions from params.yaml
+# Columns with stable_per use deterministic hashing for year-to-year stability
 entity: person
 spine_table: pers
 
@@ -22,6 +23,7 @@ columns:
 
   # Year-specific color distribution from 85237NED
   - name: KLEURCODEVRTG
+    stable_per: RINKENTEKEN
     random_categorical:
       from_params: kleur_p
       # Fallback if params not loaded:
@@ -32,6 +34,7 @@ columns:
 
   # Year-specific construction year distribution from 85237NED
   - name: EERSTETOELDAT1VRTG
+    stable_per: RINKENTEKEN
     random_categorical:
       from_params: bouwjaar_p
       # Fallback:
@@ -39,6 +42,7 @@ columns:
       probs:  [0.10, 0.15, 0.20, 0.30, 0.25]
 
   - name: SRTREFVRTG
+    stable_per: RINKENTEKEN
     random_categorical:
       values: ["B", "I", "N", "R", "H"]
       probs:  [0.05, 0.02, 0.75, 0.15, 0.03]
@@ -47,6 +51,7 @@ columns:
 
   # Year-specific vehicle type distribution from 85236NED
   - name: VRTGSOORT
+    stable_per: RINKENTEKEN
     random_categorical:
       from_params: vrtgsoort_p
       # Fallback:
@@ -59,6 +64,7 @@ columns:
   # Codes: 1=Benzine, 2=Diesel, 3=LPG, 4=BEV, 5=CNG, A=PHEV, B=HEV
   # PHEV/HEV split from Benzine using fleet estimates (85237NED lumps hybrids)
   - name: BRANDSTCODECORVRTG
+    stable_per: RINKENTEKEN
     random_categorical:
       from_params: brandstof_p
       # Fallback (approximate 2023):
@@ -69,6 +75,7 @@ columns:
 
   # Year-specific weight from 85237NED weight class distribution
   - name: MASSALEEGCORVRTG
+    stable_per: RINKENTEKEN
     random_numeric:
       distribution: normal
       mean: 1350
@@ -80,6 +87,7 @@ columns:
       round: 0
 
   - name: MAXLAADVERMCORVRTG
+    stable_per: RINKENTEKEN
     random_numeric:
       distribution: uniform
       min: 0
@@ -87,11 +95,13 @@ columns:
       round: 0
 
   - name: AANTALCYLCORVRTG
+    stable_per: RINKENTEKEN
     random_categorical:
       values: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"]
       probs:  [0.10, 0.01, 0.02, 0.08, 0.55, 0.02, 0.12, 0.08, 0.01, 0.01]
 
   - name: CYLININHOUDCORVRTG
+    stable_per: RINKENTEKEN
     random_numeric:
       distribution: normal
       mean: 1600
@@ -101,6 +111,7 @@ columns:
       round: 0
 
   - name: SOORTBROMFIETSCOR
+    stable_per: RINKENTEKEN
     random_categorical:
       values: ["--", "01", "02", "03", "04"]
       probs:  [0.90, 0.04, 0.04, 0.01, 0.01]

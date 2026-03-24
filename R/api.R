@@ -215,9 +215,33 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         ds_spine$pers <- spine$pers[idx, ..pers_cols]
       }
 
-      # Generate deterministic RINKENTEKEN from RINPERSOON (longitudinally stable)
-      if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers)))
-        ds_spine$pers[, RINKENTEKEN := .deterministic_kenteken(RINPERSOON)]
+      # Generate deterministic RINKENTEKEN from RINPERSOON
+      # ~12% annual car turnover: persons who "buy a new car" get a different
+      # kenteken derived from RINPERSOON + year (deterministic per person-year)
+      if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers))) {
+        rp <- ds_spine$pers$RINPERSOON
+        base_kt <- .deterministic_kenteken(rp)
+        # Deterministic turnover: hash RINPERSOON to a "car birth year"
+        # that is stable per person. ~12% chance of new car each year.
+        car_age_seed <- (as.double(rp) * 48271 + 99991) %% 2147483647
+        car_birth_year <- 2010L + as.integer(car_age_seed %% 15L)
+        # Person gets a new car if year > car_birth_year + ownership_duration
+        # ownership_duration ~6 years (deterministic per person)
+        own_dur <- 3L + as.integer((car_age_seed * 69069) %% 2147483647 %% 8L)
+        # How many cars has this person had by this year?
+        car_gen <- pmax(0L, as.integer((year - car_birth_year) %/% own_dur))
+        # New kenteken for each generation (salt with generation number)
+        needs_new <- car_gen > 0L
+        if (any(needs_new)) {
+          new_id <- paste0(rp[needs_new], "_", car_gen[needs_new])
+          # Hash the composite ID to get a new kenteken
+          new_kt <- .deterministic_kenteken(
+            as.double(as.double(rp[needs_new]) * 48271 + car_gen[needs_new] * 69069) %%
+              2147483647)
+          base_kt[needs_new] <- new_kt
+        }
+        ds_spine$pers[, RINKENTEKEN := base_kt]
+      }
 
       # Add HKW household key if needed (for INPATAB, INHATAB, VEHTAB_VERMOGEN)
       if ("RINPERSOONHKW" %in% needed$pers &&
@@ -580,7 +604,9 @@ read_sav <- function(file,
   dt <- .assemble_generic(dataset_id, file_key, spine, col_q = col_q)
 
   # Post-processing: income-conditional EV share for RDW kentekens
-  if (identical(dataset_id, "rdw") && "BRANDSTCODECORVRTG" %in% names(dt) &&
+  # EV-income adjustment disabled: fuel type is now deterministic per RINKENTEKEN
+  # via stable_per in the column spec. Re-randomizing would break stability.
+  if (FALSE && identical(dataset_id, "rdw") && "BRANDSTCODECORVRTG" %in% names(dt) &&
       "RINPERSOON" %in% names(dt)) {
     dt <- .adjust_ev_by_income(dt, .sim_cache$spine)
   }
@@ -803,9 +829,14 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
             fraction > 0, fraction <= 1)
   years <- as.integer(years)
 
-  # Compute n from fraction (use first year for population reference)
-  params <- suppressMessages(woonbase_cbs_params(years[1L]))
-  n <- as.integer(round(fraction * params$n_persons))
+  # Compute n from fraction using max population across years
+  # Using a fixed n ensures longitudinal consistency (same persons across years)
+  params_by_year <- lapply(stats::setNames(years, years), function(yr)
+    suppressMessages(woonbase_cbs_params(yr)))
+  max_pop <- max(vapply(params_by_year, function(p) p$n_persons, integer(1L)))
+  n <- as.integer(round(fraction * max_pop))
+  # Use first year for prompt display
+  params <- params_by_year[[1L]]
 
   # Determine which datasets to export
   .load_dataset_registry()
@@ -826,12 +857,42 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   n_years <- length(years)
   n_datasets <- length(ds_ids)
 
-  # Estimate output size and time (calibrated empirically)
-  # Without network: ~2,800 bytes/person/year; with network: ~12,000 bytes/person/year
-  # ~30s per 100k persons per year for spine + assembly
-  bytes_pp <- if (include_network) 12000 else 2800
-  est_mb <- as.numeric(n) * bytes_pp * n_years / 1e6
-  est_sec <- n / 1e5 * 30 * n_years
+  # Estimate output size and time based on actual columns ----
+  # Count columns per file, accounting for col_select
+  total_cols <- 0L
+  for (ds_id in ds_ids) {
+    ds <- .sim_cache$datasets[[ds_id]]
+    for (fkey in names(ds$files)) {
+      fi <- ds$files[[fkey]]
+      cbs_name <- fi$cbs_name
+      # Count columns from spec
+      spec <- .load_column_spec(ds_id, fkey)
+      n_file_cols <- 0L
+      for (cs in spec$columns) {
+        if (!is.null(cs[["suffixes"]])) {
+          n_file_cols <- n_file_cols + length(cs[["suffixes"]])
+        } else if (!is.null(cs[["suffixes_custom"]])) {
+          n_file_cols <- n_file_cols + length(cs[["suffixes_custom"]])
+        } else {
+          n_file_cols <- n_file_cols + 1L
+        }
+      }
+      # Apply col_select reduction if specified
+      if (!is.null(col_select)) {
+        file_cols <- col_select[[cbs_name]] %||%
+                     col_select[[toupper(cbs_name)]] %||%
+                     col_select[[tolower(cbs_name)]] %||%
+                     col_select[[fkey]]
+        if (!is.null(file_cols)) {
+          n_file_cols <- length(file_cols)
+        }
+      }
+      total_cols <- total_cols + n_file_cols
+    }
+  }
+  # ~1.7 bytes per column per row in parquet; ~3s per 100k persons per dataset-year
+  est_mb <- as.numeric(n) * total_cols * 1.7 * n_years / 1e6
+  est_sec <- as.numeric(n) / 1e5 * 3 * n_datasets * n_years
 
   # Format size and time with appropriate units
   size_str <- if (est_mb >= 1000) {
@@ -847,17 +908,16 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
   # Always prompt in interactive mode
   if (interactive()) {
-    msg <- sprintf(paste0(
+    cat(sprintf(paste0(
       "\nCBS population %d: %s persons\n",
       "Simulating %.1f%% = %s persons, %d year%s, %d datasets\n",
       "  Estimated size: %s\n",
-      "  Estimated time: %s\n",
-      "Continue? (y/n) "),
+      "  Estimated time: %s\n"),
       years[1L], format(params$n_persons, big.mark = ","),
       fraction * 100, format(n, big.mark = ","),
       n_years, if (n_years > 1L) "s" else "",
-      n_datasets, size_str, time_str)
-    ans <- readline(msg)
+      n_datasets, size_str, time_str))
+    ans <- readline("Continue? (y/n) ")
     if (!tolower(trimws(ans)) %in% c("y", "yes")) {
       message("Aborted.")
       return(invisible(NULL))
@@ -879,7 +939,8 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   for (yr in years) {
     yr_idx <- which(years == yr)
     if (verbose) {
-      message(sprintf("\n[%d/%d] Year %d", yr_idx, n_years, yr))
+      cat(sprintf("\n[%d/%d] Year %d\n", yr_idx, n_years, yr))
+      flush.console()
     }
 
     suppressMessages(sim_reset())
@@ -891,10 +952,14 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
     # Export all datasets for this year (suppress internal messages)
     for (i in seq_along(ds_ids)) {
+      if (verbose) {
+        cat(sprintf("  %s ...", ds_folders[i]))
+        flush.console()
+      }
       suppressMessages(
         sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
                    seed = seed, col_select = col_select))
-      if (verbose) message(sprintf("  %s", ds_folders[i]))
+      if (verbose) cat(" done\n")
     }
   }
 
@@ -905,8 +970,8 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
                             recursive = TRUE)
     total_mb <- sum(file.size(
       file.path(output_dir, all_files)), na.rm = TRUE) / 1e6
-    message(sprintf("\nDone: %d files, %.0f MB, %.0f sec",
-                    length(all_files), total_mb, elapsed))
+    cat(sprintf("\nDone: %d files, %.0f MB, %.0f sec\n",
+                length(all_files), total_mb, elapsed))
   }
   invisible(output_dir)
 }
