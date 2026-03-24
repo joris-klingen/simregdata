@@ -4,11 +4,13 @@ Synthetic CBS microdata generator for R. Mimics the exact file structure, column
 
 ## Background
 
-[CBS microdata](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen) are linked administrative registers available to researchers via the CBS Remote Access environment. Because the real files are restricted, this project simulates them from the PDF variable documentation so that:
+[CBS microdata](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen "CBS microdata catalog") are linked administrative registers available to researchers via the CBS Remote Access environment. Because the real files are restricted, this project simulates them from the PDF variable documentation so that:
 
 - Analysis scripts can be developed and tested locally
 - Workflows can be benchmarked and profiled
 - Colleagues without CBS access can reproduce results
+
+Currently supports **15 datasets, 27 file types, 552 columns**. See the full [column overview](docs/column-overview.md) for all simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Installation
 
@@ -23,25 +25,23 @@ Currently supports 15 CBS datasets across 27 file types:
 
 | Dataset | Description | Key |
 |---------|-------------|-----|
-| **GBA** | Population register (3 files) | RINPERSOON |
 | **Woonbase** | Housing + population (9 files) | RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER |
+| **GBA** | Population register (3 files) | RINPERSOON |
 | **RDW** | Vehicle registrations (2 files) | RINPERSOON, RINKENTEKEN |
 | **SPOLIS** | Employment records with monthly job structure | RINPERSOON, SBEID |
 | **VEHTAB** | Household wealth | RINPERSOONHKW |
-| **Energieverbruik** | Dwelling energy consumption (annual + monthly smart meter) | RINOBJECTNUMMER |
-| **HOOGSTEOPLTAB** | Highest attained education level | RINPERSOON |
 | **INPATAB** | Personal income | RINPERSOON, RINPERSOONHKW |
-| **SECMBUS** | Socioeconomic category (monthly periods) | RINPERSOON |
 | **INHATAB** | Household income | RINPERSOONHKW |
+| **HOOGSTEOPLTAB** | Highest attained education level | RINPERSOON |
+| **SECMBUS** | Socioeconomic category (monthly periods) | RINPERSOON |
 | **BETAB** | Business register | BEID |
+| **Energieverbruik** | Dwelling energy consumption (annual + monthly smart meter) | RINOBJECTNUMMER |
 | **Zonnestroominstallaties** | Solar PV installations + monthly production | RINOBJECTNUMMER |
 | **Burennetwerktab** | Neighbour network (neighbours + community members) | RINPERSOON |
 | **Colleganetwerktab** | Colleague network (same employer) | RINPERSOON |
 | **Familienetwerktab** | Family network (biological, in-law, step) | RINPERSOON |
 
 All datasets share a common population spine with consistent join keys (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, RINPERSOONHKW), so cross-file joins work exactly as on the real CBS Remote Access.
-
-See the full [column overview](docs/column-overview.md) for all 552 simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Quick start
 
@@ -79,14 +79,21 @@ sim_init("spolis", year = 2023)
 rdw  <- read_sav("RDWNPACT2023TABV1")
 jobs <- read_sav("SPOLISBUS2023V1")
 
+# Extract original CBS character codes from haven-labelled columns
+cbs_code(rdw$BRANDSTCODECORVRTG)  # "1", "2", "4", "A", "B", ...
+
 # See all available files
 sim_catalog()
 
-# Generate a 1% sample of all datasets as parquet (prompts with size/time estimate)
-sim_population("output/sim_data")
+# Generate a 1% sample of specific datasets as parquet
+sim_population("output/sim_data", datasets = c("woonbase", "rdw"))
 
 # Multiple years at once
 sim_population("output/sim_data", fraction = 0.01, years = 2019:2023)
+
+# Use exported parquet files directly via read_sav()
+sim_set_data_root("output/sim_data")
+dt <- read_sav("WoonbasePopulatiePersonen2023V1")
 ```
 
 ## Custom datasets
@@ -111,14 +118,21 @@ dt <- read_sav("my_survey2023V1")
 
 | Function | Description |
 |----------|-------------|
-| `sim_population(output_dir, fraction, years, seed)` | Generates a fractional sample (default 1%) of all datasets and exports to parquet. |
-| `sim_register(path)` | Registers a user-defined custom dataset from a simple YAML file. |
-| `sim_create_custom(path)` | Writes a template YAML for defining a custom dataset. |
+| `sim_population(output_dir, fraction, years, seed, datasets, col_select)` | Generates a fractional sample (default 1%) of all or selected datasets and exports to parquet. |
 | `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
+| `sim_export(output_dir, dataset, year, n, seed, col_select)` | Exports simulated datasets to parquet in CBS VM-style folder layout. |
+| `sim_set_data_root(path)` / `sim_get_data_root()` | Set/get a parquet data root so `read_sav()` reads pre-exported files instead of generating on-the-fly. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names. |
 | `sim_reset(dataset)` | Clears the cached spine (forces rebuild on next call). |
-| `sim_column_overview()` | Returns a `data.table` of all columns with calibration level and source. |
+| `cbs_code(x)` | Extracts original CBS character codes (e.g. `"1"`, `"A"`) from a `haven::labelled` column. |
+| `sim_column_overview()` | Returns a `data.table` of all columns with calibration level, source, and spatial detail. |
+| `sim_scan_columns(paths)` | Scans R scripts for `col_select` usage and returns a named list for `sim_export()`. |
+| `sim_register(path)` | Registers a user-defined custom dataset from a simple YAML file. |
+| `sim_create_custom(path)` | Writes a template YAML for defining a custom dataset. |
+| `cbs_scaffold_dataset(dataset_id, files, ...)` | Scaffolds YAML config from CBS PDF documentation for a new built-in dataset. |
+| `cbs_check_columns(file, txt_path)` | Compares simulated columns against CBS PDF documentation. |
+| `cbs_parse_pdf_columns(txt_path)` | Parses variable tables from extracted CBS PDF text. |
 | `*_cbs_params(year)` | Loads cached CBS parameters for a dataset (e.g. `spolis_cbs_params(2023)`). |
 | `*_update_params(years)` | Fetches CBS StatLine data and writes `params.yaml` (e.g. `vehtab_update_params()`). |
 
@@ -145,13 +159,22 @@ energieverbruik_update_params()     # Kerncijfers wijken en buurten
 
 ## Performance
 
-At 1M persons on a modern laptop:
+**Interactive use** (1M persons on a modern laptop):
 
 | Stage | Approximate time |
 |-------|-----------------|
 | Spine build (`sim_init("woonbase")`) | 8–15 s |
 | Assemble 2 columns (`read_sav` with `col_select`) | < 0.5 s |
 | Assemble all columns (no `col_select`) | 3–5 s |
+
+**Bulk export** (`sim_population` at 1% sample, ~178k persons):
+
+| Scenario | Time | Output |
+|----------|------|--------|
+| Woonbase + RDW, `col_select` (5-6 cols/file), 8 years | ~170 s (~21 s/year) | 88 parquet files, ~550 MB |
+
+The bulk of the time is spent on spine construction per year. Using `col_select`
+to limit columns keeps file sizes manageable and speeds up assembly.
 
 ## Dependencies
 

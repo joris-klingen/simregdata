@@ -84,7 +84,7 @@ p1 <- ggplot(ev_share, aes(year, ev_pct)) +
        x = NULL, y = "Aandeel EV")
 
 print(p1)
-ggsave("plots/demo_rdw_p1_ev_adoptie.png", p1, width = 8, height = 4.5, dpi = 150)
+ggsave("analysis/plots/demo_rdw_p1_ev_adoptie.png", p1, width = 8, height = 4.5, dpi = 150)
 
 
 # Fuel type stacked area ----
@@ -125,7 +125,7 @@ p2 <- ggplot(fuel_agg, aes(year, pct, fill = fuel_cat)) +
   theme(legend.position = "bottom")
 
 print(p2)
-ggsave("plots/demo_rdw_p2_brandstofmix.png", p2, width = 9, height = 5, dpi = 150)
+ggsave("analysis/plots/demo_rdw_p2_brandstofmix.png", p2, width = 9, height = 5, dpi = 150)
 
 
 # Weight vs annual km scatter ----
@@ -156,6 +156,6 @@ p3 <- ggplot(wt_sub[weight > 400 & weight < 3500 & km > 0 & km < 50000],
         strip.text = element_text(face = "bold"))
 
 print(p3)
-ggsave("plots/demo_rdw_p3_gewicht_km.png", p3, width = 12, height = 5.5, dpi = 150)
+ggsave("analysis/plots/demo_rdw_p3_gewicht_km.png", p3, width = 12, height = 5.5, dpi = 150)
 
-cat("Saved 3 plots to plots/\n")
+cat("Saved 3 plots to analysis/plots/\n")

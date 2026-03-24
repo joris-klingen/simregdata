@@ -221,6 +221,6 @@ p <- ggplot(long, aes(x = percentiel, y = pct, fill = belasting)) +
   )
 
 print(p)
-ggsave("plots/test_autobelasting.png", p,
+ggsave("analysis/plots/test_autobelasting.png", p,
        width = 12, height = 5.5, dpi = 150)
-log_msg("Done — saved to plots/test_autobelasting.png")
+log_msg("Done — saved to analysis/plots/test_autobelasting.png")

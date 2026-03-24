@@ -58,7 +58,7 @@ p1 <- ggplot(pyr, aes(age_group, N, fill = geslacht)) +
         panel.grid.major.y = element_blank())
 
 print(p1)
-ggsave("plots/demo_woonbase_p1_piramide.png", p1, width = 7, height = 6, dpi = 150)
+ggsave("analysis/plots/demo_woonbase_p1_piramide.png", p1, width = 7, height = 6, dpi = 150)
 
 
 # Household type by age of reference person ----
@@ -85,7 +85,7 @@ p2 <- ggplot(ref, aes(age_grp, pct, fill = typhh)) +
   theme(legend.position = "bottom")
 
 print(p2)
-ggsave("plots/demo_woonbase_p2_typhh_leeftijd.png", p2, width = 9, height = 5.5, dpi = 150)
+ggsave("analysis/plots/demo_woonbase_p2_typhh_leeftijd.png", p2, width = 9, height = 5.5, dpi = 150)
 
 
 # Income vs WOZ heatmap ----
@@ -121,6 +121,6 @@ p3 <- ggplot(woz_inc, aes(x = WOZWaardeObjectBAG1Jan / 1000,
   theme(legend.position = "right")
 
 print(p3)
-ggsave("plots/demo_woonbase_p3_inkomen_woz.png", p3, width = 7, height = 5.5, dpi = 150)
+ggsave("analysis/plots/demo_woonbase_p3_inkomen_woz.png", p3, width = 7, height = 5.5, dpi = 150)
 
-cat("Saved 3 plots to plots/\n")
+cat("Saved 3 plots to analysis/plots/\n")

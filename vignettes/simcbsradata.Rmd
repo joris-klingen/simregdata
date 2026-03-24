@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ## What is simcbsradata?
 
-`simcbsradata` generates synthetic CBS microdata for 6 datasets (17 file types).
+`simcbsradata` generates synthetic CBS microdata for 15 datasets (27 file types).
 It provides a drop-in `read_sav()` that intercepts CBS file names
 and returns simulated data with the same structure as the real `.sav` files
 on the CBS remote-access environment.
@@ -26,8 +26,21 @@ using realistic data with:
 
 - Correct Dutch population sizes (calibrated to CBS StatLine)
 - haven-compatible labelled columns (same as `haven::read_sav()`)
-- Consistent cross-file identifiers (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER)
-- 6 datasets: Woonbase (9 files), GBA (3), RDW (2), SPOLIS (1), VEHTAB (1), Energieverbruik (1)
+- Consistent cross-file identifiers (RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER, RINPERSOONHKW)
+- Original CBS character codes recoverable via `cbs_code()`
+
+### Datasets
+
+| Category | Datasets |
+|----------|----------|
+| Housing & population | Woonbase (9 files), GBA (3) |
+| Vehicles | RDW (2) |
+| Employment & income | SPOLIS (1), INPATAB (1), INHATAB (1), SECMBUS (1) |
+| Wealth | VEHTAB (1) |
+| Education | HOOGSTEOPLTAB (1) |
+| Business | BETAB (1) |
+| Energy | Energieverbruik (2), Zonnestroominstallaties (1) |
+| Networks | Burennetwerktab (1), Colleganetwerktab (1), Familienetwerktab (1) |
 
 ## Quick start
 
@@ -42,12 +55,11 @@ sim_catalog()
 ### Initialise the spine
 
 The "spine" is a shared set of person, household, and object identifiers.
-Pre-building it ensures that joins between different Woonbase files always
-succeed.
+Pre-building it ensures that joins between different files always succeed.
 
 ```{r init}
 # Build a small spine for development (5,000 persons)
-woonbase_init(year = 2023, n = 5000, seed = 42)
+sim_init("woonbase", year = 2023, n = 5000, seed = 42)
 ```
 
 ### Read synthetic Woonbase files
@@ -85,6 +97,22 @@ attr(dt_pers$TYPHH1Jan, "labels")
 table(haven::as_factor(dt_pers$TYPHH1Jan))
 ```
 
+### CBS character codes
+
+CBS uses character codes internally (e.g. `"1"` = benzine, `"A"` = PHEV).
+The `cbs_code()` function recovers these from `haven::labelled` columns:
+
+```{r cbs-code}
+sim_init("rdw", year = 2023, n = 5000, seed = 42)
+rdw <- read_sav("RDWNPACT2023TABV1", n_max = 10)
+
+# Integer values (haven-labelled)
+as.integer(rdw$BRANDSTCODECORVRTG)
+
+# Original CBS character codes
+cbs_code(rdw$BRANDSTCODECORVRTG)
+```
+
 ### Cross-file joins
 
 Because the spine is shared, identifiers match across files:
@@ -97,6 +125,23 @@ hh   <- read_sav("WoonbasePopulatieHuishoudens2023V1",
 
 joined <- merge(pers, hh, by = "HUISHOUDNR1Jan")
 cat(sprintf("Join match rate: %.1f%%\n", nrow(joined) / nrow(pers) * 100))
+```
+
+## Linked datasets
+
+All datasets share the same population spine, so cross-dataset joins work
+out of the box:
+
+```{r other-datasets}
+# Auto-builds shared spine if needed
+sim_init("spolis", year = 2023)
+sim_init("inpatab", year = 2023)
+
+jobs   <- read_sav("SPOLISBUS2023V1", n_max = 5)
+income <- read_sav("INPATAB2023TABV1", n_max = 5)
+
+head(jobs[, c("RINPERSOON", "SVLOON", "SCONTRACTSOORT")])
+head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 ```
 
 ## Woonbase file types (9 files)
@@ -113,18 +158,39 @@ cat(sprintf("Join match rate: %.1f%%\n", nrow(joined) / nrow(pers) * 100))
 | ek_hh_welvaart | WOONBASEEKHuishoudensWV | household | Income and wealth (Extra Kenmerken) |
 | ek_obj_panden | ExtraKenmerkenPanden | object | Building characteristics (Extra Kenmerken) |
 
-## Other datasets
+## Bulk export with sim_population()
 
-All datasets share the same population spine, so cross-dataset joins work
-out of the box:
+`sim_population()` generates a fractional sample of all (or selected) datasets
+and writes parquet files in CBS VM-style folder layout:
 
-```{r other-datasets}
-# Auto-builds shared spine if needed
-sim_init("rdw", year = 2023, n = 5000, seed = 42)
-sim_init("spolis", year = 2023)
+```r
+# Export woonbase + rdw for 2019-2023 at 1%
+sim_population("output/sim_data",
+               datasets = c("woonbase", "rdw"),
+               years = 2019:2023)
 
-rdw  <- read_sav("RDWNPACT2023TABV1", n_max = 5)
-head(rdw[, c("RINPERSOON", "RINKENTEKEN", "BRANDSTCODECORVRTG")])
+# Export everything (excluding networks by default)
+sim_population("output/sim_data", fraction = 0.01, years = 2023)
+
+# Then use the exported files directly
+sim_set_data_root("output/sim_data")
+dt <- read_sav("WoonbasePopulatiePersonen2023V1")
+```
+
+## Custom datasets
+
+Define your own datasets with a simple YAML file:
+
+```r
+# Create a template
+sim_create_custom("my_survey.yaml")
+
+# Edit the YAML, then register it
+sim_register("my_survey.yaml")
+
+# Use it like any built-in dataset
+sim_init("my_survey", year = 2023, n = 100000)
+dt <- read_sav("my_survey2023V1")
 ```
 
 ## Refreshing CBS parameters
