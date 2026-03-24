@@ -322,6 +322,8 @@
   }
 
   # Build result data.table column by column
+  # Copy base_tbl so we can progressively add resolved columns (for stable_per)
+  base_tbl <- data.table::copy(base_tbl)
   n_cols <- length(spec$columns) * 2L  # upper bound (suffixes expand)
   result_cols <- vector("list", n_cols)
   result_names <- character(n_cols)
@@ -347,6 +349,7 @@
         idx <- idx + 1L
         result_cols[[idx]] <- val
         result_names[[idx]] <- cs2$name
+        data.table::set(base_tbl, j = cs2$name, value = val)
       }
     } else if (!is.null(cs[["suffixes_custom"]])) {
       for (sc in cs[["suffixes_custom"]]) {
@@ -366,6 +369,7 @@
         idx <- idx + 1L
         result_cols[[idx]] <- val
         result_names[[idx]] <- cs2$name
+        data.table::set(base_tbl, j = cs2$name, value = val)
       }
     } else {
       # Skip if not selected
@@ -385,6 +389,8 @@
       idx <- idx + 1L
       result_cols[[idx]] <- val
       result_names[[idx]] <- cs$name
+      if (length(val) == nrow(base_tbl))
+        data.table::set(base_tbl, j = cs$name, value = val)
     }
   }
 

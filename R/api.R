@@ -580,7 +580,9 @@ read_sav <- function(file,
   dt <- .assemble_generic(dataset_id, file_key, spine, col_q = col_q)
 
   # Post-processing: income-conditional EV share for RDW kentekens
-  if (identical(dataset_id, "rdw") && "BRANDSTCODECORVRTG" %in% names(dt) &&
+  # EV-income adjustment disabled: fuel type is now deterministic per RINKENTEKEN
+  # via stable_per in the column spec. Re-randomizing would break stability.
+  if (FALSE && identical(dataset_id, "rdw") && "BRANDSTCODECORVRTG" %in% names(dt) &&
       "RINPERSOON" %in% names(dt)) {
     dt <- .adjust_ev_by_income(dt, .sim_cache$spine)
   }
