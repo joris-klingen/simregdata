@@ -921,11 +921,12 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
     .write_sim_meta(output_dir, meta)
   }
 
+  n_written <- length(files_written)
   n_skipped <- length(files_skipped)
   skip_msg <- if (n_skipped > 0L) sprintf(" (%d skipped)", n_skipped) else ""
   message(sprintf("\nExported %d parquet files to %s%s",
-                  length(files_written), output_dir, skip_msg))
-  invisible(output_dir)
+                  n_written, output_dir, skip_msg))
+  invisible(list(dir = output_dir, written = n_written, skipped = n_skipped))
 }
 
 
@@ -1114,11 +1115,17 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
         cat(sprintf("  %s ...", ds_folders[i]))
         flush.console()
       }
-      suppressMessages(
+      res <- suppressMessages(
         sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
                    seed = seed, col_select = col_select,
                    force_resim = force_resim))
-      if (verbose) cat(" done\n")
+      if (verbose) {
+        if (res$written == 0L && res$skipped > 0L) {
+          cat(" skipped\n")
+        } else {
+          cat(" done\n")
+        }
+      }
     }
   }
 
