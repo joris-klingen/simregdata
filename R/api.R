@@ -1090,6 +1090,37 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
   }
   n_cached <- n_total_files - n_new_files
 
+  # Warn about files with more columns simulated than requested
+  extra_col_warnings <- character()
+  if (!is.null(col_select) && length(meta) > 0L) {
+    for (ds_id in ds_ids) {
+      ds <- .sim_cache$datasets[[ds_id]]
+      for (fkey in names(ds$files)) {
+        fi <- ds$files[[fkey]]
+        cbs_name <- fi$cbs_name
+        if (!.file_requested(cbs_name, fkey, col_select)) next
+        fc <- col_select[[cbs_name]] %||%
+              col_select[[toupper(cbs_name)]] %||%
+              col_select[[tolower(cbs_name)]] %||%
+              col_select[[fkey]]
+        if (is.null(fc)) next
+        # Check against first available year in meta
+        entry <- meta[[.meta_key(cbs_name, years[1L])]]
+        if (is.null(entry)) next
+        meta_cols <- unlist(entry$columns)
+        extra <- setdiff(meta_cols, fc)
+        # Exclude key columns from the warning (they're always added)
+        key_cols <- unlist(fi$key_columns)
+        extra <- setdiff(extra, key_cols)
+        if (length(extra) > 0L) {
+          extra_col_warnings <- c(extra_col_warnings,
+            sprintf("  %s: %d extra cols (%s)",
+                    cbs_name, length(extra), paste(extra, collapse = ", ")))
+        }
+      }
+    }
+  }
+
   # Always prompt in interactive mode
   if (interactive()) {
     cat(sprintf(paste0(
@@ -1108,6 +1139,11 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
         cat(sprintf("  New/changed: %s\n",
                     paste(unique(new_file_names), collapse = ", ")))
       }
+    }
+    if (length(extra_col_warnings) > 0L) {
+      cat("  Note: some cached files have more columns than requested:\n")
+      cat(paste(extra_col_warnings, collapse = "\n"), "\n")
+      cat("  Use force_resim = TRUE to regenerate with only requested columns.\n")
     }
     if (n_new_files == 0L) {
       cat("  All files already simulated, nothing to do.\n")
