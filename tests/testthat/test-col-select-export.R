@@ -123,6 +123,69 @@ test_that("sim_export col_select: unlisted files are skipped", {
 })
 
 
+test_that("sim_export skips already-simulated files via .sim_meta.yaml", {
+  skip_if_not_installed("arrow")
+
+  tmp <- tempdir()
+  out <- file.path(tmp, "meta_skip_test")
+  unlink(out, recursive = TRUE)
+
+  sim_reset()
+
+  # First export: generates the file and writes meta
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  pq_path <- file.path(out, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet")
+  expect_true(file.exists(pq_path))
+  mtime1 <- file.mtime(pq_path)
+
+  # Meta file should exist
+  expect_true(file.exists(file.path(out, ".sim_meta.yaml")))
+
+  # Second export with same col_select: should skip (file not rewritten)
+  Sys.sleep(1)
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  mtime2 <- file.mtime(pq_path)
+  expect_equal(mtime1, mtime2)
+
+  # Third export with additional column: should regenerate
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG", "VRTGSOORT"))
+  )
+  pq <- arrow::read_parquet(pq_path)
+  expect_true("VRTGSOORT" %in% names(pq))
+
+  # Fourth export with force_resim: should regenerate even if same
+  # (use a fresh directory to avoid Windows file locks from arrow)
+  out2 <- file.path(tmp, "meta_force_test")
+  unlink(out2, recursive = TRUE)
+  sim_reset()
+  sim_export(
+    output_dir = out2, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  pq_path2 <- file.path(out2, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet")
+  Sys.sleep(1)
+  mtime_pre <- file.mtime(pq_path2)
+  sim_export(
+    output_dir = out2, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG")),
+    force_resim = TRUE
+  )
+  mtime_post <- file.mtime(pq_path2)
+  expect_true(mtime_post > mtime_pre)
+
+  unlink(out, recursive = TRUE)
+  unlink(out2, recursive = TRUE)
+})
+
+
 test_that("sim_scan_columns extracts columns from R scripts", {
   # Create a temp script with read_sav calls
   tmp_script <- tempfile(fileext = ".R")

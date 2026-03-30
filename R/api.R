@@ -719,6 +719,55 @@ read_sav <- function(file,
   unique(ds_ids)
 }
 
+# Simulation metadata helpers ----
+
+.SIM_META_FILE <- ".sim_meta.yaml"
+
+.read_sim_meta <- function(output_dir) {
+  path <- file.path(output_dir, .SIM_META_FILE)
+  if (!file.exists(path)) return(list())
+  yaml::read_yaml(path)
+}
+
+.write_sim_meta <- function(output_dir, meta) {
+  path <- file.path(output_dir, .SIM_META_FILE)
+  yaml::write_yaml(meta, path)
+}
+
+# Build a meta key for a file+year combination (e.g. "RDWNPACT/2023")
+.meta_key <- function(cbs_name, year) {
+  paste0(cbs_name, "/", year)
+}
+
+# Check whether a file needs (re-)simulation.
+# Returns TRUE if: no meta entry exists, columns changed, n changed, or seed changed.
+# When columns is NULL (all columns requested), always re-simulate unless
+# the meta entry was itself a full export (n and seed match and entry exists).
+.file_needs_sim <- function(meta, cbs_name, year, columns, n, seed) {
+  key <- .meta_key(cbs_name, year)
+  entry <- meta[[key]]
+  if (is.null(entry)) return(TRUE)
+  if (entry$n != n || entry$seed != seed) return(TRUE)
+  # NULL columns = all columns requested; skip only if entry is a full export
+  if (is.null(columns)) return(!isTRUE(entry$full))
+  # Check if all requested columns are already present
+  !all(columns %in% unlist(entry$columns))
+}
+
+# Record a file in the meta after successful export.
+# full = TRUE when col_select was NULL for this file (all columns exported).
+.meta_record <- function(meta, cbs_name, year, columns, n, seed, full = FALSE) {
+  key <- .meta_key(cbs_name, year)
+  meta[[key]] <- list(
+    columns   = as.list(sort(columns)),
+    n         = n,
+    seed      = seed,
+    full      = full,
+    timestamp = format(Sys.time(), "%Y-%m-%dT%H:%M:%S")
+  )
+  meta
+}
+
 # Check whether a file (identified by CBS name or file key) is requested
 # in a col_select list.  Returns TRUE when col_select is NULL (export all)
 # or when any variant of the name appears as a key.
@@ -749,10 +798,15 @@ read_sav <- function(file,
 #'   columns (defined in each manifest's `key_columns`) are always included.
 #'   Files not listed are skipped entirely.  Default `NULL` exports all
 #'   files with all columns.
+#' @param force_resim  Logical; if `TRUE`, regenerate all files regardless
+#'   of what was previously simulated.  Default `FALSE` skips files whose
+#'   columns, `n`, and `seed` already match the `.sim_meta.yaml` in
+#'   `output_dir`.
 #' @return Invisibly, `output_dir`.
 #' @export
 sim_export <- function(output_dir, dataset = NULL, year = 2023L,
-                       n = NULL, seed = 42L, col_select = NULL) {
+                       n = NULL, seed = 42L, col_select = NULL,
+                       force_resim = FALSE) {
   if (!requireNamespace("arrow", quietly = TRUE))
     stop("Package 'arrow' is required to write parquet files. ",
          "Install it with: install.packages('arrow')")
@@ -760,27 +814,17 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
   .load_dataset_registry()
   ds_ids <- if (is.null(dataset)) names(.sim_cache$datasets) else dataset
 
-  # Ensure shared spine is built first
-  if (is.null(.sim_cache$spine)) {
-    sim_init("woonbase", year = year, n = n, seed = seed)
-  }
-
-  # Initialise all requested datasets
-  for (ds_id in ds_ids) {
-    sim_init(ds_id, year = year, n = n, seed = seed)
-  }
-
   output_dir <- normalizePath(output_dir, mustWork = FALSE)
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  meta <- if (force_resim) list() else .read_sim_meta(output_dir)
+
   files_written <- character()
+  files_skipped <- character()
+  spine_built <- FALSE
 
   for (ds_id in ds_ids) {
     ds <- .sim_cache$datasets[[ds_id]]
     builder <- ds$spine_builder
-    spine <- if (identical(builder, "woonbase")) {
-      .sim_cache$spine
-    } else {
-      .sim_cache[[paste0("spine_", ds_id)]]
-    }
 
     for (fkey in names(ds$files)) {
       fi <- ds$files[[fkey]]
@@ -814,6 +858,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 
       # Resolve col_select for this file (match by CBS name or file key)
       file_col_q <- NULL
+      file_cols <- NULL
       if (!is.null(col_select)) {
         file_cols <- col_select[[cbs_name]] %||%
                      col_select[[toupper(cbs_name)]] %||%
@@ -829,6 +874,29 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
         }
       }
 
+      # Check meta: skip if this file already has the requested columns
+      if (!.file_needs_sim(meta, cbs_name, year, file_cols, n, seed)) {
+        files_skipped <- c(files_skipped, out_path)
+        message(sprintf("  %s  (skipped — already simulated)", out_path))
+        next
+      }
+
+      # Build spine lazily (only when at least one file needs generation)
+      if (!spine_built) {
+        if (is.null(.sim_cache$spine)) {
+          sim_init("woonbase", year = year, n = n, seed = seed)
+        }
+        for (init_id in ds_ids) {
+          sim_init(init_id, year = year, n = n, seed = seed)
+        }
+        spine_built <- TRUE
+      }
+      spine <- if (identical(builder, "woonbase")) {
+        .sim_cache$spine
+      } else {
+        .sim_cache[[paste0("spine_", ds_id)]]
+      }
+
       # Assemble the data.table (with optional column subset)
       dt <- .assemble_generic(ds_id, fkey, spine, col_q = file_col_q)
       tbl <- tibble::as_tibble(dt)
@@ -836,14 +904,27 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       # Write parquet
       arrow::write_parquet(tbl, out_path)
       files_written <- c(files_written, out_path)
+
+      # Record in meta (use actual columns from assembled result)
+      is_full <- is.null(file_cols)
+      meta <- .meta_record(meta, cbs_name, year, names(tbl), n, seed,
+                           full = is_full)
+
       message(sprintf("  %s  (%s rows x %s cols)",
                       out_path, format(nrow(tbl), big.mark = ","),
                       ncol(tbl)))
     }
   }
 
-  message(sprintf("\nExported %d parquet files to %s", length(files_written),
-                  output_dir))
+  # Persist meta to disk
+  if (length(files_written) > 0L) {
+    .write_sim_meta(output_dir, meta)
+  }
+
+  n_skipped <- length(files_skipped)
+  skip_msg <- if (n_skipped > 0L) sprintf(" (%d skipped)", n_skipped) else ""
+  message(sprintf("\nExported %d parquet files to %s%s",
+                  length(files_written), output_dir, skip_msg))
   invisible(output_dir)
 }
 
@@ -871,13 +952,17 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
 #'   CBS file names (e.g. `"WoonbasePopulatiePersonen"`, `"RDWNPACT"`) and
 #'   values are character vectors of column names.  Key columns (RINPERSOON
 #'   etc.) are always included automatically.
+#' @param force_resim  Logical; if `TRUE`, wipe the output directory and
+#'   regenerate everything from scratch.  Default `FALSE` skips files that
+#'   are already present in `.sim_meta.yaml` with matching columns, `n`,
+#'   and `seed`.
 #' @param verbose     Print progress summary (default `TRUE`).
 #' @return Invisibly, `output_dir`.
 #' @export
 sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
                        seed = 42L, include_network = FALSE,
                        datasets = NULL, col_select = NULL,
-                       verbose = TRUE) {
+                       force_resim = FALSE, verbose = TRUE) {
   stopifnot(is.numeric(fraction), length(fraction) == 1L,
             fraction > 0, fraction <= 1)
   years <- as.integer(years)
@@ -988,6 +1073,13 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
   t0 <- proc.time()
 
+  # Wipe output directory on force_resim
+  if (force_resim && dir.exists(output_dir)) {
+    unlink(output_dir, recursive = TRUE)
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    if (verbose) cat("Wiped output directory (force_resim)\n")
+  }
+
   # Collect folder names per dataset for display (only requested files)
   ds_folders <- vapply(ds_ids, function(ds_id) {
     ds <- .sim_cache$datasets[[ds_id]]
@@ -1024,7 +1116,8 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
       }
       suppressMessages(
         sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
-                   seed = seed, col_select = col_select))
+                   seed = seed, col_select = col_select,
+                   force_resim = force_resim))
       if (verbose) cat(" done\n")
     }
   }
