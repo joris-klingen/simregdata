@@ -681,6 +681,44 @@ read_sav <- function(file,
 
 # Parquet export ----
 
+# Resolve col_select keys to dataset IDs via the registry.
+# Keys can be CBS names ("RDWNPACT"), their case variants, or file keys
+# ("kentekens").  Returns a unique character vector of dataset IDs.
+.datasets_from_col_select <- function(col_select) {
+  .load_dataset_registry()
+  registry <- .sim_cache$registry
+  all_datasets <- .sim_cache$datasets
+
+  ds_ids <- character()
+  unmatched <- character()
+
+  for (key in names(col_select)) {
+    # Try registry lookup (cbs_name)
+    info <- registry[[key]] %||% registry[[toupper(key)]] %||%
+            registry[[tolower(key)]]
+    if (!is.null(info)) {
+      ds_ids <- c(ds_ids, info$dataset_id)
+      next
+    }
+    # Try as file key across all datasets
+    found <- FALSE
+    for (ds_id in names(all_datasets)) {
+      if (key %in% names(all_datasets[[ds_id]]$files)) {
+        ds_ids <- c(ds_ids, ds_id)
+        found <- TRUE
+        break
+      }
+    }
+    if (!found) unmatched <- c(unmatched, key)
+  }
+
+  if (length(unmatched) > 0L) {
+    stop("col_select key(s) not found in any dataset: ",
+         paste(unmatched, collapse = ", "))
+  }
+  unique(ds_ids)
+}
+
 # Check whether a file (identified by CBS name or file key) is requested
 # in a col_select list.  Returns TRUE when col_select is NULL (export all)
 # or when any variant of the name appears as a key.
@@ -855,7 +893,14 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
   # Determine which datasets to export
   .load_dataset_registry()
-  if (!is.null(datasets)) {
+  if (!is.null(datasets) && !is.null(col_select)) {
+    stop("Specify either 'datasets' or 'col_select', not both. ",
+         "When col_select is provided, datasets are inferred automatically.")
+  }
+  if (!is.null(col_select)) {
+    # Infer datasets from col_select keys
+    ds_ids <- .datasets_from_col_select(col_select)
+  } else if (!is.null(datasets)) {
     unknown <- setdiff(datasets, names(.sim_cache$datasets))
     if (length(unknown) > 0L) {
       stop("Unknown dataset(s): ", paste(unknown, collapse = ", "),

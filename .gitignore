@@ -30,4 +30,4 @@ docs/extracted/
 vignettes/*.html
 
 # Test projects (user experience sandboxes)
-test_ux_ebrb/
+ux_evrb/
