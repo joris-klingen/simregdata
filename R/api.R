@@ -1165,50 +1165,69 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
     if (verbose) cat("Wiped output directory (force_resim)\n")
   }
 
-  # Collect folder names per dataset for display (only requested files)
-  ds_folders <- vapply(ds_ids, function(ds_id) {
-    ds <- .sim_cache$datasets[[ds_id]]
-    folders <- character()
-    for (fkey in names(ds$files)) {
-      fi <- ds$files[[fkey]]
-      if (!.file_requested(fi$cbs_name, fkey, col_select)) next
-      up <- toupper(fi$cbs_name)
-      folders <- c(folders,
-        if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) paste0(up, "TAB") else up)
-    }
-    paste(folders, collapse = ", ")
-  }, character(1L))
-
   for (yr in years) {
     yr_idx <- which(years == yr)
     if (verbose) {
       cat(sprintf("\n[%d/%d] Year %d\n", yr_idx, n_years, yr))
-      flush.console()
+      flush.console(); Sys.sleep(0)
     }
 
     suppressMessages(sim_reset())
+    .load_dataset_registry()
 
     # Pre-init spolis so SBEID is available for collega (if included)
     if ("spolis" %in% ds_ids && "colleganetwerktab" %in% ds_ids) {
       suppressMessages(sim_init("spolis", year = yr, n = n, seed = seed))
     }
 
-    # Export all datasets for this year (suppress internal messages)
+    # Export datasets for this year, showing per-file progress
     for (i in seq_along(ds_ids)) {
+      ds_id <- ds_ids[i]
+      # Print per-file lines with pre-computed skip/new status
+      any_new <- FALSE
       if (verbose) {
-        cat(sprintf("  %s ...", ds_folders[i]))
-        flush.console()
-      }
-      res <- suppressMessages(
-        sim_export(output_dir, dataset = ds_ids[i], year = yr, n = n,
-                   seed = seed, col_select = col_select,
-                   force_resim = force_resim))
-      if (verbose) {
-        if (res$written == 0L && res$skipped > 0L) {
-          cat(" skipped\n")
-        } else {
-          cat(" done\n")
+        ds <- .sim_cache$datasets[[ds_id]]
+        for (fkey in names(ds$files)) {
+          fi <- ds$files[[fkey]]
+          cbs_name <- fi$cbs_name
+          if (!.file_requested(cbs_name, fkey, col_select)) next
+          fc <- if (!is.null(col_select)) {
+            col_select[[cbs_name]] %||%
+              col_select[[toupper(cbs_name)]] %||%
+              col_select[[tolower(cbs_name)]] %||%
+              col_select[[fkey]]
+          }
+          will_skip <- !.file_needs_sim(meta, cbs_name, yr, fc, n, seed)
+          up <- toupper(cbs_name)
+          folder <- if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) {
+            paste0(up, "TAB")
+          } else up
+          preview <- if (!is.null(fc) && length(fc) > 0L) {
+            if (length(fc) > 4L) {
+              paste0(paste(fc[1:4], collapse = ", "), ", ...")
+            } else {
+              paste(fc, collapse = ", ")
+            }
+          } else {
+            "all columns"
+          }
+          if (will_skip) {
+            cat(sprintf("  %s [%s] skipped\n", folder, preview))
+          } else {
+            any_new <- TRUE
+            cat(sprintf("  %s [%s] ...\n", folder, preview))
+            flush.console(); Sys.sleep(0)
+          }
         }
+      }
+      if (any_new || !verbose) {
+        suppressMessages(
+          sim_export(output_dir, dataset = ds_id, year = yr, n = n,
+                     seed = seed, col_select = col_select,
+                     force_resim = force_resim))
+        # Re-read meta after export so subsequent checks see updates
+        meta <- .read_sim_meta(output_dir)
+        if (verbose) cat(sprintf("    %s done\n", ds_id))
       }
     }
   }
