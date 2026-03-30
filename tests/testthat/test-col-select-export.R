@@ -31,9 +31,10 @@ test_that("sim_export with col_select produces subset of columns", {
   expect_true("BRANDSTCODECORVRTG" %in% names(pq))
 
   # Should NOT have other columns that the full file would have
-  full_cols <- ncol(arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet")))
   expect_lt(ncol(pq), 13L)  # full RDWNPACT has 13 columns
+
+  # VERKEERSPRESTATIE was not in col_select -> should NOT be exported
+  expect_false(dir.exists(file.path(out, "VERKEERSPRESTATIETAB")))
 
   unlink(out, recursive = TRUE)
 })
@@ -93,7 +94,7 @@ test_that("sim_export col_select with file key (lowercase) works", {
 })
 
 
-test_that("sim_export col_select: unlisted files get all columns", {
+test_that("sim_export col_select: unlisted files are skipped", {
   skip_if_not_installed("arrow")
 
   tmp <- tempdir()
@@ -112,10 +113,11 @@ test_that("sim_export col_select: unlisted files get all columns", {
     )
   )
 
-  # VERKEERSPRESTATIE was not in col_select -> should have all columns
-  vp <- arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet"))
-  expect_equal(ncol(vp), 6L)
+  # VERKEERSPRESTATIE was not in col_select -> should NOT be exported
+  expect_false(dir.exists(file.path(out, "VERKEERSPRESTATIETAB")))
+
+  # Only RDWNPACT should exist
+  expect_true(dir.exists(file.path(out, "RDWNPACTTAB")))
 
   unlink(out, recursive = TRUE)
 })

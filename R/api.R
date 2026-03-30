@@ -681,6 +681,17 @@ read_sav <- function(file,
 
 # Parquet export ----
 
+# Check whether a file (identified by CBS name or file key) is requested
+# in a col_select list.  Returns TRUE when col_select is NULL (export all)
+# or when any variant of the name appears as a key.
+.file_requested <- function(cbs_name, fkey, col_select) {
+  if (is.null(col_select)) return(TRUE)
+  !is.null(col_select[[cbs_name]]          %||%
+           col_select[[toupper(cbs_name)]]  %||%
+           col_select[[tolower(cbs_name)]]  %||%
+           col_select[[fkey]])
+}
+
 #' Export simulated datasets to parquet files
 #'
 #' Generates synthetic data for one or all registered datasets and writes
@@ -698,7 +709,8 @@ read_sav <- function(file,
 #'   which columns to include per CBS file.  Keys are CBS file names (e.g.
 #'   `"SPOLISBUS"`) or file keys (e.g. `"spolisbus"`).  Identity/join key
 #'   columns (defined in each manifest's `key_columns`) are always included.
-#'   Files not listed get all columns.  Default `NULL` exports all columns.
+#'   Files not listed are skipped entirely.  Default `NULL` exports all
+#'   files with all columns.
 #' @return Invisibly, `output_dir`.
 #' @export
 sim_export <- function(output_dir, dataset = NULL, year = 2023L,
@@ -735,6 +747,9 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
     for (fkey in names(ds$files)) {
       fi <- ds$files[[fkey]]
       cbs_name <- fi$cbs_name
+
+      # Skip files not requested by col_select
+      if (!.file_requested(cbs_name, fkey, col_select)) next
 
       # Build filename: TAB suffix for tab_suffix files
       tab <- isTRUE(fi$tab_suffix)
@@ -865,6 +880,8 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
     for (fkey in names(ds$files)) {
       fi <- ds$files[[fkey]]
       cbs_name <- fi$cbs_name
+      # Skip files not requested by col_select
+      if (!.file_requested(cbs_name, fkey, col_select)) next
       # Count columns from spec
       spec <- .load_column_spec(ds_id, fkey)
       n_file_cols <- 0L
@@ -926,13 +943,17 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
 
   t0 <- proc.time()
 
-  # Collect folder names per dataset for display
+  # Collect folder names per dataset for display (only requested files)
   ds_folders <- vapply(ds_ids, function(ds_id) {
     ds <- .sim_cache$datasets[[ds_id]]
-    folders <- vapply(ds$files, function(fi) {
+    folders <- character()
+    for (fkey in names(ds$files)) {
+      fi <- ds$files[[fkey]]
+      if (!.file_requested(fi$cbs_name, fkey, col_select)) next
       up <- toupper(fi$cbs_name)
-      if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) paste0(up, "TAB") else up
-    }, character(1L))
+      folders <- c(folders,
+        if (isTRUE(fi$tab_suffix) && !grepl("TAB$", up)) paste0(up, "TAB") else up)
+    }
     paste(folders, collapse = ", ")
   }, character(1L))
 
