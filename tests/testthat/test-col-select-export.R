@@ -31,9 +31,10 @@ test_that("sim_export with col_select produces subset of columns", {
   expect_true("BRANDSTCODECORVRTG" %in% names(pq))
 
   # Should NOT have other columns that the full file would have
-  full_cols <- ncol(arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet")))
   expect_lt(ncol(pq), 13L)  # full RDWNPACT has 13 columns
+
+  # VERKEERSPRESTATIE was not in col_select -> should NOT be exported
+  expect_false(dir.exists(file.path(out, "VERKEERSPRESTATIETAB")))
 
   unlink(out, recursive = TRUE)
 })
@@ -93,7 +94,7 @@ test_that("sim_export col_select with file key (lowercase) works", {
 })
 
 
-test_that("sim_export col_select: unlisted files get all columns", {
+test_that("sim_export col_select: unlisted files are skipped", {
   skip_if_not_installed("arrow")
 
   tmp <- tempdir()
@@ -112,12 +113,76 @@ test_that("sim_export col_select: unlisted files get all columns", {
     )
   )
 
-  # VERKEERSPRESTATIE was not in col_select -> should have all columns
-  vp <- arrow::read_parquet(
-    file.path(out, "VERKEERSPRESTATIETAB", "VERKEERSPRESTATIE2023TABV1.parquet"))
-  expect_equal(ncol(vp), 6L)
+  # VERKEERSPRESTATIE was not in col_select -> should NOT be exported
+  expect_false(dir.exists(file.path(out, "VERKEERSPRESTATIETAB")))
+
+  # Only RDWNPACT should exist
+  expect_true(dir.exists(file.path(out, "RDWNPACTTAB")))
 
   unlink(out, recursive = TRUE)
+})
+
+
+test_that("sim_export skips already-simulated files via .sim_meta.yaml", {
+  skip_if_not_installed("arrow")
+
+  tmp <- tempdir()
+  out <- file.path(tmp, "meta_skip_test")
+  unlink(out, recursive = TRUE)
+
+  sim_reset()
+
+  # First export: generates the file and writes meta
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  pq_path <- file.path(out, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet")
+  expect_true(file.exists(pq_path))
+  mtime1 <- file.mtime(pq_path)
+
+  # Meta file should exist
+  expect_true(file.exists(file.path(out, ".sim_meta.yaml")))
+
+  # Second export with same col_select: should skip (file not rewritten)
+  Sys.sleep(1)
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  mtime2 <- file.mtime(pq_path)
+  expect_equal(mtime1, mtime2)
+
+  # Third export with additional column: should regenerate
+  sim_export(
+    output_dir = out, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG", "VRTGSOORT"))
+  )
+  pq <- arrow::read_parquet(pq_path)
+  expect_true("VRTGSOORT" %in% names(pq))
+
+  # Fourth export with force_resim: should regenerate even if same
+  # (use a fresh directory to avoid Windows file locks from arrow)
+  out2 <- file.path(tmp, "meta_force_test")
+  unlink(out2, recursive = TRUE)
+  sim_reset()
+  sim_export(
+    output_dir = out2, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG"))
+  )
+  pq_path2 <- file.path(out2, "RDWNPACTTAB", "RDWNPACT2023TABV1.parquet")
+  Sys.sleep(1)
+  mtime_pre <- file.mtime(pq_path2)
+  sim_export(
+    output_dir = out2, dataset = "rdw", year = 2023L, n = 100L, seed = 42L,
+    col_select = list(RDWNPACT = c("BRANDSTCODECORVRTG")),
+    force_resim = TRUE
+  )
+  mtime_post <- file.mtime(pq_path2)
+  expect_true(mtime_post > mtime_pre)
+
+  unlink(out, recursive = TRUE)
+  unlink(out2, recursive = TRUE)
 })
 
 
