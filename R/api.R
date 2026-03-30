@@ -1054,6 +1054,41 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
     sprintf("%.0f sec", est_sec)
   }
 
+  # Check meta to count how many files need (re-)simulation ----
+  output_dir <- normalizePath(output_dir, mustWork = FALSE)
+  meta <- if (force_resim) list() else .read_sim_meta(output_dir)
+  n_total_files <- 0L
+  n_new_files   <- 0L
+  new_file_names <- character()
+  for (yr in years) {
+    for (ds_id in ds_ids) {
+      ds <- .sim_cache$datasets[[ds_id]]
+      for (fkey in names(ds$files)) {
+        fi <- ds$files[[fkey]]
+        cbs_name <- fi$cbs_name
+        if (!.file_requested(cbs_name, fkey, col_select)) next
+        n_total_files <- n_total_files + 1L
+        # Resolve file_cols the same way sim_export does
+        fc <- NULL
+        if (!is.null(col_select)) {
+          fc <- col_select[[cbs_name]] %||%
+                col_select[[toupper(cbs_name)]] %||%
+                col_select[[tolower(cbs_name)]] %||%
+                col_select[[fkey]]
+          if (!is.null(fc)) {
+            key_cols <- fi$key_columns
+            if (!is.null(key_cols)) fc <- unique(c(unlist(key_cols), fc))
+          }
+        }
+        if (.file_needs_sim(meta, cbs_name, yr, fc, n, seed)) {
+          n_new_files <- n_new_files + 1L
+          new_file_names <- c(new_file_names, cbs_name)
+        }
+      }
+    }
+  }
+  n_cached <- n_total_files - n_new_files
+
   # Always prompt in interactive mode
   if (interactive()) {
     cat(sprintf(paste0(
@@ -1065,6 +1100,18 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
       fraction * 100, format(n, big.mark = ","),
       n_years, if (n_years > 1L) "s" else "",
       n_datasets, size_str, time_str))
+    if (n_cached > 0L) {
+      cat(sprintf("  Cached: %d/%d files (only %d to simulate)\n",
+                  n_cached, n_total_files, n_new_files))
+      if (n_new_files > 0L) {
+        cat(sprintf("  New/changed: %s\n",
+                    paste(unique(new_file_names), collapse = ", ")))
+      }
+    }
+    if (n_new_files == 0L) {
+      cat("  All files already simulated, nothing to do.\n")
+      return(invisible(output_dir))
+    }
     ans <- readline("Continue? (y/n) ")
     if (!tolower(trimws(ans)) %in% c("y", "yes")) {
       message("Aborted.")
