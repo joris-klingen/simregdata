@@ -859,23 +859,27 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       # Resolve col_select for this file (match by CBS name or file key)
       file_col_q <- NULL
       file_cols <- NULL
+      user_cols <- NULL
       if (!is.null(col_select)) {
-        file_cols <- col_select[[cbs_name]] %||%
+        user_cols <- col_select[[cbs_name]] %||%
                      col_select[[toupper(cbs_name)]] %||%
                      col_select[[tolower(cbs_name)]] %||%
                      col_select[[fkey]]
-        if (!is.null(file_cols)) {
+        if (!is.null(user_cols)) {
           # Always include key columns from manifest
           key_cols <- fi$key_columns
-          if (!is.null(key_cols)) {
-            file_cols <- unique(c(unlist(key_cols), file_cols))
+          file_cols <- if (!is.null(key_cols)) {
+            unique(c(unlist(key_cols), user_cols))
+          } else {
+            user_cols
           }
           file_col_q <- rlang::quo(tidyselect::all_of(file_cols))
         }
       }
 
-      # Check meta: skip if this file already has the requested columns
-      if (!.file_needs_sim(meta, cbs_name, year, file_cols, n, seed)) {
+      # Check meta against user-requested columns only (key_columns may have
+      # suffixes in the actual output, so comparing them causes false mismatches)
+      if (!.file_needs_sim(meta, cbs_name, year, user_cols, n, seed)) {
         files_skipped <- c(files_skipped, out_path)
         message(sprintf("  %s  (skipped — already simulated)", out_path))
         next
@@ -1068,17 +1072,14 @@ sim_population <- function(output_dir, fraction = 0.01, years = 2023L,
         cbs_name <- fi$cbs_name
         if (!.file_requested(cbs_name, fkey, col_select)) next
         n_total_files <- n_total_files + 1L
-        # Resolve file_cols the same way sim_export does
+        # Resolve user-requested columns (without key_columns, which may
+        # have suffixes in the actual output)
         fc <- NULL
         if (!is.null(col_select)) {
           fc <- col_select[[cbs_name]] %||%
                 col_select[[toupper(cbs_name)]] %||%
                 col_select[[tolower(cbs_name)]] %||%
                 col_select[[fkey]]
-          if (!is.null(fc)) {
-            key_cols <- fi$key_columns
-            if (!is.null(key_cols)) fc <- unique(c(unlist(key_cols), fc))
-          }
         }
         if (.file_needs_sim(meta, cbs_name, yr, fc, n, seed)) {
           n_new_files <- n_new_files + 1L
