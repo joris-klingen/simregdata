@@ -1,0 +1,65 @@
+# WOONBASEEKPERSONENOP — Extra Kenmerken Personen Opleiding
+# Person-level education characteristics (1Jan / 31Dec snapshots)
+# CBS name: WOONBASEEKPERSONENOP{YYYY}V{N}
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  # SOI2016 highest attained education level (deprecated from 2019V2+)
+  - name: "OPLNIVSOI2016AGG4HBMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    value: "----"
+
+  # SOI2016 highest followed education level (deprecated from 2019V2+)
+  - name: "OPLNIVSOI2016AGG4HGMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    value: "----"
+
+  # SOI2021 highest attained education level — 18 categories
+  - name: "OPLNIVSOI2021AGG4HBMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1110", "1111", "1112", "1210", "1211", "1212", "1213",
+               "1220", "1221", "1222", "2110", "2111", "2112",
+               "2120", "2121", "2130", "2131", "2132",
+               "3110", "3111", "3112", "3113",
+               "3210", "3211", "3212", "3213", "9999"]
+      probs:  [0.01, 0.03, 0.10, 0.01, 0.02, 0.06, 0.03,
+               0.01, 0.04, 0.03, 0.01, 0.04, 0.04,
+               0.01, 0.05, 0.01, 0.04, 0.03,
+               0.01, 0.02, 0.12, 0.04,
+               0.01, 0.03, 0.10, 0.03, 0.06]
+    codelist: OPLNIV_SOI2021_18CAT
+    label: Opleidingsniveau SOI2021 18 cat. hoogst behaald
+
+  # SOI2021 highest followed education level — 18 categories
+  - name: "OPLNIVSOI2021AGG4HGMETNIRWO{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_categorical:
+      values: ["1110", "1111", "1112", "1210", "1211", "1212", "1213",
+               "1220", "1221", "1222", "2110", "2111", "2112",
+               "2120", "2121", "2130", "2131", "2132",
+               "3110", "3111", "3112", "3113",
+               "3210", "3211", "3212", "3213", "9999"]
+      probs:  [0.01, 0.03, 0.08, 0.01, 0.02, 0.05, 0.03,
+               0.01, 0.04, 0.03, 0.01, 0.04, 0.04,
+               0.01, 0.05, 0.01, 0.04, 0.04,
+               0.01, 0.02, 0.13, 0.05,
+               0.01, 0.03, 0.10, 0.04, 0.06]
+    codelist: OPLNIV_SOI2021_18CAT
+    label: Opleidingsniveau SOI2021 18 cat. hoogst gevolgd
+
+  # Weight for education imputation
+  - name: "GEWICHTHOOGSTEOPL{sfx}"
+    suffixes: ["1Jan", "31Dec"]
+    random_numeric:
+      distribution: uniform
+      min: 0.5
+      max: 5.0
+      round: 6

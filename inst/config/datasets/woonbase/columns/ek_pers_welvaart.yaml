@@ -1,0 +1,66 @@
+# WoonbaseEKPersonenWV — Extra Kenmerken Personen Welvaart
+# Person-level income and wealth characteristics
+# CBS name: WoonbaseEKPersonenWV{YYYY}V{N}
+entity: person
+spine_table: pers
+
+columns:
+  - name: RINPERSOONS
+    source: spine.pers.RINPERSOONS
+
+  - name: RINPERSOON
+    source: spine.pers.RINPERSOON
+
+  # Inkomen t.o.v. armoedegrens (percentage)
+  - name: "ARMOEDE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 50
+      max: 500
+      round: 0
+
+  # Inkomen t.o.v. beleidsmatig minimum (percentage)
+  - name: "ARMSOC{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 50
+      max: 500
+      round: 0
+
+  # Belastbaar inkomen persoon
+  - name: "BELI{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 35000
+      sd: 25000
+      round: 0
+
+  # Populatie IIV (persoonsniveau)
+  - name: "POPIIV{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2"]
+      probs:  [0.90, 0.10]
+    codelist: POPIIV_PERS
+    label: Populatie IIV persoon
+
+  # Positie in huishouden t.o.v. hoofdkostwinner
+  - name: "POSHHK{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3", "4", "5", "6", "7"]
+      probs:  [0.20, 0.20, 0.15, 0.10, 0.15, 0.10, 0.10]
+    codelist: POSHHK
+    label: Positie t.o.v. hoofdkostwinner
+
+  # Sociaaleconomische categorie jaarbasis
+  - name: "SECJ{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["11", "12", "13", "14", "15", "21", "22", "23", "24", "25", "26", "31", "32"]
+      probs:  [0.35, 0.02, 0.05, 0.02, 0.01, 0.04, 0.03, 0.02, 0.06, 0.20, 0.08, 0.07, 0.05]
+    codelist: SECJ
+    label: Sociaaleconomische categorie jaarbasis

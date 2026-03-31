@@ -351,6 +351,219 @@ VERSCHILIIV:
     "Geen verschil": 0
     "Verschil": 1
 
+# --- Extra Kenmerken Personen Welvaart codelists ---
+
+POPIIV_PERS:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+  labels:
+    "Particulier HH met waarneming inkomen; geen studentenHH": 1
+    "Particulier studentenhuishouden met waarneming inkomen": 2
+
+POSHHK:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+  labels:
+    Hoofdkostwinner zonder partner: 1
+    Hoofdkostwinner met partner: 2
+    Gehuwde partner van de hoofdkostwinner: 3
+    Ongehuwde partner van de hoofdkostwinner: 4
+    Minderjarig kind van (partner van) hoofdkostwinner: 5
+    Meerderjarig kind van (partner van) hoofdkostwinner: 6
+    Overig huishoudenslid: 7
+
+SECJ:
+  c2i:
+    "-": ~
+    "11": 11
+    "12": 12
+    "13": 13
+    "14": 14
+    "15": 15
+    "21": 21
+    "22": 22
+    "23": 23
+    "24": 24
+    "25": 25
+    "26": 26
+    "31": 31
+    "32": 32
+  labels:
+    Werknemer: 11
+    Directeur-grootaandeelhouder (dga): 12
+    Zelfstandig ondernemer: 13
+    Overige zelfstandige: 14
+    Meewerkend gezinslid: 15
+    Ontvanger werkloosheidsuitkering: 21
+    Ontvanger bijstandsuitkering: 22
+    Ontvanger uitkering sociale voorziening overig: 23
+    Ontvanger uitkering ziekte/arbeidsongeschiktheid: 24
+    Ontvanger pensioenuitkering: 25
+    Nog niet schoolgaand/scholier/student met inkomen: 26
+    Nog niet schoolgaand/scholier/student zonder inkomen: 31
+    Overig zonder inkomen: 32
+
+# --- Extra Kenmerken Personen Opleiding codelists ---
+
+OPLNIV_SOI2021_18CAT:
+  c2i:
+    "----": ~
+    "1110": 1
+    "1111": 2
+    "1112": 3
+    "1210": 4
+    "1211": 5
+    "1212": 6
+    "1213": 7
+    "1220": 8
+    "1221": 9
+    "1222": 10
+    "2110": 11
+    "2111": 12
+    "2112": 13
+    "2120": 14
+    "2121": 15
+    "2130": 16
+    "2131": 17
+    "2132": 18
+    "3110": 19
+    "3111": 20
+    "3112": 21
+    "3113": 22
+    "3210": 23
+    "3211": 24
+    "3212": 25
+    "3213": 26
+    "9999": 27
+  labels:
+    Onbekend: ~
+    Basisonderwijs z.n.d.: 1
+    Basisonderwijs gr1-2: 2
+    Basisonderwijs gr3-8: 3
+    Vmbo-b/k, mbo1 z.n.d.: 4
+    Praktijkonderwijs: 5
+    Vmbo-b/k: 6
+    Mbo1: 7
+    Vmbo-g/t, havo-, vwo-onderbouw: 8
+    Vmbo-g/t: 9
+    Havo-, vwo-onderbouw: 10
+    Mbo2 en mbo3 z.n.d.: 11
+    Mbo2: 12
+    Mbo3: 13
+    Mbo4 z.n.d.: 14
+    Mbo4: 15
+    Havo, vwo z.n.d.: 16
+    Havo-bovenbouw: 17
+    Vwo-bovenbouw: 18
+    Hbo, wo-bachelor z.n.d.: 19
+    Hbo-associate degree: 20
+    Hbo-bachelor: 21
+    Wo-bachelor: 22
+    Hbo-, wo-master, doctor z.n.d.: 23
+    Hbo-master: 24
+    Wo-master: 25
+    Doctor: 26
+    Weet niet of onbekend: 27
+
+# --- Extra Kenmerken Huishoudens Woonlasten codelists ---
+
+CODEHUUR:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+    "6": 6
+    "7": 7
+  labels:
+    Volledige waarneming: 1
+    Kale huur waargenomen, servicekosten geindexeerd: 2
+    Kale huur waargenomen, servicekosten geschat: 3
+    Kale huur en servicekosten geindexeerd: 4
+    Kale huur geindexeerd, servicekosten geschat: 5
+    Kale huur en servicekosten beide geschat: 6
+    Kale huur en servicekosten onbekend: 7
+
+CODEMLB:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+    "5": 5
+  labels:
+    Lasten op basis van waargenomen verbruik: 1
+    Lasten op basis van geschat gasverbruik: 2
+    Lasten op basis van geschat stroomverbruik: 3
+    Lasten op basis van geschat gas- en stroomverbruik: 4
+    Lasten geschat vanwege collectieve verwarming: 5
+
+CODEBEZIT:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    Eigen woning: 1
+    Huurwoning van corporatie: 2
+    Huurwoning van private eigenaar: 3
+
+HUURKLASSE:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+    "4": 4
+  labels:
+    Huur boven liberalisatiegrens, geen huurtoeslag: 1
+    Huur boven liberalisatiegrens, wel huurtoeslag: 2
+    Huur op of onder liberalisatiegrens, geen huurtoeslag: 3
+    Huur op of onder liberalisatiegrens, wel huurtoeslag: 4
+
+# --- Extra Kenmerken Woonruimten Welvaart codelists ---
+
+AGIAHWONING:
+  c2i:
+    "-": ~
+    "1": 1
+    "2": 2
+    "3": 3
+  labels:
+    Geen extra huurverhoging: 1
+    Beperkte extra huurverhoging: 2
+    Maximale extra huurverhoging: 3
+
+POPIIVWONING:
+  c2i:
+    "-": ~
+    "10": 10
+    "11": 11
+    "20": 20
+    "21": 21
+    "22": 22
+    "70": 70
+  labels:
+    "1 particulier HH (geen student); inkomen bekend": 10
+    "Meer particuliere HH (geen student); inkomen bekend": 11
+    "1 particulier studentenHH; inkomen bekend": 20
+    "Uitsluitend studentenHH (>1); inkomen bekend": 21
+    "StudentenHH en niet-studentenHH; inkomen bekend": 22
+    "Meer HH; inkomen gedeeltelijk bekend": 70
+
 # --- Extra Kenmerken Panden codelists ---
 
 PANDFUNCTIE:

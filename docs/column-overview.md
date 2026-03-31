@@ -737,6 +737,134 @@ Overview of all simulated columns
 </details>
 
 <details>
+<summary><code>WoonbaseEKPersonenWV</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | spine-derived | NL |  |  |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `ARMOEDE1JAN, ARMOEDE31DEC` | random: uniform [50, 500] |  |  |  |
+| `ARMSOC1JAN, ARMSOC31DEC` | random: uniform [50, 500] |  |  |  |
+| `BELI1JAN, BELI31DEC` | random: normal (mean=35000, sd=25000) |  |  |  |
+| `POPIIV1JAN, POPIIV31DEC` | random: codelist: POPIIV_PERS |  |  | [POPIIV_PERS](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `POSHHK1JAN, POSHHK31DEC` | random: codelist: POSHHK |  |  | [POSHHK](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `SECJ1JAN, SECJ31DEC` | random: codelist: SECJ |  |  | [SECJ](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+
+</details>
+
+<details>
+<summary><code>WOONBASEEKPERSONENOP</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | spine-derived | NL |  |  |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `OPLNIVSOI2016AGG4HBMETNIRWO1Jan, OPLNIVSOI2016AGG4HBMETNIRWO31Dec` | value: ---- |  |  |  |
+| `OPLNIVSOI2016AGG4HGMETNIRWO1Jan, OPLNIVSOI2016AGG4HGMETNIRWO31Dec` | value: ---- |  |  |  |
+| `OPLNIVSOI2021AGG4HBMETNIRWO1Jan, OPLNIVSOI2021AGG4HBMETNIRWO31Dec` | random: codelist: OPLNIV_SOI2021_18CAT |  |  | [OPLNIV_SOI2021_18CAT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `OPLNIVSOI2021AGG4HGMETNIRWO1Jan, OPLNIVSOI2021AGG4HGMETNIRWO31Dec` | random: codelist: OPLNIV_SOI2021_18CAT |  |  | [OPLNIV_SOI2021_18CAT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `GEWICHTHOOGSTEOPL1Jan, GEWICHTHOOGSTEOPL31Dec` | random: uniform [0.5, 5] |  |  |  |
+
+</details>
+
+<details>
+<summary><code>WOONBASEEKHuishoudensWL</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `RINPERSOONS` | spine-derived | NL |  |  |
+| `RINPERSOON` | spine-derived | NL |  |  |
+| `MLTOTAAL1JAN, MLTOTAAL31DEC` | random: normal (mean=800, sd=400) |  |  |  |
+| `MLEBRUTO1JAN, MLEBRUTO31DEC` | random: normal (mean=700, sd=350) |  |  |  |
+| `MLEHYP1JAN, MLEHYP31DEC` | random: normal (mean=550, sd=300) |  |  |  |
+| `MLEHYPAFL1JAN, MLEHYPAFL31DEC` | random: normal (mean=200, sd=150) |  |  |  |
+| `MLEHYPINLEG1JAN, MLEHYPINLEG31DEC` | random: uniform [0, 300] |  |  |  |
+| `MLEHYPRENTE1JAN, MLEHYPRENTE31DEC` | random: normal (mean=300, sd=200) |  |  |  |
+| `MLEHYPRENTEHUIDIG1JAN, MLEHYPRENTEHUIDIG31DEC` | random: normal (mean=280, sd=200) |  |  |  |
+| `MLEHYPRENTEREST1JAN, MLEHYPRENTEREST31DEC` | random: uniform [0, 100] |  |  |  |
+| `MLEHYPRENTEFINKOST1JAN, MLEHYPRENTEFINKOST31DEC` | random: uniform [0, 50] |  |  |  |
+| `MLEBEZIT1JAN, MLEBEZIT31DEC` | random: normal (mean=60, sd=30) |  |  |  |
+| `MLEBEZITOZB1JAN, MLEBEZITOZB31DEC` | random: normal (mean=30, sd=15) |  |  |  |
+| `MLEBEZITWSGEB1JAN, MLEBEZITWSGEB31DEC` | random: normal (mean=25, sd=10) |  |  |  |
+| `MLEBEZITERFPACHT1JAN, MLEBEZITERFPACHT31DEC` | random: uniform [0, 100] |  |  |  |
+| `MLEBEHEER1JAN, MLEBEHEER31DEC` | random: normal (mean=80, sd=40) |  |  |  |
+| `MLEBEHEERVVE1JAN, MLEBEHEERVVE31DEC` | random: uniform [0, 200] |  |  |  |
+| `MLEBEHEERONDH1JAN, MLEBEHEERONDH31DEC` | random: normal (mean=50, sd=25) |  |  |  |
+| `MLEBEHEEROPSTAL1JAN, MLEBEHEEROPSTAL31DEC` | random: normal (mean=20, sd=10) |  |  |  |
+| `MLEFISCEW1JAN, MLEFISCEW31DEC` | random: normal (mean=100, sd=80) |  |  |  |
+| `MLEFISCEWHYP1JAN, MLEFISCEWHYP31DEC` | random: normal (mean=90, sd=70) |  |  |  |
+| `MLEFISCEWGWS1JAN, MLEFISCEWGWS31DEC` | random: uniform [0, 50] |  |  |  |
+| `MLEFISCEWERF1JAN, MLEFISCEWERF31DEC` | random: uniform [0, 30] |  |  |  |
+| `MLEFISCEWEWF1JAN, MLEFISCEWEWF31DEC` | random: normal (mean=-20, sd=15) |  |  |  |
+| `MLENETTO1JAN, MLENETTO31DEC` | random: normal (mean=600, sd=300) |  |  |  |
+| `MLHBRUTO1JAN, MLHBRUTO31DEC` | random: normal (mean=600, sd=200) |  |  |  |
+| `MLHKALEHUUR1JAN, MLHKALEHUUR31DEC` | random: normal (mean=550, sd=200) |  |  |  |
+| `MLHSERVICE1JAN, MLHSERVICE31DEC` | random: uniform [0, 50] |  |  |  |
+| `MLHTOESLAG1JAN, MLHTOESLAG31DEC` | random: uniform [0, 300] |  |  |  |
+| `MLHNETTO1JAN, MLHNETTO31DEC` | random: normal (mean=450, sd=200) |  |  |  |
+| `MLBGEBRUIK1JAN, MLBGEBRUIK31DEC` | random: normal (mean=60, sd=20) |  |  |  |
+| `MLBGEBRUIKAFVAL1JAN, MLBGEBRUIKAFVAL31DEC` | random: normal (mean=25, sd=8) |  |  |  |
+| `MLBGEBRUIKRIOOL1JAN, MLBGEBRUIKRIOOL31DEC` | random: normal (mean=15, sd=5) |  |  |  |
+| `MLBGEBRUIKWSZUI1JAN, MLBGEBRUIKWSZUI31DEC` | random: normal (mean=15, sd=5) |  |  |  |
+| `MLBGEBRUIKWSING1JAN, MLBGEBRUIKWSING31DEC` | random: normal (mean=10, sd=3) |  |  |  |
+| `MLBNUTS1JAN, MLBNUTS31DEC` | random: normal (mean=200, sd=80) |  |  |  |
+| `MLBNUTSSTROOM1JAN, MLBNUTSSTROOM31DEC` | random: normal (mean=80, sd=35) |  |  |  |
+| `MLBNUTSSTROOMVAST1JAN, MLBNUTSSTROOMVAST31DEC` | random: normal (mean=20, sd=5) |  |  |  |
+| `MLBNUTSSTROOMVAR1JAN, MLBNUTSSTROOMVAR31DEC` | random: normal (mean=40, sd=20) |  |  |  |
+| `MLBNUTSSTROOMBEL1JAN, MLBNUTSSTROOMBEL31DEC` | random: normal (mean=20, sd=10) |  |  |  |
+| `MLBNUTSGAS1JAN, MLBNUTSGAS31DEC` | random: normal (mean=80, sd=40) |  |  |  |
+| `MLBNUTSGASVAST1JAN, MLBNUTSGASVAST31DEC` | random: normal (mean=15, sd=5) |  |  |  |
+| `MLBNUTSGASVAR1JAN, MLBNUTSGASVAR31DEC` | random: normal (mean=40, sd=25) |  |  |  |
+| `MLBNUTSGASBEL1JAN, MLBNUTSGASBEL31DEC` | random: normal (mean=25, sd=15) |  |  |  |
+| `MLBNUTSCOL1JAN, MLBNUTSCOL31DEC` | random: uniform [0, 100] |  |  |  |
+| `MLBNUTSWATER1JAN, MLBNUTSWATER31DEC` | random: normal (mean=25, sd=10) |  |  |  |
+| `MLBNUTSWATERVAST1JAN, MLBNUTSWATERVAST31DEC` | random: normal (mean=8, sd=3) |  |  |  |
+| `MLBNUTSWATERVAR1JAN, MLBNUTSWATERVAR31DEC` | random: normal (mean=12, sd=5) |  |  |  |
+| `MLBNUTSWATERBEL1JAN, MLBNUTSWATERBEL31DEC` | random: normal (mean=5, sd=2) |  |  |  |
+| `MLBNUTSHEFKORT1JAN, MLBNUTSHEFKORT31DEC` | random: uniform [30, 80] |  |  |  |
+| `MLBNUTSOVT1JAN, MLBNUTSOVT31DEC` | random: uniform [0, 100] |  |  |  |
+| `MLBTOTBIJ1JAN, MLBTOTBIJ31DEC` | random: normal (mean=250, sd=80) |  |  |  |
+| `HYPSCHULDFISCAAL1JAN, HYPSCHULDFISCAAL31DEC` | random: normal (mean=200000, sd=120000) |  |  |  |
+| `HYPSCHULDTEGOED1JAN, HYPSCHULDTEGOED31DEC` | random: uniform [0, 100000] |  |  |  |
+| `HYPSCHULDNETTO1JAN, HYPSCHULDNETTO31DEC` | random: normal (mean=180000, sd=110000) |  |  |  |
+| `HYPAFLVRIJWILLIG1JAN, HYPAFLVRIJWILLIG31DEC` | random: uniform [0, 20000] |  |  |  |
+| `AANTLD1JAN, AANTLD31DEC` | random: uniform [1, 5] |  |  |  |
+| `ANNUITAIR1JAN, ANNUITAIR31DEC` | random: uniform [0, 1] |  |  |  |
+| `HYPBOUWDEPOT1JAN, HYPBOUWDEPOT31DEC` | random: uniform [0, 50000] |  |  |  |
+| `HYPCONSUMPTIEF1JAN, HYPCONSUMPTIEF31DEC` | random: uniform [0, 30000] |  |  |  |
+| `HYPFAMBV1JAN, HYPFAMBV31DEC` | random: uniform [0, 50000] |  |  |  |
+| `ONTVSCHENKINGEW1JAN, ONTVSCHENKINGEW31DEC` | random: uniform [0, 100000] |  |  |  |
+| `ELEKVERBRUIK1JAN, ELEKVERBRUIK31DEC` | random: normal (mean=3000, sd=1500) |  |  |  |
+| `GASVERBRUIK1JAN, GASVERBRUIK31DEC` | random: normal (mean=1200, sd=600) |  |  |  |
+| `WATERVERBRUIK1JAN, WATERVERBRUIK31DEC` | random: normal (mean=45, sd=20) |  |  |  |
+| `CODEHUUR1JAN, CODEHUUR31DEC` | random: codelist: CODEHUUR |  |  | [CODEHUUR](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `CODEMLB1JAN, CODEMLB31DEC` | random: codelist: CODEMLB |  |  | [CODEMLB](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `CODEBEZIT1JAN, CODEBEZIT31DEC` | random: codelist: CODEBEZIT |  |  | [CODEBEZIT](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `HUURKLASSE1JAN, HUURKLASSE31DEC` | random: codelist: HUURKLASSE |  |  | [HUURKLASSE](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `HUURPUNTEN1JAN, HUURPUNTEN31DEC` | random: uniform [80, 250] |  |  |  |
+| `QUOTETOTAAL1JAN, QUOTETOTAAL31DEC` | random: normal (mean=25, sd=10) |  |  |  |
+| `QUOTENETEIG1JAN, QUOTENETEIG31DEC` | random: normal (mean=20, sd=10) |  |  |  |
+| `QUOTENETHUUR1JAN, QUOTENETHUUR31DEC` | random: normal (mean=28, sd=12) |  |  |  |
+
+</details>
+
+<details>
+<summary><code>WoonbaseEKWoonruimtenWV</code></summary>
+
+| Column | Source | Spatial | Calibration | Codelist |
+|--------|--------|---------|-------------|----------|
+| `SOORTOBJECTNUMMER` | spine-derived | gemeente |  |  |
+| `RINOBJECTNUMMER` | spine-derived | gemeente |  |  |
+| `AGIAHWONING1JAN, AGIAHWONING31DEC` | random: codelist: AGIAHWONING |  |  | [AGIAHWONING](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `BELIWONING1JAN, BELIWONING31DEC` | random: normal (mean=55000, sd=35000) |  |  |  |
+| `BESTINKWONING1JAN, BESTINKWONING31DEC` | random: normal (mean=40000, sd=20000) |  |  |  |
+| `POPIIVWONING1JAN, POPIIVWONING31DEC` | random: codelist: POPIIVWONING |  |  | [POPIIVWONING](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/woonbase/codelists.yaml) |
+| `VROMWONING1JAN, VROMWONING31DEC` | random: normal (mean=30000, sd=40000) |  |  |  |
+| `W1000VERWONING1JAN, W1000VERWONING31DEC` | random: uniform [0, 500000] |  |  |  |
+
+</details>
+
+<details>
 <summary><code>ExtraKenmerkenPandenTAB</code></summary>
 
 | Column | Source | Spatial | Calibration | Codelist |

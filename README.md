@@ -10,7 +10,7 @@ Synthetic CBS microdata generator for R. Mimics the exact file structure, column
 - Workflows can be benchmarked and profiled
 - Colleagues without CBS access can reproduce results
 
-Currently supports **15 datasets, 27 file types, 552 columns**. See the full [column overview](docs/column-overview.md) for all simulated columns with their source, spatial level, calibration links, and codelists.
+Currently supports **15 datasets, 31 file types, 648 columns**. See the full [column overview](docs/column-overview.md) for all simulated columns with their source, spatial level, calibration links, and codelists.
 
 ## Installation
 
@@ -21,11 +21,11 @@ remotes::install_github("joris-klingen/simcbsradata")
 
 ## Supported datasets
 
-Currently supports 15 CBS datasets across 27 file types:
+Currently supports 15 CBS datasets across 31 file types:
 
 | Dataset | Description | Key |
 |---------|-------------|-----|
-| **Woonbase** | Housing + population (9 files) | RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER |
+| **Woonbase** | Housing + population (13 files) | RINPERSOON, HUISHOUDNR, RINOBJECTNUMMER |
 | **GBA** | Population register (3 files) | RINPERSOON |
 | **RDW** | Vehicle registrations (2 files) | RINPERSOON, RINKENTEKEN |
 | **SPOLIS** | Employment records with monthly job structure | RINPERSOON, SBEID |

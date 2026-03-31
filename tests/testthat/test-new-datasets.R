@@ -21,6 +21,10 @@ test_that("new dataset file names parse correctly", {
     "INHA2023TABV1"        = list(file_key = "inhatab",       dataset_id = "inhatab",       year = 2023L),
     "BE2023TABV1"          = list(file_key = "betab",         dataset_id = "betab",         year = 2023L),
     "Zonnnestroominstallaties2023V1" = list(file_key = "zonnestroominstallaties", dataset_id = "zonnestroominstallaties", year = 2023L),
+    "WoonbaseEKPersonenWV2023V1" = list(file_key = "ek_pers_welvaart", dataset_id = "woonbase", year = 2023L),
+    "WOONBASEEKPERSONENOP2023V1" = list(file_key = "ek_pers_opleiding", dataset_id = "woonbase", year = 2023L),
+    "WOONBASEEKHuishoudensWL2023V1" = list(file_key = "ek_hh_woonlasten", dataset_id = "woonbase", year = 2023L),
+    "WoonbaseEKWoonruimtenWV2023V1" = list(file_key = "ek_obj_welvaart", dataset_id = "woonbase", year = 2023L),
     "BURENNETWERK2023TABV1"   = list(file_key = "burennetwerktab",  dataset_id = "burennetwerktab",  year = 2023L),
     "COLLEGANETWERK2023TABV1" = list(file_key = "colleganetwerktab", dataset_id = "colleganetwerktab", year = 2023L),
     "FAMILIENETWERK2023TABV1" = list(file_key = "familienetwerktab", dataset_id = "familienetwerktab", year = 2023L)
@@ -179,6 +183,144 @@ test_that("BETAB generates valid business register data", {
 
   # Legacy SBI1993 is constant
   expect_true(all(dt$SBI1993VJJJJ == "-----"))
+})
+
+
+# ---- WOONBASEEKPERSONENOP ----
+
+test_that("WOONBASEEKPERSONENOP generates valid education data", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("WOONBASEEKPERSONENOP2023V1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 12L)
+  expect_equal(ncol(dt), 12L)
+
+  # Key columns
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONS" %in% names(dt))
+
+  # SOI2021 columns present
+  expect_true("OPLNIVSOI2021AGG4HBMETNIRWO1Jan" %in% names(dt))
+  expect_true("OPLNIVSOI2021AGG4HBMETNIRWO31Dec" %in% names(dt))
+  expect_true("OPLNIVSOI2021AGG4HGMETNIRWO1Jan" %in% names(dt))
+  expect_true("OPLNIVSOI2021AGG4HGMETNIRWO31Dec" %in% names(dt))
+
+  # SOI2021 is labelled
+  expect_s3_class(dt[["OPLNIVSOI2021AGG4HBMETNIRWO1Jan"]], "haven_labelled")
+
+  # SOI2016 deprecated (all "----")
+  expect_true(all(dt[["OPLNIVSOI2016AGG4HBMETNIRWO1Jan"]] == "----"))
+
+  # Weight is numeric
+  expect_true(is.numeric(dt[["GEWICHTHOOGSTEOPL1Jan"]]))
+
+  # RINPERSOON is 9-char
+  expect_true(all(nchar(dt$RINPERSOON) == 9L))
+})
+
+
+# ---- WOONBASEEKHuishoudensWL ----
+
+test_that("WOONBASEEKHuishoudensWL generates valid housing cost data", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("WOONBASEEKHuishoudensWL2023V1")
+
+  check_tibble(dt, min_rows = 50L, min_cols = 144L)
+  expect_equal(ncol(dt), 144L)
+
+  # Key columns
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONS" %in% names(dt))
+
+  # Sample of suffixed columns present
+  for (sfx in c("1JAN", "31DEC")) {
+    expect_true(paste0("MLTOTAAL", sfx) %in% names(dt))
+    expect_true(paste0("MLHKALEHUUR", sfx) %in% names(dt))
+    expect_true(paste0("CODEBEZIT", sfx) %in% names(dt))
+    expect_true(paste0("QUOTETOTAAL", sfx) %in% names(dt))
+  }
+
+  # Numeric cost fields
+  expect_true(is.numeric(dt[["MLTOTAAL1JAN"]]))
+  expect_true(is.numeric(dt[["HYPSCHULDFISCAAL1JAN"]]))
+
+  # Categoricals are labelled
+  expect_s3_class(dt[["CODEBEZIT1JAN"]], "haven_labelled")
+  expect_s3_class(dt[["HUURKLASSE1JAN"]], "haven_labelled")
+  expect_s3_class(dt[["CODEHUUR1JAN"]], "haven_labelled")
+})
+
+
+# ---- WoonbaseEKWoonruimtenWV ----
+
+test_that("WoonbaseEKWoonruimtenWV generates valid dwelling wealth data", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("WoonbaseEKWoonruimtenWV2023V1")
+
+  check_tibble(dt, min_rows = 50L, min_cols = 14L)
+  expect_equal(ncol(dt), 14L)
+
+  # Key columns
+  expect_true("SOORTOBJECTNUMMER" %in% names(dt))
+  expect_true("RINOBJECTNUMMER" %in% names(dt))
+
+  # Suffixed columns present
+  for (sfx in c("1JAN", "31DEC")) {
+    expect_true(paste0("AGIAHWONING", sfx) %in% names(dt))
+    expect_true(paste0("BELIWONING", sfx) %in% names(dt))
+    expect_true(paste0("POPIIVWONING", sfx) %in% names(dt))
+  }
+
+  # Categoricals are labelled
+  expect_s3_class(dt[["POPIIVWONING1JAN"]], "haven_labelled")
+  expect_s3_class(dt[["AGIAHWONING1JAN"]], "haven_labelled")
+
+  # Numerics
+  expect_true(is.numeric(dt[["BELIWONING1JAN"]]))
+  expect_true(is.numeric(dt[["W1000VERWONING1JAN"]]))
+})
+
+
+# ---- WoonbaseEKPersonenWV ----
+
+test_that("WoonbaseEKPersonenWV generates valid person wealth data", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
+  dt <- read_sav("WoonbaseEKPersonenWV2023V1")
+
+  check_tibble(dt, min_rows = 100L, min_cols = 14L)
+
+  # Key columns
+  expect_true("RINPERSOON" %in% names(dt))
+  expect_true("RINPERSOONS" %in% names(dt))
+
+  # Suffixed columns present for both 1JAN and 31DEC
+  for (sfx in c("1JAN", "31DEC")) {
+    expect_true(paste0("ARMOEDE", sfx) %in% names(dt))
+    expect_true(paste0("ARMSOC", sfx)  %in% names(dt))
+    expect_true(paste0("BELI", sfx)    %in% names(dt))
+    expect_true(paste0("POPIIV", sfx)  %in% names(dt))
+    expect_true(paste0("POSHHK", sfx)  %in% names(dt))
+    expect_true(paste0("SECJ", sfx)    %in% names(dt))
+  }
+
+  # Income is numeric
+  expect_true(is.numeric(dt$BELI1JAN))
+  expect_true(is.numeric(dt$BELI31DEC))
+
+  # SECJ is labelled
+  expect_s3_class(dt$SECJ1JAN, "haven_labelled")
+  expect_s3_class(dt$SECJ31DEC, "haven_labelled")
+
+  # POSHHK is labelled with values 1-7
+  expect_s3_class(dt$POSHHK1JAN, "haven_labelled")
+  expect_true(all(as.integer(dt$POSHHK1JAN) %in% 1:7))
+
+  # RINPERSOON is 9-char
+  expect_true(all(nchar(dt$RINPERSOON) == 9L))
 })
 
 

@@ -1,0 +1,665 @@
+# WOONBASEEKHuishoudensWL — Extra Kenmerken Huishoudens Woonlasten
+# Household housing cost components (monthly amounts)
+# CBS name: WOONBASEEKHuishoudensWL{YYYY}V{N}
+entity: household
+spine_table: hh
+
+columns:
+  - name: RINPERSOONS
+    source: spine.hh.RINPERSOONS_Ref
+
+  - name: RINPERSOON
+    source: spine.hh.RINPERSOON_Ref
+
+  # --- Owner costs ---
+
+  # Totale maandelijkse woonlasten
+  - name: "MLTOTAAL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 800
+      sd: 400
+      round: 2
+
+  # Bruto vaste woonlasten eigenaren
+  - name: "MLEBRUTO{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 700
+      sd: 350
+      round: 2
+
+  # Bruto woonlasten eigenwoningschuld
+  - name: "MLEHYP{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 550
+      sd: 300
+      round: 2
+
+  # Verplichte aflossing eigenwoningschuld
+  - name: "MLEHYPAFL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 200
+      sd: 150
+      round: 2
+
+  # Verplichte premie/inleg KEW/BEW/SEW
+  - name: "MLEHYPINLEG{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 300
+      round: 2
+
+  # Betaalde rente eigenwoningschuld
+  - name: "MLEHYPRENTE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 300
+      sd: 200
+      round: 2
+
+  # Rente actuele eigen woning
+  - name: "MLEHYPRENTEHUIDIG{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 280
+      sd: 200
+      round: 2
+
+  # Rente restschuld vroegere woning
+  - name: "MLEHYPRENTEREST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100
+      round: 2
+
+  # Financieringskosten eigen woning
+  - name: "MLEHYPRENTEFINKOST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50
+      round: 2
+
+  # Lasten bezit (OZB + waterschap + erfpacht)
+  - name: "MLEBEZIT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 60
+      sd: 30
+      round: 2
+
+  # OZB
+  - name: "MLEBEZITOZB{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 30
+      sd: 15
+      round: 2
+
+  # Heffing gebouwd waterschap
+  - name: "MLEBEZITWSGEB{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 25
+      sd: 10
+      round: 2
+
+  # Erfpacht
+  - name: "MLEBEZITERFPACHT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100
+      round: 2
+
+  # VVE + onderhoud + opstal
+  - name: "MLEBEHEER{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 80
+      sd: 40
+      round: 2
+
+  # VVE-bijdrage
+  - name: "MLEBEHEERVVE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 200
+      round: 2
+
+  # Reservering groot onderhoud
+  - name: "MLEBEHEERONDH{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 50
+      sd: 25
+      round: 2
+
+  # Opstalverzekering
+  - name: "MLEBEHEEROPSTAL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 10
+      round: 2
+
+  # Fiscaal effect eigen woning (totaal)
+  - name: "MLEFISCEW{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 100
+      sd: 80
+      round: 2
+
+  # Fiscaal effect hypotheekrenteaftrek
+  - name: "MLEFISCEWHYP{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 90
+      sd: 70
+      round: 2
+
+  # Fiscaal effect aftrek geen/geringe eigenwoningschuld
+  - name: "MLEFISCEWGWS{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50
+      round: 2
+
+  # Fiscaal effect aftrek erfpacht
+  - name: "MLEFISCEWERF{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 30
+      round: 2
+
+  # Fiscaal effect bijtelling eigenwoningforfait
+  - name: "MLEFISCEWEWF{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: -20
+      sd: 15
+      round: 2
+
+  # Netto vaste woonlasten eigenaren
+  - name: "MLENETTO{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 600
+      sd: 300
+      round: 2
+
+  # --- Rental costs ---
+
+  # Bruto vaste woonlasten huurders
+  - name: "MLHBRUTO{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 600
+      sd: 200
+      round: 2
+
+  # Kale huur
+  - name: "MLHKALEHUUR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 550
+      sd: 200
+      round: 2
+
+  # Subsidiabele servicekosten
+  - name: "MLHSERVICE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50
+      round: 2
+
+  # Huurtoeslag
+  - name: "MLHTOESLAG{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 300
+      round: 2
+
+  # Netto vaste woonlasten huurders
+  - name: "MLHNETTO{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 450
+      sd: 200
+      round: 2
+
+  # --- Usage costs ---
+
+  # Gebruikersheffingen totaal
+  - name: "MLBGEBRUIK{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 60
+      sd: 20
+      round: 2
+
+  # Afvalstoffenheffing
+  - name: "MLBGEBRUIKAFVAL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 25
+      sd: 8
+      round: 2
+
+  # Rioolheffing
+  - name: "MLBGEBRUIKRIOOL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 5
+      round: 2
+
+  # Zuiverings-/verontreinigingsheffing
+  - name: "MLBGEBRUIKWSZUI{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 5
+      round: 2
+
+  # Ingezetenenheffing
+  - name: "MLBGEBRUIKWSING{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 10
+      sd: 3
+      round: 2
+
+  # Nutsvoorzieningen totaal
+  - name: "MLBNUTS{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 200
+      sd: 80
+      round: 2
+
+  # Stroom totaal
+  - name: "MLBNUTSSTROOM{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 80
+      sd: 35
+      round: 2
+
+  # Stroom vast
+  - name: "MLBNUTSSTROOMVAST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 5
+      round: 2
+
+  # Stroom variabel
+  - name: "MLBNUTSSTROOMVAR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 40
+      sd: 20
+      round: 2
+
+  # Stroom energiebelasting
+  - name: "MLBNUTSSTROOMBEL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 10
+      round: 2
+
+  # Gas totaal
+  - name: "MLBNUTSGAS{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 80
+      sd: 40
+      round: 2
+
+  # Gas vast
+  - name: "MLBNUTSGASVAST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 15
+      sd: 5
+      round: 2
+
+  # Gas variabel
+  - name: "MLBNUTSGASVAR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 40
+      sd: 25
+      round: 2
+
+  # Gas energiebelasting
+  - name: "MLBNUTSGASBEL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 25
+      sd: 15
+      round: 2
+
+  # Collectieve verwarming
+  - name: "MLBNUTSCOL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100
+      round: 2
+
+  # Water totaal
+  - name: "MLBNUTSWATER{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 25
+      sd: 10
+      round: 2
+
+  # Water vast
+  - name: "MLBNUTSWATERVAST{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 8
+      sd: 3
+      round: 2
+
+  # Water variabel
+  - name: "MLBNUTSWATERVAR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 12
+      sd: 5
+      round: 2
+
+  # Water belasting
+  - name: "MLBNUTSWATERBEL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 5
+      sd: 2
+      round: 2
+
+  # Heffingskorting energiebelasting
+  - name: "MLBNUTSHEFKORT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 30
+      max: 80
+      round: 2
+
+  # Overige tegemoetkomingen energierekening
+  - name: "MLBNUTSOVT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100
+      round: 2
+
+  # Bijkomende woonlasten totaal
+  - name: "MLBTOTBIJ{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 250
+      sd: 80
+      round: 2
+
+  # --- Mortgage stock variables ---
+
+  # Fiscale eigenwoningschuld
+  - name: "HYPSCHULDFISCAAL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 200000
+      sd: 120000
+      round: 0
+
+  # Spaartegoed spaar-/beleggingshypotheek
+  - name: "HYPSCHULDTEGOED{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100000
+      round: 0
+
+  # Netto eigenwoningschuld
+  - name: "HYPSCHULDNETTO{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 180000
+      sd: 110000
+      round: 0
+
+  # Vrijwillige aflossing per jaar
+  - name: "HYPAFLVRIJWILLIG{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 20000
+      round: 0
+
+  # Aantal leningdelen
+  - name: "AANTLD{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 1
+      max: 5
+      round: 0
+
+  # Indicator annuitair
+  - name: "ANNUITAIR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 1
+      round: 0
+
+  # Bouwdepot
+  - name: "HYPBOUWDEPOT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50000
+      round: 0
+
+  # Consumptief deel hypotheek
+  - name: "HYPCONSUMPTIEF{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 30000
+      round: 0
+
+  # Hypotheek familie/eigen BV
+  - name: "HYPFAMBV{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 50000
+      round: 0
+
+  # Ontvangen schenking eigen woning
+  - name: "ONTVSCHENKINGEW{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 0
+      max: 100000
+      round: 0
+
+  # --- Energy/water usage ---
+
+  # Elektriciteitsverbruik kWh/jaar
+  - name: "ELEKVERBRUIK{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 3000
+      sd: 1500
+      round: 0
+
+  # Gasverbruik m3/jaar
+  - name: "GASVERBRUIK{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 1200
+      sd: 600
+      round: 0
+
+  # Waterverbruik m3/jaar
+  - name: "WATERVERBRUIK{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 45
+      sd: 20
+      round: 0
+
+  # --- Categorical indicators ---
+
+  # Codering huurbedrag
+  - name: "CODEHUUR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3", "4", "5", "6", "7"]
+      probs:  [0.50, 0.10, 0.10, 0.08, 0.07, 0.10, 0.05]
+    codelist: CODEHUUR
+    label: Codering huurbedrag
+
+  # Codering energielasten
+  - name: "CODEMLB{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3", "4", "5"]
+      probs:  [0.70, 0.08, 0.08, 0.04, 0.10]
+    codelist: CODEMLB
+    label: Codering energielasten
+
+  # Woningbezit
+  - name: "CODEBEZIT{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3"]
+      probs:  [0.57, 0.30, 0.13]
+    codelist: CODEBEZIT
+    label: Woningbezit huishouden
+
+  # Huurklasse
+  - name: "HUURKLASSE{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_categorical:
+      values: ["1", "2", "3", "4"]
+      probs:  [0.15, 0.05, 0.45, 0.35]
+    codelist: HUURKLASSE
+    label: Huurklasse t.o.v. liberalisatiegrens
+
+  # Huurpunten
+  - name: "HUURPUNTEN{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: uniform
+      min: 80
+      max: 250
+      round: 0
+
+  # --- Woonquotes ---
+
+  # Totale woonquote
+  - name: "QUOTETOTAAL{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 25
+      sd: 10
+      round: 2
+
+  # Netto woonquote eigenaren
+  - name: "QUOTENETEIG{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 20
+      sd: 10
+      round: 2
+
+  # Netto woonquote huurders
+  - name: "QUOTENETHUUR{sfx}"
+    suffixes: ["1JAN", "31DEC"]
+    random_numeric:
+      distribution: normal
+      mean: 28
+      sd: 12
+      round: 2
