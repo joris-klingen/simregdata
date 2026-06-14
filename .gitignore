@@ -1,10 +1,19 @@
 # R session artefacts
 .Rproj.user
 .Rhistory
+.radian_history
 .RData
 .Ruserdata
 Rplots.pdf
 *.log
+*.Rcheck/
+
+# VSCode — commit shared project config, ignore everything else
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Stray PDFs at top level (CBS docs belong in docs/cbs-catalogs/)
 /*.pdf
