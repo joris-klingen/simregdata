@@ -8,9 +8,8 @@ Rplots.pdf
 *.log
 *.Rcheck/
 
-# VSCode — commit shared project config, ignore everything else
+# VSCode — share portable config, ignore machine-specific settings
 .vscode/*
-!.vscode/settings.json
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
