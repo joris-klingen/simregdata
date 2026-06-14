@@ -12,3 +12,6 @@
 ^\.git$
 ^CLAUDE\.md$
 ^.*\.pdf$
+^\.vscode$
+^\.lintr$
+^dev$
