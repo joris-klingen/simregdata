@@ -1,4 +1,4 @@
-# RDWNPACT kentekens — vehicle characteristics per license plate
+# RDWNPACT kentekens - vehicle characteristics per license plate
 # CBS name: RDWNPACT{YYYY}TABV{N}
 # One row per vehicle per person
 # Calibrated from CBS StatLine 85237NED + 85236NED via rdw_update_params()

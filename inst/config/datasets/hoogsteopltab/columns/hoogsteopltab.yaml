@@ -32,7 +32,7 @@ columns:
       values: ["1.000000", "1.000000", "1.000000", "2.500000", "5.000000"]
       probs:  [0.85, 0.05, 0.02, 0.05, 0.03]
 
-  # SOI2021 aggregated level (highest attained) — 18 categories
+  # SOI2021 aggregated level (highest attained) - 18 categories
   # This is the most commonly used variable
   - name: OPLNIVSOI2021AGG4HBmetNIRWO
     random_categorical:

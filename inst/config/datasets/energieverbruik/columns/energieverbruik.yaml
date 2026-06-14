@@ -1,4 +1,4 @@
-# ENERGIEVERBRUIK{YYYY}TABV{N} — Energieverbruik particuliere woningen
+# ENERGIEVERBRUIK{YYYY}TABV{N} - Energieverbruik particuliere woningen
 # Energy consumption of private dwellings: gas, electricity, solar PV, heating
 # One record per dwelling (object), keyed by SOORTOBJECTNUMMER + RINOBJECTNUMMER
 entity: object

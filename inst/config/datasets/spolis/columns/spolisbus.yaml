@@ -1,4 +1,4 @@
-# SPOLISBUS — employment records (jobs, wages, hours, insurance)
+# SPOLISBUS - employment records (jobs, wages, hours, insurance)
 # CBS name: SPOLISBUS{YYYY}V{N}
 # One row per job record per person per period
 # Calibrated from CBS StatLine 81431NED via spolis_update_params()

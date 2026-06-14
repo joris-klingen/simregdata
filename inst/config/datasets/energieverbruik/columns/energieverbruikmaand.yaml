@@ -1,4 +1,4 @@
-# ENERGIEVERBRUIKMAAND{YYYY}TABV{N} — Monthly smart meter energy data
+# ENERGIEVERBRUIKMAAND{YYYY}TABV{N} - Monthly smart meter energy data
 # Gas and electricity delivery/feed-back per month for dwellings with smart meters
 # One record per dwelling (object), keyed by SOORTOBJECTNUMMER + RINOBJECTNUMMER
 entity: object
@@ -14,7 +14,7 @@ columns:
   - name: RINOBJECTNUMMER
     source: spine.obj.RINOBJECTNUMMER
 
-  # ---- Gas delivery (m3/month) — seasonal pattern ----
+  # ---- Gas delivery (m3/month) - seasonal pattern ----
   - name: GASLEV01
     random_numeric:
       distribution: normal

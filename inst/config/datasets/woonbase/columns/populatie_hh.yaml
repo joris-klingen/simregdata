@@ -1,4 +1,4 @@
-# PopulatieHuishoudens — household-level population file
+# PopulatieHuishoudens - household-level population file
 entity: household
 spine_table: hh
 

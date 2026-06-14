@@ -1,4 +1,4 @@
-# WOONBASEEKPERSONENOP — Extra Kenmerken Personen Opleiding
+# WOONBASEEKPERSONENOP - Extra Kenmerken Personen Opleiding
 # Person-level education characteristics (1Jan / 31Dec snapshots)
 # CBS name: WOONBASEEKPERSONENOP{YYYY}V{N}
 entity: person
@@ -21,7 +21,7 @@ columns:
     suffixes: ["1Jan", "31Dec"]
     value: "----"
 
-  # SOI2021 highest attained education level — 18 categories
+  # SOI2021 highest attained education level - 18 categories
   - name: "OPLNIVSOI2021AGG4HBMETNIRWO{sfx}"
     suffixes: ["1Jan", "31Dec"]
     random_categorical:
@@ -38,7 +38,7 @@ columns:
     codelist: OPLNIV_SOI2021_18CAT
     label: Opleidingsniveau SOI2021 18 cat. hoogst behaald
 
-  # SOI2021 highest followed education level — 18 categories
+  # SOI2021 highest followed education level - 18 categories
   - name: "OPLNIVSOI2021AGG4HGMETNIRWO{sfx}"
     suffixes: ["1Jan", "31Dec"]
     random_categorical:

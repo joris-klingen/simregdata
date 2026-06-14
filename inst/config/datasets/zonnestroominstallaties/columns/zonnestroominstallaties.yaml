@@ -1,4 +1,4 @@
-# Zonnnestroominstallaties{YYYY}V{N} — Solar PV installations
+# Zonnnestroominstallaties{YYYY}V{N} - Solar PV installations
 # One record per installation, linked to objects via RINOBJECTNUMMER
 entity: object
 spine_table: pers

@@ -23,7 +23,7 @@ entities:
     id_width: 16
     id_prefix_col: SOORTOBJECTNUMMER
 
-# File registry: key → CBS dataset name + metadata
+# File registry: key -> CBS dataset name + metadata
 files:
   sleutel:
     cbs_name: WoonbaseSleutelbestand

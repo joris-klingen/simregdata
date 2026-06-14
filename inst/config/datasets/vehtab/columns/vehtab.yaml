@@ -1,4 +1,4 @@
-# VEH{YYYY}TABV{N} — Vermogens van huishoudens
+# VEH{YYYY}TABV{N} - Vermogens van huishoudens
 # Household wealth data: assets, debts, and wealth components
 # One record per household, keyed by RINPERSOONHKW (hoofdkostwinner)
 entity: household

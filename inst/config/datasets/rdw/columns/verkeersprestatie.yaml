@@ -1,4 +1,4 @@
-# VERKEERSPRESTATIE — traffic performance of passenger cars
+# VERKEERSPRESTATIE - traffic performance of passenger cars
 # CBS name: VERKEERSPRESTATIE{YYYY}TABV{N}
 # One row per vehicle (license plate) per year
 # Calibrated from CBS StatLine 85404NED via rdw_update_params()

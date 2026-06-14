@@ -3,9 +3,9 @@
 # The GBA is the true population spine: all other CBS datasets reference it.
 #
 # Three core files:
-#   GBAPERSOONKTAB    — person demographics, limited (one row per person)
-#   GBAADRESOBJECTBUS — person-address links (one row per person-period)
-#   GBAHUISHOUDENSBUS — household composition (one row per person)
+#   GBAPERSOONKTAB    - person demographics, limited (one row per person)
+#   GBAADRESOBJECTBUS - person-address links (one row per person-period)
+#   GBAHUISHOUDENSBUS - household composition (one row per person)
 
 dataset_id: gba
 label: GBA Bevolkingsregister
