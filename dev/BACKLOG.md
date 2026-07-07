@@ -63,3 +63,67 @@ whose distributions come from real CBS data rather than being invented.
   aggregates on a simulated sample, and report deltas so drift in calibrated
   vars is caught. Skip purely invented vars.
 </details>
+
+<details>
+<summary><b>5. `conditional_on:` generator type (cross-column dependence)</b></summary>
+
+Let a column's distribution depend on the value of an earlier column, so
+correlations are modelled explicitly (e.g. fuel type conditional on build year,
+income bracket conditional on education level) instead of every column being
+drawn independently.
+
+- **Builds on:** the `.resolve_column()` dispatcher in `../R/assemble.R` (a
+  clean single seam for new generator types) and the progressive `base_tbl`
+  building that already lets `stable_per` reference earlier columns.
+- **Add:** a `conditional_on: <column>` spec with per-level `values`/`probs`
+  (or per-level params), plus a matching classifier branch in
+  `../R/column_overview.R`.
+- **Why now:** this is also the principled fix for the `stable_per` hash
+  correlation - real conditional structure replaces accidental rank
+  correlation between columns sharing an identifier.
+</details>
+
+<details>
+<summary><b>6. `sim_validate_config()` + config schema test</b></summary>
+
+A single validator that checks every dataset config (built-in and user-defined)
+for the classes of defect found in review.
+
+- **Builds on:** `../R/registry.R` config loading; the ASCII guard in
+  `../tests/testthat/test-config-ascii.R`.
+- **Add:** verify each `random_categorical` `probs` sums to ~1; every `values`
+  entry is covered by its `codelist` c2i (would have caught the SPOLIS `"-"`
+  gap); every `from_params` / `mean_from_params` key exists in the dataset's
+  `params.yaml` (would have caught `bouwjaar_p`); configs are ASCII-only; the
+  manifest `entities` block is consistent with each file's `entity`.
+- **Wire in:** run it in a testthat test over all datasets, and call it from
+  `sim_register()` so custom YAML is validated on registration.
+</details>
+
+<details>
+<summary><b>7. Demographic dynamics across years (births/deaths/migration)</b></summary>
+
+Today the spine is a fixed max-N person set that is year-invariant (Phase 1),
+so panels are perfectly balanced. Add genuine entry/exit so longitudinal
+analyses (attrition, cohort entry, mortality) behave like real RA data.
+
+- **Builds on:** the Phase 1 (identity) / Phase 2 (year-varying) split in
+  `../R/spine.R`, and the existing person indicators
+  (`Indicator_PersoonIsGeboren`, `...IsOverleden`, `...IsGeimmigreerd`).
+- **Add:** let persons enter/leave the panel across years with valid GBA dates,
+  driven deterministically per person so a given seed stays reproducible.
+</details>
+
+<details>
+<summary><b>8. Native `.sav` export mode</b></summary>
+
+Optionally write real SPSS `.sav` files (not just parquet) with full
+haven-labelled metadata, mirroring CBS's actual RA file delivery.
+
+- **Builds on:** `sim_export()` in `../R/api.R` and the haven-labelled columns
+  already produced by `.lbl()` / `.apply_codelist()`.
+- **Add:** a `format = c("parquet", "sav")` option that routes through
+  `haven::write_sav()`, preserving value labels and variable labels, so scripts
+  written against the simulator (real `haven::read_sav()` calls included) are
+  drop-in for the RA environment.
+</details>

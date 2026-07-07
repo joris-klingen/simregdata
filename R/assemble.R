@@ -21,12 +21,21 @@
   if (!is.null(col_spec$random_categorical)) {
     rc <- col_spec$random_categorical
     stable_id <- col_spec$stable_per
-    # stable_per: deterministic assignment by identifier (skip from_params)
+    # stable_per: deterministic assignment by identifier. Still honor a
+    # from_params year-calibrated distribution when one is available; only fall
+    # back to the hardcoded values/probs when the params key is missing.
     if (!is.null(stable_id) && !is.null(base_tbl) &&
         stable_id %in% names(base_tbl)) {
       vals <- as.character(rc$values)
       probs <- if (!is.null(rc$probs)) as.numeric(rc$probs) else
         rep(1 / length(vals), length(vals))
+      if (!is.null(rc$from_params) && !is.null(params)) {
+        pv <- params[[rc$from_params]]
+        if (!is.null(pv)) {
+          vals  <- as.character(names(pv))
+          probs <- as.numeric(pv)
+        }
+      }
       return(.deterministic_categorical(
         as.character(base_tbl[[stable_id]]), vals, probs,
         salt = col_spec$name))
@@ -55,9 +64,17 @@
   if (!is.null(col_spec$random_numeric)) {
     rn <- col_spec$random_numeric
     stable_id <- col_spec$stable_per
-    # stable_per: deterministic numeric by identifier (skip from_params)
+    # stable_per: deterministic numeric by identifier. Apply mean/sd overrides
+    # from year-calibrated params first, then hash deterministically so the
+    # value stays constant per identifier across years.
     if (!is.null(stable_id) && !is.null(base_tbl) &&
         stable_id %in% names(base_tbl)) {
+      if (!is.null(params)) {
+        if (!is.null(rn$mean_from_params))
+          rn$mean <- as.numeric(params[[rn$mean_from_params]] %||% rn$mean)
+        if (!is.null(rn$sd_from_params))
+          rn$sd <- as.numeric(params[[rn$sd_from_params]] %||% rn$sd)
+      }
       return(.deterministic_numeric(
         as.character(base_tbl[[stable_id]]),
         distribution = rn$distribution,
@@ -118,7 +135,12 @@
 
 # Apply codelist labelling to a column value
 .apply_codelist <- function(val, col_spec, codelists) {
-  if (is.null(col_spec$codelist)) return(val)
+  if (is.null(col_spec$codelist)) {
+    # No codelist: still attach the variable label (haven's "label" attribute)
+    # so documented labels on non-coded columns reach the output.
+    if (!is.null(col_spec$label)) attr(val, "label") <- col_spec$label
+    return(val)
+  }
   cl_name <- col_spec$codelist
   cl <- codelists[[cl_name]]
   if (is.null(cl)) stop("Codelist not found: ", cl_name)
@@ -250,9 +272,11 @@
   jan1  <- .yyyymmdd(spine$jan1)
   dec31 <- .yyyymmdd(spine$dec31)
 
-  # Load dataset params (year-specific calibrated distributions)
-  params_key <- paste0("params_", dataset_id)
-  params_yr_key <- paste0("params_year_", dataset_id)
+  # Load dataset params (year-specific calibrated distributions).
+  # Use a "dsparams_" prefix so the woonbase key does not collide with the
+  # legacy full spine-params list cached under "params_woonbase" by sim_init().
+  params_key <- paste0("dsparams_", dataset_id)
+  params_yr_key <- paste0("dsparams_year_", dataset_id)
   params <- .sim_cache[[params_key]]
   cached_yr <- .sim_cache[[params_yr_key]]
   if (is.null(params) || !identical(cached_yr, spine$year)) {
@@ -339,7 +363,7 @@
         if (!is.null(selected_set) && !(cs2$name %in% selected_set)) next
         if (!is.null(cs2$source))
           cs2$source <- gsub("\\{sfx\\}", sfx, cs2$source)
-        if (isTRUE(cs2$indicator_label) && !is.null(cs2$label))
+        if (!is.null(cs2$label))
           cs2$label <- gsub("\\{sfx\\}", sfx, cs2$label)
         cs2$suffixes <- NULL
 
@@ -401,12 +425,12 @@
   names(result_cols) <- result_names
   dt <- data.table::as.data.table(result_cols)
 
-  # Apply col_select (still needed for tidyselect patterns like starts_with)
+  # Apply col_select (still needed for tidyselect patterns like starts_with).
+  # Let eval_select errors propagate so an invalid selection (e.g. a mistyped
+  # column) fails loudly like haven, instead of silently returning all columns.
   if (!is.null(col_q) && !rlang::quo_is_null(col_q)) {
-    sel <- tryCatch(
-      names(tidyselect::eval_select(col_q, dt)),
-      error = function(e) character(0L))
-    if (length(sel) > 0L) dt <- dt[, sel, with = FALSE]
+    sel <- names(tidyselect::eval_select(col_q, dt))
+    dt <- dt[, sel, with = FALSE]
   }
 
   dt

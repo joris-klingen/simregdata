@@ -21,6 +21,7 @@ Imports:
     tibble,
     tidyselect,
     tools,
+    utils,
     yaml
 Suggests:
     arrow,

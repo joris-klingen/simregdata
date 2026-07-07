@@ -10,7 +10,8 @@ sim_export(
   year = 2023L,
   n = NULL,
   seed = 42L,
-  col_select = NULL
+  col_select = NULL,
+  force_resim = FALSE
 )
 }
 \arguments{
@@ -30,10 +31,18 @@ population count from bundled parameters.}
 which columns to include per CBS file.  Keys are CBS file names (e.g.
 \code{"SPOLISBUS"}) or file keys (e.g. \code{"spolisbus"}).  Identity/join key
 columns (defined in each manifest's \code{key_columns}) are always included.
-Files not listed get all columns.  Default \code{NULL} exports all columns.}
+Files not listed are skipped entirely.  Default \code{NULL} exports all
+files with all columns.}
+
+\item{force_resim}{Logical; if \code{TRUE}, regenerate all files regardless
+of what was previously simulated.  Default \code{FALSE} skips files whose
+columns, \code{n}, and \code{seed} already match the \code{.sim_meta.yaml} in
+\code{output_dir}.}
 }
 \value{
-Invisibly, \code{output_dir}.
+Invisibly, a list with elements \code{dir} (the output directory),
+\code{written} (number of parquet files written) and \code{skipped} (number of
+files skipped because they were already simulated).
 }
 \description{
 Generates synthetic data for one or all registered datasets and writes

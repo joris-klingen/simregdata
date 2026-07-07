@@ -13,7 +13,10 @@ sim_init(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L)
 
 \item{n}{Number of persons to generate.
 \code{NULL} (the default) fetches the actual population count from bundled
-parameters for \code{year}.}
+parameters for \code{year}.  Note that \code{n} and \code{seed} only take effect when the
+shared spine is (re)built; if a spine for \code{year} is already cached, the
+existing spine (with its original \code{n}/\code{seed}) is reused.  Call
+\code{\link[=sim_reset]{sim_reset()}} first to force a rebuild with a different \code{n} or \code{seed}.}
 
 \item{seed}{RNG seed for reproducibility (default 42).}
 }

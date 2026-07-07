@@ -65,6 +65,7 @@ dt <- read_sav(
 )
 
 # Cross-file joins work because all files share the same spine IDs
+library(data.table)  # for as.data.table() and join-by-reference below
 dt_pers <- as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
                                    col_select = c(RINPERSOON, HUISHOUDNR1Jan,
                                                   VBOWoningType1Jan)))
@@ -121,7 +122,7 @@ dt <- read_sav("my_survey2023V1")
 | `sim_population(output_dir, fraction, years, seed, datasets, col_select)` | Generates a fractional sample (default 1%) of all or selected datasets and exports to parquet. |
 | `sim_init(dataset, year, n, seed)` | Builds the shared population spine and prepares dataset-specific state. |
 | `read_sav(file, col_select, n_max, skip, ...)` | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths. |
-| `sim_export(output_dir, dataset, year, n, seed, col_select)` | Exports simulated datasets to parquet in CBS VM-style folder layout. |
+| `sim_export(output_dir, dataset, year, n, seed, col_select, force_resim)` | Exports simulated datasets to parquet in CBS VM-style folder layout. Skips files whose columns/`n`/`seed` already match the `.sim_meta.yaml` in `output_dir`; pass `force_resim = TRUE` to regenerate regardless. |
 | `sim_set_data_root(path)` / `sim_get_data_root()` | Set/get a parquet data root so `read_sav()` reads pre-exported files instead of generating on-the-fly. |
 | `sim_catalog(dataset, year)` | Prints all available synthetic file names. |
 | `sim_reset(dataset)` | Clears the cached spine (forces rebuild on next call). |
@@ -179,7 +180,8 @@ to limit columns keeps file sizes manageable and speeds up assembly.
 ## Dependencies
 
 ```r
+# stats, tools and utils ship with base R, so they are not installed here
 install.packages(c("data.table", "haven", "rlang", "tidyselect", "yaml",
-                   "tibble", "stats", "tools",
-                   "cbsodataR"))  # optional: refresh params from StatLine
+                   "tibble"))
+install.packages(c("arrow", "cbsodataR"))  # optional: parquet I/O + StatLine refresh
 ```
