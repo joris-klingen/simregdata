@@ -32,8 +32,11 @@ vector).}
 
 \item{n_max}{Maximum number of rows to return (default \code{Inf}).}
 
-\item{.name_repair}{Passed to \code{haven::read_sav()} (non-simulated files
-only).}
+\item{.name_repair}{Column-name repair.  For non-simulated files this is
+passed to \code{haven::read_sav()}.  For simulated files (and parquet reads) it
+is applied only when it is a function (e.g. \code{~ make.unique(.x)}); string
+presets like \code{"unique"} are ignored because generated names are already
+unique.}
 
 \item{year}{Simulation year used for auto-init (default 2023).}
 

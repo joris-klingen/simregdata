@@ -92,9 +92,11 @@ JN_INDICATOR:
   c2i:
     "J": 1
     "N": 0
+    "-": 9
   labels:
     "Ja": 1
     "Nee": 0
+    "Niet van toepassing": 9
 
 INDICATOR_01:
   c2i:

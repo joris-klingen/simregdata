@@ -11,7 +11,10 @@
 #' @param year  Simulation year (default 2023).
 #' @param n     Number of persons to generate.
 #'   `NULL` (the default) fetches the actual population count from bundled
-#'   parameters for `year`.
+#'   parameters for `year`.  Note that `n` and `seed` only take effect when the
+#'   shared spine is (re)built; if a spine for `year` is already cached, the
+#'   existing spine (with its original `n`/`seed`) is reused.  Call
+#'   [sim_reset()] first to force a rebuild with a different `n` or `seed`.
 #' @param seed  RNG seed for reproducibility (default 42).
 #' @return Invisibly `NULL`.
 #' @export
@@ -152,11 +155,15 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         )
 
       } else if (dataset %in% .NETWERK_DATASETS) {
-        # Network datasets: build dyadic person-pair relation table
-        # Include gemeente for spatial clustering (buren)
-        extra_cols <- "GemeenteCodeJJJJ1Jan"
+        # Network datasets: build dyadic person-pair relation table.
+        # NOTE: buren relations are built from a year-invariant RINPERSOON
+        # ordering so a non-mover keeps the same neighbours across years.
+        # We deliberately do NOT cluster on GemeenteCodeJJJJ1Jan here: gemeente
+        # is a Phase-2 (year-varying) attribute, so clustering on it would both
+        # break cross-year stability and make the output depend on whether a
+        # woonbase spatial file was read earlier in the session.
         pers_cols <- intersect(
-          unique(c("RINPERSOON", needed$pers, extra_cols)),
+          unique(c("RINPERSOON", needed$pers)),
           names(spine$pers))
         if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
 
@@ -192,20 +199,31 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         )
 
       } else {
-        # Standard generic sampling
-        # Weighted sampling: use gemeente vehicle weights if available
-        gem_wt <- .load_gem_vehicle_weights(dataset, year)
+        # Standard generic sampling.
+        # Gemeente vehicle-ownership weights are RDW-specific (they model car
+        # density) and must NOT leak into person/household datasets like
+        # inpatab/inhatab/hoogsteopltab/vehtab, which are one-row-per-person and
+        # would otherwise get duplicated, population-losing samples.
+        gem_wt <- if (identical(dataset, "rdw")) {
+          .load_gem_vehicle_weights(dataset, year)
+        } else {
+          NULL
+        }
         gem_col <- if (!is.null(gem_wt)) {
           spine$pers$GemeenteCodeJJJJ1Jan %||% spine$pers_gemeente
         }
+        # Only sample with replacement when we genuinely need more records than
+        # there are persons; weighted-without-replacement still respects the
+        # gemeente weights while keeping RINPERSOON/RINKENTEKEN unique.
+        need_replace <- n_records > nrow(spine$pers)
         if (!is.null(gem_col)) {
           pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
           pw[is.na(pw)] <- 1.0
           idx <- sample.int(nrow(spine$pers), n_records,
-            replace = TRUE, prob = pw)
+            replace = need_replace, prob = pw)
         } else {
           idx <- sample.int(nrow(spine$pers), n_records,
-            replace = n_records > nrow(spine$pers))
+            replace = need_replace)
         }
 
         pers_cols <- needed$pers
@@ -479,8 +497,11 @@ sim_get_data_root <- function() {
 #'   vector).
 #' @param skip  Number of rows to skip (default 0).
 #' @param n_max  Maximum number of rows to return (default `Inf`).
-#' @param .name_repair  Passed to `haven::read_sav()` (non-simulated files
-#'   only).
+#' @param .name_repair  Column-name repair.  For non-simulated files this is
+#'   passed to `haven::read_sav()`.  For simulated files (and parquet reads) it
+#'   is applied only when it is a function (e.g. `~ make.unique(.x)`); string
+#'   presets like `"unique"` are ignored because generated names are already
+#'   unique.
 #' @param year  Simulation year used for auto-init (default 2023).
 #' @param seed  RNG seed used for auto-init (default 42).
 #' @param ...   Additional arguments passed to `haven::read_sav()`.
@@ -599,6 +620,13 @@ read_sav <- function(file,
   } else {
     spine <- .sim_cache[[paste0("spine_", dataset_id)]]
   }
+
+  # Deterministic per-file seed (same scheme as sim_export) so that reading the
+  # same file twice in one session yields identical data, and on-the-fly reads
+  # line up with exported parquet. stable_per columns are hash-based and
+  # unaffected; this only pins the ordinary random columns.
+  file_seed <- bitwXor(seed, sum(utf8ToInt(paste0(dataset_id, "/", file_key))))
+  set.seed(file_seed)
 
   # Assemble the requested file via generic YAML-driven engine
   dt <- .assemble_generic(dataset_id, file_key, spine, col_q = col_q)
@@ -743,11 +771,20 @@ read_sav <- function(file,
 # Returns TRUE if: no meta entry exists, columns changed, n changed, or seed changed.
 # When columns is NULL (all columns requested), always re-simulate unless
 # the meta entry was itself a full export (n and seed match and entry exists).
+# Scalar equality that treats two NULLs as equal (n = NULL round-trips through
+# .sim_meta.yaml as a missing/NULL field; `NULL != NULL` is logical(0) and would
+# error inside `if`).
+.eq_scalar <- function(a, b) {
+  if (is.null(a) && is.null(b)) return(TRUE)
+  if (is.null(a) || is.null(b)) return(FALSE)
+  isTRUE(a == b)
+}
+
 .file_needs_sim <- function(meta, cbs_name, year, columns, n, seed) {
   key <- .meta_key(cbs_name, year)
   entry <- meta[[key]]
   if (is.null(entry)) return(TRUE)
-  if (entry$n != n || entry$seed != seed) return(TRUE)
+  if (!.eq_scalar(entry$n, n) || !.eq_scalar(entry$seed, seed)) return(TRUE)
   # NULL columns = all columns requested; skip only if entry is a full export
   if (is.null(columns)) return(!isTRUE(entry$full))
   # Check if all requested columns are already present
@@ -802,7 +839,9 @@ read_sav <- function(file,
 #'   of what was previously simulated.  Default `FALSE` skips files whose
 #'   columns, `n`, and `seed` already match the `.sim_meta.yaml` in
 #'   `output_dir`.
-#' @return Invisibly, `output_dir`.
+#' @return Invisibly, a list with elements `dir` (the output directory),
+#'   `written` (number of parquet files written) and `skipped` (number of
+#'   files skipped because they were already simulated).
 #' @export
 sim_export <- function(output_dir, dataset = NULL, year = 2023L,
                        n = NULL, seed = 42L, col_select = NULL,

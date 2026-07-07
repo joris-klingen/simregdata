@@ -12,6 +12,7 @@ sim_population(
   include_network = FALSE,
   datasets = NULL,
   col_select = NULL,
+  force_resim = FALSE,
   verbose = TRUE
 )
 }
@@ -36,6 +37,11 @@ registered datasets.  Takes precedence over \code{include_network}.}
 CBS file names (e.g. \code{"WoonbasePopulatiePersonen"}, \code{"RDWNPACT"}) and
 values are character vectors of column names.  Key columns (RINPERSOON
 etc.) are always included automatically.}
+
+\item{force_resim}{Logical; if \code{TRUE}, wipe the output directory and
+regenerate everything from scratch.  Default \code{FALSE} skips files that
+are already present in \code{.sim_meta.yaml} with matching columns, \code{n},
+and \code{seed}.}
 
 \item{verbose}{Print progress summary (default \code{TRUE}).}
 }

@@ -74,8 +74,16 @@
     total
   }, double(1L), USE.NAMES = FALSE)
 
-  # Multiplicative hash combining ID and salt
-  h <- (id_num * 48271 + salt_num) %% mod
+  # Multiplicative hash combining ID and salt.
+  # The salt must enter *multiplicatively*, not just additively: an additive
+  # salt (h = id*a + salt) makes every column's uniform an affine shift of the
+  # same draw, so all stable_per columns of one identifier become perfectly
+  # rank-correlated. Deriving a salt-specific odd multiplier decorrelates them.
+  # Operands stay < 2^53 so double arithmetic remains exact:
+  #   id_num < mod (~2.1e9), salt_mult < 2^21 (~2.1e6) -> product < 4.6e15.
+  salt_mult <- (salt_num %% 1048573) * 2 + 1  # odd multiplier in [1, ~2.1e6]
+  h <- (id_num * salt_mult) %% mod
+  h <- (h * 48271 + salt_num) %% mod
   h <- (h * 69069 + 1) %% mod
   h / mod
 }
@@ -83,6 +91,9 @@
 # Deterministic categorical: hash IDs to pick categories via cumulative probs.
 .deterministic_categorical <- function(id_vec, values, probs, salt) {
   u <- .hash_to_uniform(id_vec, salt)
+  # Normalize so probs that don't sum to 1 behave like the random sample()
+  # path (which renormalizes) instead of dumping the residual on the last bin.
+  probs <- probs / sum(probs)
   cum_p <- cumsum(probs)
   # findInterval with breakpoints [0, cum_p[1], ..., cum_p[n-1]]
   # returns bin index 1..n matching values[1..n]

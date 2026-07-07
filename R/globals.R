@@ -1,13 +1,14 @@
 #' @import data.table
 #' @importFrom haven labelled
-#' @importFrom rlang enquo quo_is_null quo_get_expr
+#' @importFrom rlang enquo quo_is_null quo_get_expr "%||%"
 #' @importFrom tidyselect eval_select
 #' @importFrom tibble as_tibble
 #' @importFrom stats rbinom rlnorm rnorm runif setNames
+#' @importFrom utils globalVariables
 NULL
 
 # Suppress R CMD check NOTEs for data.table NSE variables
-utils::globalVariables(c(
+globalVariables(c(
   ".N", ".I", ".SD",
   "RINOBJECTNUMMER", "SOORTOBJECTNUMMER", "RINPERSOON", "RINPERSOONS",
   "HUISHOUDNR", "TYPHH", "IMPUTATIECODEHH", "DATUMAANVANGHH",

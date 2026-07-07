@@ -7,18 +7,21 @@ Source PDFs downloaded from the CBS microdata catalog
 
 ```
 docs/
-├── cbs-catalogs.yaml         # PDF source URLs (tracked in git)
-├── download_pdfs.R           # Downloads PDFs from the YAML
-├── extract_pdfs.R            # Extracts full text + column metadata from PDFs
-├── cbs-catalogs/             # Downloaded PDFs (gitignored)
-│   ├── woonbase/             # 9 files
-│   ├── rdw/                  # 2 files
-│   ├── spolis/               # 1 file
-│   ├── vehtab/               # 1 file
-│   └── energieverbruik/      # 1 file
-└── extracted/                # Extracted output (gitignored)
-    ├── full_text/{dataset}/  # Plain text per PDF (one .txt per .pdf)
-    └── meta/                 # Column metadata CSVs (volgnr, naam, formaat)
+├── cbs-catalogs.yaml              # PDF source URLs (tracked in git)
+├── download_pdfs.R                # Downloads PDFs from the YAML
+├── extract_pdfs.R                 # Extracts full text + column metadata from PDFs
+├── column-overview.md             # Generated overview of all simulated columns
+├── cbs-variable-reference.md      # Hand-written CBS variable reference notes
+├── implementation-plan-tier1-2.md # Design notes / implementation plan
+├── cbs-catalogs/                  # Downloaded PDFs (gitignored)
+│   ├── woonbase/                  # 9 files
+│   ├── rdw/                       # 2 files
+│   ├── spolis/                    # 1 file
+│   ├── vehtab/                    # 1 file
+│   └── energieverbruik/           # 1 file
+└── extracted/                     # Extracted output (gitignored)
+    ├── full_text/{dataset}/       # Plain text per PDF (one .txt per .pdf)
+    └── meta/                      # Column metadata CSVs (volgnr, naam, formaat)
 ```
 
 ## Downloading PDFs
