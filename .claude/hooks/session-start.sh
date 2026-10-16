@@ -29,7 +29,15 @@ codename <- tryCatch(
 )
 if (length(codename) != 1L || !nzchar(codename)) codename <- 'noble'
 repo <- sprintf('https://packagemanager.posit.co/cran/__linux__/%s/latest', codename)
-options(repos = c(CRAN = repo), Ncpus = max(1L, parallel::detectCores()))
+
+# A platform User-Agent makes PPM serve precompiled Linux binaries (no build
+# toolchain needed) instead of source tarballs.
+options(
+  repos = c(CRAN = repo),
+  HTTPUserAgent = sprintf('R/%s R (%s)', getRversion(),
+    paste(getRversion(), R.version$platform, R.version$arch, R.version$os)),
+  Ncpus = max(1L, parallel::detectCores())
+)
 
 # Imports needed at runtime + tools to test and lint. `arrow` powers the
 # parquet-export tests (otherwise skipped). Base packages (stats/tools/utils)
@@ -51,9 +59,11 @@ if (length(missing)) {
     message('WARNING: could not install: ', paste(still, collapse = ', '))
     message('  The CRAN mirror (', repo, ') was unreachable.')
     message('  This usually means the environment network policy blocks R')
-    message('  package repositories. Add packagemanager.posit.co under')
-    message('  "Allowed domains" (Allow package managers left ticked), or')
-    message('  widen the network access level.')
+    message('  package repositories. Add BOTH of these under "Allowed')
+    message('  domains" (Allow package managers left ticked), or widen the')
+    message('  network access level:')
+    message('    - packagemanager.posit.co   (package index)')
+    message('    - rspm-sync.rstudio.com     (package downloads / CDN)')
   }
 } else {
   message('All required R packages already installed.')
