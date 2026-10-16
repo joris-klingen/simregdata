@@ -17,8 +17,12 @@ Rplots.pdf
 # Stray PDFs at top level (CBS docs belong in docs/cbs-catalogs/)
 /*.pdf
 
-# Claude Code settings (local only)
-.claude/
+# Claude Code — track the shared SessionStart hook + its registration,
+# ignore machine-local overrides
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/settings.local.json
 
 # Generated plots (reproducible from scripts)
 analysis/plots/
