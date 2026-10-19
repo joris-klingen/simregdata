@@ -4,6 +4,9 @@
 
 entity: person
 spine_table: pers
+# Period file: only persons present in the simulation year have a current
+# address, so restrict to the year's population (demographic entry/exit).
+population_snapshot: true
 
 pre_compute:
   - name: GemeenteCodeJJJJ1Jan

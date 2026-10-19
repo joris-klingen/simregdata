@@ -137,6 +137,38 @@ dt <- read_sav("my_survey2023V1")
 | `*_cbs_params(year)` | Loads cached CBS parameters for a dataset (e.g. `spolis_cbs_params(2023)`). |
 | `*_update_params(years)` | Fetches CBS StatLine data and writes `params.yaml` (e.g. `vehtab_update_params()`). |
 
+### Demographic dynamics across years
+
+Each person is assigned a **year-invariant life course** — a birth year, a
+death year (from a sex-specific lifespan), and optional emigration / immigration
+years — derived deterministically from their `RINPERSOON`. Because the life
+course depends only on the person (not the simulation year) it is fully
+reproducible for a given seed, yet it makes the population genuinely
+**unbalanced across years**: persons are born into the panel, die, and migrate
+in and out.
+
+Population-snapshot files only contain the persons present in the simulation
+year, and their entry/exit indicators are derived from the life course rather
+than drawn independently:
+
+- `WoonbasePopulatiePersonen`, `GBAADRESOBJECTBUS`, `GBAHUISHOUDENSBUS` are
+  restricted to the year's living/registered population (`Indicator_PersoonIs*`
+  for births, deaths, migration, and `IsAanwezig1Jan`/`IsAanwezig31Dec` reflect
+  actual events).
+- `GBAPERSOONKTAB` keeps one row per person ever registered (it is demographic,
+  not a period snapshot).
+
+The shared identity spine that other datasets sample from (SPOLIS, income,
+networks, …) stays year-invariant, so cross-year network stability and
+reproducible joins are unaffected. Household member/child counts and the
+reference person are recomputed for the surviving members of each snapshot.
+
+*Current scope:* dynamics are applied to the shared person spine and the
+person-level snapshot files; household/object files keep their full structure,
+and explicit GBA date columns (full birth/death/migration dates) are a planned
+follow-up. Event rates are approximate and centred on the reference year;
+calibration to CBS StatLine is tracked separately.
+
 ### Architecture
 
 The simulator uses a YAML-driven config system under `inst/config/datasets/{dataset_id}/`:

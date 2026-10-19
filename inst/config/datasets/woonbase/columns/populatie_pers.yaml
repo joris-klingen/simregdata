@@ -1,6 +1,9 @@
 # PopulatiePersonen - person-level population file
+# Snapshot of the population present in the simulation year, so it reflects
+# demographic entry/exit (births, deaths, migration). See R/demographics.R.
 entity: person
 spine_table: pers
+population_snapshot: true
 
 columns:
   - name: RINPERSOON
