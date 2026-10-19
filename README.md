@@ -190,6 +190,17 @@ vehtab_update_params()              # 83834NED
 energieverbruik_update_params()     # Kerncijfers wijken en buurten
 ```
 
+## Simulation quality
+
+How close is an analysis on simulated data to the same analysis on the real
+microdata? A series of vignettes answers that per research question, comparing
+simulated outcomes with CBS StatLine (via `cbsodataR`, plots via
+[ggcpb](https://github.com/joris-klingen/ggcpb)):
+
+| Vignette | Research question | Datasets |
+|----------|-------------------|----------|
+| `vignette("quality-cars")` | How fast is the car fleet electrifying, by vehicle age, mileage and region? | RDW, Woonbase |
+
 ## Performance
 
 **Interactive use** (1M persons on a modern laptop):
@@ -216,4 +227,5 @@ to limit columns keeps file sizes manageable and speeds up assembly.
 install.packages(c("data.table", "haven", "rlang", "tidyselect", "yaml",
                    "tibble"))
 install.packages(c("arrow", "cbsodataR"))  # optional: parquet I/O + StatLine refresh
+remotes::install_github("joris-klingen/ggcpb")  # optional: quality vignettes
 ```
