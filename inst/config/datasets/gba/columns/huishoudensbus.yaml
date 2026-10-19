@@ -4,6 +4,9 @@
 
 entity: person
 spine_table: pers
+# Period file: household membership only exists while a person is present, so
+# restrict to the year's population (demographic entry/exit).
+population_snapshot: true
 
 columns:
   - name: RINPERSOONS

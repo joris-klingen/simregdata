@@ -201,6 +201,13 @@
   agg_cols <- c("AantalPersonenPerHuishouden", "AantalKinderenPerHuishouden")
   dt_hh[hh_sz, (agg_cols) := mget(agg_cols), on = "HUISHOUDNR"]
 
+  # ---- Life course (identity-phase, year-invariant) ----
+  # Assign each person a deterministic birth/death/migration profile from their
+  # RINPERSOON so panels become unbalanced across years while staying
+  # reproducible. Runs after all Phase 1 random draws so the RNG stream is
+  # unchanged; see R/demographics.R.
+  .assign_life_events(dt_pers, .REF_YEAR)
+
 
   # ==== PHASE 2: Year-specific attributes ====================================
   # Year-dependent seed: same person gets different gemeente, WOZ, indicators
@@ -286,19 +293,25 @@
   # Set Indicator_PersoonIsVerhuisd based on actual movers
   dt_pers[, Indicator_PersoonIsVerhuisd := as.character(as.integer(pers_in_moved))]
 
-  ind_specs <- list(
-    c("Indicator_PersoonIsGeboren",                 0.012),
-    c("Indicator_PersoonIsOverleden",               0.010),
-    c("Indicator_PersoonIsGeemigreerd",             0.008),
-    c("Indicator_PersoonIsGeimmigreerd",            0.007),
+  # Administrative indicators: small independent random flags, not tied to the
+  # life course.
+  admin_specs <- list(
     c("Indicator_PersoonIsAdministratiefAfgevoerd", 0.002),
-    c("Indicator_PersoonIsAdministratiefOpgenomen", 0.002),
-    c("Indicator_PersoonIsAanwezig1Jan",            0.99),
-    c("Indicator_PersoonIsAanwezig31Dec",           0.99)
+    c("Indicator_PersoonIsAdministratiefOpgenomen", 0.002)
   )
-  for (sp in ind_specs) {
+  for (sp in admin_specs) {
     data.table::set(dt_pers, j = sp[[1L]],
       value = as.character(rbinom(N_PERS_actual, 1L, as.numeric(sp[[2L]]))))
+  }
+
+  # Life-event indicators: derived deterministically from each person's
+  # entry/exit years (births, deaths, migration) rather than drawn
+  # independently, so they stay consistent across years. `present` marks the
+  # persons who belong to this year's population snapshot.
+  demog <- .demographic_indicators(dt_pers, year)
+  pers_present <- demog$present
+  for (nm in setdiff(names(demog), "present")) {
+    data.table::set(dt_pers, j = nm, value = demog[[nm]])
   }
 
   # AantalKeerVerhuisd: based on actual movers
@@ -359,6 +372,7 @@
   list(pers = dt_pers, hh = dt_hh, obj = dt_obj,
        obj_raw = dt_obj, dt_ref = dt_ref,
        pers_gemeente = pers_gemeente,
+       pers_present = pers_present,
        year = year, jan1 = jan1, dec31 = dec31,
        pers_spatial_enriched = FALSE,
        hh_enriched = FALSE,
@@ -483,7 +497,16 @@
     dt_ref  <- spine$dt_ref
     year    <- spine$year
 
-    obj_kids <- dt_pers[, .(
+    # Count occupancy over the persons present in the simulation year so that
+    # not-yet-born or departed persons do not inflate per-object counts (and so
+    # youngest-child age stays non-negative). See R/demographics.R.
+    occ_pers <- if (!is.null(spine$pers_present)) {
+      dt_pers[spine$pers_present]
+    } else {
+      dt_pers
+    }
+
+    obj_kids <- occ_pers[, .(
       AantalKinderenPerVSL = sum(PLHH == "1"),
       LeeftijdJongsteKindPerVSL = if (any(PLHH == "1"))
         min(as.integer(year) - GBAGeboorteJaar[PLHH == "1"]) else 99L,

@@ -25,6 +25,8 @@ globalVariables(c(
   "Indicator_PersoonIsGeemigreerd", "Indicator_PersoonIsGeimmigreerd",
   "Indicator_PersoonIsAdministratiefAfgevoerd", "Indicator_PersoonIsAdministratiefOpgenomen",
   "Indicator_PersoonIsAanwezig1Jan", "Indicator_PersoonIsAanwezig31Dec",
+  "DemogEntryYear", "DemogExitYear", "DemogEntryType", "DemogExitType",
+  "demog_has_ref",
   "RINPERSOON_Ref", "RINPERSOONS_Ref", "REFPERSOONHH_Ref",
   "PLHH_Ref", "GBAGeslachtsAanduiding_Ref",
   "RINPERSOON_Ref2", "RINPERSOONS_Ref2",

@@ -265,6 +265,19 @@
     }
   }
 
+  # Population snapshot: restrict a person-level file to the persons present in
+  # the simulation year (demographic entry/exit) and repair household
+  # bookkeeping for the survivors. Enrichment above has already run against the
+  # full person spine, so the presence mask still aligns row-for-row and the
+  # subset carries any enriched columns. The filtered table is substituted into
+  # the local `spine` (copy-on-modify, so the session cache is untouched) so
+  # that both the base table and every `spine.pers.*` source read use the same
+  # population. See R/demographics.R.
+  if (isTRUE(spec$population_snapshot) && identical(tbl_name, "pers") &&
+      !is.null(spine$pers_present)) {
+    spine$pers <- .repair_active_households(spine$pers[spine$pers_present])
+  }
+
   base_tbl <- spine[[tbl_name]]
   if (is.null(base_tbl)) stop("Spine table '", tbl_name, "' not found")
   n_rows <- nrow(base_tbl)

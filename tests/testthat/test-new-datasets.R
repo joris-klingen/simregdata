@@ -561,7 +561,11 @@ test_that("FAMILIENETWERKTAB generates valid family network", {
 test_that("netwerk persons come from shared spine", {
   sim_reset()
   sim_init("woonbase", year = 2023L, n = 200L, seed = 42L)
-  dt_pers <- read_sav("WoonbasePopulatiePersonen2023V1",
+  # Compare against the full identity set (the Sleutelbestand key file), not the
+  # WoonbasePopulatiePersonen snapshot: networks sample the year-invariant spine,
+  # whereas the population file is filtered to the persons present in the year
+  # (demographic entry/exit), so it omits some spine persons by design.
+  dt_pers <- read_sav("WoonbaseSleutelbestand2023V1",
                        col_select = c(RINPERSOON))
 
   sim_init("burennetwerktab", year = 2023L, seed = 42L)
