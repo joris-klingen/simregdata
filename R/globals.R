@@ -17,6 +17,8 @@ globalVariables(c(
   "AanvangWoonduur", "AantalPersonenPerHuishouden", "AantalKinderenPerHuishouden",
   "AantalPersonenPerVSL", "AantalKinderenPerVSL", "LeeftijdJongsteKindPerVSL",
   "LeeftijdRefPersoon", "AantalPersonenPerVSLKlasse", "n", "jaar", "p",
+  "age", "type", "concept", "Inkomensklassen_label", "KenmerkenVanHuishoudens_label",
+  "Inkomensbegrippen_label", "INHAHL", "RINPERSOONHKW",
   "PandID1Jan", "PandID31Dec", "VBOWoningType1Jan",
   "Indicator_VBOIsGesloopt", "Indicator_VBOIsTransformatie",
   "Indicator_VBOIsNieuwbouw", "Indicator_VSLIsOntrokken", "Indicator_VSLIsNieuw",

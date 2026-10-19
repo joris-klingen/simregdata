@@ -23,7 +23,7 @@ sim_column_overview <- function() {
 
   # StatLine table mapping: dataset -> table IDs used for calibration
   statline_tables <- list(
-    woonbase                = "37230ned",
+    woonbase                = "37230ned, 83932NED",
     rdw                     = "85237NED, 85236NED, 85404NED",
     spolis                  = "81431NED",
     vehtab                  = "83834NED",
@@ -32,7 +32,7 @@ sim_column_overview <- function() {
     hoogsteopltab           = "82275NED",
     inpatab                 = NA_character_,
     secmbus                 = NA_character_,
-    inhatab                 = NA_character_,
+    inhatab                 = "83932NED",
     betab                   = NA_character_,
     zonnestroominstallaties = NA_character_,
     burennetwerktab         = NA_character_,

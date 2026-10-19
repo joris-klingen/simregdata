@@ -323,17 +323,18 @@
   woz <- dt_obj$WOZWaardeObjectBAG1Jan
   woz_rank <- data.table::frank(woz, ties.method = "random") / (N_HH + 1)
 
-  # BESTINKH: disposable income
-  dt_hh[, BESTINKH := as.integer(pmax(5000L, pmin(250000L, round(
-    stats::qlnorm(woz_rank, meanlog = 10.45, sdlog = 0.45) *
-    exp(stats::rnorm(.N, 0, 0.25)), -2L))))]
+  # Disposable, gross, primary and standardised income: lognormal per
+  # household type (and AOW age of the reference person), calibrated to
+  # StatLine 83932NED and correlated with WOZ (R/params_inhatab.R)
+  ref_age <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1,
+                     .(HUISHOUDNR, age = year - GBAGeboorteJaar)]
+  hh_age <- ref_age$age[match(dt_hh$HUISHOUDNR, ref_age$HUISHOUDNR)]
+  hh_age[is.na(hh_age)] <- 45L
+  inc <- .simulate_hh_income(dt_hh$TYPHH, hh_age, woz_rank, year)
+  for (nm in names(inc)) data.table::set(dt_hh, j = nm, value = inc[[nm]])
 
   # BELIH: taxable income (higher than disposable)
   dt_hh[, BELIH := as.integer(round(BESTINKH * stats::runif(.N, 1.1, 1.4), -2L))]
-
-  # GESTINKH: standardized income (equivalized by HH size)
-  dt_hh[, GESTINKH := as.integer(round(
-    BESTINKH / sqrt(pmax(1L, AantalPersonenPerHuishouden)), -2L))]
 
   # VERMHH: household wealth — correlated with WOZ rank, wider distribution
   verm_rank <- pmax(0.001, pmin(0.999, woz_rank + stats::rnorm(N_HH, 0, 0.15)))
@@ -348,6 +349,10 @@
     data.table::frank(BESTINKH, ties.method = "random") / .N * 100))]
   dt_hh[, P100HGEST := as.integer(ceiling(
     data.table::frank(GESTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HBRUT := as.integer(ceiling(
+    data.table::frank(BRUTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HPRIM := as.integer(ceiling(
+    data.table::frank(PRIMINKH, ties.method = "random") / .N * 100))]
   dt_hh[, P100HVERM := as.integer(ceiling(
     data.table::frank(VERMHH, ties.method = "random") / .N * 100))]
   dt_hh[, P100WELVAART := as.integer(ceiling(data.table::frank(

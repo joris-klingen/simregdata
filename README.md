@@ -185,6 +185,7 @@ Year-specific parameters are stored in each dataset's `params.yaml` and checked 
 ```r
 woonbase_update_params()            # 37230ned, 71486ned
 rdw_update_params()                 # 85237NED, 85236NED, 85404NED
+inhatab_update_params()             # 83932NED (household income, also woonbase)
 spolis_update_params()              # 81431NED
 vehtab_update_params()              # 83834NED
 energieverbruik_update_params()     # Kerncijfers wijken en buurten

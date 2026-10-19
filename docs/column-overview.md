@@ -203,7 +203,7 @@ Overview of all simulated columns
 |--------|--------|---------|-------------|----------|
 | `RINPERSOONSHKW` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
 | `RINPERSOONHKW` | spine-derived | NL |  |  |
-| `INHAHL` | random: uniform [1, 6] |  |  |  |
+| `INHAHL` | spine-derived | NL |  |  |
 | `INHAHLMI` | random: uniform [1, 4] |  |  |  |
 | `INHARMEUR` | random: uniform [1, 300] |  |  |  |
 | `INHARMEURL` | random: uniform [1, 300] |  |  |  |
@@ -212,19 +212,19 @@ Overview of all simulated columns
 | `INHARMSOC` | random: uniform [1, 300] |  |  |  |
 | `INHARMSOCL` | random: uniform [1, 300] |  |  |  |
 | `INHBBIHJ` | random: hardcoded probs |  |  |  |
-| `INHBELIH` | params: mean_belih | NL |  |  |
-| `INHBESTINKH` | params: mean_bestinkh | NL |  |  |
-| `INHBRUTINKH` | params: mean_brutinkh | NL |  |  |
+| `INHBELIH` | random: normal (mean=18000, sd=20000) |  |  |  |
+| `INHBESTINKH` | spine-derived | NL |  |  |
+| `INHBRUTINKH` | spine-derived | NL |  |  |
 | `INHEHALGR` | random: hardcoded probs |  |  |  |
-| `INHGESTINKH` | params: mean_gestinkh | NL |  |  |
-| `INHP100HBEST` | random: uniform [1, 100] |  |  |  |
-| `INHP100HBESTES` | random: uniform [1, 100] |  |  |  |
-| `INHP100HBRUT` | random: uniform [1, 100] |  |  |  |
-| `INHP100HGEST` | random: uniform [1, 100] |  |  |  |
-| `INHP100HGESTES` | random: uniform [1, 100] |  |  |  |
-| `INHP100HPRIM` | random: uniform [1, 100] |  |  |  |
+| `INHGESTINKH` | spine-derived | NL |  |  |
+| `INHP100HBEST` | spine-derived | NL |  |  |
+| `INHP100HBESTES` | spine-derived | NL |  |  |
+| `INHP100HBRUT` | spine-derived | NL |  |  |
+| `INHP100HGEST` | spine-derived | NL |  |  |
+| `INHP100HGESTES` | spine-derived | NL |  |  |
+| `INHP100HPRIM` | spine-derived | NL |  |  |
 | `INHPOPIIV` | random: codelist: popiiv |  |  | [popiiv](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
-| `INHPRIMINKH` | params: mean_priminkh | NL |  |  |
+| `INHPRIMINKH` | spine-derived | NL |  |  |
 | `INHSAMAOW` | random: hardcoded probs |  |  |  |
 | `INHSAMHH` | random: codelist: samhh |  |  | [samhh](https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
 | `INHUAF` | random: uniform [0, 3] |  |  |  |

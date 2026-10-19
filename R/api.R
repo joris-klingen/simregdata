@@ -138,6 +138,12 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         ds_spine$pers <- .build_secm_periods(
           sampled_pers, year = year, seed = seed, params = ds_params)
 
+      } else if (identical(dataset, "inhatab")) {
+        # INHATAB: one row per household (key RINPERSOONHKW) with at least
+        # one member present in the year, carrying the household income
+        # drawn on the spine so it matches woonbase (R/params_inhatab.R)
+        ds_spine$pers <- .build_inhatab_households(spine)
+
       } else if (identical(dataset, "betab")) {
         # BETAB: generate unique business IDs
         # Try to reuse BEIDs from SPOLIS if available

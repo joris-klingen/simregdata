@@ -37,14 +37,13 @@ woonbase extra-kenmerken file `WOONBASEEKHuishoudensWV`, with
 `BESTINKH1JAN`. Both are compared here with StatLine 83932NED, the
 published aggregate of the same register.
 
-The short version: neither simulated source is usable for this question yet.
-`INHATAB` has the wrong unit (one row per person, not per household), the
-wrong level, a symmetric distribution where the real one is skewed, and
-percentile columns that are unrelated to the income they rank. The woonbase
-income has a realistic skewed shape and consistent percentiles but is too
-low and does not vary with household type. Code written against either
-source runs on the real data unchanged, but the numbers it produces here
-carry little information about the real answer.
+The short version: household income is drawn per household type from
+83932NED, and both simulated sources hold the same value. The published level
+and the differences between household types are reproduced, and the
+distribution over income classes and the decile means come close, with
+somewhat too little mass at the very bottom and in the extreme top. One gap
+remains: personal incomes in `INPATAB` are drawn independently and do not add
+up to the household income.
 
 ## Setup
 
@@ -121,57 +120,49 @@ hh[wb_inc, on = "RINPERSOON", `:=`(
 # woonbase (person -> household)
 inpa[pers, on = "RINPERSOON", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
 hkw_hh <- unique(inpa[, .(RINPERSOONHKW, HUISHOUDNR1Jan)], by = "RINPERSOONHKW")
-```
-
-## One row per household?
-
-`INHATAB` is a household file: on the remote-access environment it has one
-row per `RINPERSOONHKW`. The simulated file does not:
-
-```{r unit}
-data.table(
-  rijen                 = nrow(inha),
-  unieke_RINPERSOONHKW  = uniqueN(inha$RINPERSOONHKW),
-  huishoudens_woonbase  = nrow(hh)
-)
-```
-
-The simulator draws one record per *person* and attaches that person's
-household key, so a household appears once for every member, each time with
-a different, independently drawn income:
-
-```{r unit-example}
-dup <- inha[, .N, by = RINPERSOONHKW][N %between% c(2, 4), RINPERSOONHKW[1]]
-inha[RINPERSOONHKW == dup, .(RINPERSOONHKW, INHBESTINKH, INHBRUTINKH, INHP100HBEST)]
-```
-
-Code that aggregates `INHATAB` without deduplicating double-counts
-multi-person households, a mistake that cannot happen on the real file. For
-the comparison below we keep the first record per household.
-
-```{r dedupe}
-inha1 <- unique(inha, by = "RINPERSOONHKW")
-inha1[hkw_hh, on = "RINPERSOONHKW", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
-hh[inha1, on = "HUISHOUDNR1Jan", `:=`(
+inha[hkw_hh, on = "RINPERSOONHKW", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
+hh[inha, on = "HUISHOUDNR1Jan", `:=`(
   inhatab   = as.numeric(i.INHBESTINKH),
   inh_p100  = as.numeric(i.INHP100HBEST),
   primair   = as.numeric(i.INHPRIMINKH),
   bruto     = as.numeric(i.INHBRUTINKH),
   gestand   = as.numeric(i.INHGESTINKH))]
 hh <- hh[!is.na(inhatab)]
-
-# long format: one row per household and simulated source
-sim_long <- melt(hh[, .(HUISHOUDNR1Jan, type, inhatab, woonbase)],
-  id.vars = c("HUISHOUDNR1Jan", "type"),
-  variable.name = "bron", value.name = "inkomen")
-sim_long[, bron := fifelse(bron == "inhatab", "INHATAB", "woonbase")]
 ```
+
+## One row per household
+
+`INHATAB` is a household file: on the remote-access environment it has one
+row per `RINPERSOONHKW`. The simulated file follows that, and every household
+key in `INPATAB` is found in it:
+
+```{r unit}
+data.table(
+  rijen                   = nrow(inha),
+  unieke_RINPERSOONHKW    = uniqueN(inha$RINPERSOONHKW),
+  inpatab_hkw_in_inhatab  = mean(inpa$RINPERSOONHKW %in% inha$RINPERSOONHKW) * 100
+)
+```
+
+Both simulated sources carry the same disposable income for a household, so
+an analysis gives the same answer whichever file it starts from:
+
+```{r same-source}
+hh[!is.na(woonbase), .(huishoudens = .N, gelijk = mean(inhatab == woonbase) * 100)]
+```
+
+The rest of this vignette uses `INHATAB`.
 
 ### StatLine reference
 
 | Table | Content |
 |-------|---------|
 | 83932NED | Private households by income concept, income class or decile, and household characteristics: count, mean and median income |
+
+The simulator is calibrated to the mean and median per household type of
+this table (`inhatab_update_params()`); the class distribution, the decile
+means and the national totals below are not used in the calibration and are
+an out-of-sample check.
 
 ```{r fetch-statline, warning = FALSE}
 sl <- statline("83932NED", Perioden = paste0(YEAR, "JJ00"))
@@ -180,9 +171,9 @@ tcat("StatLine reachable: ", has_statline)
 
 if (has_statline) {
   sl[, `:=`(
-    n        = as.numeric(ParticuliereHuishoudens_1) * 1000,
+    n         = as.numeric(ParticuliereHuishoudens_1) * 1000,
     gemiddeld = as.numeric(GemiddeldInkomen_4) * 1000,
-    mediaan  = as.numeric(MediaanInkomen_5) * 1000
+    mediaan   = as.numeric(MediaanInkomen_5) * 1000
   )]
   sl_best <- sl[Inkomensbegrippen_label == "Besteedbaar inkomen"]
 }
@@ -197,7 +188,7 @@ cat("> **Note.** StatLine could not be reached when this vignette was built, so"
 ## Level: mean and median
 
 ```{r level}
-sim_level <- sim_long[, .(gemiddeld = mean(inkomen), mediaan = median(inkomen)), by = bron]
+sim_level <- hh[, .(bron = "simulatie", gemiddeld = mean(inhatab), mediaan = median(inhatab))]
 sl_level <- if (has_statline) {
   sl_best[Inkomensklassen_label == "Totaal" &
           KenmerkenVanHuishoudens_label == "Particuliere huishoudens",
@@ -214,20 +205,15 @@ cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro
   ylab  = "euro per huishouden per jaar")
 ```
 
-Both simulated sources are too low. `INHATAB` draws from a normal
-distribution whose mean is set in `inst/config/datasets/inhatab/params.yaml`;
-the 2023 values there are well below the published ones. Because the
-distribution is symmetric, its median also equals its mean, whereas in
-reality the mean lies well above the median.
-
-The other income concepts in `INHATAB` tell the same story:
+The other income concepts are derived from disposable income per household,
+using the ratio of the type's medians:
 
 ```{r concepts}
 sim_conc <- hh[, .(
   begrip = c("Primair inkomen", "Bruto inkomen", "Besteedbaar inkomen",
              "Gestandaardiseerd inkomen"),
   gemiddeld = c(mean(primair), mean(bruto), mean(inhatab), mean(gestand)),
-  bron = "INHATAB")]
+  bron = "simulatie")]
 sl_conc <- if (has_statline) {
   sl[Inkomensklassen_label == "Totaal" &
      KenmerkenVanHuishoudens_label == "Particuliere huishoudens",
@@ -243,6 +229,10 @@ cpb_col(conc, x = begrip, y = gemiddeld, fill = bron,
   ylab  = "euro per huishouden per jaar")
 ```
 
+Gross and standardised income follow; primary income comes out too high,
+because it is far more skewed than disposable income (pensioners have little
+primary income) and a single ratio of medians does not capture that.
+
 ## Distribution over income classes
 
 ```{r classes}
@@ -252,9 +242,8 @@ KLASSEN <- c("minder dan 10 000 euro", "10 000 tot 20 000 euro",
              "100 000 tot 200 000 euro", "200 000 euro of meer")
 breaks <- c(-Inf, 10, 20, 30, 40, 50, 100, 200, Inf) * 1000
 
-sim_cls <- sim_long[, .N, by = .(bron, klasse = cut(inkomen, breaks, labels = KLASSEN,
-                                                    right = FALSE))][
-  , .(klasse, aandeel = N / sum(N) * 100), by = bron]
+sim_cls <- hh[, .N, by = .(klasse = cut(inhatab, breaks, labels = KLASSEN, right = FALSE))][
+  , .(bron = "simulatie", klasse, aandeel = N / sum(N) * 100)]
 sl_cls <- if (has_statline) {
   sl_best[KenmerkenVanHuishoudens_label == "Particuliere huishoudens" &
           sub("^Inkomen: ", "", Inkomensklassen_label) %in% KLASSEN,
@@ -273,11 +262,10 @@ cpb_col(cls, x = klasse, y = aandeel, fill = bron,
   xlab  = "% van de huishoudens")
 ```
 
-`INHATAB` puts far too many households below 10,000 euro: the normal
-distribution has a long left tail, truncated at -50,000 euro, so a sizable
-share of households gets a large negative income. The real distribution is
-right-skewed, with few households at the bottom and a long tail at the top;
-the woonbase income has that shape, shifted to the left.
+The lognormal per household type gets the bulk of the distribution right but
+has thin tails at the bottom: hardly any household falls below 10,000 euro,
+where the real data hold self-employed with losses and students. In return
+too many households land between 100,000 and 200,000 euro.
 
 ## Inequality: mean income per decile
 
@@ -285,8 +273,8 @@ The research question is about inequality, so the shape of the distribution
 matters more than its level. Mean disposable income per decile group:
 
 ```{r deciles}
-sim_dec <- sim_long[order(inkomen), .(deciel = ceiling(seq_len(.N) / .N * 10), inkomen),
-                    by = bron][, .(gemiddeld = mean(inkomen)), by = .(bron, deciel)]
+sim_dec <- hh[order(inhatab), .(deciel = ceiling(seq_len(.N) / .N * 10), inhatab)][
+  , .(bron = "simulatie", gemiddeld = mean(inhatab)), by = deciel]
 sl_dec <- if (has_statline) {
   d <- sl_best[KenmerkenVanHuishoudens_label == "Particuliere huishoudens" &
                grepl("10%-groep", Inkomensklassen_label)]
@@ -311,46 +299,35 @@ decile groups:
 dec[, .(top_bodem = gemiddeld[deciel == 10] / gemiddeld[deciel == 1]), by = bron]
 ```
 
-Both sources miss the top of the distribution: the highest decile group
-averages well under half of the published value, so any inequality measure
-comes out too low. `INHATAB` follows the published decile means from the
-third to the ninth group, but its bottom decile has a negative mean, which
-makes the ratio meaningless. The woonbase income has a plausible bottom but
-falls further behind from the middle upward.
+The decile means follow the published ones up to the eighth group. The
+ninth is too high and the tenth too low: the real top decile has a much
+longer tail than a lognormal, so inequality measures that weigh the very top
+(the top-bottom ratio, top income shares) come out somewhat too low.
 
 ## Percentile columns
 
-Both files ship a precomputed percentile of disposable income
-(`INHP100HBEST`, `P100HBEST1JAN`). On the real data that is the rank of the
-household in the national distribution, and analyses often group on it
-directly instead of computing their own ranks.
+`INHP100HBEST` is the household's rank in the national distribution of
+disposable income, as on the real file, so grouping on it directly is
+equivalent to computing the ranks yourself:
 
 ```{r percentiles}
-hh[, .(
-  bron = c("INHATAB", "woonbase"),
-  correlatie_percentiel_inkomen = c(
-    cor(inh_p100, inhatab, method = "spearman"),
-    cor(wb_p100, woonbase, method = "spearman")))]
+hh[, .(correlatie_percentiel_inkomen = cor(inh_p100, inhatab, method = "spearman"))]
 ```
-
-In `INHATAB` the percentile is drawn independently of the income, so grouping
-on it gives flat profiles. In woonbase it is computed from the income and can
-be used.
 
 ## Income by household type
 
 ```{r by-type, fig.height = 4.6}
 TYPEN <- c("Eenpersoonshuishouden", "Eenoudergezin", "Paar, zonder kind",
            "Paar, met kind(eren)", "Meerpersoonshuishouden, overig")
-sim_long[, statline_type := fcase(
-  type == "Eenpersoonshuishouden",                       "Eenpersoonshuishouden",
-  type == "Eenouderhuishouden",                          "Eenoudergezin",
-  grepl("paar zonder kinderen", type),                   "Paar, zonder kind",
-  grepl("paar met kinderen", type),                      "Paar, met kind(eren)",
-  type == "Overig huishouden",                           "Meerpersoonshuishouden, overig"
+hh[, statline_type := fcase(
+  type == "Eenpersoonshuishouden",     "Eenpersoonshuishouden",
+  type == "Eenouderhuishouden",        "Eenoudergezin",
+  grepl("paar zonder kinderen", type), "Paar, zonder kind",
+  grepl("paar met kinderen", type),    "Paar, met kind(eren)",
+  type == "Overig huishouden",         "Meerpersoonshuishouden, overig"
 )]
-sim_type <- sim_long[!is.na(statline_type),
-                     .(gemiddeld = mean(inkomen)), by = .(bron, type = statline_type)]
+sim_type <- hh[!is.na(statline_type),
+               .(bron = "simulatie", gemiddeld = mean(inhatab)), by = .(type = statline_type)]
 sl_type <- if (has_statline) {
   sl_best[Inkomensklassen_label == "Totaal" &
           sub("^Type: ", "", KenmerkenVanHuishoudens_label) %in% TYPEN,
@@ -369,10 +346,10 @@ cpb_col(by_type, x = type, y = gemiddeld, fill = bron,
   xlab  = "euro per huishouden per jaar")
 ```
 
-In reality couples with children have roughly three times the disposable
-income of single-person households. Neither simulated source reproduces
-that: `INHATAB` draws income independently of the household, and woonbase
-links it to the WOZ value of the dwelling only, not to the number of earners.
+The calibration targets are finer than these five groups (singles and
+childless couples are split at the AOW age), so the means here are a check
+that the household types in the simulated population are combined in the
+right proportions.
 
 ## Persons and households
 
@@ -382,31 +359,33 @@ consistency check, and a common step in research code, is to aggregate
 
 ```{r persons-vs-households}
 pers_sum <- inpa[, .(som_personen = sum(as.numeric(INPPERSBESTINK))), by = RINPERSOONHKW]
-pers_sum[inha1, on = "RINPERSOONHKW", inhatab := as.numeric(i.INHBESTINKH)]
+pers_sum[inha, on = "RINPERSOONHKW", inhatab := as.numeric(i.INHBESTINKH)]
 pers_sum[, .(huishoudens = .N, correlatie = cor(som_personen, inhatab))]
 ```
 
-The two files are generated independently, so the household total of the
-person incomes has no relation to the household income.
+Personal incomes in `INPATAB` are still drawn independently of the
+household, so the household total of the person incomes is only weakly
+related to the household income, through the number of members. Analyses that split household income over its members,
+or that combine personal and household income, cannot be checked on the
+simulated data yet.
 
 ## Summary
 
 | Moment | Source in simulator | Matches StatLine? | Safe for research? |
 |--------|---------------------|-------------------|--------------------|
-| One row per household in INHATAB | one row per person | no | no |
-| Mean / median income (INHATAB) | normal, hand-set params | no, too low; median = mean | no |
-| Mean / median income (woonbase) | lognormal via WOZ rank | too low | no |
-| Distribution over classes | INHATAB normal / woonbase lognormal | no / shape roughly | no |
-| Inequality (decile means) | as above | no: top too low (both), bottom negative (INHATAB) | no |
-| Percentile columns | INHATAB uniform / woonbase rank | no / yes | woonbase only |
-| Income by household type | independent of type | no | no |
-| Persons add up to households | independent files | no | no |
+| One row per household in INHATAB | household spine | yes | yes |
+| INHATAB and woonbase agree | same spine column | yes | yes |
+| Mean / median income | lognormal per type, 83932NED | yes | yes |
+| Other income concepts | derived from disposable income | gross, standardised yes; primary too high | not for primary income |
+| Distribution over classes | lognormal mixture (not calibrated) | close; tails too thin | yes, except the tails |
+| Inequality (decile means) | lognormal mixture (not calibrated) | close up to decile 8; top too low | with care at the top |
+| Percentile columns | rank of the income | yes | yes |
+| Income by household type | 83932NED per type | yes | yes |
+| Persons add up to households | INPATAB independent | no | no |
 
-For this research question the simulator is useful for building and testing
-the pipeline (linking `INHATAB` via `RINPERSOONHKW`, joining household types,
-computing deciles), as long as the code deduplicates on `RINPERSOONHKW`. The
-inequality and household-type results themselves have to come from the real
-microdata. The main improvements that would change that verdict: one
-`INHATAB` row per household, a skewed distribution calibrated to the 83932NED
-deciles, income conditional on household type, and income concepts and
-percentiles derived from one another rather than drawn independently.
+For this research question the simulator now gives answers close to the
+published figures, so results developed here are a reasonable preview of the
+results on the real microdata, with inequality at the very top somewhat
+understated. What it cannot show is anything finer than the
+calibration: income differences by region, education or migration
+background, and the split of household income over its members.

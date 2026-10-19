@@ -19,34 +19,34 @@ The tables below classify every column across all 15 datasets.
 
 ## Summary: StatLine-calibrated parameters
 
-| Parameter                                      | Dataset                 | CBS table           | Simulated column(s)             |
-|------------------------------------------------|-------------------------|---------------------|---------------------------------|
-| Population size (`n_persons`)                  | Woonbase                | 37230ned            | Controls spine row count        |
-| Household count (`n_hh`)                       | Woonbase                | 71486ned            | Controls HH count in spine      |
-| HH-type distribution (`typhh_p`)               | Woonbase                | 71486ned            | TYPHH in all file types         |
-| Gemeente population weights                    | Woonbase                | 37230ned            | GemeenteCode sampling probs     |
-| Vehicle fleet size (`n_vehicles`)              | RDW                     | 85236NED            | Controls RDW row count          |
-| Gemeente vehicle weights                       | RDW                     | 85236NED + 37230ned | Spine sampling probs per gem    |
-| Fuel type (`brandstof_p`)                      | RDW                     | 85237NED            | BRANDSTCODECORVRTG              |
-| Vehicle colour (`kleur_p`)                     | RDW                     | 85237NED            | KLEURCODEVRTG                   |
-| Vehicle weight (`gewicht_mean/sd`)             | RDW                     | 85237NED            | MASSALEEGCORVRTG                |
-| Vehicle type (`vrtgsoort_p`)                   | RDW                     | 85236NED            | VRTGSOORT                       |
-| Construction year (`bouwjaar_p`)               | RDW                     | 85237NED            | EERSTETOELDAT1VRTG              |
-| Annual km (`jaarkm_mean/sd`)                   | RDW                     | 85404NED            | VPJAARKM                        |
-| Job count (`n_jobs`)                           | SPOLIS                  | 85275NED            | Controls SPOLIS row count       |
-| Household count (`n_households`)               | VEHTAB                  | (woonbase)          | Controls VEHTAB row count       |
-| Dwelling count (`n_dwellings`)                 | Energieverbruik         | (woonbase)          | Controls row count              |
-| Gas consumption (`gas_mean/sd`)                | Energieverbruik         | CBS energy stats    | GAS                             |
-| Electricity (`elek_mean/sd`)                   | Energieverbruik         | CBS energy stats    | ELEK                            |
-| Solar PV share (`solar_pv_share`)              | Energieverbruik         | CBS energy stats    | ZONPV                           |
-| Education level (`opl_niveau_hb/hg`)           | HOOGSTEOPLTAB           | 82275NED            | OPLNIVSOI2021AGG4HBmetNIRWO, HG |
-| Personal income (`secj_dist`, income means)    | INPATAB                 | 83931NED, 84493NED  | INPSECJ, INPPERSINK, etc.       |
-| Household income (income means)                | INHATAB                 | 83932NED            | INHBESTINKH, INHBRUTINKH, etc.  |
-| SEC monthly (`secm_dist`)                      | SECMBUS                 | (implicit)          | SECM                            |
-| SBI sector (`sbi2008_dist`)                    | BETAB                   | (implicit)          | SBI2008VJJJJ                    |
-| Business size (`gksbs_dist`)                   | BETAB                   | (implicit)          | GKSBS                           |
-| PV installations (`n_installations`, capacity) | Zonnestroominstallaties | (implicit)          | Vermogen_panelen                |
-| Network relation counts                        | Buren/Collega/Familie   | (implicit)          | Row count per person            |
+| Parameter                                          | Dataset                 | CBS table           | Simulated column(s)                          |
+|----------------------------------------------------|-------------------------|---------------------|----------------------------------------------|
+| Population size (`n_persons`)                      | Woonbase                | 37230ned            | Controls spine row count                     |
+| Household count (`n_hh`)                           | Woonbase                | 71486ned            | Controls HH count in spine                   |
+| HH-type distribution (`typhh_p`)                   | Woonbase                | 71486ned            | TYPHH in all file types                      |
+| Gemeente population weights                        | Woonbase                | 37230ned            | GemeenteCode sampling probs                  |
+| Vehicle fleet size (`n_vehicles`)                  | RDW                     | 85236NED            | Controls RDW row count                       |
+| Gemeente vehicle weights                           | RDW                     | 85236NED + 37230ned | Spine sampling probs per gem                 |
+| Fuel type (`brandstof_p`)                          | RDW                     | 85237NED            | BRANDSTCODECORVRTG                           |
+| Vehicle colour (`kleur_p`)                         | RDW                     | 85237NED            | KLEURCODEVRTG                                |
+| Vehicle weight (`gewicht_mean/sd`)                 | RDW                     | 85237NED            | MASSALEEGCORVRTG                             |
+| Vehicle type (`vrtgsoort_p`)                       | RDW                     | 85236NED            | VRTGSOORT                                    |
+| Construction year (`bouwjaar_p`)                   | RDW                     | 85237NED            | EERSTETOELDAT1VRTG                           |
+| Annual km (`jaarkm_mean/sd`)                       | RDW                     | 85404NED            | VPJAARKM                                     |
+| Job count (`n_jobs`)                               | SPOLIS                  | 85275NED            | Controls SPOLIS row count                    |
+| Household count (`n_households`)                   | VEHTAB                  | (woonbase)          | Controls VEHTAB row count                    |
+| Dwelling count (`n_dwellings`)                     | Energieverbruik         | (woonbase)          | Controls row count                           |
+| Gas consumption (`gas_mean/sd`)                    | Energieverbruik         | CBS energy stats    | GAS                                          |
+| Electricity (`elek_mean/sd`)                       | Energieverbruik         | CBS energy stats    | ELEK                                         |
+| Solar PV share (`solar_pv_share`)                  | Energieverbruik         | CBS energy stats    | ZONPV                                        |
+| Education level (`opl_niveau_hb/hg`)               | HOOGSTEOPLTAB           | 82275NED            | OPLNIVSOI2021AGG4HBmetNIRWO, HG              |
+| Personal income (`secj_dist`, income means)        | INPATAB                 | 83931NED, 84493NED  | INPSECJ, INPPERSINK, etc.                    |
+| Household income (mean, median per household type) | INHATAB, Woonbase       | 83932NED            | BESTINKH1JAN, INHBESTINKH, INHBRUTINKH, etc. |
+| SEC monthly (`secm_dist`)                          | SECMBUS                 | (implicit)          | SECM                                         |
+| SBI sector (`sbi2008_dist`)                        | BETAB                   | (implicit)          | SBI2008VJJJJ                                 |
+| Business size (`gksbs_dist`)                       | BETAB                   | (implicit)          | GKSBS                                        |
+| PV installations (`n_installations`, capacity)     | Zonnestroominstallaties | (implicit)          | Vermogen_panelen                             |
+| Network relation counts                            | Buren/Collega/Familie   | (implicit)          | Row count per person                         |
 
 ## Per-dataset column classification
 
@@ -87,10 +87,14 @@ spine):
 - `HHBWoonSit1Jan` – living situation
 - All `*Klasse*` columns – categorical class versions
 
+**StatLine-calibrated household income** (83932NED, see INHATAB below):
+
+- `BESTINKH1JAN`, `GESTINKH1JAN` – disposable and standardised income
+- `P100HBEST1JAN`, `P100HGEST1JAN` – national rank of those incomes
+
 **Random numeric / uniform** (NOT calibrated):
 
-- `BESTINKH1JAN`, `INKONTV1JAN`, etc. – income components (EK files)
-- `P100HBEST1JAN` – income percentile (uniform 1-100)
+- `INKONTV1JAN`, etc. – other income components (EK files)
 - `VERMHH1JAN`, `SCHULDHH1JAN` – wealth/debt (random normal)
 - `LeeftijdRefPersoon1Jan` – ref person age (derived)
 - `AantalKinderenPerHuishouden1Jan` – children count (derived)
@@ -234,24 +238,29 @@ StatLine-calibrated.
 
 ### INHATAB (1 file, 29 columns)
 
-Household income register. Five income aggregates are
-StatLine-calibrated.
+Household income register, one row per household. Disposable income is
+drawn on the shared spine from a lognormal per household type (and AOW
+age of the reference person), fitted to the mean and median of 83932NED
+and correlated with the WOZ value; woonbase `BESTINKH1JAN` holds the
+same value. Gross, primary and standardised income are derived from it
+per household.
 
-| Column                                                                                 | Level              | Source                               |
-|----------------------------------------------------------------------------------------|--------------------|--------------------------------------|
-| RINPERSOONSHKW                                                                         | Constant           | Always `"R"`                         |
-| RINPERSOONHKW                                                                          | Spine-derived      | Ref person from spine HH             |
-| INHBESTINKH                                                                            | **StatLine**       | Disposable income mean/sd (83932NED) |
-| INHBRUTINKH                                                                            | **StatLine**       | Gross income mean/sd                 |
-| INHGESTINKH                                                                            | **StatLine**       | Standardised income mean/sd          |
-| INHPRIMINKH                                                                            | **StatLine**       | Primary income mean/sd               |
-| INHBELIH                                                                               | **StatLine**       | Taxable income mean/sd               |
-| INHP100HBEST, INHP100HBESTES, INHP100HBRUT, INHP100HGEST, INHP100HGESTES, INHP100HPRIM | Random uniform     | Income percentiles 1-100             |
-| INHAHL, INHAHLMI                                                                       | Random numeric     | Hardcoded mean/sd                    |
-| INHARMEUR, INHARMEURL, INHARMLAG, INHARMLAGL, INHARMSOC, INHARMSOCL                    | Random numeric     | Poverty thresholds                   |
-| INHPOPIIV, INHSAMHH, INHSAMAOW                                                         | Codelist           | Hardcoded probs                      |
-| INHBBIHJ                                                                               | Random categorical | Income class                         |
-| INHEHALGR                                                                              | Random categorical | Income source group                  |
+| Column                                                                                 | Level              | Source                                                |
+|----------------------------------------------------------------------------------------|--------------------|-------------------------------------------------------|
+| RINPERSOONSHKW                                                                         | Constant           | Always `"R"`                                          |
+| RINPERSOONHKW                                                                          | Spine-derived      | Ref person from spine HH                              |
+| INHBESTINKH                                                                            | **StatLine**       | Lognormal per household type (83932NED mean, median)  |
+| INHBRUTINKH                                                                            | **StatLine**       | Disposable income x type ratio of medians, with noise |
+| INHGESTINKH                                                                            | **StatLine**       | Disposable income / type equivalence factor           |
+| INHPRIMINKH                                                                            | **StatLine**       | Disposable income x type ratio of medians, with noise |
+| INHBELIH                                                                               | Random numeric     | Hardcoded mean/sd                                     |
+| INHP100HBEST, INHP100HBESTES, INHP100HBRUT, INHP100HGEST, INHP100HGESTES, INHP100HPRIM | Spine-derived      | National rank of the income (ES = same rank)          |
+| INHAHL                                                                                 | Spine-derived      | Members present in the year                           |
+| INHAHLMI                                                                               | Random numeric     | Hardcoded range                                       |
+| INHARMEUR, INHARMEURL, INHARMLAG, INHARMLAGL, INHARMSOC, INHARMSOCL                    | Random numeric     | Poverty thresholds                                    |
+| INHPOPIIV, INHSAMHH, INHSAMAOW                                                         | Codelist           | Hardcoded probs                                       |
+| INHBBIHJ                                                                               | Random categorical | Income class                                          |
+| INHEHALGR                                                                              | Random categorical | Income source group                                   |
 
 ### HOOGSTEOPLTAB (1 file, 16 columns)
 
