@@ -40,12 +40,12 @@ It needs the RDW files `RDWNPACT{YYYY}TABV1` (vehicles) and
 population for the region and household.
 
 The short version: the fuel mix per year, the headline of the question, is
-reproduced, as are other marginals calibrated to StatLine (average mileage,
-the ranking of gemeenten by car density). The number of cars per inhabitant
-is too high, and anything that depends on the *joint* distribution of vehicle
-characteristics (EVs among new cars, mileage by fuel, weight by fuel) is not
-reproduced, because the simulator draws those columns independently. The
-sections below show where the line falls.
+reproduced, as are the other marginals calibrated to StatLine (cars per
+inhabitant, the age profile of the fleet, average mileage, the ranking of
+gemeenten by car density). Anything that depends on the *joint* distribution
+of vehicle characteristics (EVs among new cars, mileage by fuel, weight by
+fuel) is not reproduced, because the simulator draws those columns
+independently. The sections below show where the line falls.
 
 ## Setup
 
@@ -205,20 +205,13 @@ sl_density <- if (has_statline) {
 rbindlist(list(sim_density, sl_density))
 ```
 
-It does not. The simulator scales the RDW fleet to the full person spine,
-which since the demographic dynamics also holds persons who are not resident
-in the simulation year (not yet born or immigrated, deceased, emigrated).
-Those persons are not in `WoonbasePopulatiePersonen`, yet they own cars:
+Every simulated car has an owner in that year's woonbase population, so an
+inner join of RDW on `WoonbasePopulatiePersonen` keeps the whole fleet:
 
 ```{r owner-outside-population}
 cars[year == 2023, .(autos = .N,
                      eigenaar_niet_in_populatie = mean(is.na(gemeente)) * 100)]
 ```
-
-Two consequences for analysis code: per-capita car ownership comes out too
-high, and an inner join of RDW on the woonbase population silently drops
-these cars. The shares in the rest of this vignette are computed within the
-simulated fleet and are not affected.
 
 ## Fuel mix over time
 
@@ -309,10 +302,10 @@ cpb_col(ev, x = bouwjaargroep, y = aandeel_ev, fill = bron,
   ylab  = "% binnen bouwjaargroep")
 ```
 
-The age profile itself is off too. `EERSTETOELDAT1VRTG` falls back to five
-fixed values (2000, 2005, ..., 2020) because no `bouwjaar_p` parameter is
-stored, and those values do not move with the simulation year, so the
-simulated fleet is too young:
+The age profile of the fleet itself does match: `EERSTETOELDAT1VRTG` is
+drawn from the single-year construction-year distribution of 85237NED for
+the simulation year (for years before 2019, the first year in 85237NED, it is
+the 2019 distribution restricted to earlier construction years).
 
 ```{r age-profile}
 sim_age <- cars[year == 2023, .N, by = .(bouwjaargroep = bin_bouwjaar(bouwjaar))][
@@ -331,9 +324,10 @@ cpb_col(age, x = bouwjaargroep, y = aandeel, fill = bron,
   ylab  = "% van het wagenpark")
 ```
 
-**Verdict:** do not use the simulator to study vehicle age, or anything
-conditional on it (scrappage, EV uptake among new cars). Code that computes
-such tables will *run*, but the numbers carry no information.
+**Verdict:** the age profile on its own can be used, but nothing conditional
+on vehicle age (EV uptake among new cars, fuel or weight by age). Code that
+computes such tables will *run*, but the cross-tabulated numbers carry no
+information.
 
 ## Kilometres driven by fuel
 
@@ -477,8 +471,7 @@ The ranking of gemeenten is reproduced, but the spread is compressed: the
 simulated points lie on a flatter line than the 45-degree line, partly
 because each person owns at most one vehicle. The few gemeenten far to the
 right are where lease and rental companies register their cars; the
-simulator places those cars with private persons. The level offset is the
-fleet-size issue described above.
+simulator places those cars with private persons.
 
 ## Cars and household income
 
@@ -513,11 +506,11 @@ cpb_col(hh[!is.na(deciel), .(zonder_auto = mean(!heeft_auto) * 100), by = deciel
 
 | Moment | Source in simulator | Matches StatLine? | Safe for research? |
 |--------|---------------------|-------------------|--------------------|
-| Cars per inhabitant | 85236NED, scaled to full spine | no, too high | not yet |
+| Cars per inhabitant | 85236NED (calibrated) | yes | yes |
 | Fuel mix per year (BEV, diesel, petrol) | 85237NED (calibrated) | yes | yes |
 | PHEV / HEV split | fleet estimates | not checked | with care |
 | EV share by construction year | independent draws | no | no |
-| Age profile of the fleet | fixed fallback values | no, too young | no |
+| Age profile of the fleet | 85237NED (calibrated) | yes | yes |
 | Average annual km | 85404NED (calibrated) | yes | yes |
 | Annual km by fuel | single distribution | no | no |
 | Weight distribution | normal, mean/sd from 85237NED | roughly | marginal only |
