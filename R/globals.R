@@ -16,7 +16,7 @@ globalVariables(c(
   "GBAGeboorteJaar", "GBABurgerlijkeStaat", "GBAGeslachtsAanduiding",
   "AanvangWoonduur", "AantalPersonenPerHuishouden", "AantalKinderenPerHuishouden",
   "AantalPersonenPerVSL", "AantalKinderenPerVSL", "LeeftijdJongsteKindPerVSL",
-  "LeeftijdRefPersoon", "AantalPersonenPerVSLKlasse", "n",
+  "LeeftijdRefPersoon", "AantalPersonenPerVSLKlasse", "n", "jaar", "p",
   "PandID1Jan", "PandID31Dec", "VBOWoningType1Jan",
   "Indicator_VBOIsGesloopt", "Indicator_VBOIsTransformatie",
   "Indicator_VBOIsNieuwbouw", "Indicator_VSLIsOntrokken", "Indicator_VSLIsNieuw",

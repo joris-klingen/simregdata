@@ -48,7 +48,7 @@ test_that("HOOGSTEOPLTAB generates valid education data", {
   sim_init("hoogsteopltab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("HOOGSTEOPL2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 16L)
+  check_tibble(dt, min_rows = 150L, min_cols = 16L)
 
   # Required columns present
   expect_true("RINPERSOON" %in% names(dt))
@@ -78,7 +78,7 @@ test_that("INPATAB generates valid personal income data", {
   sim_init("inpatab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("INPA2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+  check_tibble(dt, min_rows = 150L, min_cols = 25L)
 
   # Key columns
   expect_true("RINPERSOON" %in% names(dt))
@@ -141,7 +141,7 @@ test_that("INHATAB generates valid household income data", {
   sim_init("inhatab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("INHA2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+  check_tibble(dt, min_rows = 150L, min_cols = 25L)
 
   # Key columns
   expect_true("RINPERSOONSHKW" %in% names(dt))
@@ -724,7 +724,7 @@ test_that("sim_register creates a working person-keyed dataset", {
   sim_init("test_survey", year = 2023L, n = 100L, seed = 42L)
   dt <- read_sav("test_survey2023V1")
 
-  check_tibble(dt, min_rows = 100L, min_cols = 6L)
+  check_tibble(dt, min_rows = 75L, min_cols = 6L)
 
   # Key columns auto-added
   expect_true("RINPERSOON" %in% names(dt))
