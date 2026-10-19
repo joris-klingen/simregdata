@@ -166,7 +166,7 @@ cars[, brandstof := factor(brandstof, levels = FUELS)]
 | 85404NED | Mileage of passenger cars by fuel, age and ownership | kilometres |
 | 37230ned | Population by region | cars per 1,000 inhabitants |
 
-```{r fetch-statline}
+```{r fetch-statline, warning = FALSE}
 sl_237 <- rbindlist(lapply(YEARS, function(y) {
   dt <- statline("85237NED", Perioden = period(y))
   if (!is.null(dt)) dt[, year := y]

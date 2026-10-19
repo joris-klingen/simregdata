@@ -190,7 +190,16 @@ vehtab_update_params()              # 83834NED
 energieverbruik_update_params()     # Kerncijfers wijken en buurten
 ```
 
-## Simulation quality
+## Vignettes
+
+Rendered versions (with output and figures) are in
+[docs/vignettes/](docs/vignettes/), regenerated with
+`Rscript dev/render_vignettes.R`:
+
+- [Getting started](docs/vignettes/simcbsradata.md) -- `vignette("simcbsradata")`
+- [Calibration overview](docs/vignettes/calibration-overview.md) -- `vignette("calibration-overview")`
+
+### Simulation quality
 
 How close is an analysis on simulated data to the same analysis on the real
 microdata? A series of vignettes answers that per research question, comparing
@@ -199,7 +208,7 @@ simulated outcomes with CBS StatLine (via `cbsodataR`, plots via
 
 | Vignette | Research question | Datasets |
 |----------|-------------------|----------|
-| `vignette("quality-cars")` | How fast is the car fleet electrifying, by vehicle age, mileage and region? | RDW, Woonbase |
+| [Cars](docs/vignettes/quality-cars.md) -- `vignette("quality-cars")` | How fast is the car fleet electrifying, by vehicle age, mileage and region? | RDW, Woonbase |
 
 ## Performance
 

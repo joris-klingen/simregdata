@@ -138,9 +138,9 @@ sim_init("spolis", year = 2023)
 sim_init("inpatab", year = 2023)
 
 jobs   <- read_sav("SPOLISBUS2023V1", n_max = 5)
-income <- read_sav("INPATAB2023TABV1", n_max = 5)
+income <- read_sav("INPA2023TABV1", n_max = 5)
 
-head(jobs[, c("RINPERSOON", "SVLOON", "SCONTRACTSOORT")])
+head(jobs[, c("RINPERSOON", "SBASISLOON", "SCONTRACTSOORT")])
 head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 ```
 
