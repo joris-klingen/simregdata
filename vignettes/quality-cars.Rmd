@@ -57,27 +57,33 @@ library(ggcpb)
 library(simcbsradata)  # after haven, so read_sav() is the simulator's
 ```
 
-`statline()` fetches a StatLine table with the dimension labels added and
-returns `NULL` when StatLine cannot be reached (dimension codes are trimmed
-and the `*_label` columns are plain character); the comparison plots then show
+`statline()` fetches a StatLine table with the dimension labels added,
+retrying a few times on a dropped connection, and returns `NULL` when
+StatLine cannot be reached (dimension codes are trimmed and the `*_label`
+columns are plain character); the comparison plots then show
 the simulated series only.
 
 ```{r statline-helper}
 options(cbsodataR.base_url = "https://opendata.cbs.nl")
 
-statline <- function(id, ...) {
-  tryCatch({
-    dt <- as.data.table(cbsodataR::cbs_add_label_columns(cbsodataR::cbs_get_data(id, ...)))
-    for (j in names(dt)) {
-      if (is.factor(dt[[j]]) || is.character(dt[[j]])) {
-        set(dt, j = j, value = trimws(as.character(dt[[j]])))
-      }
+statline <- function(id, ..., tries = 3L) {
+  for (i in seq_len(tries)) {
+    dt <- tryCatch(
+      suppressWarnings(as.data.table(cbsodataR::cbs_add_label_columns(
+        cbsodataR::cbs_get_data(id, ...)))),
+      error = function(e) {
+        tcat("StatLine table ", id, " attempt ", i, " failed: ", conditionMessage(e))
+        NULL
+      })
+    if (!is.null(dt)) break
+  }
+  if (is.null(dt)) return(NULL)
+  for (j in names(dt)) {
+    if (is.factor(dt[[j]]) || is.character(dt[[j]])) {
+      set(dt, j = j, value = trimws(as.character(dt[[j]])))
     }
-    dt
-  }, error = function(e) {
-    tcat("StatLine table ", id, " not available: ", conditionMessage(e))
-    NULL
-  })
+  }
+  dt
 }
 
 # first measure column whose name matches `pattern`

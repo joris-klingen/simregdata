@@ -157,14 +157,14 @@ dt_pers <- read_sav("WoonbasePopulatiePersonen2023V1",
                     col_select = c(RINPERSOON, TYPHH1Jan, GBAGeboorteJaar1Jan))
 head(dt_pers)
 #> # A tibble: 6 × 3
-#>   RINPERSOON TYPHH1Jan                            GBAGeboorteJaar1Jan
-#>   <chr>      <int+lbl>                                          <int>
-#> 1 320585149  1 [Eenpersoonshuishouden]                           1948
-#> 2 059224175  2 [Niet-gehuwd paar zonder kinderen]                1984
-#> 3 102982427  2 [Niet-gehuwd paar zonder kinderen]                1988
-#> 4 164027219  5 [Gehuwd paar met kinderen]                        1994
-#> 5 556348955  5 [Gehuwd paar met kinderen]                        1957
-#> 6 290686850  4 [Niet-gehuwd paar met kinderen]                   1995
+#>   RINPERSOON TYPHH1Jan                         GBAGeboorteJaar1Jan
+#>   <chr>      <int+lbl>                                       <int>
+#> 1 494318943  5 [Gehuwd paar met kinderen]                     1955
+#> 2 031131210  5 [Gehuwd paar met kinderen]                     1995
+#> 3 438882452  5 [Gehuwd paar met kinderen]                     2016
+#> 4 859956951  4 [Niet-gehuwd paar met kinderen]                1994
+#> 5 833043810  4 [Niet-gehuwd paar met kinderen]                1949
+#> 6 847776314  4 [Niet-gehuwd paar met kinderen]                2022
 ```
 
 ``` r
@@ -174,14 +174,14 @@ dt_hh <- read_sav("WoonbasePopulatieHuishoudens2023V1",
                   col_select = c(HUISHOUDNR1Jan, TYPHH1Jan, LeeftijdRefPersoon1Jan))
 head(dt_hh)
 #> # A tibble: 6 × 3
-#>   HUISHOUDNR1Jan TYPHH1Jan                            LeeftijdRefPersoon1Jan
-#>   <chr>          <int+lbl>                                             <int>
-#> 1 000000000001   1 [Eenpersoonshuishouden]                                75
-#> 2 000000000002   2 [Niet-gehuwd paar zonder kinderen]                     39
-#> 3 000000000003   5 [Gehuwd paar met kinderen]                             29
-#> 4 000000000004   4 [Niet-gehuwd paar met kinderen]                        28
-#> 5 000000000005   2 [Niet-gehuwd paar zonder kinderen]                     49
-#> 6 000000000006   1 [Eenpersoonshuishouden]                                29
+#>   HUISHOUDNR1Jan TYPHH1Jan                         LeeftijdRefPersoon1Jan
+#>   <chr>          <int+lbl>                                          <int>
+#> 1 000000000001   5 [Gehuwd paar met kinderen]                          68
+#> 2 000000000002   4 [Niet-gehuwd paar met kinderen]                     29
+#> 3 000000000003   1 [Eenpersoonshuishouden]                             33
+#> 4 000000000004   1 [Eenpersoonshuishouden]                             52
+#> 5 000000000005   3 [Gehuwd paar zonder kinderen]                       25
+#> 6 000000000006   4 [Niet-gehuwd paar met kinderen]                     64
 ```
 
 ### Haven-compatible labels
@@ -209,11 +209,11 @@ attr(dt_pers$TYPHH1Jan, "labels")
 table(haven::as_factor(dt_pers$TYPHH1Jan))
 #> 
 #>            Eenpersoonshuishouden Niet-gehuwd paar zonder kinderen 
-#>                               20                                6 
+#>                               23                                3 
 #>      Gehuwd paar zonder kinderen    Niet-gehuwd paar met kinderen 
-#>                               24                               17 
+#>                               22                                9 
 #>         Gehuwd paar met kinderen               Eenouderhuishouden 
-#>                               23                               10 
+#>                               35                                8 
 #>                Overig huishouden        Institutioneel huishouden 
 #>                                0                                0 
 #>             Meerdere huishoudens 
@@ -232,11 +232,11 @@ rdw <- read_sav("RDWNPACT2023TABV1", n_max = 10)
 
 # Integer values (haven-labelled)
 as.integer(rdw$BRANDSTCODECORVRTG)
-#>  [1]  1  1 11  2  2  1  1  1 11  1
+#>  [1] 1 2 1 2 1 1 4 1 1 2
 
 # Original CBS character codes
 cbs_code(rdw$BRANDSTCODECORVRTG)
-#>  [1] "1" "1" "B" "2" "2" "1" "1" "1" "B" "1"
+#>  [1] "1" "2" "1" "2" "1" "1" "4" "1" "1" "2"
 ```
 
 ### Cross-file joins
@@ -269,22 +269,22 @@ income <- read_sav("INPA2023TABV1", n_max = 5)
 
 head(jobs[, c("RINPERSOON", "SBASISLOON", "SCONTRACTSOORT")])
 #> # A tibble: 5 × 3
-#>   RINPERSOON SBASISLOON SCONTRACTSOORT         
-#>   <chr>           <dbl> <int+lbl>              
-#> 1 757679938        4937 3 [Niet van toepassing]
-#> 2 757679938        1906 3 [Niet van toepassing]
-#> 3 757679938        5684 3 [Niet van toepassing]
-#> 4 757679938        2313 3 [Niet van toepassing]
-#> 5 757679938        3415 3 [Niet van toepassing]
+#>   RINPERSOON SBASISLOON SCONTRACTSOORT   
+#>   <chr>           <dbl> <int+lbl>        
+#> 1 847280784        1804 1 [Bepaalde tijd]
+#> 2 847280784        2075 1 [Bepaalde tijd]
+#> 3 847280784        6526 1 [Bepaalde tijd]
+#> 4 847280784        1359 1 [Bepaalde tijd]
+#> 5 847280784        1860 1 [Bepaalde tijd]
 head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 #> # A tibble: 5 × 3
 #>   RINPERSOON INPPERSBESTINK INPSECJ                             
 #>   <chr>               <dbl> <int+lbl>                           
-#> 1 757679938           25066 1 [Werknemer]                       
-#> 2 846589799           51921 7 [Ontvanger bijstandsuitkering]    
-#> 3 289313044           32161 6 [Ontvanger werkloosheidsuitkering]
-#> 4 343512911           -9789 1 [Werknemer]                       
-#> 5 865649252          -16519 1 [Werknemer]
+#> 1 847280784           37715 1 [Werknemer]                       
+#> 2 719479549           47664 7 [Ontvanger bijstandsuitkering]    
+#> 3 073304317           24554 6 [Ontvanger werkloosheidsuitkering]
+#> 4 776993912           33214 1 [Werknemer]                       
+#> 5 271821755           12454 1 [Werknemer]
 ```
 
 ## Woonbase file types (9 files)

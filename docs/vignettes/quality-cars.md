@@ -35,27 +35,33 @@ library(ggcpb)
 library(simcbsradata)  # after haven, so read_sav() is the simulator's
 ```
 
-`statline()` fetches a StatLine table with the dimension labels added
-and returns `NULL` when StatLine cannot be reached (dimension codes are
-trimmed and the `*_label` columns are plain character); the comparison
-plots then show the simulated series only.
+`statline()` fetches a StatLine table with the dimension labels added,
+retrying a few times on a dropped connection, and returns `NULL` when
+StatLine cannot be reached (dimension codes are trimmed and the
+`*_label` columns are plain character); the comparison plots then show
+the simulated series only.
 
 ``` r
 options(cbsodataR.base_url = "https://opendata.cbs.nl")
 
-statline <- function(id, ...) {
-  tryCatch({
-    dt <- as.data.table(cbsodataR::cbs_add_label_columns(cbsodataR::cbs_get_data(id, ...)))
-    for (j in names(dt)) {
-      if (is.factor(dt[[j]]) || is.character(dt[[j]])) {
-        set(dt, j = j, value = trimws(as.character(dt[[j]])))
-      }
+statline <- function(id, ..., tries = 3L) {
+  for (i in seq_len(tries)) {
+    dt <- tryCatch(
+      suppressWarnings(as.data.table(cbsodataR::cbs_add_label_columns(
+        cbsodataR::cbs_get_data(id, ...)))),
+      error = function(e) {
+        tcat("StatLine table ", id, " attempt ", i, " failed: ", conditionMessage(e))
+        NULL
+      })
+    if (!is.null(dt)) break
+  }
+  if (is.null(dt)) return(NULL)
+  for (j in names(dt)) {
+    if (is.factor(dt[[j]]) || is.character(dt[[j]])) {
+      set(dt, j = j, value = trimws(as.character(dt[[j]])))
     }
-    dt
-  }, error = function(e) {
-    tcat("StatLine table ", id, " not available: ", conditionMessage(e))
-    NULL
-  })
+  }
+  dt
 }
 
 # first measure column whose name matches `pattern`
@@ -118,13 +124,13 @@ sims <- lapply(YEARS, function(y) {
   tcat("simulating ", y)
   simulate_year(y)
 })
-#> [2026-10-19 11:53:02] simulating 2019
-#> [2026-10-19 11:53:06] simulating 2020
-#> [2026-10-19 11:53:10] simulating 2021
-#> [2026-10-19 11:53:14] simulating 2022
-#> [2026-10-19 11:53:18] simulating 2023
-#> [2026-10-19 11:53:21] simulating 2024
-#> [2026-10-19 11:53:25] simulating 2025
+#> [2026-10-19 12:00:29] simulating 2019
+#> [2026-10-19 12:00:33] simulating 2020
+#> [2026-10-19 12:00:37] simulating 2021
+#> [2026-10-19 12:00:41] simulating 2022
+#> [2026-10-19 12:00:45] simulating 2023
+#> [2026-10-19 12:00:49] simulating 2024
+#> [2026-10-19 12:00:53] simulating 2025
 names(sims) <- YEARS
 
 cars <- rbindlist(lapply(sims, `[[`, "cars"))
@@ -164,7 +170,7 @@ sl_pop <- statline("37230ned", Perioden = period(2023))
 has_statline <- nrow(sl_237) > 0 && !is.null(sl_236) &&
   !is.null(sl_404) && !is.null(sl_pop)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-19 11:54:21] StatLine reachable: TRUE
+#> [2026-10-19 12:01:30] StatLine reachable: TRUE
 ```
 
 ## Fleet size

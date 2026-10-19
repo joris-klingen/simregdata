@@ -209,6 +209,7 @@ simulated outcomes with CBS StatLine (via `cbsodataR`, plots via
 | Vignette | Research question | Datasets |
 |----------|-------------------|----------|
 | [Cars](docs/vignettes/quality-cars.md) -- `vignette("quality-cars")` | How fast is the car fleet electrifying, by vehicle age, mileage and region? | RDW, Woonbase |
+| [Household income](docs/vignettes/quality-income.md) -- `vignette("quality-income")` | How unequal is household disposable income, and how does it differ by household type? | INHATAB, INPATAB, Woonbase |
 
 ## Performance
 
