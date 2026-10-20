@@ -150,7 +150,7 @@ calibration and are an out-of-sample check.
 sl <- statline("83932NED", Perioden = paste0(YEAR, "JJ00"))
 has_statline <- !is.null(sl)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-19 14:37:34] StatLine reachable: TRUE
+#> [2026-10-20 14:36:22] StatLine reachable: TRUE
 
 if (has_statline) {
   sl[, `:=`(
