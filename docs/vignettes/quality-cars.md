@@ -124,13 +124,13 @@ sims <- lapply(YEARS, function(y) {
   tcat("simulating ", y)
   simulate_year(y)
 })
-#> [2026-10-20 14:32:21] simulating 2019
-#> [2026-10-20 14:32:26] simulating 2020
-#> [2026-10-20 14:32:30] simulating 2021
-#> [2026-10-20 14:32:35] simulating 2022
-#> [2026-10-20 14:32:39] simulating 2023
-#> [2026-10-20 14:32:43] simulating 2024
-#> [2026-10-20 14:32:48] simulating 2025
+#> [2026-10-21 07:48:09] simulating 2019
+#> [2026-10-21 07:48:11] simulating 2020
+#> [2026-10-21 07:48:13] simulating 2021
+#> [2026-10-21 07:48:15] simulating 2022
+#> [2026-10-21 07:48:17] simulating 2023
+#> [2026-10-21 07:48:19] simulating 2024
+#> [2026-10-21 07:48:20] simulating 2025
 names(sims) <- YEARS
 
 cars <- rbindlist(lapply(sims, `[[`, "cars"))
@@ -170,7 +170,7 @@ sl_pop <- statline("37230ned", Perioden = period(2023))
 has_statline <- nrow(sl_237) > 0 && !is.null(sl_236) &&
   !is.null(sl_404) && !is.null(sl_pop)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-20 14:33:21] StatLine reachable: TRUE
+#> [2026-10-21 07:49:02] StatLine reachable: TRUE
 ```
 
 ## Fleet size
@@ -191,7 +191,7 @@ sl_density <- if (has_statline) {
 }
 rbindlist(list(sim_density, sl_density))
 #>         bron auto_per_1000
-#> 1: simulatie      495.0942
+#> 1: simulatie      496.8224
 #> 2:  StatLine      500.6435
 ```
 
@@ -203,7 +203,7 @@ fleet:
 cars[year == 2023, .(autos = .N,
                      eigenaar_niet_in_populatie = mean(is.na(gemeente)) * 100)]
 #>    autos eigenaar_niet_in_populatie
-#> 1:  8881                          0
+#> 1:  8912                          0
 ```
 
 ## Fuel mix over time
@@ -245,13 +245,13 @@ cpb_line(fuel[brandstof %in% c("benzine", "diesel", "elektrisch")],
 ``` r
 dcast(fuel[brandstof == "elektrisch"], year ~ bron, value.var = "aandeel")
 #>    year  StatLine simulatie
-#> 1: 2019  3.722749  3.355310
-#> 2: 2020  4.681951  5.309116
-#> 3: 2021  6.056834  6.520997
-#> 4: 2022  8.212618  8.700527
-#> 5: 2023 10.742116 10.347934
-#> 6: 2024 13.835399 13.334077
-#> 7: 2025 17.529999 17.198753
+#> 1: 2019  3.722749  3.427419
+#> 2: 2020  4.681951  5.334570
+#> 3: 2021  6.056834  6.229848
+#> 4: 2022  8.212618  8.466742
+#> 5: 2023 10.742116 10.267056
+#> 6: 2024 13.835399 13.280729
+#> 7: 2025 17.529999 17.330591
 ```
 
 The simulated shares sit on the StatLine trend for every fuel; what is
@@ -482,7 +482,7 @@ if (has_statline) {
 ``` r
 gem[inwoners >= 500, .(gemeenten = .N, correlatie = cor(sim, statline))]
 #>    gemeenten correlatie
-#> 1:        96  0.8103935
+#> 1:        94  0.8621079
 ```
 
 The ranking of gemeenten is reproduced, but the spread is compressed:

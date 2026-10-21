@@ -87,10 +87,17 @@ woonbase parameters.  Three things are StatLine-calibrated:
 - `AantalPersonenPerHuishouden1Jan` -- HH size (derived from TYPHH)
 - `GemeenteCodeJJJJ1Jan` -- municipality (**StatLine-calibrated**)
 - `VBOWoningType1Jan` -- dwelling type (fixed distribution)
-- `VBOBouwjaar1Jan` -- construction year (fixed distribution)
-- `VBOOppervlakte1Jan` -- floor area (fixed distribution)
+- `VBOBouwjaar1Jan` -- construction year (fixed class shares, never after the simulation year)
+- `VBOOppervlakte1Jan` -- floor area (fixed class shares)
 - `WOZWaardeObjectBAG1Jan` -- WOZ value (fixed distribution)
 - `TypeEigenaar1Jan` -- owner type (fixed distribution)
+
+Dwelling attributes are drawn per dwelling from a hash of `RINOBJECTNUMMER`,
+so they are identical on 1 January and 31 December and stay the same across
+simulation years as far as the yearly distributions allow (gemeente only
+changes where the shares change or gemeenten merge). The class columns
+(`VBOBouwJaarKlasse`, `VBOOppervlakteKlasse`, `WOZWaardeObjectBAGKlasse`) are
+derived from the values.
 
 **Codelist-labelled columns** (hardcoded probabilities):
 

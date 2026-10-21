@@ -22,9 +22,9 @@ gas and electricity are drawn independently of the dwelling, so detached
 houses use as much gas as apartments, old houses as much as new ones,
 and a household of five as much electricity as a single person. Solar
 panels have no effect on net electricity use, and the spread of the
-distributions is too narrow. On top of that, the woonbase dwelling
-characteristics used for the breakdown are themselves inconsistent (see
-the last section).
+distributions is too narrow. The woonbase dwelling characteristics used
+for the breakdowns are themselves consistent (see the last section), so
+the flat profiles are down to the energy columns alone.
 
 ## Setup
 
@@ -165,7 +165,7 @@ sl <- statline("85140NED", Perioden = paste0(YEAR, "JJ00"))
 sl_trend <- statline("81528NED", RegioS = cbsodataR::has_substring("NL01"))
 has_statline <- !is.null(sl) && !is.null(sl_trend)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-20 14:35:35] StatLine reachable: TRUE
+#> [2026-10-21 07:51:28] StatLine reachable: TRUE
 
 # one-way breakdowns: every other dimension at its total
 one_way <- function(dim) {
@@ -418,8 +418,9 @@ energie[, .(
 ## Dwelling characteristics
 
 The breakdowns above lean on woonbase for the construction year and
-floor area of each dwelling. Those columns turn out to be inconsistent
-with each other:
+floor area of each dwelling. A check that these are usable: the classes
+contain the values, the values are the same on 1 January and 31
+December, and no dwelling is built after the simulation year.
 
 ``` r
 woonr2 <- as.data.table(read_sav(
@@ -451,38 +452,30 @@ dw[, .(
                                    c("2025-2030", "2030-2035", ">=2035")) * 100
 )]
 #>    bouwjaar_in_klasse oppervlakte_in_klasse bouwjaar_1jan_31dec_gelijk
-#> 1:           7.387057              20.54542                  0.6919007
+#> 1:                100                   100                        100
 #>    oppervlakte_1jan_31dec_gelijk klasse_na_simulatiejaar
-#> 1:                     0.6512007                1.689052
+#> 1:                           100                       0
 ```
 
-- The class columns (`VBOBouwJaarKlasse`, `VBOOppervlakteKlasse`) are
-  drawn separately from the values they classify, so a dwelling’s
-  construction year falls in its own class only by chance. Some classes
-  even lie after the simulation year.
-- The construction year and floor area are drawn again for 31 December,
-  so the same dwelling has a different construction year at the start
-  and the end of the year (and in every simulation year).
-- The construction year is uniform between 1850 and the simulation year,
-  so the age profile of the housing stock is wrong as well.
-
-Analyses by construction year or floor area (new construction, the
-effect of building regulations, energy use per m2) are affected for any
-dataset that links to woonbase dwellings, not only for energy.
+Each dwelling’s attributes are drawn once from a hash of its
+`RINOBJECTNUMMER`, so they also stay the same across simulation years.
+The construction-year and floor-area distributions use fixed class
+shares rather than StatLine, so the age profile of the housing stock is
+plausible but not calibrated to a specific year.
 
 ## Summary
 
-| Moment                                    | Source in simulator                 | Matches StatLine?                                                          | Safe for research? |
-|-------------------------------------------|-------------------------------------|----------------------------------------------------------------------------|--------------------|
-| Mean gas and electricity per year         | calibrated (params.yaml)            | gas 2016-2023 yes; electricity too high before 2021, both too high in 2024 | with care          |
-| Share with solar panels                   | calibrated (params.yaml)            | close                                                                      | yes                |
-| Share with district heating               | calibrated (params.yaml)            | close                                                                      | yes                |
-| Spread of gas and electricity use         | normal, hand-set sd                 | no, too narrow                                                             | no                 |
-| Gas by dwelling type, size, age           | independent of dwelling             | no                                                                         | no                 |
-| Electricity by number of occupants        | independent of household            | no                                                                         | no                 |
-| Net electricity with solar panels         | independent of `ZONPV`              | no                                                                         | no                 |
-| `ELEK - ELEKTERUG = ELEKNETTO`            | independent draws                   | no                                                                         | no                 |
-| Dwelling construction year and floor area | independent draws, redrawn per date | no                                                                         | no                 |
+| Moment                                    | Source in simulator                  | Matches StatLine?                                                          | Safe for research?          |
+|-------------------------------------------|--------------------------------------|----------------------------------------------------------------------------|-----------------------------|
+| Mean gas and electricity per year         | calibrated (params.yaml)             | gas 2016-2023 yes; electricity too high before 2021, both too high in 2024 | with care                   |
+| Share with solar panels                   | calibrated (params.yaml)             | close                                                                      | yes                         |
+| Share with district heating               | calibrated (params.yaml)             | close                                                                      | yes                         |
+| Spread of gas and electricity use         | normal, hand-set sd                  | no, too narrow                                                             | no                          |
+| Gas by dwelling type, size, age           | independent of dwelling              | no                                                                         | no                          |
+| Electricity by number of occupants        | independent of household             | no                                                                         | no                          |
+| Net electricity with solar panels         | independent of `ZONPV`               | no                                                                         | no                          |
+| `ELEK - ELEKTERUG = ELEKNETTO`            | independent draws                    | no                                                                         | no                          |
+| Dwelling construction year and floor area | stable per dwelling, classes derived | consistent; not calibrated                                                 | yes, as breakdown variables |
 
 For this research question the simulator supports building the pipeline
 (linking `ENERGIEVERBRUIK` to woonbase on `RINOBJECTNUMMER`, classifying
@@ -491,6 +484,4 @@ the question asks for comes out flat. The improvements that would change
 that are drawing gas and electricity conditional on dwelling type, floor
 area, construction year and occupants (85140NED has all of these one
 way), deriving net electricity from delivery and feed-in with feed-in
-only for dwellings with panels, and making the woonbase construction
-year and floor area stable per dwelling with classes derived from the
-values.
+only for dwellings with panels.

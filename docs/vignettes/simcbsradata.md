@@ -232,11 +232,11 @@ rdw <- read_sav("RDWNPACT2023TABV1", n_max = 10)
 
 # Integer values (haven-labelled)
 as.integer(rdw$BRANDSTCODECORVRTG)
-#>  [1] 1 2 1 2 1 1 4 1 1 2
+#>  [1] 1 4 1 1 4 1 1 1 1 4
 
 # Original CBS character codes
 cbs_code(rdw$BRANDSTCODECORVRTG)
-#>  [1] "1" "2" "1" "2" "1" "1" "4" "1" "1" "2"
+#>  [1] "1" "4" "1" "1" "4" "1" "1" "1" "1" "4"
 ```
 
 ### Cross-file joins

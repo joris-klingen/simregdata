@@ -51,28 +51,43 @@
 # Hash character ID vector to uniform (0,1) using multiplicative hashing.
 # Salt differentiates columns so the same ID gets different values per column.
 .hash_to_uniform <- function(id_vec, salt) {
+  .hash_mix(.hash_id_num(id_vec), salt)
+}
+
+# Numeric form of character IDs for .hash_mix(). Split out so callers that
+# need several salts for the same IDs convert them only once.
+.hash_id_num <- function(id_vec) {
+  mod <- 2147483647  # 2^31 - 1
+  # Convert character IDs to numeric: sum UTF-8 byte values in 8-char chunks
+  # to avoid overflow with long hex strings. Vectorised per ID length: the
+  # bytes of all IDs of one length form a matrix with one column per ID.
+  id_vec <- as.character(id_vec)
+  out <- numeric(length(id_vec))
+  len <- nchar(id_vec, type = "bytes")
+  for (n_bytes in unique(len)) {
+    idx <- which(len == n_bytes)
+    if (n_bytes == 0L) next
+    bytes <- matrix(as.integer(charToRaw(paste(id_vec[idx], collapse = ""))),
+                    nrow = n_bytes)
+    total <- numeric(length(idx))
+    multiplier <- 1
+    for (i in seq(1L, n_bytes, by = 8L)) {
+      rows <- i:min(i + 7L, n_bytes)
+      chunk_val <- colSums(bytes[rows, , drop = FALSE] * (256^(seq_along(rows) - 1L)))
+      total <- (total + chunk_val * multiplier) %% mod
+      multiplier <- (multiplier * 259) %% mod
+    }
+    out[idx] <- total
+  }
+  out
+}
+
+# Uniform (0,1) from numeric IDs (see .hash_id_num()) and a salt
+.hash_mix <- function(id_num, salt) {
   mod <- 2147483647  # 2^31 - 1
   # Convert salt to a numeric seed via byte sum
   salt_bytes <- as.integer(charToRaw(salt))
   salt_num <- sum(salt_bytes * seq_along(salt_bytes)) %% mod
-
-  # Convert character IDs to numeric: sum UTF-8 byte values in 8-char chunks
-  # to avoid overflow with long hex strings
-  id_num <- vapply(id_vec, function(id) {
-    raw_bytes <- as.integer(charToRaw(id))
-    n_bytes <- length(raw_bytes)
-    total <- 0
-    chunk_size <- 8L
-    multiplier <- 1
-    for (i in seq(1L, n_bytes, by = chunk_size)) {
-      end <- min(i + chunk_size - 1L, n_bytes)
-      chunk <- raw_bytes[i:end]
-      chunk_val <- sum(chunk * (256^(seq_along(chunk) - 1L)))
-      total <- (total + chunk_val * multiplier) %% mod
-      multiplier <- (multiplier * 259) %% mod
-    }
-    total
-  }, double(1L), USE.NAMES = FALSE)
 
   # Multiplicative hash combining ID and salt.
   # The salt must enter *multiplicatively*, not just additively: an additive
@@ -86,6 +101,21 @@
   h <- (h * 48271 + salt_num) %% mod
   h <- (h * 69069 + 1) %% mod
   h / mod
+}
+
+# Uniform (0,1) for (a, b) pairs of numeric hashes in [0, 2^31 - 1), mixed
+# with xor-shifts so that, unlike .hash_mix(), the result is not affine in the
+# inputs: pairs that share one element give unrelated values. Multipliers stay
+# below 2^22 so the products are exact in double arithmetic.
+.hash_pair <- function(a, b) {
+  mod <- 2147483647
+  x <- bitwXor(as.integer(a), as.integer(b))
+  x <- bitwXor(x, bitwShiftR(x, 16L))
+  x <- as.integer((as.double(x) * 2654435) %% mod)
+  x <- bitwXor(x, bitwShiftR(x, 13L))
+  x <- as.integer((as.double(x) * 1500007) %% mod)
+  x <- bitwXor(x, bitwShiftR(x, 16L))
+  (as.double(x) + 0.5) / (mod + 1)
 }
 
 # Deterministic categorical: hash IDs to pick categories via cumulative probs.
