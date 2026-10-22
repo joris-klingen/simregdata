@@ -34,6 +34,35 @@
 .OPP_LOWER <- c(15L, 50L, 75L, 100L, 150L, 250L)
 .OPP_UPPER <- c(.OPP_LOWER[-1L], 400L)
 
+# Floor-area class shares per dwelling type (rows: VBOWoningType codes,
+# columns: OPPKLASSE 1-6). A starting pattern only: .opp_given_type() adjusts
+# it so that, combined with the dwelling-type shares, the national floor-area
+# shares (opp_p) are reproduced.
+.OPP_BY_TYPE <- rbind(
+  "00" = c(0.01, 0.05, 0.25, 0.48, 0.18, 0.03),
+  "01" = c(0.00, 0.02, 0.06, 0.30, 0.45, 0.17),
+  "02" = c(0.00, 0.02, 0.10, 0.45, 0.38, 0.05),
+  "03" = c(0.01, 0.05, 0.25, 0.50, 0.17, 0.02),
+  "04" = c(0.01, 0.06, 0.30, 0.50, 0.12, 0.01),
+  "05" = c(0.20, 0.40, 0.28, 0.10, 0.02, 0.00),
+  "99" = c(0.08, 0.23, 0.26, 0.22, 0.15, 0.06)
+)
+
+# Floor-area class probabilities given dwelling type: iterative proportional
+# fitting of the joint table (type share x .OPP_BY_TYPE) to the type shares
+# and the national floor-area shares
+.opp_given_type <- function(type_p, opp_p, iter = 100L) {
+  types <- intersect(names(type_p), rownames(.OPP_BY_TYPE))
+  joint <- .OPP_BY_TYPE[types, , drop = FALSE] * as.numeric(type_p[types]) + 1e-6
+  type_t <- as.numeric(type_p[types]) / sum(type_p[types])
+  opp_t <- as.numeric(opp_p) / sum(opp_p)
+  for (it in seq_len(iter)) {
+    joint <- joint * (type_t / rowSums(joint))
+    joint <- t(t(joint) * (opp_t / colSums(joint)))
+  }
+  joint / rowSums(joint)
+}
+
 # Value by inverse CDF of a piecewise-uniform distribution over classes with
 # shares `p` and bounds `lower`/`upper`
 .qclass_value <- function(u, p, lower, upper) {
@@ -308,8 +337,17 @@
 
   bouwjaar <- .stable_bouwjaar(u_obj("bouwjaar"), params$bouwjaar_p, year)
   bouwjaar_klasse <- as.character(findInterval(bouwjaar, .BOUWJAAR_LOWER))
+  # floor area conditional on dwelling type (apartments smaller, detached
+  # houses larger), national class shares as in opp_p
   opp_p <- params$opp_p[names(params$opp_p) != "9"]
-  opp_vec <- .qclass_value(u_obj("oppervlakte"), opp_p, .OPP_LOWER, .OPP_UPPER)
+  opp_cond <- .opp_given_type(params$woningtype_p, opp_p)
+  u_opp <- u_obj("oppervlakte")
+  opp_vec <- integer(N_OBJ)
+  for (tp in unique(woningtype)) {
+    idx <- which(woningtype == tp)
+    p_tp <- if (tp %in% rownames(opp_cond)) opp_cond[tp, ] else opp_p
+    opp_vec[idx] <- .qclass_value(u_opp[idx], p_tp, .OPP_LOWER, .OPP_UPPER)
+  }
   opp_klasse <- as.character(findInterval(opp_vec, .OPP_LOWER))
 
   # WOZ: per-municipality mean from StatLine, conditional on dwelling size

@@ -14,155 +14,71 @@ columns:
   - name: RINOBJECTNUMMER
     source: spine.obj.RINOBJECTNUMMER
 
-  # ---- Gas delivery (m3/month) - seasonal pattern ----
   - name: GASLEV01
-    random_numeric:
-      distribution: normal
-      mean: 200
-      sd: 100
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV01
     label: Gaslevering in m3 in januari
 
   - name: GASLEV02
-    random_numeric:
-      distribution: normal
-      mean: 180
-      sd: 90
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV02
     label: Gaslevering in m3 in februari
 
   - name: GASLEV03
-    random_numeric:
-      distribution: normal
-      mean: 140
-      sd: 70
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV03
     label: Gaslevering in m3 in maart
 
   - name: GASLEV04
-    random_numeric:
-      distribution: normal
-      mean: 70
-      sd: 40
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV04
     label: Gaslevering in m3 in april
 
   - name: GASLEV05
-    random_numeric:
-      distribution: normal
-      mean: 25
-      sd: 15
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV05
     label: Gaslevering in m3 in mei
 
   - name: GASLEV06
-    random_numeric:
-      distribution: normal
-      mean: 15
-      sd: 10
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV06
     label: Gaslevering in m3 in juni
 
   - name: GASLEV07
-    random_numeric:
-      distribution: normal
-      mean: 10
-      sd: 8
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV07
     label: Gaslevering in m3 in juli
 
   - name: GASLEV08
-    random_numeric:
-      distribution: normal
-      mean: 10
-      sd: 8
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV08
     label: Gaslevering in m3 in augustus
 
   - name: GASLEV09
-    random_numeric:
-      distribution: normal
-      mean: 20
-      sd: 12
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV09
     label: Gaslevering in m3 in september
 
   - name: GASLEV10
-    random_numeric:
-      distribution: normal
-      mean: 60
-      sd: 35
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV10
     label: Gaslevering in m3 in oktober
 
   - name: GASLEV11
-    random_numeric:
-      distribution: normal
-      mean: 140
-      sd: 70
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV11
     label: Gaslevering in m3 in november
 
   - name: GASLEV12
-    random_numeric:
-      distribution: normal
-      mean: 190
-      sd: 95
-      min: 0
-      round: 1
+    source: spine.obj.GASLEV12
     label: Gaslevering in m3 in december
 
-  # ---- Electricity delivery peak/high tariff (kWh/month) ----
   - name: ELKLEV{sfx}
     suffixes: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    random_numeric:
-      distribution: normal
-      mean: 150
-      sd: 80
-      min: 0
-      round: 1
+    source: spine.obj.ELKLEV{sfx}
     label: Elektriciteitslevering hoog tarief in kWh in maand {sfx}
 
-  # ---- Electricity feed-back peak/high tariff (kWh/month) ----
   - name: ELKTLV{sfx}
     suffixes: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    random_numeric:
-      distribution: normal
-      mean: 30
-      sd: 50
-      min: 0
-      round: 1
+    source: spine.obj.ELKTLV{sfx}
     label: Elektriciteit teruglevering hoog tarief in kWh in maand {sfx}
 
-  # ---- Electricity delivery off-peak/low tariff (kWh/month) ----
   - name: ELKLEVLAAG{sfx}
     suffixes: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    random_numeric:
-      distribution: normal
-      mean: 60
-      sd: 35
-      min: 0
-      round: 1
+    source: spine.obj.ELKLEVLAAG{sfx}
     label: Elektriciteitslevering laag tarief in kWh in maand {sfx}
 
-  # ---- Electricity feed-back off-peak/low tariff (kWh/month) ----
   - name: ELKTLVLAAG{sfx}
     suffixes: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    random_numeric:
-      distribution: normal
-      mean: 5
-      sd: 10
-      min: 0
-      round: 1
+    source: spine.obj.ELKTLVLAAG{sfx}
     label: Elektriciteit teruglevering laag tarief in kWh in maand {sfx}
+

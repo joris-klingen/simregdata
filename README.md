@@ -189,6 +189,7 @@ inhatab_update_params()             # 83932NED (household income, also woonbase)
 spolis_update_params()              # 81431NED
 vehtab_update_params()              # 83834NED
 energieverbruik_update_params()     # Kerncijfers wijken en buurten
+energieverbruik_update_structure()  # 81528NED, 85140NED (energy per dwelling characteristic)
 ```
 
 ## Vignettes

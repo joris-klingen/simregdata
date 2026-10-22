@@ -184,3 +184,133 @@ energieverbruik_update_params <- function(years = 2017:2023,
 
   invisible(all_params)
 }
+
+
+# Dwelling-level energy structure (85140NED, 81528NED) ----
+
+# 85140NED dimensions used for the dwelling-level model, with the codes of
+# the simulated characteristics they map to (woonbase VBOWoningType codes,
+# lower bounds of construction-year and floor-area classes, occupants)
+.ENERGY_DIMS <- list(
+  woningtype = c("01" = "Vrijstaande woning", "02" = "2-onder-1-kapwoning",
+                 "03" = "Hoekwoning", "04" = "Tussenwoning", "05" = "Appartement"),
+  bouwjaar   = c("1000" = "1000 tot 1946", "1946" = "1946 tot 1965",
+                 "1965" = "1965 tot 1975", "1975" = "1975 tot 1992",
+                 "1992" = "1992 tot 2006", "2006" = "2006 tot 2015",
+                 "2015" = "2015 tot heden"),
+  oppervlakte = c("2" = "2 tot 50", "50" = "50 tot 75", "75" = "75 tot 100",
+                  "100" = "100 tot 150", "150" = "150 tot 250", "250" = "250 tot 10 000"),
+  bewoners   = c("1" = "1 persoon", "2" = "2 personen", "3" = "3 personen",
+                 "4" = "4 personen", "5" = "5 personen of meer")
+)
+.ENERGY_DIM_KEYS <- c(woningtype = "Woningtype", bouwjaar = "Bouwjaar",
+                      oppervlakte = "Gebruiksoppervlakte", bewoners = "Bewonersklasse")
+
+
+#' Fetch the dwelling-level energy structure from StatLine
+#'
+#' Adds to `inst/config/datasets/energieverbruik/params.yaml`:
+#' \itemize{
+#'   \item from `81528NED` (all `years`): national mean gas (`gas_mean`) and
+#'         electricity delivery (`elek_mean`) per dwelling;
+#'   \item from `85140NED` (2019 onwards): a `structuur` block per year with
+#'         the mean temperature-corrected gas use and electricity delivery,
+#'         the share with solar panels and with district heating, per dwelling
+#'         type, construction-year class, floor-area class and number of
+#'         occupants, the national percentiles, and electricity delivery and
+#'         net delivery for dwellings with and without solar panels.
+#' }
+#' The simulator draws gas and electricity per dwelling from this structure
+#' (see `.build_energy()`).
+#'
+#' @param years Integer vector of years (default `2010:2025`).
+#' @param config_dir Directory holding params.yaml.
+#' @return Invisibly, the full parameter list.
+#' @export
+energieverbruik_update_structure <- function(years = 2010:2025,
+                                             config_dir = .dataset_dir("energieverbruik")) {
+  if (!requireNamespace("cbsodataR", quietly = TRUE))
+    stop("Package 'cbsodataR' is required. Install with install.packages('cbsodataR').")
+
+  yaml_path <- file.path(config_dir, "params.yaml")
+  all_params <- if (file.exists(yaml_path)) yaml::read_yaml(yaml_path) else list()
+  lbl <- function(dt) {
+    dt <- data.table::as.data.table(cbsodataR::cbs_add_label_columns(dt))
+    for (j in grep("_label$", names(dt), value = TRUE)) {
+      data.table::set(dt, j = j, value = trimws(as.character(dt[[j]])))
+    }
+    dt
+  }
+  num <- function(dt, pattern) as.numeric(dt[[grep(pattern, names(dt), value = TRUE)[1L]]])
+
+  cat("Fetching national energy use per dwelling (81528NED):\n")
+  nat <- lbl(cbsodataR::cbs_get_data("81528NED", RegioS = cbsodataR::has_substring("NL01")))
+  nat <- nat[Woningkenmerken_label == "Totaal woningen"]
+  for (yr in years) {
+    row <- nat[Perioden_label == as.character(yr)]
+    if (nrow(row) == 0L) next
+    yk <- as.character(yr)
+    if (is.null(all_params[[yk]])) all_params[[yk]] <- list()
+    all_params[[yk]]$gas_mean  <- num(row, "^GemiddeldAardgasverbruik")
+    all_params[[yk]]$elek_mean <- num(row, "^GemiddeldeElektriciteitslevering")
+    cat(sprintf("  %d: gas %s m3, elek %s kWh\n", yr,
+                all_params[[yk]]$gas_mean, all_params[[yk]]$elek_mean))
+  }
+
+  cat("Fetching dwelling-level structure (85140NED):\n")
+  for (yr in intersect(years, 2019:2100)) {
+    tryCatch({
+      d <- lbl(cbsodataR::cbs_get_data("85140NED", Perioden = paste0(yr, "JJ00")))
+      dims <- c(.ENERGY_DIM_KEYS, solar = "HoofdverwarmingEnZonnestroom")
+      is_tot <- function(dim) d[[paste0(dim, "_label")]] %in% c("Totaal", "Totaal woningen")
+      one_way <- function(dim) {
+        keep <- rep(TRUE, nrow(d))
+        for (o in setdiff(dims, dim)) keep <- keep & is_tot(o)
+        d[keep]
+      }
+      measures <- function(rows) list(
+        gas    = num(rows, "^GemiddeldeAardgasleveringTempGecorr"),
+        elek   = num(rows, "^GemiddeldeElektriciteitslevering"),
+        zon    = num(rows, "^AandeelWoningenZonnestroomOpAdres") / 100,
+        stadsw = num(rows, "^AandeelWoningenMetStadsverwarming") / 100)
+
+      tot <- one_way("none")
+      s <- list(totaal = lapply(measures(tot), function(x) x[1L]))
+      s$gas_pct <- vapply(seq(10, 90, 10), function(p)
+        num(tot, paste0("^AardgasTempGecorrPercentiel", p, "_"))[1L], numeric(1L))
+      s$elek_pct <- vapply(seq(10, 90, 10), function(p)
+        num(tot, paste0("^ElektriciteitsleveringPercentiel", p, "_"))[1L], numeric(1L))
+
+      for (k in names(.ENERGY_DIM_KEYS)) {
+        dim <- .ENERGY_DIM_KEYS[[k]]
+        ow <- one_way(dim)
+        labels <- gsub("\\s*m\u00b2$|\\s*m2$", "", ow[[paste0(dim, "_label")]])
+        m <- measures(ow)
+        idx <- match(.ENERGY_DIMS[[k]], labels)
+        if (anyNA(idx)) stop("missing categories for ", dim, ": ",
+                             paste(.ENERGY_DIMS[[k]][is.na(idx)], collapse = ", "))
+        s[[k]] <- lapply(m, function(x) as.list(stats::setNames(x[idx], names(.ENERGY_DIMS[[k]]))))
+      }
+
+      sol <- one_way("HoofdverwarmingEnZonnestroom")
+      sl <- sol$HoofdverwarmingEnZonnestroom_label
+      for (key in c("met", "zonder")) {
+        r <- sol[sl == paste("Totaal", key, "zonnestroominstallatie")]
+        s$zonnestroom[[key]] <- list(
+          elek  = num(r, "^GemiddeldeElektriciteitslevering")[1L],
+          netto = num(r, "^NettoElektriciteitsleveringGemiddelde")[1L])
+      }
+
+      yk <- as.character(yr)
+      if (is.null(all_params[[yk]])) all_params[[yk]] <- list()
+      all_params[[yk]]$structuur <- s
+      cat(sprintf("  %d: gas %.0f m3 (corr.), elek %.0f kWh, solar %.0f%%\n", yr,
+                  s$totaal$gas, s$totaal$elek, s$totaal$zon * 100))
+    }, error = function(e) cat(sprintf("  %d: FAILED (%s)\n", yr, conditionMessage(e))))
+  }
+
+  all_params <- all_params[order(as.integer(names(all_params)))]
+  yaml::write_yaml(all_params, yaml_path)
+  cat(sprintf("Written energieverbruik params.yaml (%d years)\n", length(all_params)))
+  invisible(all_params)
+}

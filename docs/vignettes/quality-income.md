@@ -150,7 +150,7 @@ calibration and are an out-of-sample check.
 sl <- statline("83932NED", Perioden = paste0(YEAR, "JJ00"))
 has_statline <- !is.null(sl)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-21 07:51:48] StatLine reachable: TRUE
+#> [2026-10-22 14:34:53] StatLine reachable: TRUE
 
 if (has_statline) {
   sl[, `:=`(
@@ -174,7 +174,7 @@ sl_level <- if (has_statline) {
 level <- rbindlist(list(sim_level, sl_level), use.names = TRUE)
 level
 #>         bron gemiddeld mediaan
-#> 1: simulatie  59913.62   46900
+#> 1: simulatie  59915.66   47100
 #> 2:  StatLine  57600.00   44700
 
 cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro"),
@@ -289,8 +289,8 @@ decile groups:
 ``` r
 dec[, .(top_bodem = gemiddeld[deciel == 10] / gemiddeld[deciel == 1]), by = bron]
 #>         bron top_bodem
-#> 1: simulatie  11.58295
-#> 2:  StatLine  13.11450
+#> 1: simulatie   11.5816
+#> 2:  StatLine   13.1145
 ```
 
 The decile means follow the published ones up to the eighth group. The
@@ -307,7 +307,7 @@ equivalent to computing the ranks yourself:
 ``` r
 hh[, .(correlatie_percentiel_inkomen = cor(inh_p100, inhatab, method = "spearman"))]
 #>    correlatie_percentiel_inkomen
-#> 1:                     0.9999489
+#> 1:                      0.999949
 ```
 
 ## Income by household type
@@ -360,7 +360,7 @@ pers_sum <- inpa[, .(som_personen = sum(as.numeric(INPPERSBESTINK))), by = RINPE
 pers_sum[inha, on = "RINPERSOONHKW", inhatab := as.numeric(i.INHBESTINKH)]
 pers_sum[, .(huishoudens = .N, correlatie = cor(som_personen, inhatab))]
 #>    huishoudens correlatie
-#> 1:       22227  0.1869707
+#> 1:       22227  0.1828951
 ```
 
 Personal incomes in `INPATAB` are still drawn independently of the

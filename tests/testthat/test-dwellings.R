@@ -47,7 +47,9 @@ test_that("dwellings keep their attributes across simulation years", {
   old <- m$VBOBouwjaar1Jan.b <= 2022L
   expect_identical(m$VBOBouwjaar1Jan.a[old], m$VBOBouwjaar1Jan.b[old])
   expect_gt(mean(old), 0.98)
-  expect_identical(m$VBOOppervlakte1Jan.a, m$VBOOppervlakte1Jan.b)
+  # floor area follows dwelling type, which changes only where the
+  # gemeente's apartment share does
+  expect_gt(mean(m$VBOOppervlakte1Jan.a == m$VBOOppervlakte1Jan.b), 0.98)
   # gemeente only moves where the shares change or gemeenten merge
   expect_gt(mean(m$GemeenteCodeJJJJ1Jan.a == m$GemeenteCodeJJJJ1Jan.b), 0.95)
 })
@@ -65,4 +67,11 @@ test_that(".hash_pair gives proportional weighted rendezvous", {
   w <- c(1, 2, 3, 4)
   pick <- .rendezvous(ids, 1:4, w, "test")
   expect_equal(as.numeric(table(pick)) / length(pick), w / sum(w), tolerance = 0.05)
+})
+
+test_that("floor area depends on dwelling type", {
+  obj <- spine_obj(2023L, n = 50000L)
+  opp <- tapply(obj$VBOOppervlakte1Jan, obj$VBOWoningType1Jan, stats::median)
+  expect_lt(opp[["05"]], opp[["04"]])
+  expect_lt(opp[["04"]], opp[["01"]])
 })

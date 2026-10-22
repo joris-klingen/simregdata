@@ -324,6 +324,13 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
       if (length(obj_cols) == 0L) obj_cols <- "RINOBJECTNUMMER"
       obj_tbl <- spine$obj_raw %||% spine$obj
       ds_spine$obj <- obj_tbl[, ..obj_cols]
+      if (!"RINOBJECTNUMMER" %in% obj_cols) {
+        ds_spine$obj[, RINOBJECTNUMMER := obj_tbl$RINOBJECTNUMMER]
+      }
+      # Energy use per dwelling from its characteristics (R/energy.R)
+      if (identical(dataset, "energieverbruik")) {
+        ds_spine$obj <- .build_energy(ds_spine$obj, spine, year)
+      }
     }
 
     .sim_cache[[paste0("spine_", dataset)]] <- ds_spine

@@ -19,34 +19,33 @@ The tables below classify every column across all 15 datasets.
 
 ## Summary: StatLine-calibrated parameters
 
-| Parameter                                          | Dataset                 | CBS table           | Simulated column(s)                          |
-|----------------------------------------------------|-------------------------|---------------------|----------------------------------------------|
-| Population size (`n_persons`)                      | Woonbase                | 37230ned            | Controls spine row count                     |
-| Household count (`n_hh`)                           | Woonbase                | 71486ned            | Controls HH count in spine                   |
-| HH-type distribution (`typhh_p`)                   | Woonbase                | 71486ned            | TYPHH in all file types                      |
-| Gemeente population weights                        | Woonbase                | 37230ned            | GemeenteCode sampling probs                  |
-| Vehicle fleet size (`n_vehicles`)                  | RDW                     | 85236NED            | Controls RDW row count                       |
-| Gemeente vehicle weights                           | RDW                     | 85236NED + 37230ned | Spine sampling probs per gem                 |
-| Fuel type (`brandstof_p`)                          | RDW                     | 85237NED            | BRANDSTCODECORVRTG                           |
-| Vehicle colour (`kleur_p`)                         | RDW                     | 85237NED            | KLEURCODEVRTG                                |
-| Vehicle weight (`gewicht_mean/sd`)                 | RDW                     | 85237NED            | MASSALEEGCORVRTG                             |
-| Vehicle type (`vrtgsoort_p`)                       | RDW                     | 85236NED            | VRTGSOORT                                    |
-| Construction year (`bouwjaar_p`)                   | RDW                     | 85237NED            | EERSTETOELDAT1VRTG                           |
-| Annual km (`jaarkm_mean/sd`)                       | RDW                     | 85404NED            | VPJAARKM                                     |
-| Job count (`n_jobs`)                               | SPOLIS                  | 85275NED            | Controls SPOLIS row count                    |
-| Household count (`n_households`)                   | VEHTAB                  | (woonbase)          | Controls VEHTAB row count                    |
-| Dwelling count (`n_dwellings`)                     | Energieverbruik         | (woonbase)          | Controls row count                           |
-| Gas consumption (`gas_mean/sd`)                    | Energieverbruik         | CBS energy stats    | GAS                                          |
-| Electricity (`elek_mean/sd`)                       | Energieverbruik         | CBS energy stats    | ELEK                                         |
-| Solar PV share (`solar_pv_share`)                  | Energieverbruik         | CBS energy stats    | ZONPV                                        |
-| Education level (`opl_niveau_hb/hg`)               | HOOGSTEOPLTAB           | 82275NED            | OPLNIVSOI2021AGG4HBmetNIRWO, HG              |
-| Personal income (`secj_dist`, income means)        | INPATAB                 | 83931NED, 84493NED  | INPSECJ, INPPERSINK, etc.                    |
-| Household income (mean, median per household type) | INHATAB, Woonbase       | 83932NED            | BESTINKH1JAN, INHBESTINKH, INHBRUTINKH, etc. |
-| SEC monthly (`secm_dist`)                          | SECMBUS                 | (implicit)          | SECM                                         |
-| SBI sector (`sbi2008_dist`)                        | BETAB                   | (implicit)          | SBI2008VJJJJ                                 |
-| Business size (`gksbs_dist`)                       | BETAB                   | (implicit)          | GKSBS                                        |
-| PV installations (`n_installations`, capacity)     | Zonnestroominstallaties | (implicit)          | Vermogen_panelen                             |
-| Network relation counts                            | Buren/Collega/Familie   | (implicit)          | Row count per person                         |
+| Parameter                                                                           | Dataset                 | CBS table           | Simulated column(s)                                    |
+|-------------------------------------------------------------------------------------|-------------------------|---------------------|--------------------------------------------------------|
+| Population size (`n_persons`)                                                       | Woonbase                | 37230ned            | Controls spine row count                               |
+| Household count (`n_hh`)                                                            | Woonbase                | 71486ned            | Controls HH count in spine                             |
+| HH-type distribution (`typhh_p`)                                                    | Woonbase                | 71486ned            | TYPHH in all file types                                |
+| Gemeente population weights                                                         | Woonbase                | 37230ned            | GemeenteCode sampling probs                            |
+| Vehicle fleet size (`n_vehicles`)                                                   | RDW                     | 85236NED            | Controls RDW row count                                 |
+| Gemeente vehicle weights                                                            | RDW                     | 85236NED + 37230ned | Spine sampling probs per gem                           |
+| Fuel type (`brandstof_p`)                                                           | RDW                     | 85237NED            | BRANDSTCODECORVRTG                                     |
+| Vehicle colour (`kleur_p`)                                                          | RDW                     | 85237NED            | KLEURCODEVRTG                                          |
+| Vehicle weight (`gewicht_mean/sd`)                                                  | RDW                     | 85237NED            | MASSALEEGCORVRTG                                       |
+| Vehicle type (`vrtgsoort_p`)                                                        | RDW                     | 85236NED            | VRTGSOORT                                              |
+| Construction year (`bouwjaar_p`)                                                    | RDW                     | 85237NED            | EERSTETOELDAT1VRTG                                     |
+| Annual km (`jaarkm_mean/sd`)                                                        | RDW                     | 85404NED            | VPJAARKM                                               |
+| Job count (`n_jobs`)                                                                | SPOLIS                  | 85275NED            | Controls SPOLIS row count                              |
+| Household count (`n_households`)                                                    | VEHTAB                  | (woonbase)          | Controls VEHTAB row count                              |
+| Dwelling count (`n_dwellings`)                                                      | Energieverbruik         | (woonbase)          | Controls row count                                     |
+| National gas and electricity per dwelling (`gas_mean`, `elek_mean`)                 | Energieverbruik         | 81528NED            | GAS, ELEK                                              |
+| Gas, electricity, solar, district heating per dwelling characteristic (`structuur`) | Energieverbruik         | 85140NED            | GAS, GASSJV, ELEK, ELEKTERUG, ELEKNETTO, ZONPV, STADSW |
+| Education level (`opl_niveau_hb/hg`)                                                | HOOGSTEOPLTAB           | 82275NED            | OPLNIVSOI2021AGG4HBmetNIRWO, HG                        |
+| Personal income (`secj_dist`, income means)                                         | INPATAB                 | 83931NED, 84493NED  | INPSECJ, INPPERSINK, etc.                              |
+| Household income (mean, median per household type)                                  | INHATAB, Woonbase       | 83932NED            | BESTINKH1JAN, INHBESTINKH, INHBRUTINKH, etc.           |
+| SEC monthly (`secm_dist`)                                                           | SECMBUS                 | (implicit)          | SECM                                                   |
+| SBI sector (`sbi2008_dist`)                                                         | BETAB                   | (implicit)          | SBI2008VJJJJ                                           |
+| Business size (`gksbs_dist`)                                                        | BETAB                   | (implicit)          | GKSBS                                                  |
+| PV installations (`n_installations`, capacity)                                      | Zonnestroominstallaties | (implicit)          | Vermogen_panelen                                       |
+| Network relation counts                                                             | Buren/Collega/Familie   | (implicit)          | Row count per person                                   |
 
 ## Per-dataset column classification
 
@@ -340,36 +339,46 @@ Business register. SBI sector and size class are StatLine-calibrated.
 
 ### Energieverbruik (2 files, ~38 columns)
 
+Gas and electricity are generated per dwelling from its characteristics
+(`R/energy.R`): dwelling type, construction year and floor area from
+woonbase, and the number of occupants present. The one-way means, shares
+and percentiles of StatLine 85140NED (2019 onwards; earlier years use
+the 2019 structure scaled to the national level of 81528NED) are matched
+by raking: gas is additive in the characteristics with normal noise,
+electricity multiplicative with lognormal noise, solar panels and
+district heating are probabilities raked on the logit scale and assigned
+per dwelling with a stable hash, so panels stay installed as adoption
+grows.
+
 #### ENERGIEVERBRUIKTAB (annual totals, 20 columns)
 
-| Column                    | Level          | Source                       |
-|---------------------------|----------------|------------------------------|
-| SOORTOBJECTNUMMER         | Spine-derived  | From woonbase obj spine      |
-| RINOBJECTNUMMER           | Spine-derived  | From woonbase obj spine      |
-| WONINGT                   | Constant       | `" "` (empty since 2019)     |
-| WOONR                     | Constant       | `" "` (empty since 2019)     |
-| STADSW                    | Codelist       | Hardcoded 94%/6%             |
-| GAS                       | **StatLine**   | `gas_mean/sd` from params    |
-| ELEK                      | **StatLine**   | `elek_mean/sd` from params   |
-| GASBRON                   | Codelist       | Hardcoded probs              |
-| ELEKBRON                  | Codelist       | Hardcoded probs              |
-| ELEKTERUG                 | Random numeric | Hardcoded mean/sd            |
-| ELEKNETTO                 | Random numeric | Hardcoded mean/sd            |
-| GASSJV                    | Random numeric | Hardcoded mean/sd            |
-| WARMTESCHATTING           | Random numeric | Hardcoded mean/sd            |
-| ZONPV                     | **StatLine**   | `solar_pv_share` from params |
-| ZONVERMOGEN1JAN           | Random numeric | Hardcoded mean/sd            |
-| ZONVERMOGEN31DEC          | Random numeric | Hardcoded mean/sd            |
-| ZONPVBRON                 | Codelist       | Hardcoded probs              |
-| HOOFDVERWARMING31DEC      | Codelist       | Hardcoded probs              |
-| WONINGBEWONING10PROFIELEN | Codelist       | Hardcoded probs              |
-| KBHOOFDVERWARMING31DEC    | Codelist       | Hardcoded probs              |
+| Column                                       | Level         | Source                                                                                                  |
+|----------------------------------------------|---------------|---------------------------------------------------------------------------------------------------------|
+| SOORTOBJECTNUMMER                            | Spine-derived | From woonbase obj spine                                                                                 |
+| RINOBJECTNUMMER                              | Spine-derived | From woonbase obj spine                                                                                 |
+| WONINGT                                      | Constant      | `" "` (empty since 2019)                                                                                |
+| WOONR                                        | Constant      | `" "` (empty since 2019)                                                                                |
+| STADSW                                       | **StatLine**  | 85140NED share per dwelling type and construction year                                                  |
+| GAS                                          | **StatLine**  | GASSJV scaled to the actual national mean (81528NED)                                                    |
+| GASSJV                                       | **StatLine**  | 85140NED means per characteristic and percentiles; zero for district heating and all-electric dwellings |
+| ELEK                                         | **StatLine**  | 85140NED means per characteristic and by solar panels, percentiles                                      |
+| ELEKTERUG                                    | **StatLine**  | Dwellings with panels only, proportional to capacity, mean from 85140NED                                |
+| ELEKNETTO                                    | Derived       | ELEK - ELEKTERUG                                                                                        |
+| GASBRON                                      | Codelist      | Hardcoded probs                                                                                         |
+| ELEKBRON                                     | Codelist      | Hardcoded probs                                                                                         |
+| WARMTESCHATTING                              | Derived       | Gas-equivalent heat of district-heating dwellings (GJ)                                                  |
+| ZONPV                                        | **StatLine**  | 85140NED share per dwelling type, floor area, occupants                                                 |
+| ZONVERMOGEN1JAN, ZONVERMOGEN31DEC            | Derived       | Lognormal around 4 kWp, larger on larger dwellings                                                      |
+| ZONPVBRON                                    | Codelist      | Hardcoded probs                                                                                         |
+| HOOFDVERWARMING31DEC, KBHOOFDVERWARMING31DEC | Derived       | District heating without gas, all-electric, block or individual CV                                      |
+| WONINGBEWONING10PROFIELEN                    | Codelist      | Hardcoded probs                                                                                         |
 
 #### ENERGIEVERBRUIKMAAND (monthly smart meter, 18 columns)
 
-Monthly gas and electricity readings from smart meters, with delivery
-and return flows. All monthly columns are random numeric with hardcoded
-parameters.
+The annual gas, electricity delivery and feed-in of ENERGIEVERBRUIKTAB
+spread over the months with fixed seasonal profiles, and over the high
+and low tariff with fixed shares, so the months add up to the annual
+values.
 
 ### Zonnestroominstallaties (1 file, 28 columns)
 

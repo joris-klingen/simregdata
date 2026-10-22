@@ -124,13 +124,13 @@ sims <- lapply(YEARS, function(y) {
   tcat("simulating ", y)
   simulate_year(y)
 })
-#> [2026-10-21 07:48:09] simulating 2019
-#> [2026-10-21 07:48:11] simulating 2020
-#> [2026-10-21 07:48:13] simulating 2021
-#> [2026-10-21 07:48:15] simulating 2022
-#> [2026-10-21 07:48:17] simulating 2023
-#> [2026-10-21 07:48:19] simulating 2024
-#> [2026-10-21 07:48:20] simulating 2025
+#> [2026-10-22 14:30:03] simulating 2019
+#> [2026-10-22 14:30:04] simulating 2020
+#> [2026-10-22 14:30:06] simulating 2021
+#> [2026-10-22 14:30:08] simulating 2022
+#> [2026-10-22 14:30:10] simulating 2023
+#> [2026-10-22 14:30:12] simulating 2024
+#> [2026-10-22 14:30:14] simulating 2025
 names(sims) <- YEARS
 
 cars <- rbindlist(lapply(sims, `[[`, "cars"))
@@ -170,7 +170,7 @@ sl_pop <- statline("37230ned", Perioden = period(2023))
 has_statline <- nrow(sl_237) > 0 && !is.null(sl_236) &&
   !is.null(sl_404) && !is.null(sl_pop)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-21 07:49:02] StatLine reachable: TRUE
+#> [2026-10-22 14:30:41] StatLine reachable: TRUE
 ```
 
 ## Fleet size

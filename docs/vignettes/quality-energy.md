@@ -15,16 +15,13 @@ the same register are in StatLine 85140NED (by dwelling type, floor
 area, construction year, number of occupants and solar panels, 2019
 onwards) and 81528NED (national averages since 2010).
 
-The short version: the national averages of gas and electricity use
-roughly follow StatLine over time, because they are calibrated per year.
-Everything the research question is actually about is not reproduced:
-gas and electricity are drawn independently of the dwelling, so detached
-houses use as much gas as apartments, old houses as much as new ones,
-and a household of five as much electricity as a single person. Solar
-panels have no effect on net electricity use, and the spread of the
-distributions is too narrow. The woonbase dwelling characteristics used
-for the breakdowns are themselves consistent (see the last section), so
-the flat profiles are down to the energy columns alone.
+The short version: gas and electricity are generated per dwelling from
+its type, construction year, floor area, number of occupants and solar
+panels, calibrated to 85140NED, so the gradients the question is about
+are reproduced, as are the percentiles and the effect of solar panels on
+net electricity use. National averages are a few percent low, because
+the simulated housing stock has more small dwellings and single-person
+households than the real one.
 
 ## Setup
 
@@ -87,7 +84,7 @@ sim_init("energieverbruik", year = YEAR, seed = 43L)
 
 energie <- as.data.table(read_sav(
   sprintf("ENERGIEVERBRUIK%dTABV1", YEAR),
-  col_select = c(RINOBJECTNUMMER, GAS, ELEK, ELEKTERUG, ELEKNETTO, ZONPV, STADSW)))
+  col_select = c(RINOBJECTNUMMER, GASSJV, ELEK, ELEKTERUG, ELEKNETTO, ZONPV, STADSW)))
 woonr <- as.data.table(read_sav(
   sprintf("WoonbasePopulatieWoonruimten%dV1", YEAR),
   col_select = c(RINOBJECTNUMMER, VBOWoningType1Jan, AantalPersonenPerVSLKlasse1Jan)))
@@ -95,8 +92,10 @@ kenm <- as.data.table(read_sav(
   sprintf("WoonbaseKenmerkenWoonruimten%dV1", YEAR),
   col_select = c(RINOBJECTNUMMER, VBOBouwjaar1Jan, VBOOppervlakte1Jan)))
 
+# 85140NED reports temperature-corrected gas use, which is GASSJV; GAS is the
+# actual delivery in the year
 energie[, `:=`(
-  gas      = as.numeric(GAS),
+  gas      = as.numeric(GASSJV),
   elek     = as.numeric(ELEK),
   terug    = as.numeric(ELEKTERUG),
   netto    = as.numeric(ELEKNETTO),
@@ -165,7 +164,7 @@ sl <- statline("85140NED", Perioden = paste0(YEAR, "JJ00"))
 sl_trend <- statline("81528NED", RegioS = cbsodataR::has_substring("NL01"))
 has_statline <- !is.null(sl) && !is.null(sl_trend)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-21 07:51:28] StatLine reachable: TRUE
+#> [2026-10-22 14:33:42] StatLine reachable: TRUE
 
 # one-way breakdowns: every other dimension at its total
 one_way <- function(dim) {
@@ -183,9 +182,9 @@ one_way <- function(dim) {
 
 ## National averages over time
 
-Gas and electricity use per dwelling are calibrated per year, so the
-national trend should follow 81528NED. We simulate a smaller population
-for every year.
+The national level per year comes from 81528NED (actual, not temperature
+corrected, gas use: the simulated `GAS`). We simulate a smaller
+population for every year.
 
 ``` r
 TREND_YEARS <- 2015:2024
@@ -221,17 +220,18 @@ cpb_line(trend, x = jaar, y = verbruik, colour = bron,
 
 <img src="quality-energy_files/figure-gfm/trend-1.png" width="100%" />
 
-Gas follows the published decline from 2016 to 2023; the 2024 parameter
-is too high. Electricity is a few hundred kWh too high before 2021 and
-again in 2024. The yearly means in
-`inst/config/datasets/energieverbruik/params.yaml` for those years are
-estimates rather than StatLine values.
+Both follow the published series a few percent low. The dwelling-level
+model targets the mean *within* every dwelling type, construction year,
+floor area and household size, and the simulated stock has relatively
+more of the small, low-use dwellings and single-person households, so
+the national mean comes out lower. The fit spreads that mismatch over
+all margins rather than matching some exactly and missing others by
+more.
 
 ## Distribution: percentiles
 
-85140NED publishes the 10th to 90th percentiles. For gas these are
-temperature corrected; the simulated `GAS` is the actual delivery, which
-in 2023 differs from the corrected value by a few percent.
+85140NED publishes the 10th to 90th percentiles (gas temperature
+corrected, compared with `GASSJV`).
 
 ``` r
 sim_pct <- energie[, .(
@@ -263,9 +263,9 @@ cpb_line(pct, x = percentiel, y = verbruik, colour = bron,
 
 <img src="quality-energy_files/figure-gfm/percentiles-1.png" width="100%" />
 
-The simulated distributions are too narrow at both ends. Real gas use
-starts at zero (dwellings without a gas connection, about one in ten)
-and has a long upper tail; electricity has a longer upper tail too.
+Both distributions follow the published percentiles, including the tenth
+of dwellings without gas (district heating, most new dwellings, other
+all-electric homes). Gas is slightly short at the top.
 
 ## Gas use by dwelling characteristics
 
@@ -326,11 +326,12 @@ cpb_col(gas_opp, x = klasse, y = gemiddeld, fill = bron,
 
 <img src="quality-energy_files/figure-gfm/gas-by-3.png" width="100%" />
 
-In the simulator every group uses the national average. The real
-gradients are large: a detached house uses well over twice the gas of an
-apartment, and dwellings of over 250 m2 several times that of the
-smallest ones. Any analysis of who would be hit by a gas tax, or which
-dwellings to insulate first, gives a flat answer on the simulated data.
+The gradients are reproduced: a detached house uses more than twice the
+gas of an apartment, dwellings of over 250 m2 nearly four times that of
+the smallest ones, and gas use falls steadily with the construction
+year. Levels are a few percent low in some groups because the raking
+cannot match all four characteristics exactly on a stock whose joint
+distribution differs from the real one.
 
 ## Electricity use by number of occupants
 
@@ -347,14 +348,15 @@ cpb_col(elek_bew, x = klasse, y = gemiddeld, fill = bron,
 
 <img src="quality-energy_files/figure-gfm/elek-by-1.png" width="100%" />
 
-Electricity is drawn independently of the household as well.
+Electricity rises with the number of occupants as in the published data,
+about 5% high in every group (the counterpart of the low national mean).
 
 ## Solar panels and net electricity use
 
-The share of dwellings with solar panels is calibrated per year. The
-second half of the research question, how much they reduce net
-electricity demand, depends on `ELEKNETTO` being lower for dwellings
-with panels.
+Solar panels are assigned with probabilities raked to the published
+shares per dwelling type, floor area and number of occupants. Feed-in
+(`ELEKTERUG`) exists only for dwellings with panels, proportional to
+their capacity, and net electricity is delivery minus feed-in.
 
 ``` r
 sim_zon <- energie[, .(
@@ -373,11 +375,11 @@ sl_zon <- if (has_statline) {
 }
 zon <- rbindlist(list(sim_zon, sl_zon), use.names = TRUE)
 zon[, .(bron, zonnepanelen, netto, terug)]
-#>         bron       zonnepanelen    netto    terug
-#> 1: simulatie    met zonnestroom 2449.696 772.5411
-#> 2: simulatie zonder zonnestroom 2417.575 773.8959
-#> 3:  StatLine    met zonnestroom 1140.000       NA
-#> 4:  StatLine zonder zonnestroom 2280.000       NA
+#>         bron       zonnepanelen    netto   terug
+#> 1: simulatie    met zonnestroom 1102.415 1750.33
+#> 2: simulatie zonder zonnestroom 2203.572    0.00
+#> 3:  StatLine    met zonnestroom 1140.000      NA
+#> 4:  StatLine zonder zonnestroom 2280.000      NA
 
 cpb_col(zon, x = zonnepanelen, y = netto, fill = bron,
   position = "dodge", reverse_legend = FALSE,
@@ -398,21 +400,31 @@ sl_share <- if (has_statline) {
 }
 rbindlist(list(sim_share, sl_share), use.names = TRUE)
 #>         bron zonnestroom stadsverwarming
-#> 1: simulatie    31.54025        5.757654
+#> 1: simulatie    29.46766        6.910045
 #> 2:  StatLine    33.00000        6.900000
+
+energie[, zon_pct := zon * 100]
+zon_type <- compare_by("woningtype", "Woningtype", TYPES, value = "zon_pct",
+                       sl_pattern = "^AandeelWoningenZonnestroomOpAdres")
+cpb_col(zon_type, x = klasse, y = gemiddeld, fill = bron,
+  position = "dodge", reverse_legend = FALSE,
+  title = "Woningen met zonnepanelen naar woningtype, 2023",
+  ylab  = "% van de woningen")
 ```
 
-The shares match, but in the simulator net electricity is the same with
-and without panels, and the feed-in (`ELEKTERUG`) is as high for
-dwellings without panels as for dwellings with them. `ELEK`, `ELEKTERUG`
-and `ELEKNETTO` are drawn independently of each other and of `ZONPV`:
+<img src="quality-energy_files/figure-gfm/solar-share-1.png" width="100%" />
+
+Net electricity of dwellings with panels is half that of dwellings
+without, as published. The share per dwelling type matches; nationally
+it is a few points low for the same composition reason as gas. The
+electricity columns are consistent with each other:
 
 ``` r
 energie[, .(
   netto_gelijk_aan_levering_min_terug = mean(abs(netto - (elek - terug)) < 1) * 100,
   terug_zonder_panelen = mean(terug[!zon] > 0) * 100)]
 #>    netto_gelijk_aan_levering_min_terug terug_zonder_panelen
-#> 1:                         0.004299966             66.40286
+#> 1:                                 100                    0
 ```
 
 ## Dwelling characteristics
@@ -465,23 +477,20 @@ plausible but not calibrated to a specific year.
 
 ## Summary
 
-| Moment                                    | Source in simulator                  | Matches StatLine?                                                          | Safe for research?          |
-|-------------------------------------------|--------------------------------------|----------------------------------------------------------------------------|-----------------------------|
-| Mean gas and electricity per year         | calibrated (params.yaml)             | gas 2016-2023 yes; electricity too high before 2021, both too high in 2024 | with care                   |
-| Share with solar panels                   | calibrated (params.yaml)             | close                                                                      | yes                         |
-| Share with district heating               | calibrated (params.yaml)             | close                                                                      | yes                         |
-| Spread of gas and electricity use         | normal, hand-set sd                  | no, too narrow                                                             | no                          |
-| Gas by dwelling type, size, age           | independent of dwelling              | no                                                                         | no                          |
-| Electricity by number of occupants        | independent of household             | no                                                                         | no                          |
-| Net electricity with solar panels         | independent of `ZONPV`               | no                                                                         | no                          |
-| `ELEK - ELEKTERUG = ELEKNETTO`            | independent draws                    | no                                                                         | no                          |
-| Dwelling construction year and floor area | stable per dwelling, classes derived | consistent; not calibrated                                                 | yes, as breakdown variables |
+| Moment                                        | Source in simulator                  | Matches StatLine?                    | Safe for research?          |
+|-----------------------------------------------|--------------------------------------|--------------------------------------|-----------------------------|
+| Mean gas and electricity per year             | 81528NED level, 85140NED structure   | trend yes, a few percent low         | yes                         |
+| Percentiles of gas and electricity            | noise fitted to 85140NED             | yes                                  | yes                         |
+| Gas by dwelling type, size, construction year | raked to 85140NED                    | yes, within a few percent            | yes                         |
+| Electricity by number of occupants            | raked to 85140NED                    | gradient yes, about 5% high          | yes                         |
+| Solar panels by dwelling type                 | raked to 85140NED                    | yes; national share a few points low | yes                         |
+| Net electricity with and without panels       | feed-in from capacity                | yes                                  | yes                         |
+| `ELEK - ELEKTERUG = ELEKNETTO`                | derived                              | yes                                  | yes                         |
+| Dwelling construction year and floor area     | stable per dwelling, classes derived | consistent; not calibrated           | yes, as breakdown variables |
 
-For this research question the simulator supports building the pipeline
-(linking `ENERGIEVERBRUIK` to woonbase on `RINOBJECTNUMMER`, classifying
-dwellings, computing group means) but not the answer: every breakdown
-the question asks for comes out flat. The improvements that would change
-that are drawing gas and electricity conditional on dwelling type, floor
-area, construction year and occupants (85140NED has all of these one
-way), deriving net electricity from delivery and feed-in with feed-in
-only for dwellings with panels.
+For this research question the simulator now gives answers close to the
+published figures for every breakdown in 85140NED. What it cannot show
+are interactions the one-way tables do not pin down (for example the gas
+use of large apartments specifically), effects of characteristics
+outside the model (income, ownership, insulation label), and anything
+regional.

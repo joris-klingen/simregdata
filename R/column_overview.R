@@ -27,7 +27,7 @@ sim_column_overview <- function() {
     rdw                     = "85237NED, 85236NED, 85404NED",
     spolis                  = "81431NED",
     vehtab                  = "83834NED",
-    energieverbruik         = "Kerncijfers wijken en buurten",
+    energieverbruik         = "Kerncijfers wijken en buurten, 81528NED, 85140NED",
     gba                     = NA_character_,
     hoogsteopltab           = "82275NED",
     inpatab                 = NA_character_,
