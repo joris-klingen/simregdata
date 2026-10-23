@@ -34,7 +34,6 @@ columns:
       distribution: normal
       mean_from_params: mean_persink
       sd_from_params: sd_persink
-      min: -50000
       round: 0
 
   # Primary income (wages + self-employment)
@@ -43,7 +42,6 @@ columns:
       distribution: normal
       mean_from_params: mean_prim
       sd_from_params: sd_prim
-      min: -50000
       round: 0
 
   # Gross income
@@ -52,7 +50,6 @@ columns:
       distribution: normal
       mean_from_params: mean_brut
       sd_from_params: sd_brut
-      min: -50000
       round: 0
 
   # Disposable income
@@ -61,7 +58,6 @@ columns:
       distribution: normal
       mean_from_params: mean_bestink
       sd_from_params: sd_bestink
-      min: -50000
       round: 0
 
   # Taxable income
@@ -141,7 +137,6 @@ columns:
       distribution: normal
       mean_from_params: mean_gestink
       sd_from_params: sd_gestink
-      min: -50000
       round: 0
 
   # Income percentiles

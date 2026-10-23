@@ -77,6 +77,10 @@ level of 81528NED, `.energy_structure()`).
 | Household income: lognormal per type, WOZ copula (`rho = 0.5`), noise sd's | `R/params_inhatab.R` | shape around the fetched 83932NED means and medians | modelling choice |
 | `.GAS_MONTH_P`, `.ELEK_MONTH_P`, `.ZON_MONTH_P`, tariff shares, `.GASLOOS_VANAF`, all-electric share in new dwellings, block-heating share | `R/energy.R` | monthly profiles, high/low tariff, gas-free new dwellings | modelling choice |
 | Solar capacity around 4 kWp | `R/energy.R` | `ZONVERMOGEN` | modelling choice |
+| Structural shares: vehicles per owner, dropped (3%) and business-stock (2%) cars, owner types, non-GBA owners (2%) | `R/rdw_vehicles.R` | vehicle structure of RDWNPACT and VERKEERSPRESTATIE | modelling choice |
+| Households with a loss (1%) or unknown income (1%) | `R/params_inhatab.R` | negative incomes and special codes in INHATAB (codes from the INHATAB documentation) | modelling choice |
+| Vacant dwellings (1.5%), unknown floor area (0.5%) and WOZ (1%) | `R/dwellings_vacant.R` | dwellings without residents, class 9 | modelling choice |
+| Heating-type, determination-method and empty-value shares | `R/energy.R` | `HOOFDVERWARMING31DEC`, `GASBRON`, `ELEKBRON`, empty `GAS`/`ELEK` | modelling choice |
 | PHEV/HEV fleet shares by year | `R/params_rdw.R` | split of hybrids from petrol | stated: CBS publications "Meer dan 1 miljoen stekkerauto's" (2025), "Wie rijdt er elektrisch?" (2023), RAI Kerncijfers |
 | Job, period and SEC structure probabilities | `R/spolis_jobs.R`, `R/secm_periods.R` | jobs per person, periods per person | **unknown** |
 

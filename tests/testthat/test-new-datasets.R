@@ -184,12 +184,19 @@ test_that("INHATAB income matches woonbase and its percentiles", {
   inha[unique(inpa, by = "RINPERSOONHKW"), on = "RINPERSOONHKW",
        HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
   inha[hh, on = "HUISHOUDNR1Jan", wb := i.BESTINKH]
-  expect_equal(as.numeric(inha$INHBESTINKH[!is.na(inha$wb)]),
-               inha$wb[!is.na(inha$wb)])
+  # (except where INHATAB records the income as unknown)
+  known <- as.numeric(inha$INHBESTINKH) != 9999999999
+  expect_equal(as.numeric(inha$INHBESTINKH[known & !is.na(inha$wb)]),
+               inha$wb[known & !is.na(inha$wb)])
 
-  # percentile is the rank of the income
-  expect_gt(stats::cor(as.numeric(inha$INHP100HBEST),
-                       as.numeric(inha$INHBESTINKH), method = "spearman"), 0.99)
+  # percentile is the rank of the income; -1 unknown, -2 institutional
+  p100 <- as.numeric(inha$INHP100HBEST)
+  expect_true(all(p100[!known] == -1))
+  expect_true(all(p100 %in% c(-2, -1, 1:100)))
+  expect_gt(stats::cor(p100[p100 > 0], as.numeric(inha$INHBESTINKH)[p100 > 0],
+                       method = "spearman"), 0.99)
+  # some households have a negative income
+  expect_gt(sum(as.numeric(inha$INHBESTINKH) < 0), 0)
   # gross income is never below disposable income
   expect_true(all(inha$INHBRUTINKH >= inha$INHBESTINKH))
 })

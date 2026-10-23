@@ -485,6 +485,11 @@
     data.table::frank(BESTINKH) + data.table::frank(VERMHH),
     ties.method = "random") / .N * 100))]
 
+  # Vacant dwellings and unknown classes, added after everything that uses
+  # the object attributes (R/dwellings_vacant.R)
+  dt_obj <- .add_vacant_dwellings(dt_obj)
+  dt_obj <- .mask_unknown_dwelling_values(dt_obj)
+
   # Reference persons (precomputed for lazy hh/obj enrichment)
   dt_ref <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1]
   dt_ref[, LeeftijdRefPersoon := as.integer(year - GBAGeboorteJaar)]

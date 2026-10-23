@@ -12,7 +12,7 @@ test_that("datasets join on their keys within one simulation year", {
 
   pers <- rd("WoonbasePopulatiePersonen2023V1", c("RINPERSOON", "HUISHOUDNR1Jan"))
   obj  <- rd("WoonbasePopulatieWoonruimten2023V1", "RINOBJECTNUMMER")
-  rdw  <- rd("RDWNPACT2023TABV1", c("RINPERSOON", "RINKENTEKEN"))
+  rdw  <- rd("RDWNPACT2023TABV1", c("RINPERSOONS", "RINPERSOON", "RINKENTEKEN"))
   vp   <- rd("VERKEERSPRESTATIE2023TABV1", "RINKENTEKEN")
   jobs <- rd("SPOLISBUS2023V1", "RINPERSOON")
   inpa <- rd("INPA2023TABV1", c("RINPERSOON", "RINPERSOONHKW"))
@@ -21,7 +21,10 @@ test_that("datasets join on their keys within one simulation year", {
   ener <- rd("ENERGIEVERBRUIK2023TABV1", "RINOBJECTNUMMER")
 
   # persons
-  expect_true(all(rdw$RINPERSOON %in% pers$RINPERSOON))
+  # vehicle owners in the GBA link; companies and others (K, S) do not
+  in_gba <- as.character(cbs_code(rdw$RINPERSOONS)) == "R"
+  expect_true(all(rdw$RINPERSOON[in_gba] %in% pers$RINPERSOON))
+  expect_false(any(rdw$RINPERSOON[!in_gba] %in% pers$RINPERSOON))
   expect_true(all(jobs$RINPERSOON %in% pers$RINPERSOON))
   expect_true(all(inpa$RINPERSOON %in% pers$RINPERSOON))
   # vehicles: traffic performance belongs to registered vehicles

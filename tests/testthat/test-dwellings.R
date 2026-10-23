@@ -22,10 +22,17 @@ test_that("construction-year and floor-area classes match the values", {
   obj <- spine_obj(2023L)
   expect_identical(obj$VBOBouwJaarKlasse1Jan,
                    as.character(findInterval(obj$VBOBouwjaar1Jan, .BOUWJAAR_LOWER)))
-  expect_identical(obj$VBOOppervlakteKlasse1Jan,
-                   as.character(findInterval(obj$VBOOppervlakte1Jan, .OPP_LOWER)))
-  expect_identical(obj$WOZWaardeObjectBAGKlasse1Jan,
-                   .woz_to_klasse(obj$WOZWaardeObjectBAG1Jan))
+  # unknown values: class 9, floor area empty, WOZ 99999999999
+  opp_unk <- obj$VBOOppervlakteKlasse1Jan == "9"
+  woz_unk <- obj$WOZWaardeObjectBAGKlasse1Jan == "9"
+  expect_gt(sum(opp_unk), 0)
+  expect_gt(sum(woz_unk), 0)
+  expect_true(all(is.na(obj$VBOOppervlakte1Jan) == opp_unk))
+  expect_true(all((obj$WOZWaardeObjectBAG1Jan == 99999999999) == woz_unk))
+  expect_identical(obj$VBOOppervlakteKlasse1Jan[!opp_unk],
+                   as.character(findInterval(obj$VBOOppervlakte1Jan[!opp_unk], .OPP_LOWER)))
+  expect_identical(obj$WOZWaardeObjectBAGKlasse1Jan[!woz_unk],
+                   .woz_to_klasse(obj$WOZWaardeObjectBAG1Jan[!woz_unk]))
 })
 
 test_that("no dwelling is built after the simulation year", {
@@ -49,7 +56,7 @@ test_that("dwellings keep their attributes across simulation years", {
   expect_gt(mean(old), 0.98)
   # floor area follows dwelling type, which changes only where the
   # gemeente's apartment share does
-  expect_gt(mean(m$VBOOppervlakte1Jan.a == m$VBOOppervlakte1Jan.b), 0.98)
+  expect_gt(mean(m$VBOOppervlakte1Jan.a == m$VBOOppervlakte1Jan.b, na.rm = TRUE), 0.98)
   # gemeente only moves where the shares change or gemeenten merge
   expect_gt(mean(m$GemeenteCodeJJJJ1Jan.a == m$GemeenteCodeJJJJ1Jan.b), 0.95)
 })
@@ -71,7 +78,7 @@ test_that(".hash_pair gives proportional weighted rendezvous", {
 
 test_that("floor area depends on dwelling type", {
   obj <- spine_obj(2023L, n = 50000L)
-  opp <- tapply(obj$VBOOppervlakte1Jan, obj$VBOWoningType1Jan, stats::median)
+  opp <- tapply(obj$VBOOppervlakte1Jan, obj$VBOWoningType1Jan, stats::median, na.rm = TRUE)
   expect_lt(opp[["05"]], opp[["04"]])
   expect_lt(opp[["04"]], opp[["01"]])
 })
