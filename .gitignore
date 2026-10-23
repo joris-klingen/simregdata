@@ -1,5 +1,6 @@
 # R session artefacts
 .Rproj.user
+*.Rproj
 .Rhistory
 .radian_history
 .RData

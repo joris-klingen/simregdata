@@ -1,8 +1,8 @@
 ---
-title: "Simulation quality: energy use of dwellings"
+title: "Developing an analysis of dwelling energy use"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Simulation quality: energy use of dwellings}
+  %\VignetteIndexEntry{Developing an analysis of dwelling energy use}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,28 +20,27 @@ if (run) source("quality-helpers.R")
 > **Which dwellings use the most gas and electricity, and how much do solar
 > panels reduce the net electricity demand of a household?**
 
-This vignette runs that question on simulated `ENERGIEVERBRUIK` linked to
-the woonbase dwellings, and compares the answers with StatLine 85140NED
-(energy use by dwelling type, construction year, floor area, occupants and
-solar panels) and 81528NED (national averages). Part of a series with
-`vignette("quality-cars")` and `vignette("quality-income")`.
+The analysis itself will run in CBS Remote Access. This page develops its
+code on simulated `ENERGIEVERBRUIK` linked to the woonbase dwellings, and uses
+StatLine 85140NED (energy use by dwelling characteristics) and 81528NED
+(national averages) to show which simulated results look like the real ones.
+Similar pages: `vignette("quality-cars")` and `vignette("quality-income")`.
 
 ## At a glance
 
-| Moment | Matches StatLine? | Safe for research? |
-|--------|-------------------|--------------------|
-| Gas by dwelling type, construction year, floor area | yes, within a few percent | yes |
-| Electricity by number of occupants | gradient yes, about 5% high | yes |
-| Solar panels by dwelling type | yes | yes |
-| Net electricity with and without panels | yes | yes |
-| Percentiles of gas and electricity | yes | yes |
-| National means per year | trend yes, a few percent low | yes |
-| Interactions not in the one-way tables | not calibrated | no |
+| Result | Looks like reality? | In Remote Access |
+|--------|---------------------|------------------|
+| Gas by dwelling type, construction year, floor area | yes, within a few percent | similar; a large gap means a bug |
+| Electricity by number of occupants | yes, about 5% high | similar |
+| Solar panels by dwelling type; net electricity with and without | yes | similar |
+| Percentiles of gas and electricity | yes | similar |
+| National means per year | trend yes, a few percent low | similar |
+| Combinations of characteristics (e.g. type by construction year) | not calibrated | can differ |
+| Heating type, gas-free dwellings | no | see below |
 
 Gas and electricity are generated per dwelling from its characteristics and
-fitted to the one-way means and percentiles of 85140NED. National averages
-are a few percent low because the simulated stock has more small dwellings
-and single-person households than the real one.
+fitted to the one-way tables of 85140NED, so code for one-way breakdowns can
+be checked against StatLine before it runs on the real data.
 
 ## Simulated data
 
@@ -86,7 +85,8 @@ energie[, `:=`(
   bewoners    = fifelse(bewoners %in% c("5", "6-9", ">=10"), "5 of meer", bewoners))]
 
 by_kenmerk <- function(k) {
-  energie[!is.na(get(k)), .(gas = mean(gas), elek = mean(elek), zon = mean(zon) * 100),
+  energie[!is.na(get(k)), .(gas = mean(gas, na.rm = TRUE), elek = mean(elek, na.rm = TRUE),
+                            zon = mean(zon) * 100),
           by = .(klasse = get(k))][, kenmerk := k]
 }
 sim_by <- rbindlist(lapply(c("woningtype", "bouwjaar", "oppervlakte", "bewoners"), by_kenmerk))
@@ -164,7 +164,8 @@ gas use falls steadily with the construction year.
 ## Electricity and solar panels
 
 ```{r solar}
-energie[, .(netto = mean(netto), teruglevering = mean(terug)), by = .(zonnepanelen = zon)]
+energie[, .(netto = mean(netto, na.rm = TRUE), teruglevering = mean(terug, na.rm = TRUE)),
+        by = .(zonnepanelen = zon)]
 ```
 
 ```{r elek-plots, echo = FALSE}
@@ -174,7 +175,7 @@ plot_by("bewoners", "elek", c("1", "2", "3", "4", "5 of meer"),
 plot_by("woningtype", "zon", TYPES, "Zonnepanelen naar woningtype, 2023",
         "woningtype", "% van de woningen", "zon-type")
 zon <- rbindlist(list(
-  energie[, .(netto = mean(netto), bron = "simulatie"),
+  energie[, .(netto = mean(netto, na.rm = TRUE), bron = "simulatie"),
           by = .(zonnepanelen = fifelse(zon, "met zonnepanelen", "zonder zonnepanelen"))],
   if (has_statline) one_way("HoofdverwarmingEnZonnestroom")[
     grepl("^Totaal (met|zonder) zonnestroom", HoofdverwarmingEnZonnestroom_label),
@@ -191,15 +192,14 @@ show_cpb(p, "netto")
 Electricity rises with the number of occupants, a few percent high in every
 group. Solar panels follow the published shares per dwelling type, and net
 electricity of dwellings with panels is half that of dwellings without, as
-published. Feed-in exists only with panels, and `ELEKNETTO` equals
-`ELEK - ELEKTERUG`.
+published.
 
 ## Distribution and trend
 
 ```{r percentiles}
 sim_pct <- energie[, .(percentiel = seq(10, 90, 10),
-                       aardgas = quantile(gas, seq(0.1, 0.9, 0.1)),
-                       elektriciteit = quantile(elek, seq(0.1, 0.9, 0.1)))]
+                       aardgas = quantile(gas, seq(0.1, 0.9, 0.1), na.rm = TRUE),
+                       elektriciteit = quantile(elek, seq(0.1, 0.9, 0.1), na.rm = TRUE))]
 ```
 
 ```{r distribution-plots, echo = FALSE, out.width = "700px"}
@@ -225,7 +225,8 @@ trend_sim <- rbindlist(lapply(2015:2024, function(y) {
   woonbase_init(year = y, n = 10000L, seed = 42L)
   sim_init("energieverbruik", year = y, seed = 43L)
   e <- as.data.table(read_sav(sprintf("ENERGIEVERBRUIK%dTABV1", y), col_select = c(GAS, ELEK)))
-  data.table(jaar = y, gas = mean(as.numeric(e$GAS)), elek = mean(as.numeric(e$ELEK)),
+  data.table(jaar = y, gas = mean(as.numeric(e$GAS), na.rm = TRUE),
+             elek = mean(as.numeric(e$ELEK), na.rm = TRUE),
              bron = "simulatie")
 }))
 trend_sl <- if (has_statline) {
@@ -248,3 +249,22 @@ dwellings without gas (district heating, most new dwellings, other
 all-electric homes). The national means follow the published trend a few
 percent low: the model matches the mean *within* each dwelling group, and the
 simulated stock has relatively more small, low-use dwellings.
+
+## Before you move to Remote Access
+
+- **Empty values.** `GAS` and `ELEK` are empty in the real file when there is
+  too little information, never in the simulated one. Every mean and quantile
+  above uses `na.rm = TRUE`; without it the real results are `NA`.
+- **Net electricity.** In the real file `ELEKNETTO` is `ELEK - ELEKTERUG`
+  capped at 0, and `ELEKTERUG` is capped at twice `ELEK`. The simulated values
+  break both caps for a few percent of dwellings, so code that recomputes net
+  demand will not reproduce the simulated `ELEKNETTO` exactly.
+- **Gas-free dwellings.** Zero gas use is spread evenly over all `GASBRON`
+  groups here; in reality it is concentrated in heat-pump, district-heating
+  and vacant dwellings. Code that uses `GASBRON` or `GAS == 0` to classify
+  dwellings runs, but its result here is meaningless.
+- **Heating type.** Only four of the nine `HOOFDVERWARMING31DEC` codes occur
+  in the simulation; tables by heating type get extra rows on the real data.
+- **Vacant dwellings.** Every simulated dwelling has a household. In reality
+  vacant dwellings exist, so joins from energy to households leave dwellings
+  without occupants.
