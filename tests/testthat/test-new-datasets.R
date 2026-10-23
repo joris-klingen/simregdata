@@ -31,7 +31,7 @@ test_that("new dataset file names parse correctly", {
   )
 
   for (nm in names(new_names)) {
-    parsed   <- simcbsradata:::.parse_file_registry(nm)
+    parsed   <- simregdata:::.parse_file_registry(nm)
     expected <- new_names[[nm]]
     expect_false(is.null(parsed), label = paste("parsed is not NULL for", nm))
     expect_identical(parsed$file_key,   expected$file_key,   label = paste("file_key for", nm))

@@ -162,7 +162,7 @@ sim_column_overview <- function() {
 # Base directory for all dataset configs
 .dataset_base_dir <- function() {
   # When installed as a package
-  pkg <- system.file("config/datasets", package = "simcbsradata")
+  pkg <- system.file("config/datasets", package = "simregdata")
   if (nzchar(pkg)) return(pkg)
   # When running from source (devtools::load_all)
   if (dir.exists("inst/config/datasets")) return("inst/config/datasets")

@@ -2,7 +2,7 @@ Simulation quality: cars
 ================
 
 This is the first of a series of vignettes that ask: *if I develop an
-analysis on simcbsradata, how close will the answers be to what I get on
+analysis on simregdata, how close will the answers be to what I get on
 the real CBS microdata?* Each vignette takes one research question, runs
 it on simulated data, and puts the outcome next to the published CBS
 StatLine figures that the real microdata aggregate to.
@@ -32,7 +32,7 @@ library(data.table)
 library(haven)
 library(ggplot2)
 library(ggcpb)
-library(simcbsradata)  # after haven, so read_sav() is the simulator's
+library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,
@@ -124,13 +124,13 @@ sims <- lapply(YEARS, function(y) {
   tcat("simulating ", y)
   simulate_year(y)
 })
-#> [2026-10-22 14:30:03] simulating 2019
-#> [2026-10-22 14:30:04] simulating 2020
-#> [2026-10-22 14:30:06] simulating 2021
-#> [2026-10-22 14:30:08] simulating 2022
-#> [2026-10-22 14:30:10] simulating 2023
-#> [2026-10-22 14:30:12] simulating 2024
-#> [2026-10-22 14:30:14] simulating 2025
+#> [2026-10-23 09:33:15] simulating 2019
+#> [2026-10-23 09:33:17] simulating 2020
+#> [2026-10-23 09:33:18] simulating 2021
+#> [2026-10-23 09:33:19] simulating 2022
+#> [2026-10-23 09:33:20] simulating 2023
+#> [2026-10-23 09:33:21] simulating 2024
+#> [2026-10-23 09:33:22] simulating 2025
 names(sims) <- YEARS
 
 cars <- rbindlist(lapply(sims, `[[`, "cars"))
@@ -170,7 +170,7 @@ sl_pop <- statline("37230ned", Perioden = period(2023))
 has_statline <- nrow(sl_237) > 0 && !is.null(sl_236) &&
   !is.null(sl_404) && !is.null(sl_pop)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-22 14:30:41] StatLine reachable: TRUE
+#> [2026-10-23 09:33:48] StatLine reachable: TRUE
 ```
 
 ## Fleet size

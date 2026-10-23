@@ -47,7 +47,7 @@
 #' @export
 sim_create_custom <- function(path) {
   template <- paste0(
-    "# Custom dataset definition for simcbsradata\n",
+    "# Custom dataset definition for simregdata\n",
     "# Edit this file, then register with: sim_register(\"", path, "\")\n",
     "#\n",
     "# After registering:\n",

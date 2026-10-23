@@ -30,7 +30,7 @@ library(data.table)
 library(haven)
 library(ggplot2)
 library(ggcpb)
-library(simcbsradata)  # after haven, so read_sav() is the simulator's
+library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,
@@ -164,7 +164,7 @@ sl <- statline("85140NED", Perioden = paste0(YEAR, "JJ00"))
 sl_trend <- statline("81528NED", RegioS = cbsodataR::has_substring("NL01"))
 has_statline <- !is.null(sl) && !is.null(sl_trend)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-22 14:33:42] StatLine reachable: TRUE
+#> [2026-10-23 09:35:47] StatLine reachable: TRUE
 
 # one-way breakdowns: every other dimension at its total
 one_way <- function(dim) {

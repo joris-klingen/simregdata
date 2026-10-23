@@ -50,7 +50,7 @@ for (f in files_to_test) {
   t_fly <- system.time({
     sim_init("woonbase", year = YEAR, n = N, seed = SEED)
     # Parse to find which dataset this belongs to
-    parsed <- simcbsradata:::.parse_file_registry(f)
+    parsed <- simregdata:::.parse_file_registry(f)
     if (parsed$dataset_id != "woonbase") {
       sim_init(parsed$dataset_id, year = YEAR, n = N, seed = SEED)
     }

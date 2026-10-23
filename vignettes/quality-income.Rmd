@@ -52,7 +52,7 @@ library(data.table)
 library(haven)
 library(ggplot2)
 library(ggcpb)
-library(simcbsradata)  # after haven, so read_sav() is the simulator's
+library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,

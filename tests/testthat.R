@@ -1,4 +1,4 @@
 library(testthat)
-library(simcbsradata)
+library(simregdata)
 
-test_check("simcbsradata")
+test_check("simregdata")

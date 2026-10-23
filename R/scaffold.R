@@ -31,7 +31,7 @@ cbs_scaffold_dataset <- function(dataset_id,
                                  output_dir = NULL) {
 
   if (is.null(output_dir)) {
-    pkg_root <- system.file(package = "simcbsradata")
+    pkg_root <- system.file(package = "simregdata")
     if (nzchar(pkg_root)) {
       output_dir <- file.path(pkg_root, "config", "datasets", dataset_id)
     } else {

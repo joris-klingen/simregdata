@@ -2,7 +2,7 @@
 
 # Base path for all dataset configs
 .datasets_dir <- function() {
-  system.file("config", "datasets", package = "simcbsradata")
+  system.file("config", "datasets", package = "simregdata")
 }
 
 # Dataset-specific config directory

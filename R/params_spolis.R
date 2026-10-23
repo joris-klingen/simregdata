@@ -19,7 +19,7 @@ spolis_cbs_params <- function(year = 2023L) {
   yaml_path <- .spolis_params_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
     stop("SPOLIS parameter file not found. Run spolis_update_params() first, or ",
-         "ensure simcbsradata is properly installed.",
+         "ensure simregdata is properly installed.",
          "\nExpected: inst/config/datasets/spolis/params.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)

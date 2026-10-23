@@ -3,7 +3,7 @@ Calibration overview
 
 ## What does “calibrated” mean?
 
-simcbsradata distinguishes several levels of column realism:
+simregdata distinguishes several levels of column realism:
 
 | Level                     | Description                                                                                                                                   | Changes across years? |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|

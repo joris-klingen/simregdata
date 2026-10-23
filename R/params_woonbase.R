@@ -34,7 +34,7 @@ woonbase_cbs_params <- function(year = 2023L) {
   # ---- Annual aggregates (YAML) ----
   yaml_path <- .wb_annual_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
-    stop("Parameter file not found. Ensure simcbsradata is properly installed.",
+    stop("Parameter file not found. Ensure simregdata is properly installed.",
          "\nExpected: inst/config/datasets/woonbase/params.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)

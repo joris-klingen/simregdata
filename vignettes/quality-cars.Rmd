@@ -25,7 +25,7 @@ knitr::opts_chunk$set(eval = run)
 ```
 
 This is the first of a series of vignettes that ask: *if I develop an analysis
-on simcbsradata, how close will the answers be to what I get on the real CBS
+on simregdata, how close will the answers be to what I get on the real CBS
 microdata?* Each vignette takes one research question, runs it on simulated
 data, and puts the outcome next to the published CBS StatLine figures that the
 real microdata aggregate to.
@@ -54,7 +54,7 @@ library(data.table)
 library(haven)
 library(ggplot2)
 library(ggcpb)
-library(simcbsradata)  # after haven, so read_sav() is the simulator's
+library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,

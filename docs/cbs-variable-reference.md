@@ -1,5 +1,11 @@
 # CBS Microdata Variable Reference
 
+> Source: transcribed from the public variable documentation of CBS
+> (Statistics Netherlands) in the CBS microdata catalogue
+> (<https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/catalogus-microdata>),
+> © CBS. The original documents are listed with their URLs in
+> [cbs-catalogs.yaml](cbs-catalogs.yaml). Not an official CBS document.
+
 Comprehensive variable reference for CBS (Statistics Netherlands) microdata files. Extracted from official CBS PDF documentation. All descriptions are in the original Dutch unless otherwise noted. Variables with `{sfx}` (1Jan/31Dec) suffixes share the same definition for both reference dates.
 
 ---

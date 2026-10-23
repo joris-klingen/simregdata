@@ -1,10 +1,10 @@
-Getting started with simcbsradata
+Getting started with simregdata
 ================
 
-## What is simcbsradata?
+## What is simregdata?
 
-`simcbsradata` generates synthetic CBS microdata for 15 datasets (27
-file types). It provides a drop-in `read_sav()` that intercepts CBS file
+`simregdata` generates synthetic CBS microdata for 15 datasets (31 file
+types). It provides a drop-in `read_sav()` that intercepts CBS file
 names and returns simulated data with the same structure as the real
 `.sav` files on the CBS remote-access environment.
 
@@ -21,7 +21,7 @@ environment using realistic data with:
 
 | Category             | Datasets                                                          |
 |----------------------|-------------------------------------------------------------------|
-| Housing & population | Woonbase (9 files), GBA (3)                                       |
+| Housing & population | Woonbase (13 files), GBA (3)                                      |
 | Vehicles             | RDW (2)                                                           |
 | Employment & income  | SPOLIS (1), INPATAB (1), INHATAB (1), SECMBUS (1)                 |
 | Wealth               | VEHTAB (1)                                                        |
@@ -34,12 +34,12 @@ environment using realistic data with:
 
 ``` r
 library(haven)
-library(simcbsradata)   # load after haven so read_sav() masks haven::read_sav()
+library(simregdata)   # load after haven so read_sav() masks haven::read_sav()
 
 # See what files are available
 sim_catalog()
 #> 
-#>   simcbsradata — synthetic file catalog
+#>   simregdata — synthetic file catalog
 #>   ======================================
 #> 
 #>   Dataset: Bedrijven (activiteit en grootteklasse) (betab)
@@ -287,19 +287,23 @@ head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 #> 5 271821755           12454 1 [Werknemer]
 ```
 
-## Woonbase file types (9 files)
+## Woonbase file types (13 files)
 
-| Key            | CBS dataset name             | Unit      | Description                                                    |
-|----------------|------------------------------|-----------|----------------------------------------------------------------|
-| sleutel        | WoonbaseSleutelbestand       | person    | Key file linking persons to HH and objects                     |
-| kenmerken_pers | WoonbaseKenmerkenPersonen    | person    | Person characteristics (age, gender, civil status)             |
-| kenmerken_hh   | WoonbaseKenmerkenHuishoudens | household | Household characteristics (type, size)                         |
-| kenmerken_obj  | WoonbaseKenmerkenWoonruimten | object    | Dwelling characteristics (WOZ, floor area, build year)         |
-| populatie_pers | WoonbasePopulatiePersonen    | person    | Person population (rich: includes HH + object attributes)      |
-| populatie_hh   | WoonbasePopulatieHuishoudens | household | Household population (includes ref-person + object attributes) |
-| populatie_obj  | WoonbasePopulatieWoonruimten | object    | Dwelling population (includes HH + ref-person attributes)      |
-| ek_hh_welvaart | WOONBASEEKHuishoudensWV      | household | Income and wealth (Extra Kenmerken)                            |
-| ek_obj_panden  | ExtraKenmerkenPanden         | object    | Building characteristics (Extra Kenmerken)                     |
+| Key               | CBS dataset name             | Unit      | Description                                                    |
+|-------------------|------------------------------|-----------|----------------------------------------------------------------|
+| sleutel           | WoonbaseSleutelbestand       | person    | Key file linking persons to HH and objects                     |
+| kenmerken_pers    | WoonbaseKenmerkenPersonen    | person    | Person characteristics (age, gender, civil status)             |
+| kenmerken_hh      | WoonbaseKenmerkenHuishoudens | household | Household characteristics (type, size)                         |
+| kenmerken_obj     | WoonbaseKenmerkenWoonruimten | object    | Dwelling characteristics (WOZ, floor area, build year)         |
+| populatie_pers    | WoonbasePopulatiePersonen    | person    | Person population (rich: includes HH + object attributes)      |
+| populatie_hh      | WoonbasePopulatieHuishoudens | household | Household population (includes ref-person + object attributes) |
+| populatie_obj     | WoonbasePopulatieWoonruimten | object    | Dwelling population (includes HH + ref-person attributes)      |
+| ek_hh_welvaart    | WOONBASEEKHuishoudensWV      | household | Household income and wealth (Extra Kenmerken)                  |
+| ek_pers_welvaart  | WoonbaseEKPersonenWV         | person    | Person income and poverty (Extra Kenmerken)                    |
+| ek_pers_opleiding | WOONBASEEKPERSONENOP         | person    | Person education level (Extra Kenmerken)                       |
+| ek_hh_woonlasten  | WOONBASEEKHuishoudensWL      | household | Household housing costs and mortgage (Extra Kenmerken)         |
+| ek_obj_welvaart   | WoonbaseEKWoonruimtenWV      | object    | Dwelling income and wealth (Extra Kenmerken)                   |
+| ek_obj_panden     | ExtraKenmerkenPanden         | object    | Building characteristics (Extra Kenmerken)                     |
 
 ## Bulk export with sim_population()
 
@@ -345,6 +349,8 @@ bundled YAML files. To update from CBS StatLine (requires `cbsodataR`):
 woonbase_update_params(years = 2016:2025)
 rdw_update_params(years = 2019:2025)
 spolis_update_params(years = 2010:2025)
+inhatab_update_params(years = 2011:2024)            # household income (83932NED)
+energieverbruik_update_structure(years = 2010:2025) # energy per dwelling (81528NED, 85140NED)
 ```
 
 ## Unregistered files
@@ -357,3 +363,97 @@ falls through to `haven::read_sav()`. This means you can use a single
 # This reads a real .sav file via haven
 dt <- read_sav("G:/MICRODATA/SOME_OTHER_FILE.sav")
 ```
+
+## Function reference
+
+| Function                                                                  | Description                                                                                                                                                                                                       |
+|---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sim_population(output_dir, fraction, years, seed, datasets, col_select)` | Generates a fractional sample (default 1%) of all or selected datasets and exports to parquet.                                                                                                                    |
+| `sim_init(dataset, year, n, seed)`                                        | Builds the shared population spine and prepares dataset-specific state.                                                                                                                                           |
+| `read_sav(file, col_select, n_max, skip, ...)`                            | Drop-in replacement for `haven::read_sav()`. Returns synthetic data for registered CBS filenames; falls through to `haven::read_sav()` for unregistered paths.                                                    |
+| `sim_export(output_dir, dataset, year, n, seed, col_select, force_resim)` | Exports simulated datasets to parquet in CBS VM-style folder layout. Skips files whose columns/`n`/`seed` already match the `.sim_meta.yaml` in `output_dir`; pass `force_resim = TRUE` to regenerate regardless. |
+| `sim_set_data_root(path)` / `sim_get_data_root()`                         | Set/get a parquet data root so `read_sav()` reads pre-exported files instead of generating on-the-fly.                                                                                                            |
+| `sim_catalog(dataset, year)`                                              | Prints all available synthetic file names.                                                                                                                                                                        |
+| `sim_reset(dataset)`                                                      | Clears the cached spine (forces rebuild on next call).                                                                                                                                                            |
+| `cbs_code(x)`                                                             | Extracts original CBS character codes (e.g. `"1"`, `"A"`) from a `haven::labelled` column.                                                                                                                        |
+| `sim_column_overview()`                                                   | Returns a `data.table` of all columns with calibration level, source, and spatial detail.                                                                                                                         |
+| `sim_scan_columns(paths)`                                                 | Scans R scripts for `col_select` usage and returns a named list for `sim_export()`.                                                                                                                               |
+| `sim_register(path)`                                                      | Registers a user-defined custom dataset from a simple YAML file.                                                                                                                                                  |
+| `sim_create_custom(path)`                                                 | Writes a template YAML for defining a custom dataset.                                                                                                                                                             |
+| `cbs_scaffold_dataset(dataset_id, files, ...)`                            | Scaffolds YAML config from CBS PDF documentation for a new built-in dataset.                                                                                                                                      |
+| `cbs_check_columns(file, txt_path)`                                       | Compares simulated columns against CBS PDF documentation.                                                                                                                                                         |
+| `cbs_parse_pdf_columns(txt_path)`                                         | Parses variable tables from extracted CBS PDF text.                                                                                                                                                               |
+| `*_cbs_params(year)`                                                      | Loads cached CBS parameters for a dataset (e.g. `spolis_cbs_params(2023)`).                                                                                                                                       |
+| `*_update_params(years)`                                                  | Fetches CBS StatLine data and writes `params.yaml` (e.g. `vehtab_update_params()`).                                                                                                                               |
+
+## Demographic dynamics across years
+
+Each person is assigned a **year-invariant life course** — a birth year,
+a death year (from a sex-specific lifespan), and optional emigration /
+immigration years — derived deterministically from their `RINPERSOON`.
+Because the life course depends only on the person (not the simulation
+year) it is fully reproducible for a given seed, yet it makes the
+population genuinely **unbalanced across years**: persons are born into
+the panel, die, and migrate in and out.
+
+Population-snapshot files only contain the persons present in the
+simulation year, and their entry/exit indicators are derived from the
+life course rather than drawn independently:
+
+- `WoonbasePopulatiePersonen`, `GBAADRESOBJECTBUS`, `GBAHUISHOUDENSBUS`
+  are restricted to the year’s living/registered population
+  (`Indicator_PersoonIs*` for births, deaths, migration, and
+  `IsAanwezig1Jan`/`IsAanwezig31Dec` reflect actual events).
+- `GBAPERSOONKTAB` keeps one row per person ever registered (it is
+  demographic, not a period snapshot).
+
+The shared identity spine that other datasets sample from (SPOLIS,
+income, networks, …) stays year-invariant, so cross-year network
+stability and reproducible joins are unaffected. Household member/child
+counts and the reference person are recomputed for the surviving members
+of each snapshot.
+
+*Current scope:* dynamics are applied to the shared person spine and the
+person-level snapshot files; household/object files keep their full
+structure, and explicit GBA date columns (full birth/death/migration
+dates) are a planned follow-up. Event rates are approximate and centred
+on the reference year; calibration to CBS StatLine is tracked
+separately.
+
+## Architecture
+
+The simulator uses a YAML-driven config system under
+`inst/config/datasets/{dataset_id}/`:
+
+- **`manifest.yaml`** — registers the dataset, its spine builder, and
+  file types
+- **`codelists.yaml`** — value label mappings (applied as
+  `haven::labelled`)
+- **`columns/*.yaml`** — per-file column definitions (sources,
+  distributions, codelists)
+- **`params.yaml`** — year-specific CBS-calibrated parameters
+
+Year-specific parameters are stored in each dataset’s `params.yaml` and
+checked into git. **No API calls are made during data generation** — the
+`*_update_params()` functions above are only needed to refresh
+parameters when CBS publishes new StatLine data.
+
+## Performance
+
+**Interactive use** (1M persons on a modern laptop):
+
+| Stage                                             | Approximate time |
+|---------------------------------------------------|------------------|
+| Spine build (`sim_init("woonbase")`)              | 8–15 s           |
+| Assemble 2 columns (`read_sav` with `col_select`) | \< 0.5 s         |
+| Assemble all columns (no `col_select`)            | 3–5 s            |
+
+**Bulk export** (`sim_population` at 1% sample, ~178k persons):
+
+| Scenario                                              | Time                | Output                    |
+|-------------------------------------------------------|---------------------|---------------------------|
+| Woonbase + RDW, `col_select` (5-6 cols/file), 8 years | ~170 s (~21 s/year) | 88 parquet files, ~550 MB |
+
+The bulk of the time is spent on spine construction per year. Using
+`col_select` to limit columns keeps file sizes manageable and speeds up
+assembly.
