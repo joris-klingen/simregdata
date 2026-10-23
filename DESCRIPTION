@@ -1,6 +1,6 @@
 Package: simregdata
 Title: Simulate CBS Microdata
-Version: 0.3.0
+Version: 0.4.0
 Authors@R: person("Joris", "Klingen", role = c("aut", "cre"),
                   email = "joris.klingen@gmail.com")
 Description: Generates synthetic CBS microdata with realistic Dutch population
@@ -10,6 +10,8 @@ Description: Generates synthetic CBS microdata with realistic Dutch population
     simulated data with haven-compatible labelled columns, consistent
     cross-file identifiers, and CBS-calibrated value distributions.
 License: GPL (>= 2)
+URL: https://joris-klingen.github.io/simregdata/, https://github.com/joris-klingen/simregdata
+BugReports: https://github.com/joris-klingen/simregdata/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

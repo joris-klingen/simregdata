@@ -12,7 +12,7 @@ columns:
     label: Soort persoonsnummer hoofdkostwinner
 
   - name: RINPERSOONHKW
-    source: spine.hh.RINPERSOON_Ref
+    source: spine.hh.RINPERSOONHKW
 
   # ---- Percentile rankings ----
   - name: VEHP100WELVAART

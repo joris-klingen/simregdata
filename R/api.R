@@ -316,6 +316,10 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
       hh_cols <- intersect(needed$hh, names(spine$hh))
       if (length(hh_cols) == 0L) hh_cols <- "HUISHOUDNR"
       ds_spine$hh <- spine$hh[, ..hh_cols]
+      # household key shared with INPATAB and INHATAB (R/household_key.R)
+      if ("RINPERSOONHKW" %in% needed$hh) {
+        ds_spine$hh[, RINPERSOONHKW := .deterministic_hkw_id(spine$hh$HUISHOUDNR)]
+      }
     }
 
     # Object-level spine: copy shared object table directly

@@ -1,0 +1,68 @@
+url: https://joris-klingen.github.io/simregdata/
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, quality, reference, articles, news]
+    right: [search, github]
+  components:
+    quality:
+      text: Quality
+      menu:
+      - text: Cars
+        href: articles/quality-cars.html
+      - text: Household income
+        href: articles/quality-income.html
+      - text: Energy use
+        href: articles/quality-energy.html
+
+reference:
+- title: Simulate and read
+  contents:
+  - read_sav
+  - sim_init
+  - sim_reset
+  - sim_catalog
+  - cbs_code
+- title: Export
+  contents:
+  - sim_population
+  - sim_export
+  - sim_set_data_root
+  - sim_get_data_root
+  - sim_scan_columns
+- title: Custom datasets
+  contents:
+  - sim_create_custom
+  - sim_register
+  - sim_column_overview
+- title: Woonbase
+  contents:
+  - starts_with("woonbase_")
+- title: StatLine parameters
+  desc: Load the bundled parameters, or refresh them from StatLine.
+  contents:
+  - ends_with("_cbs_params")
+  - ends_with("_update_params")
+  - energieverbruik_update_structure
+- title: Building new datasets
+  desc: Tools for transcribing CBS variable documentation.
+  contents:
+  - starts_with("cbs_")
+  - -cbs_code
+
+articles:
+- title: Simulation quality
+  navbar: ~
+  contents:
+  - quality-cars
+  - quality-income
+  - quality-energy
+- title: Reference
+  navbar: Reference
+  contents:
+  - articles/provenance
+  - articles/column-overview
+  - articles/cbs-variable-reference
