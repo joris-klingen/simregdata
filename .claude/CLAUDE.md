@@ -13,7 +13,7 @@ When a new dataset is added (new config under `inst/config/datasets/`), always a
 
 ## Documentation site
 
-The pkgdown site (`_pkgdown.yml`) is built and deployed to GitHub Pages by
+The pkgdown site (`pkgdown/_pkgdown.yml`) is built and deployed to GitHub Pages by
 `.github/workflows/pkgdown.yaml`. Build locally with
 `pkgdown::build_site()` (output in `docs/`, which is gitignored). The
 `quality-*` vignettes fetch StatLine, so building them needs internet access.

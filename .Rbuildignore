@@ -7,9 +7,7 @@
 ^\.claude$
 ^\.github$
 ^\.gitignore$
-^\.lintr$
 ^\.vscode$
-^_pkgdown\.yml$
 ^pkgdown$
 ^README\.md$
 ^NEWS\.md$
