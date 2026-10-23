@@ -11,9 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 4.2,
-  out.width = "100%",
+  out.width = "350px",
   dev = "ragg_png",
   message = FALSE
 )
@@ -55,6 +53,33 @@ library(haven)
 library(ggplot2)
 library(ggcpb)
 library(simregdata)  # after haven, so read_sav() is the simulator's
+```
+
+Figures are written with `save_cpb()` at the CPB page width (half page,
+7.5 cm, unless noted) and shown at half size, as in the ggcpb vignettes.
+They use ggcpb's open fallback font, Source Sans 3, instead of the
+Rijksoverheid font.
+
+```{r figures}
+options(ggcpb.font_path = character(0), ggcpb.font_warning = FALSE)
+cpb_register_fonts(enable_showtext = FALSE)
+
+# write `p` with save_cpb() next to knitr's own figures and include it
+show_cpb <- function(p, name, page = "half", height = NULL) {
+  file <- file.path(dirname(knitr::fig_path()), paste0(name, ".png"))
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  save_cpb(file, p, page = page, height = height)
+  knitr::include_graphics(file)
+}
+
+# horizontal bars: first category at the top, simulatie above StatLine
+# (pass colour_index = c(2, 6) to keep the colours of the other figures)
+flip <- function(d, x) {
+  d <- copy(d)
+  d[, (x) := factor(get(x), levels = rev(levels(factor(get(x)))))]
+  d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
+  d
+}
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,
@@ -224,7 +249,7 @@ cars[year == 2023, .(autos = .N,
 The core of the research question. Fuel shares per year are taken directly
 from 85237NED, so the simulated trend should follow StatLine.
 
-```{r fuel-trend, fig.height = 5}
+```{r fuel-trend, out.width = "700px"}
 sim_fuel <- cars[, .N, by = .(year, brandstof)][
   , .(brandstof, aandeel = N / sum(N) * 100, bron = "simulatie"), by = year]
 
@@ -244,13 +269,14 @@ fuel <- rbindlist(list(sim_fuel, sl_fuel), use.names = TRUE)
 fuel[, brandstof := factor(brandstof, levels = FUELS)]
 
 # LPG and other fuels stay below 2% and are left out of the figure
-cpb_line(fuel[brandstof %in% c("benzine", "diesel", "elektrisch")],
+p <- cpb_line(fuel[brandstof %in% c("benzine", "diesel", "elektrisch")],
   x = year, y = aandeel, colour = bron,
   points     = TRUE,
   facet      = brandstof,
   facet_ncol = 3,
   title = "Brandstofmix personenauto's",
   ylab  = "% van het wagenpark")
+show_cpb(p, "fuel-trend", page = "full")
 ```
 
 ```{r fuel-table}
@@ -301,11 +327,14 @@ sl_ev <- if (has_statline) {
 }
 ev <- rbindlist(list(sim_ev, sl_ev), use.names = TRUE)
 
-cpb_col(ev, x = bouwjaargroep, y = aandeel_ev, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
-  title = "Aandeel elektrische auto's naar bouwjaar, 2023",
-  ylab  = "% binnen bouwjaargroep")
+p <- cpb_col(flip(ev, "bouwjaargroep"), x = bouwjaargroep, y = aandeel_ev, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Elektrische auto's naar bouwjaar, 2023",
+  ylab  = "bouwjaar",
+  xlab  = "% elektrisch binnen bouwjaargroep")
+show_cpb(p, "ev-by-age")
 ```
 
 The age profile of the fleet itself does match: `EERSTETOELDAT1VRTG` is
@@ -323,11 +352,14 @@ sl_age <- if (has_statline) {
 }
 age <- rbindlist(list(sim_age, sl_age), use.names = TRUE)
 
-cpb_col(age, x = bouwjaargroep, y = aandeel, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
+p <- cpb_col(flip(age, "bouwjaargroep"), x = bouwjaargroep, y = aandeel, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
   title = "Personenauto's naar bouwjaar, 2023",
-  ylab  = "% van het wagenpark")
+  ylab  = "bouwjaar",
+  xlab  = "% van het wagenpark")
+show_cpb(p, "age-profile")
 ```
 
 **Verdict:** the age profile on its own can be used, but nothing conditional
@@ -366,11 +398,12 @@ sl_km <- if (has_statline) {
 km_fuel <- rbindlist(list(sim_km, sl_km), use.names = TRUE)
 km_fuel[, groep := factor(groep, levels = KM_FUELS)]
 
-cpb_col(km_fuel[!is.na(groep)], x = groep, y = km, fill = bron,
+p <- cpb_col(km_fuel[!is.na(groep)], x = groep, y = km, fill = bron,
   position       = "dodge",
   reverse_legend = FALSE,
-  title = "Gemiddeld jaarkilometrage naar brandstof, 2023",
+  title = "Jaarkilometrage naar brandstof, 2023",
   ylab  = "km per auto per jaar")
+show_cpb(p, "km-by-fuel")
 ```
 
 The fleet-wide average matches; the split by fuel does not. A policy simulation
@@ -402,11 +435,12 @@ sl_wt <- if (has_statline) {
 }
 wt <- rbindlist(list(sim_wt, sl_wt), use.names = TRUE)
 
-cpb_line(wt, x = gewicht, y = aandeel, colour = bron,
+p <- cpb_line(wt, x = gewicht, y = aandeel, colour = bron,
   points = TRUE,
   title = "Personenauto's naar leeggewicht, 2023",
   ylab  = "% van het wagenpark",
   xlab  = "leeggewicht (kg, klassemidden)")
+show_cpb(p, "weight")
 ```
 
 The mean and spread line up, the shape does not: the real fleet has a large
@@ -424,7 +458,7 @@ density per gemeente should be reproduced. With 20,000 persons spread over
 342 gemeenten each gemeente only has a few dozen simulated persons, so we
 simulate a larger population for this check.
 
-```{r regional, fig.height = 4.6}
+```{r regional}
 sim_reset()
 woonbase_init(year = 2023, n = 200000L, seed = 42L)
 sim_init("rdw", year = 2023, seed = 43L)
@@ -456,17 +490,18 @@ if (has_statline) {
   gem <- merge(sim_gem[, .(gemeente, inwoners, sim)],
                sl_gem[, .(gemeente, statline)], by = "gemeente")
 
-  cpb_scatter(gem[inwoners >= 500], x = statline, y = sim,
-    title = "Personenauto's per 1.000 inwoners per gemeente, 2023",
+  p <- cpb_scatter(gem[inwoners >= 500], x = statline, y = sim,
+    title = "Auto's per 1.000 inwoners per gemeente",
     ylab  = "simulatie",
     xlab  = "StatLine") +
     geom_abline(slope = 1, intercept = 0, linewidth = 0.3, linetype = "dashed")
 } else {
-  cpb_hist(sim_gem[inwoners >= 500], x = sim, bins = 30,
-    title = "Personenauto's per 1.000 inwoners per gemeente, 2023 (simulatie)",
+  p <- cpb_hist(sim_gem[inwoners >= 500], x = sim, bins = 30,
+    title = "Auto's per 1.000 inwoners (simulatie)",
     ylab  = "aantal gemeenten",
     xlab  = "auto's per 1.000 inwoners")
 }
+show_cpb(p, "regional")
 ```
 
 ```{r regional-cor, eval = run && has_statline}
@@ -501,11 +536,12 @@ kent_big[pers_hh, on = "RINPERSOON", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
 hh[, heeft_auto := HUISHOUDNR1Jan %in% kent_big$HUISHOUDNR1Jan]
 hh[, deciel := factor(pmin(10L, ceiling(as.numeric(P100HBEST1JAN) / 10)), levels = 1:10)]
 
-cpb_col(hh[!is.na(deciel), .(zonder_auto = mean(!heeft_auto) * 100), by = deciel],
+p <- cpb_col(hh[!is.na(deciel), .(zonder_auto = mean(!heeft_auto) * 100), by = deciel],
   x = deciel, y = zonder_auto,
-  title = "Huishoudens zonder auto naar inkomensdeciel (simulatie)",
+  title = "Huishoudens zonder auto (simulatie)",
   ylab  = "% huishoudens",
   xlab  = "deciel besteedbaar huishoudinkomen")
+show_cpb(p, "income")
 ```
 
 ## Summary

@@ -32,6 +32,33 @@ library(ggcpb)
 library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
+Figures are written with `save_cpb()` at the CPB page width (half page,
+7.5 cm, unless noted) and shown at half size, as in the ggcpb vignettes.
+They use ggcpb’s open fallback font, Source Sans 3, instead of the
+Rijksoverheid font.
+
+``` r
+options(ggcpb.font_path = character(0), ggcpb.font_warning = FALSE)
+cpb_register_fonts(enable_showtext = FALSE)
+
+# write `p` with save_cpb() next to knitr's own figures and include it
+show_cpb <- function(p, name, page = "half", height = NULL) {
+  file <- file.path(dirname(knitr::fig_path()), paste0(name, ".png"))
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  save_cpb(file, p, page = page, height = height)
+  knitr::include_graphics(file)
+}
+
+# horizontal bars: first category at the top, simulatie above StatLine
+# (pass colour_index = c(2, 6) to keep the colours of the other figures)
+flip <- function(d, x) {
+  d <- copy(d)
+  d[, (x) := factor(get(x), levels = rev(levels(factor(get(x)))))]
+  d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
+  d
+}
+```
+
 `statline()` fetches a StatLine table with the dimension labels added,
 retrying a few times on a dropped connection, and returns `NULL` when
 StatLine cannot be reached; the plots then show the simulated series
@@ -150,7 +177,7 @@ calibration and are an out-of-sample check.
 sl <- statline("83932NED", Perioden = paste0(YEAR, "JJ00"))
 has_statline <- !is.null(sl)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-23 09:36:54] StatLine reachable: TRUE
+#> [2026-10-23 10:06:35] StatLine reachable: TRUE
 
 if (has_statline) {
   sl[, `:=`(
@@ -177,15 +204,17 @@ level
 #> 1: simulatie  59915.66   47100
 #> 2:  StatLine  57600.00   44700
 
-cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro"),
+p <- cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro"),
   x = maat, y = euro, fill = bron,
   position       = "dodge",
   reverse_legend = FALSE,
   title = "Besteedbaar huishoudinkomen, 2023",
   ylab  = "euro per huishouden per jaar")
+show_cpb(p, "level")
+#> [2026-10-23 10:06:35] ggcpb: wrote quality-income_files/figure-gfm/level.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-income_files/figure-gfm/level-1.png" width="100%" />
+<img src="quality-income_files/figure-gfm/level.png" width="350px" />
 
 The other income concepts are derived from disposable income per
 household, using the ratio of the type’s medians:
@@ -204,14 +233,20 @@ sl_conc <- if (has_statline) {
 conc <- rbindlist(list(sim_conc, sl_conc), use.names = TRUE)
 conc[, begrip := factor(begrip, levels = unique(sim_conc$begrip))]
 
-cpb_col(conc, x = begrip, y = gemiddeld, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
-  title = "Gemiddeld huishoudinkomen naar inkomensbegrip, 2023",
-  ylab  = "euro per huishouden per jaar")
+conc[, begrip := factor(sub(" inkomen$", "", begrip), levels = sub(" inkomen$", "", levels(begrip)))]
+p <- cpb_col(flip(conc[, .(begrip, bron, duizend = gemiddeld / 1000)], "begrip"),
+  x = begrip, y = duizend, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Inkomen naar inkomensbegrip, 2023",
+  ylab  = "inkomensbegrip",
+  xlab  = "duizend euro per huishouden per jaar")
+show_cpb(p, "concepts")
+#> [2026-10-23 10:06:36] ggcpb: wrote quality-income_files/figure-gfm/concepts.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-income_files/figure-gfm/concepts-1.png" width="100%" />
+<img src="quality-income_files/figure-gfm/concepts.png" width="350px" />
 
 Gross and standardised income follow; primary income comes out too high,
 because it is far more skewed than disposable income (pensioners have
@@ -236,18 +271,23 @@ sl_cls <- if (has_statline) {
     , .(bron, klasse, aandeel = n / sum(n) * 100)]
 }
 cls <- rbindlist(list(sim_cls, sl_cls), use.names = TRUE)
-cls[, klasse := factor(klasse, levels = rev(KLASSEN))]
+# short labels for the figure, in thousands of euro
+KORT <- c("< 10", "10 - 20", "20 - 30", "30 - 40", "40 - 50", "50 - 100",
+          "100 - 200", ">= 200")
+cls[, klasse := factor(KORT[match(klasse, KLASSEN)], levels = KORT)]
 
-cpb_col(cls, x = klasse, y = aandeel, fill = bron,
-  position       = "dodge",
-  orientation    = "horizontal",
-  reverse_legend = TRUE,
-  title = "Huishoudens naar besteedbaar inkomen, 2023",
-  ylab  = "besteedbaar inkomen",
+p <- cpb_col(flip(cls, "klasse"), x = klasse, y = aandeel, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Huishoudens naar inkomen, 2023",
+  ylab  = "besteedbaar inkomen (duizend euro)",
   xlab  = "% van de huishoudens")
+show_cpb(p, "classes")
+#> [2026-10-23 10:06:36] ggcpb: wrote quality-income_files/figure-gfm/classes.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-income_files/figure-gfm/classes-1.png" width="100%" />
+<img src="quality-income_files/figure-gfm/classes.png" width="350px" />
 
 The lognormal per household type gets the bulk of the distribution right
 but has thin tails at the bottom: hardly any household falls below
@@ -273,15 +313,17 @@ sl_dec <- if (has_statline) {
 }
 dec <- rbindlist(list(sim_dec, sl_dec), use.names = TRUE)
 
-cpb_line(dec, x = deciel, y = gemiddeld, colour = bron,
+p <- cpb_line(dec, x = deciel, y = gemiddeld, colour = bron,
   points = TRUE,
-  title = "Gemiddeld besteedbaar inkomen per 10%-groep, 2023",
+  title = "Inkomen per 10%-groep, 2023",
   ylab  = "euro per huishouden per jaar",
   xlab  = "10%-groep (1 = laagste inkomens)") +
   scale_x_continuous(breaks = 1:10)
+show_cpb(p, "deciles")
+#> [2026-10-23 10:06:37] ggcpb: wrote quality-income_files/figure-gfm/deciles.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-income_files/figure-gfm/deciles-1.png" width="100%" />
+<img src="quality-income_files/figure-gfm/deciles.png" width="350px" />
 
 A common summary is the ratio of the mean income of the top and bottom
 decile groups:
@@ -331,18 +373,22 @@ sl_type <- if (has_statline) {
             gemiddeld)]
 }
 by_type <- rbindlist(list(sim_type, sl_type), use.names = TRUE)
-by_type[, type := factor(type, levels = rev(TYPEN))]
+by_type[, type := factor(type, levels = TYPEN)]
 
-cpb_col(by_type, x = type, y = gemiddeld, fill = bron,
+p <- cpb_col(flip(by_type[, .(type, bron, duizend = gemiddeld / 1000)], "type"),
+  x = type, y = duizend, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
   position       = "dodge",
   orientation    = "horizontal",
   reverse_legend = TRUE,
-  title = "Gemiddeld besteedbaar inkomen naar huishoudtype, 2023",
+  title = "Inkomen naar huishoudtype, 2023",
   ylab  = "huishoudtype",
-  xlab  = "euro per huishouden per jaar")
+  xlab  = "duizend euro per huishouden per jaar")
+show_cpb(p, "by-type")
+#> [2026-10-23 10:06:37] ggcpb: wrote quality-income_files/figure-gfm/by-type.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-income_files/figure-gfm/by-type-1.png" width="100%" />
+<img src="quality-income_files/figure-gfm/by-type.png" width="350px" />
 
 The calibration targets are finer than these five groups (singles and
 childless couples are split at the AOW age), so the means here are a

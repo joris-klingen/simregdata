@@ -33,6 +33,33 @@ library(ggcpb)
 library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
+Figures are written with `save_cpb()` at the CPB page width (half page,
+7.5 cm, unless noted) and shown at half size, as in the ggcpb vignettes.
+They use ggcpb’s open fallback font, Source Sans 3, instead of the
+Rijksoverheid font.
+
+``` r
+options(ggcpb.font_path = character(0), ggcpb.font_warning = FALSE)
+cpb_register_fonts(enable_showtext = FALSE)
+
+# write `p` with save_cpb() next to knitr's own figures and include it
+show_cpb <- function(p, name, page = "half", height = NULL) {
+  file <- file.path(dirname(knitr::fig_path()), paste0(name, ".png"))
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  save_cpb(file, p, page = page, height = height)
+  knitr::include_graphics(file)
+}
+
+# horizontal bars: first category at the top, simulatie above StatLine
+# (pass colour_index = c(2, 6) to keep the colours of the other figures)
+flip <- function(d, x) {
+  d <- copy(d)
+  d[, (x) := factor(get(x), levels = rev(levels(factor(get(x)))))]
+  d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
+  d
+}
+```
+
 `statline()` fetches a StatLine table with the dimension labels added,
 retrying a few times on a dropped connection, and returns `NULL` when
 StatLine cannot be reached; the plots then show the simulated series
@@ -164,7 +191,7 @@ sl <- statline("85140NED", Perioden = paste0(YEAR, "JJ00"))
 sl_trend <- statline("81528NED", RegioS = cbsodataR::has_substring("NL01"))
 has_statline <- !is.null(sl) && !is.null(sl_trend)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-23 09:35:47] StatLine reachable: TRUE
+#> [2026-10-23 10:05:23] StatLine reachable: TRUE
 
 # one-way breakdowns: every other dimension at its total
 one_way <- function(dim) {
@@ -210,15 +237,17 @@ trend <- melt(rbindlist(list(sim_trend, sl_tr), use.names = TRUE),
 trend[, drager := factor(fifelse(drager == "gas", "aardgas (m3)", "elektriciteit (kWh)"),
                          levels = c("aardgas (m3)", "elektriciteit (kWh)"))]
 
-cpb_line(trend, x = jaar, y = verbruik, colour = bron,
+p <- cpb_line(trend, x = jaar, y = verbruik, colour = bron,
   points       = TRUE,
   facet        = drager,
   facet_scales = "free_y",
   title = "Gemiddeld energieverbruik per woning",
   ylab  = "per woning per jaar")
+show_cpb(p, "trend", page = "full")
+#> [2026-10-23 10:06:23] ggcpb: wrote quality-energy_files/figure-gfm/trend.png (6.1 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/trend-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/trend.png" width="700px" />
 
 Both follow the published series a few percent low. The dwelling-level
 model targets the mean *within* every dwelling type, construction year,
@@ -252,16 +281,18 @@ sl_pct <- if (has_statline) {
 pct <- melt(rbindlist(list(sim_pct, sl_pct), use.names = TRUE),
             id.vars = c("percentiel", "bron"), variable.name = "drager", value.name = "verbruik")
 
-cpb_line(pct, x = percentiel, y = verbruik, colour = bron,
+p <- cpb_line(pct, x = percentiel, y = verbruik, colour = bron,
   points       = TRUE,
   facet        = drager,
   facet_scales = "free_y",
   title = "Verdeling energieverbruik per woning, 2023",
   ylab  = "m3 of kWh per woning per jaar",
   xlab  = "percentiel")
+show_cpb(p, "percentiles", page = "full")
+#> [2026-10-23 10:06:24] ggcpb: wrote quality-energy_files/figure-gfm/percentiles.png (6.1 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/percentiles-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/percentiles.png" width="700px" />
 
 Both distributions follow the published percentiles, including the tenth
 of dwellings without gas (district heating, most new dwellings, other
@@ -296,35 +327,47 @@ compare_by <- function(sim_col, sl_dim, levels, value = "gas",
 }
 
 gas_type <- compare_by("woningtype", "Woningtype", TYPES)
-cpb_col(gas_type, x = klasse, y = gemiddeld, fill = bron,
-  position = "dodge", reverse_legend = FALSE,
+p <- cpb_col(flip(gas_type, "klasse"), x = klasse, y = gemiddeld, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position = "dodge", orientation = "horizontal",
   title = "Aardgasverbruik naar woningtype, 2023",
-  ylab  = "m3 per woning per jaar")
+  ylab  = "woningtype",
+  xlab  = "m3 per woning per jaar")
+show_cpb(p, "gas-by")
+#> [2026-10-23 10:06:24] ggcpb: wrote quality-energy_files/figure-gfm/gas-by.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/gas-by-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/gas-by.png" width="350px" />
 
 ``` r
 
 gas_bj <- compare_by("bouwjaarklasse", "Bouwjaar", BJ_LABEL)
-cpb_col(gas_bj, x = klasse, y = gemiddeld, fill = bron,
-  position = "dodge", reverse_legend = FALSE,
+p <- cpb_col(flip(gas_bj, "klasse"), x = klasse, y = gemiddeld, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position = "dodge", orientation = "horizontal",
   title = "Aardgasverbruik naar bouwjaar, 2023",
-  ylab  = "m3 per woning per jaar")
+  ylab  = "bouwjaar",
+  xlab  = "m3 per woning per jaar")
+show_cpb(p, "gas-by-2")
+#> [2026-10-23 10:06:25] ggcpb: wrote quality-energy_files/figure-gfm/gas-by-2.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/gas-by-2.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/gas-by-2.png" width="350px" />
 
 ``` r
 
 gas_opp <- compare_by("oppervlakklasse", "Gebruiksoppervlakte", OPP_LABEL)
-cpb_col(gas_opp, x = klasse, y = gemiddeld, fill = bron,
-  position = "dodge", reverse_legend = FALSE,
-  title = "Aardgasverbruik naar gebruiksoppervlakte, 2023",
-  ylab  = "m3 per woning per jaar")
+p <- cpb_col(flip(gas_opp, "klasse"), x = klasse, y = gemiddeld, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position = "dodge", orientation = "horizontal",
+  title = "Aardgasverbruik naar oppervlakte, 2023",
+  ylab  = "gebruiksoppervlakte",
+  xlab  = "m3 per woning per jaar")
+show_cpb(p, "gas-by-3")
+#> [2026-10-23 10:06:25] ggcpb: wrote quality-energy_files/figure-gfm/gas-by-3.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/gas-by-3.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/gas-by-3.png" width="350px" />
 
 The gradients are reproduced: a detached house uses more than twice the
 gas of an apartment, dwellings of over 250 m2 nearly four times that of
@@ -339,14 +382,16 @@ distribution differs from the real one.
 elek_bew <- compare_by("bewonersklasse", "Bewonersklasse",
                        c("1", "2", "3", "4", "5 of meer"),
                        value = "elek", sl_pattern = "^GemiddeldeElektriciteitslevering")
-cpb_col(elek_bew, x = klasse, y = gemiddeld, fill = bron,
+p <- cpb_col(elek_bew, x = klasse, y = gemiddeld, fill = bron,
   position = "dodge", reverse_legend = FALSE,
-  title = "Elektriciteitsverbruik naar aantal bewoners, 2023",
+  title = "Elektriciteit naar bewoners, 2023",
   ylab  = "kWh per woning per jaar",
   xlab  = "aantal bewoners")
+show_cpb(p, "elek-by")
+#> [2026-10-23 10:06:26] ggcpb: wrote quality-energy_files/figure-gfm/elek-by.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/elek-by-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/elek-by.png" width="350px" />
 
 Electricity rises with the number of occupants as in the published data,
 about 5% high in every group (the counterpart of the low national mean).
@@ -381,13 +426,15 @@ zon[, .(bron, zonnepanelen, netto, terug)]
 #> 3:  StatLine    met zonnestroom 1140.000      NA
 #> 4:  StatLine zonder zonnestroom 2280.000      NA
 
-cpb_col(zon, x = zonnepanelen, y = netto, fill = bron,
+p <- cpb_col(zon, x = zonnepanelen, y = netto, fill = bron,
   position = "dodge", reverse_legend = FALSE,
-  title = "Netto elektriciteitslevering met en zonder zonnepanelen, 2023",
+  title = "Netto elektriciteitslevering, 2023",
   ylab  = "kWh per woning per jaar")
+show_cpb(p, "solar")
+#> [2026-10-23 10:06:26] ggcpb: wrote quality-energy_files/figure-gfm/solar.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/solar-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/solar.png" width="350px" />
 
 ``` r
 sim_share <- energie[, .(bron = "simulatie",
@@ -406,13 +453,17 @@ rbindlist(list(sim_share, sl_share), use.names = TRUE)
 energie[, zon_pct := zon * 100]
 zon_type <- compare_by("woningtype", "Woningtype", TYPES, value = "zon_pct",
                        sl_pattern = "^AandeelWoningenZonnestroomOpAdres")
-cpb_col(zon_type, x = klasse, y = gemiddeld, fill = bron,
-  position = "dodge", reverse_legend = FALSE,
-  title = "Woningen met zonnepanelen naar woningtype, 2023",
-  ylab  = "% van de woningen")
+p <- cpb_col(flip(zon_type, "klasse"), x = klasse, y = gemiddeld, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position = "dodge", orientation = "horizontal",
+  title = "Zonnepanelen naar woningtype, 2023",
+  ylab  = "woningtype",
+  xlab  = "% van de woningen")
+show_cpb(p, "solar-share")
+#> [2026-10-23 10:06:27] ggcpb: wrote quality-energy_files/figure-gfm/solar-share.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-energy_files/figure-gfm/solar-share-1.png" width="100%" />
+<img src="quality-energy_files/figure-gfm/solar-share.png" width="350px" />
 
 Net electricity of dwellings with panels is half that of dwellings
 without, as published. The share per dwelling type matches; nationally

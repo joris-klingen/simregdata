@@ -31,6 +31,9 @@ for (rmd in list.files("vignettes", pattern = "\\.Rmd$", full.names = TRUE)) {
   tcat("rendering ", basename(rmd))
   # render from a copy inside out_dir so figure links in the .md are relative
   local_rmd <- file.path(out_dir, basename(rmd))
+  # start from an empty figure folder so figures of removed or renamed
+  # chunks do not linger
+  unlink(sub("\\.Rmd$", "_files", local_rmd), recursive = TRUE)
   file.copy(rmd, local_rmd, overwrite = TRUE)
   rmarkdown::render(
     local_rmd,

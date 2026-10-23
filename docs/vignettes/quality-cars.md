@@ -35,6 +35,33 @@ library(ggcpb)
 library(simregdata)  # after haven, so read_sav() is the simulator's
 ```
 
+Figures are written with `save_cpb()` at the CPB page width (half page,
+7.5 cm, unless noted) and shown at half size, as in the ggcpb vignettes.
+They use ggcpb’s open fallback font, Source Sans 3, instead of the
+Rijksoverheid font.
+
+``` r
+options(ggcpb.font_path = character(0), ggcpb.font_warning = FALSE)
+cpb_register_fonts(enable_showtext = FALSE)
+
+# write `p` with save_cpb() next to knitr's own figures and include it
+show_cpb <- function(p, name, page = "half", height = NULL) {
+  file <- file.path(dirname(knitr::fig_path()), paste0(name, ".png"))
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  save_cpb(file, p, page = page, height = height)
+  knitr::include_graphics(file)
+}
+
+# horizontal bars: first category at the top, simulatie above StatLine
+# (pass colour_index = c(2, 6) to keep the colours of the other figures)
+flip <- function(d, x) {
+  d <- copy(d)
+  d[, (x) := factor(get(x), levels = rev(levels(factor(get(x)))))]
+  d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
+  d
+}
+```
+
 `statline()` fetches a StatLine table with the dimension labels added,
 retrying a few times on a dropped connection, and returns `NULL` when
 StatLine cannot be reached (dimension codes are trimmed and the
@@ -124,13 +151,13 @@ sims <- lapply(YEARS, function(y) {
   tcat("simulating ", y)
   simulate_year(y)
 })
-#> [2026-10-23 09:33:15] simulating 2019
-#> [2026-10-23 09:33:17] simulating 2020
-#> [2026-10-23 09:33:18] simulating 2021
-#> [2026-10-23 09:33:19] simulating 2022
-#> [2026-10-23 09:33:20] simulating 2023
-#> [2026-10-23 09:33:21] simulating 2024
-#> [2026-10-23 09:33:22] simulating 2025
+#> [2026-10-23 10:02:48] simulating 2019
+#> [2026-10-23 10:02:49] simulating 2020
+#> [2026-10-23 10:02:50] simulating 2021
+#> [2026-10-23 10:02:51] simulating 2022
+#> [2026-10-23 10:02:53] simulating 2023
+#> [2026-10-23 10:02:54] simulating 2024
+#> [2026-10-23 10:02:55] simulating 2025
 names(sims) <- YEARS
 
 cars <- rbindlist(lapply(sims, `[[`, "cars"))
@@ -170,7 +197,7 @@ sl_pop <- statline("37230ned", Perioden = period(2023))
 has_statline <- nrow(sl_237) > 0 && !is.null(sl_236) &&
   !is.null(sl_404) && !is.null(sl_pop)
 tcat("StatLine reachable: ", has_statline)
-#> [2026-10-23 09:33:48] StatLine reachable: TRUE
+#> [2026-10-23 10:03:21] StatLine reachable: TRUE
 ```
 
 ## Fleet size
@@ -231,16 +258,18 @@ fuel <- rbindlist(list(sim_fuel, sl_fuel), use.names = TRUE)
 fuel[, brandstof := factor(brandstof, levels = FUELS)]
 
 # LPG and other fuels stay below 2% and are left out of the figure
-cpb_line(fuel[brandstof %in% c("benzine", "diesel", "elektrisch")],
+p <- cpb_line(fuel[brandstof %in% c("benzine", "diesel", "elektrisch")],
   x = year, y = aandeel, colour = bron,
   points     = TRUE,
   facet      = brandstof,
   facet_ncol = 3,
   title = "Brandstofmix personenauto's",
   ylab  = "% van het wagenpark")
+show_cpb(p, "fuel-trend", page = "full")
+#> [2026-10-23 10:03:22] ggcpb: wrote quality-cars_files/figure-gfm/fuel-trend.png (6.1 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/fuel-trend-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/fuel-trend.png" width="700px" />
 
 ``` r
 dcast(fuel[brandstof == "elektrisch"], year ~ bron, value.var = "aandeel")
@@ -299,14 +328,18 @@ sl_ev <- if (has_statline) {
 }
 ev <- rbindlist(list(sim_ev, sl_ev), use.names = TRUE)
 
-cpb_col(ev, x = bouwjaargroep, y = aandeel_ev, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
-  title = "Aandeel elektrische auto's naar bouwjaar, 2023",
-  ylab  = "% binnen bouwjaargroep")
+p <- cpb_col(flip(ev, "bouwjaargroep"), x = bouwjaargroep, y = aandeel_ev, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Elektrische auto's naar bouwjaar, 2023",
+  ylab  = "bouwjaar",
+  xlab  = "% elektrisch binnen bouwjaargroep")
+show_cpb(p, "ev-by-age")
+#> [2026-10-23 10:03:22] ggcpb: wrote quality-cars_files/figure-gfm/ev-by-age.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/ev-by-age-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/ev-by-age.png" width="350px" />
 
 The age profile of the fleet itself does match: `EERSTETOELDAT1VRTG` is
 drawn from the single-year construction-year distribution of 85237NED
@@ -324,14 +357,18 @@ sl_age <- if (has_statline) {
 }
 age <- rbindlist(list(sim_age, sl_age), use.names = TRUE)
 
-cpb_col(age, x = bouwjaargroep, y = aandeel, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
+p <- cpb_col(flip(age, "bouwjaargroep"), x = bouwjaargroep, y = aandeel, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
   title = "Personenauto's naar bouwjaar, 2023",
-  ylab  = "% van het wagenpark")
+  ylab  = "bouwjaar",
+  xlab  = "% van het wagenpark")
+show_cpb(p, "age-profile")
+#> [2026-10-23 10:03:23] ggcpb: wrote quality-cars_files/figure-gfm/age-profile.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/age-profile-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/age-profile.png" width="350px" />
 
 **Verdict:** the age profile on its own can be used, but nothing
 conditional on vehicle age (EV uptake among new cars, fuel or weight by
@@ -369,14 +406,19 @@ sl_km <- if (has_statline) {
 km_fuel <- rbindlist(list(sim_km, sl_km), use.names = TRUE)
 km_fuel[, groep := factor(groep, levels = KM_FUELS)]
 
-cpb_col(km_fuel[!is.na(groep)], x = groep, y = km, fill = bron,
+p <- cpb_col(km_fuel[!is.na(groep)], x = groep, y = km, fill = bron,
   position       = "dodge",
   reverse_legend = FALSE,
-  title = "Gemiddeld jaarkilometrage naar brandstof, 2023",
+  title = "Jaarkilometrage naar brandstof, 2023",
   ylab  = "km per auto per jaar")
+show_cpb(p, "km-by-fuel")
+#> Warning: ggcpb: the longest category label is 1.65 cm wide, but 4 labels side
+#> by side on a 7.5 cm figure get about 1.6 cm each. Text is too long for the
+#> category labels -- please shorten them, or break them over two lines with "\n".
+#> [2026-10-23 10:03:23] ggcpb: wrote quality-cars_files/figure-gfm/km-by-fuel.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/km-by-fuel-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/km-by-fuel.png" width="350px" />
 
 The fleet-wide average matches; the split by fuel does not. A policy
 simulation of fuel excise on these data will get the *total* about right
@@ -407,14 +449,16 @@ sl_wt <- if (has_statline) {
 }
 wt <- rbindlist(list(sim_wt, sl_wt), use.names = TRUE)
 
-cpb_line(wt, x = gewicht, y = aandeel, colour = bron,
+p <- cpb_line(wt, x = gewicht, y = aandeel, colour = bron,
   points = TRUE,
   title = "Personenauto's naar leeggewicht, 2023",
   ylab  = "% van het wagenpark",
   xlab  = "leeggewicht (kg, klassemidden)")
+show_cpb(p, "weight")
+#> [2026-10-23 10:03:24] ggcpb: wrote quality-cars_files/figure-gfm/weight.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/weight-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/weight.png" width="350px" />
 
 The mean and spread line up, the shape does not: the real fleet has a
 large block of light cars between 750 and 1,350 kg, which the normal
@@ -464,20 +508,22 @@ if (has_statline) {
   gem <- merge(sim_gem[, .(gemeente, inwoners, sim)],
                sl_gem[, .(gemeente, statline)], by = "gemeente")
 
-  cpb_scatter(gem[inwoners >= 500], x = statline, y = sim,
-    title = "Personenauto's per 1.000 inwoners per gemeente, 2023",
+  p <- cpb_scatter(gem[inwoners >= 500], x = statline, y = sim,
+    title = "Auto's per 1.000 inwoners per gemeente",
     ylab  = "simulatie",
     xlab  = "StatLine") +
     geom_abline(slope = 1, intercept = 0, linewidth = 0.3, linetype = "dashed")
 } else {
-  cpb_hist(sim_gem[inwoners >= 500], x = sim, bins = 30,
-    title = "Personenauto's per 1.000 inwoners per gemeente, 2023 (simulatie)",
+  p <- cpb_hist(sim_gem[inwoners >= 500], x = sim, bins = 30,
+    title = "Auto's per 1.000 inwoners (simulatie)",
     ylab  = "aantal gemeenten",
     xlab  = "auto's per 1.000 inwoners")
 }
+show_cpb(p, "regional")
+#> [2026-10-23 10:03:46] ggcpb: wrote quality-cars_files/figure-gfm/regional.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/regional-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/regional.png" width="350px" />
 
 ``` r
 gem[inwoners >= 500, .(gemeenten = .N, correlatie = cor(sim, statline))]
@@ -513,14 +559,16 @@ kent_big[pers_hh, on = "RINPERSOON", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
 hh[, heeft_auto := HUISHOUDNR1Jan %in% kent_big$HUISHOUDNR1Jan]
 hh[, deciel := factor(pmin(10L, ceiling(as.numeric(P100HBEST1JAN) / 10)), levels = 1:10)]
 
-cpb_col(hh[!is.na(deciel), .(zonder_auto = mean(!heeft_auto) * 100), by = deciel],
+p <- cpb_col(hh[!is.na(deciel), .(zonder_auto = mean(!heeft_auto) * 100), by = deciel],
   x = deciel, y = zonder_auto,
-  title = "Huishoudens zonder auto naar inkomensdeciel (simulatie)",
+  title = "Huishoudens zonder auto (simulatie)",
   ylab  = "% huishoudens",
   xlab  = "deciel besteedbaar huishoudinkomen")
+show_cpb(p, "income")
+#> [2026-10-23 10:03:47] ggcpb: wrote quality-cars_files/figure-gfm/income.png (2.95 x 2.95 in, 300 dpi)
 ```
 
-<img src="quality-cars_files/figure-gfm/income-1.png" width="100%" />
+<img src="quality-cars_files/figure-gfm/income.png" width="350px" />
 
 ## Summary
 
