@@ -69,7 +69,7 @@ See the **[Getting started guide](docs/vignettes/simregdata.md)** for the full w
 Rendered versions of the vignettes (with output and figures) are in
 [docs/vignettes/](docs/vignettes/), regenerated with `Rscript dev/render_vignettes.R`.
 
-- **[Getting started](docs/vignettes/simregdata.md)** — workflow, joins, bulk export, custom datasets, function reference, performance, demographic dynamics
+- **[Getting started](docs/vignettes/simregdata.md)** — workflow, joins, bulk export, custom datasets, function reference
 - **[Calibration overview](docs/vignettes/calibration-overview.md)** — how variables are calibrated to CBS StatLine
 - **[Column overview](docs/column-overview.md)** — all 648 simulated columns
 - **[Provenance](docs/provenance.md)** — the source of every simulation parameter
