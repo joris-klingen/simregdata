@@ -7,39 +7,29 @@
 Rplots.pdf
 *.log
 *.Rcheck/
+*.tar.gz
 
-# VSCode — share portable config, ignore machine-specific settings
-.vscode/*
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
+# Editor settings
+.vscode/
 
-# Stray PDFs at top level (CBS docs belong in docs/cbs-catalogs/)
-/*.pdf
-
-# Claude Code — track the shared SessionStart hook + its registration,
-# ignore machine-local overrides
+# Claude Code: track the project instructions and the shared SessionStart
+# hook, ignore machine-local overrides
 .claude/*
+!.claude/CLAUDE.md
 !.claude/settings.json
 !.claude/hooks/
 .claude/settings.local.json
 
-# Generated plots (reproducible from scripts)
-analysis/plots/
+# CBS documentation PDFs and the text extracted from them; download and
+# extract with the scripts in dev/cbs-docs/. Not redistributed here.
+*.pdf
+dev/cbs-docs/pdf/
+dev/cbs-docs/extracted/
 
-# CBS documentation PDFs (download with: Rscript docs/download_pdfs.R)
-docs/cbs-catalogs/**/*.pdf
-
-# Extracted text and metadata from PDFs (regenerate with: Rscript docs/extract_pdfs.R)
-docs/extracted/
-
-# Built package tarballs
-*.tar.gz
-
-# Vignette build artefacts
+# Vignette and pkgdown build artefacts
 /doc/
 /Meta/
 vignettes/*.html
-
-# Test projects (user experience sandboxes)
-ux_evrb/
+vignettes/*_files/
+vignettes/articles/*_files/
+docs/
