@@ -35,10 +35,12 @@ sim_init("rdw", year = 2023)
 rdw <- read_sav("RDWNPACT2023TABV1")
 ```
 
-## How good is it?
+## Worked examples
 
-Quality articles run a research question on simulated data and compare the
-answer with StatLine: [cars](https://joris-klingen.github.io/simregdata/articles/quality-cars.html),
+Each example develops the code for a research question on simulated data,
+shows which results already look like the published StatLine figures, and
+lists what will differ in Remote Access:
+[cars](https://joris-klingen.github.io/simregdata/articles/quality-cars.html),
 [household income](https://joris-klingen.github.io/simregdata/articles/quality-income.html)
 and [energy use](https://joris-klingen.github.io/simregdata/articles/quality-energy.html).
 

@@ -5,11 +5,11 @@ template:
 
 navbar:
   structure:
-    left: [intro, quality, reference, articles, news]
+    left: [intro, examples, reference, articles, news]
     right: [search, github]
   components:
-    quality:
-      text: Quality
+    examples:
+      text: Examples
       menu:
       - text: Cars
         href: articles/quality-cars.html
@@ -54,7 +54,7 @@ reference:
   - -cbs_code
 
 articles:
-- title: Simulation quality
+- title: Worked examples
   navbar: ~
   contents:
   - quality-cars
