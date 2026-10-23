@@ -11,9 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 4.2,
-  out.width = "100%",
+  out.width = "350px",
   dev = "ragg_png",
   message = FALSE
 )
@@ -53,6 +51,33 @@ library(haven)
 library(ggplot2)
 library(ggcpb)
 library(simregdata)  # after haven, so read_sav() is the simulator's
+```
+
+Figures are written with `save_cpb()` at the CPB page width (half page,
+7.5 cm, unless noted) and shown at half size, as in the ggcpb vignettes.
+They use ggcpb's open fallback font, Source Sans 3, instead of the
+Rijksoverheid font.
+
+```{r figures}
+options(ggcpb.font_path = character(0), ggcpb.font_warning = FALSE)
+cpb_register_fonts(enable_showtext = FALSE)
+
+# write `p` with save_cpb() next to knitr's own figures and include it
+show_cpb <- function(p, name, page = "half", height = NULL) {
+  file <- file.path(dirname(knitr::fig_path()), paste0(name, ".png"))
+  dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+  save_cpb(file, p, page = page, height = height)
+  knitr::include_graphics(file)
+}
+
+# horizontal bars: first category at the top, simulatie above StatLine
+# (pass colour_index = c(2, 6) to keep the colours of the other figures)
+flip <- function(d, x) {
+  d <- copy(d)
+  d[, (x) := factor(get(x), levels = rev(levels(factor(get(x)))))]
+  d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
+  d
+}
 ```
 
 `statline()` fetches a StatLine table with the dimension labels added,
@@ -197,12 +222,13 @@ sl_level <- if (has_statline) {
 level <- rbindlist(list(sim_level, sl_level), use.names = TRUE)
 level
 
-cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro"),
+p <- cpb_col(melt(level, id.vars = "bron", variable.name = "maat", value.name = "euro"),
   x = maat, y = euro, fill = bron,
   position       = "dodge",
   reverse_legend = FALSE,
   title = "Besteedbaar huishoudinkomen, 2023",
   ylab  = "euro per huishouden per jaar")
+show_cpb(p, "level")
 ```
 
 The other income concepts are derived from disposable income per household,
@@ -222,11 +248,16 @@ sl_conc <- if (has_statline) {
 conc <- rbindlist(list(sim_conc, sl_conc), use.names = TRUE)
 conc[, begrip := factor(begrip, levels = unique(sim_conc$begrip))]
 
-cpb_col(conc, x = begrip, y = gemiddeld, fill = bron,
-  position       = "dodge",
-  reverse_legend = FALSE,
-  title = "Gemiddeld huishoudinkomen naar inkomensbegrip, 2023",
-  ylab  = "euro per huishouden per jaar")
+conc[, begrip := factor(sub(" inkomen$", "", begrip), levels = sub(" inkomen$", "", levels(begrip)))]
+p <- cpb_col(flip(conc[, .(begrip, bron, duizend = gemiddeld / 1000)], "begrip"),
+  x = begrip, y = duizend, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Inkomen naar inkomensbegrip, 2023",
+  ylab  = "inkomensbegrip",
+  xlab  = "duizend euro per huishouden per jaar")
+show_cpb(p, "concepts")
 ```
 
 Gross and standardised income follow; primary income comes out too high,
@@ -251,15 +282,19 @@ sl_cls <- if (has_statline) {
     , .(bron, klasse, aandeel = n / sum(n) * 100)]
 }
 cls <- rbindlist(list(sim_cls, sl_cls), use.names = TRUE)
-cls[, klasse := factor(klasse, levels = rev(KLASSEN))]
+# short labels for the figure, in thousands of euro
+KORT <- c("< 10", "10 - 20", "20 - 30", "30 - 40", "40 - 50", "50 - 100",
+          "100 - 200", ">= 200")
+cls[, klasse := factor(KORT[match(klasse, KLASSEN)], levels = KORT)]
 
-cpb_col(cls, x = klasse, y = aandeel, fill = bron,
-  position       = "dodge",
-  orientation    = "horizontal",
-  reverse_legend = TRUE,
-  title = "Huishoudens naar besteedbaar inkomen, 2023",
-  ylab  = "besteedbaar inkomen",
+p <- cpb_col(flip(cls, "klasse"), x = klasse, y = aandeel, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
+  position    = "dodge",
+  orientation = "horizontal",
+  title = "Huishoudens naar inkomen, 2023",
+  ylab  = "besteedbaar inkomen (duizend euro)",
   xlab  = "% van de huishoudens")
+show_cpb(p, "classes")
 ```
 
 The lognormal per household type gets the bulk of the distribution right but
@@ -284,12 +319,13 @@ sl_dec <- if (has_statline) {
 }
 dec <- rbindlist(list(sim_dec, sl_dec), use.names = TRUE)
 
-cpb_line(dec, x = deciel, y = gemiddeld, colour = bron,
+p <- cpb_line(dec, x = deciel, y = gemiddeld, colour = bron,
   points = TRUE,
-  title = "Gemiddeld besteedbaar inkomen per 10%-groep, 2023",
+  title = "Inkomen per 10%-groep, 2023",
   ylab  = "euro per huishouden per jaar",
   xlab  = "10%-groep (1 = laagste inkomens)") +
   scale_x_continuous(breaks = 1:10)
+show_cpb(p, "deciles")
 ```
 
 A common summary is the ratio of the mean income of the top and bottom
@@ -310,13 +346,13 @@ longer tail than a lognormal, so inequality measures that weigh the very top
 disposable income, as on the real file, so grouping on it directly is
 equivalent to computing the ranks yourself:
 
-```{r percentiles}
+```{r percentiles, out.width = "700px"}
 hh[, .(correlatie_percentiel_inkomen = cor(inh_p100, inhatab, method = "spearman"))]
 ```
 
 ## Income by household type
 
-```{r by-type, fig.height = 4.6}
+```{r by-type}
 TYPEN <- c("Eenpersoonshuishouden", "Eenoudergezin", "Paar, zonder kind",
            "Paar, met kind(eren)", "Meerpersoonshuishouden, overig")
 hh[, statline_type := fcase(
@@ -335,15 +371,18 @@ sl_type <- if (has_statline) {
             gemiddeld)]
 }
 by_type <- rbindlist(list(sim_type, sl_type), use.names = TRUE)
-by_type[, type := factor(type, levels = rev(TYPEN))]
+by_type[, type := factor(type, levels = TYPEN)]
 
-cpb_col(by_type, x = type, y = gemiddeld, fill = bron,
+p <- cpb_col(flip(by_type[, .(type, bron, duizend = gemiddeld / 1000)], "type"),
+  x = type, y = duizend, fill = bron,
+  colour_index = c(2, 6),  # keep simulatie blue, StatLine magenta
   position       = "dodge",
   orientation    = "horizontal",
   reverse_legend = TRUE,
-  title = "Gemiddeld besteedbaar inkomen naar huishoudtype, 2023",
+  title = "Inkomen naar huishoudtype, 2023",
   ylab  = "huishoudtype",
-  xlab  = "euro per huishouden per jaar")
+  xlab  = "duizend euro per huishouden per jaar")
+show_cpb(p, "by-type")
 ```
 
 The calibration targets are finer than these five groups (singles and
