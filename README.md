@@ -1,4 +1,4 @@
-# simcbsradata
+# simregdata
 
 Synthetic CBS microdata generator for R. Mimics the exact file structure, column names, value labels, and cross-file join keys of CBS registers — so analysis code written against this simulator runs unchanged on the real remote access data. Key variables are calibrated to publicly available CBS StatLine statistics, ensuring realistic marginal distributions for demographics, housing, vehicles, employment, wealth, and energy consumption.
 
@@ -16,7 +16,7 @@ Currently supports **15 datasets, 31 file types, 648 columns**. See the full [co
 
 ```r
 # Install from GitHub
-remotes::install_github("joris-klingen/simcbsradata")
+remotes::install_github("joris-klingen/simregdata")
 ```
 
 ## Supported datasets
@@ -46,7 +46,7 @@ All datasets share a common population spine with consistent join keys (RINPERSO
 ## Quick start
 
 ```r
-library(simcbsradata)
+library(simregdata)
 
 # Build a woonbase spine for 2023 (100k persons takes ~2 s)
 sim_init("woonbase", year = 2023, n = 100000, seed = 42)

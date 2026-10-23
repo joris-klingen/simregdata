@@ -49,7 +49,7 @@ sim_scan_columns <- function(paths) {
 .walk_exprs <- function(expr, result_env) {
   if (is.call(expr)) {
     fn_name <- as.character(expr[[1L]])
-    # Match read_sav() or simcbsradata::read_sav()
+    # Match read_sav() or simregdata::read_sav()
     is_read_sav <- identical(fn_name, "read_sav") ||
       (length(fn_name) == 3L && fn_name[3L] == "read_sav")
 

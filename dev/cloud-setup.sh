@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Startup script for a Claude cloud environment working on the simcbsradata R package.
+# Startup script for a Claude cloud environment working on the simregdata R package.
 # Target: Ubuntu (Claude cloud images). Run once at environment setup.
 # Installs R, system libraries for sf/arrow/ggplot2, and all package dependencies.
 
 set -euo pipefail
 
-echo "==> simcbsradata cloud setup starting"
+echo "==> simregdata cloud setup starting"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -53,7 +53,7 @@ if (!requireNamespace("pak", quietly = TRUE)) {
 }
 
 pak::pak(c(
-  "local::.",        # simcbsradata itself (deps = Imports + Suggests)
+  "local::.",        # simregdata itself (deps = Imports + Suggests)
   "devtools",
   "roxygen2",
   "testthat",
@@ -71,7 +71,7 @@ EOF
 
 # --- Smoke test --------------------------------------------------------------
 # Load the package to confirm the toolchain is wired up end to end.
-Rscript -e 'devtools::load_all("."); cat("\n==> simcbsradata loaded OK\n")'
+Rscript -e 'devtools::load_all("."); cat("\n==> simregdata loaded OK\n")'
 
-echo "==> simcbsradata cloud setup complete"
+echo "==> simregdata cloud setup complete"
 echo "    Run tests with: Rscript -e 'devtools::test()'"

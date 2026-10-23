@@ -54,20 +54,20 @@ cat("\n--- Cross-year persistence ---\n")
 
 # Test directly: same RINPERSOON+job_index -> same IKVID regardless of year
 test_persons <- c("000000001", "000000002", "000000003")
-id_a <- simcbsradata:::.deterministic_job_id(test_persons, c(1L, 1L, 1L))
-id_b <- simcbsradata:::.deterministic_job_id(test_persons, c(1L, 1L, 1L))
+id_a <- simregdata:::.deterministic_job_id(test_persons, c(1L, 1L, 1L))
+id_b <- simregdata:::.deterministic_job_id(test_persons, c(1L, 1L, 1L))
 stopifnot(identical(id_a, id_b))
 cat("  Same RINPERSOON+job_index -> same IKVID: PASS\n")
 
 # Different job_index -> different IKVID
-id_j1 <- simcbsradata:::.deterministic_job_id("000000001", 1L)
-id_j2 <- simcbsradata:::.deterministic_job_id("000000001", 2L)
+id_j1 <- simregdata:::.deterministic_job_id("000000001", 1L)
+id_j2 <- simregdata:::.deterministic_job_id("000000001", 2L)
 stopifnot(id_j1 != id_j2)
 cat("  Different job_index -> different IKVID: PASS\n")
 
 # Different person -> different IKVID
-id_p1 <- simcbsradata:::.deterministic_job_id("000000001", 1L)
-id_p2 <- simcbsradata:::.deterministic_job_id("000000002", 1L)
+id_p1 <- simregdata:::.deterministic_job_id("000000001", 1L)
+id_p2 <- simregdata:::.deterministic_job_id("000000002", 1L)
 stopifnot(id_p1 != id_p2)
 cat("  Different person -> different IKVID: PASS\n")
 

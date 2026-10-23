@@ -6,7 +6,7 @@ devtools::load_all()
 dt <- sim_column_overview()
 
 # --- Load manifest files to get full CBS names per file key ---
-base <- system.file("config/datasets", package = "simcbsradata")
+base <- system.file("config/datasets", package = "simregdata")
 if (!nzchar(base)) base <- "inst/config/datasets"
 
 datasets <- list.dirs(base, recursive = FALSE, full.names = TRUE)
@@ -33,7 +33,7 @@ for (dpath in datasets) {
 }
 
 # GitHub base URL for codelist links
-gh_base <- "https://github.com/joris-klingen/simcbsradata/blob/main/inst/config/datasets"
+gh_base <- "https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets"
 
 # StatLine URL builder: table ID -> clickable link
 statline_link <- function(table_id) {

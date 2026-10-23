@@ -44,7 +44,7 @@ rdw_cbs_params <- function(year = 2023L) {
   yaml_path <- .rdw_params_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
     stop("RDW parameter file not found. Run rdw_update_params() first, or ",
-         "ensure simcbsradata is properly installed.",
+         "ensure simregdata is properly installed.",
          "\nExpected: inst/config/datasets/rdw/params.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)

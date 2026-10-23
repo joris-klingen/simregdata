@@ -1,6 +1,6 @@
 # Backlog
 
-Dev backlog for `simcbsradata`. Not part of the package (`dev/` is
+Dev backlog for `simregdata`. Not part of the package (`dev/` is
 `.Rbuildignore`d). Most items extend code that already exists.
 
 <details>

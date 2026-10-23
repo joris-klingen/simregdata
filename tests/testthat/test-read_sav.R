@@ -43,7 +43,7 @@ test_that("file name parsing matches exact CBS names", {
   )
 
   for (nm in names(names_should_match)) {
-    parsed   <- simcbsradata:::.parse_file_registry(nm)
+    parsed   <- simregdata:::.parse_file_registry(nm)
     expected <- names_should_match[[nm]]
     expect_identical(parsed$file_key, expected$file_key, label = paste("file_key for", basename(nm)))
     expect_identical(parsed$year, expected$year, label = paste("year for", basename(nm)))
@@ -52,9 +52,9 @@ test_that("file name parsing matches exact CBS names", {
 
 
 test_that("unregistered files return NULL", {
-  expect_null(simcbsradata:::.parse_file_registry("some_other_file.sav"))
-  expect_null(simcbsradata:::.parse_file_registry("woonbasepopulatieperso"))
-  expect_null(simcbsradata:::.parse_file_registry("woonbasekenmerkenhuis"))
+  expect_null(simregdata:::.parse_file_registry("some_other_file.sav"))
+  expect_null(simregdata:::.parse_file_registry("woonbasepopulatieperso"))
+  expect_null(simregdata:::.parse_file_registry("woonbasekenmerkenhuis"))
 })
 
 

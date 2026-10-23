@@ -1,4 +1,4 @@
-Package: simcbsradata
+Package: simregdata
 Title: Simulate CBS Microdata
 Version: 0.3.0
 Authors@R: person("Joris", "Klingen", role = c("aut", "cre"),

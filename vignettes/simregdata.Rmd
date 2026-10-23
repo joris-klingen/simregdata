@@ -1,8 +1,8 @@
 ---
-title: "Getting started with simcbsradata"
+title: "Getting started with simregdata"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting started with simcbsradata}
+  %\VignetteIndexEntry{Getting started with simregdata}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,9 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-## What is simcbsradata?
+## What is simregdata?
 
-`simcbsradata` generates synthetic CBS microdata for 15 datasets (27 file types).
+`simregdata` generates synthetic CBS microdata for 15 datasets (27 file types).
 It provides a drop-in `read_sav()` that intercepts CBS file names
 and returns simulated data with the same structure as the real `.sav` files
 on the CBS remote-access environment.
@@ -46,7 +46,7 @@ using realistic data with:
 
 ```{r quick-start}
 library(haven)
-library(simcbsradata)   # load after haven so read_sav() masks haven::read_sav()
+library(simregdata)   # load after haven so read_sav() masks haven::read_sav()
 
 # See what files are available
 sim_catalog()

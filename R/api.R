@@ -388,7 +388,7 @@ sim_catalog <- function(dataset = NULL, year = 2023L) {
   }
 
   cat("\n")
-  cat("  simcbsradata \u2014 synthetic file catalog\n")
+  cat("  simregdata \u2014 synthetic file catalog\n")
   cat("  ======================================\n\n")
 
   for (ds_id in names(ds_list)) {

@@ -8,7 +8,7 @@
 # "does not exist in current working directory" error.
 
 test_that("config YAML files contain only ASCII", {
-  cfg_dir <- system.file("config", "datasets", package = "simcbsradata")
+  cfg_dir <- system.file("config", "datasets", package = "simregdata")
   skip_if(!nzchar(cfg_dir) || !dir.exists(cfg_dir), "config dir not available")
 
   yaml_files <- list.files(cfg_dir, pattern = "[.]ya?ml$",

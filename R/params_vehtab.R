@@ -19,7 +19,7 @@ vehtab_cbs_params <- function(year = 2023L) {
   yaml_path <- .vehtab_params_yaml()
   if (!nzchar(yaml_path) || !file.exists(yaml_path))
     stop("VEHTAB parameter file not found. ",
-         "Ensure simcbsradata is properly installed.",
+         "Ensure simregdata is properly installed.",
          "\nExpected: inst/config/datasets/vehtab/params.yaml")
 
   all_params <- yaml::read_yaml(yaml_path)
