@@ -33,7 +33,7 @@ using realistic data with:
 
 | Category | Datasets |
 |----------|----------|
-| Housing & population | Woonbase (9 files), GBA (3) |
+| Housing & population | Woonbase (13 files), GBA (3) |
 | Vehicles | RDW (2) |
 | Employment & income | SPOLIS (1), INPATAB (1), INHATAB (1), SECMBUS (1) |
 | Wealth | VEHTAB (1) |
@@ -144,7 +144,7 @@ head(jobs[, c("RINPERSOON", "SVLOON", "SCONTRACTSOORT")])
 head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 ```
 
-## Woonbase file types (9 files)
+## Woonbase file types (13 files)
 
 | Key | CBS dataset name | Unit | Description |
 |-----|-----------------|------|-------------|
@@ -155,7 +155,11 @@ head(income[, c("RINPERSOON", "INPPERSBESTINK", "INPSECJ")])
 | populatie_pers | WoonbasePopulatiePersonen | person | Person population (rich: includes HH + object attributes) |
 | populatie_hh | WoonbasePopulatieHuishoudens | household | Household population (includes ref-person + object attributes) |
 | populatie_obj | WoonbasePopulatieWoonruimten | object | Dwelling population (includes HH + ref-person attributes) |
-| ek_hh_welvaart | WOONBASEEKHuishoudensWV | household | Income and wealth (Extra Kenmerken) |
+| ek_hh_welvaart | WOONBASEEKHuishoudensWV | household | Household income and wealth (Extra Kenmerken) |
+| ek_pers_welvaart | WoonbaseEKPersonenWV | person | Person income and poverty (Extra Kenmerken) |
+| ek_pers_opleiding | WOONBASEEKPERSONENOP | person | Person education level (Extra Kenmerken) |
+| ek_hh_woonlasten | WOONBASEEKHuishoudensWL | household | Household housing costs and mortgage (Extra Kenmerken) |
+| ek_obj_welvaart | WoonbaseEKWoonruimtenWV | object | Dwelling income and wealth (Extra Kenmerken) |
 | ek_obj_panden | ExtraKenmerkenPanden | object | Building characteristics (Extra Kenmerken) |
 
 ## Bulk export with sim_population()
