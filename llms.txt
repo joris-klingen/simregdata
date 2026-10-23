@@ -1,0 +1,195 @@
+# simregdata
+
+[![R-CMD-check](https://github.com/joris-klingen/simregdata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/joris-klingen/simregdata/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/joris-klingen/simregdata/actions/workflows/pkgdown.yaml/badge.svg)](https://joris-klingen.github.io/simregdata/)
+[![License: GPL (\>=
+2)](https://img.shields.io/badge/license-GPL%20(%3E%3D%202)-blue.svg)](https://joris-klingen.github.io/simregdata/LICENSE.md)
+
+Simulated CBS microdata for R. `simregdata` reproduces the file names,
+columns, value labels and join keys of 15 CBS registers, so analysis
+code written against it runs unchanged on the real data in CBS Remote
+Access. Distributions are calibrated to CBS StatLine.
+
+> **Disclaimer.** simregdata is independent of CBS (Statistics
+> Netherlands). All data it produces is synthetic and describes no real
+> persons, households, dwellings or businesses. Publish only results
+> computed on the real data, under CBS’s output rules.
+
+## Installation
+
+``` r
+
+remotes::install_github("joris-klingen/simregdata")
+```
+
+## Example
+
+``` r
+
+library(haven)
+library(simregdata)  # after haven, so read_sav() is the simulator's
+
+sim_init("woonbase", year = 2023, n = 100000, seed = 42)
+pers <- read_sav("WoonbasePopulatiePersonen2023V1",
+                 col_select = c(RINPERSOON, HUISHOUDNR1Jan, VBOWoningType1Jan))
+
+# all datasets share one population, so joins match
+sim_init("rdw", year = 2023)
+rdw <- read_sav("RDWNPACT2023TABV1")
+```
+
+## How good is it?
+
+Quality articles run a research question on simulated data and compare
+the answer with StatLine:
+[cars](https://joris-klingen.github.io/simregdata/articles/quality-cars.html),
+[household
+income](https://joris-klingen.github.io/simregdata/articles/quality-income.html)
+and [energy
+use](https://joris-klingen.github.io/simregdata/articles/quality-energy.html).
+
+![Mean household income by household type, simulated and
+StatLine](reference/figures/README-income.png)
+
+## Datasets
+
+| Topic                  | Datasets                                     |
+|------------------------|----------------------------------------------|
+| Housing and population | Woonbase (13 files), GBA (3)                 |
+| Vehicles               | RDW (2)                                      |
+| Work and income        | SPOLIS, INPATAB, INHATAB, SECMBUS            |
+| Wealth and education   | VEHTAB, HOOGSTEOPLTAB                        |
+| Businesses             | BETAB                                        |
+| Energy                 | Energieverbruik (2), Zonnestroominstallaties |
+| Networks               | Buren-, Collega- and Familienetwerktab       |
+
+The [column
+overview](https://joris-klingen.github.io/simregdata/articles/column-overview.html)
+lists every simulated column, and the [provenance
+article](https://joris-klingen.github.io/simregdata/articles/provenance.html)
+where each parameter comes from.
+
+## Sources
+
+Calibration parameters come from CBS StatLine open data, © CBS, reused
+under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). File
+structures follow the public variable documentation in the [CBS
+microdata
+catalogue](https://www.cbs.nl/nl-nl/onze-diensten/maatwerk-en-microdata/microdata-zelf-onderzoek-doen/catalogus-microdata).
+
+# Package index
+
+## Simulate and read
+
+- [`read_sav()`](https://joris-klingen.github.io/simregdata/reference/read_sav.md)
+  : Read a CBS file (synthetic) or any other .sav file (via haven)
+- [`sim_init()`](https://joris-klingen.github.io/simregdata/reference/sim_init.md)
+  : Initialize a dataset spine and cache it for the session
+- [`sim_reset()`](https://joris-klingen.github.io/simregdata/reference/sim_reset.md)
+  [`woonbase_reset()`](https://joris-klingen.github.io/simregdata/reference/sim_reset.md)
+  : Clear the cached spine
+- [`sim_catalog()`](https://joris-klingen.github.io/simregdata/reference/sim_catalog.md)
+  [`woonbase_catalog()`](https://joris-klingen.github.io/simregdata/reference/sim_catalog.md)
+  : Print a catalog of available synthetic datasets and files
+- [`cbs_code()`](https://joris-klingen.github.io/simregdata/reference/cbs_code.md)
+  : Extract CBS character codes from a haven-labelled column
+
+## Export
+
+- [`sim_population()`](https://joris-klingen.github.io/simregdata/reference/sim_population.md)
+  : Generate a fractional sample of all datasets
+- [`sim_export()`](https://joris-klingen.github.io/simregdata/reference/sim_export.md)
+  : Export simulated datasets to parquet files
+- [`sim_set_data_root()`](https://joris-klingen.github.io/simregdata/reference/sim_set_data_root.md)
+  [`sim_get_data_root()`](https://joris-klingen.github.io/simregdata/reference/sim_set_data_root.md)
+  : Set or clear the parquet data root
+- [`sim_scan_columns()`](https://joris-klingen.github.io/simregdata/reference/sim_scan_columns.md)
+  : Scan R scripts for CBS column usage
+
+## Custom datasets
+
+- [`sim_create_custom()`](https://joris-klingen.github.io/simregdata/reference/sim_create_custom.md)
+  : Create a custom dataset template YAML
+- [`sim_register()`](https://joris-klingen.github.io/simregdata/reference/sim_register.md)
+  : Register a custom dataset from a simple YAML file
+- [`sim_column_overview()`](https://joris-klingen.github.io/simregdata/reference/sim_column_overview.md)
+  : Column overview with calibration levels
+
+## Woonbase
+
+- [`sim_catalog()`](https://joris-klingen.github.io/simregdata/reference/sim_catalog.md)
+  [`woonbase_catalog()`](https://joris-klingen.github.io/simregdata/reference/sim_catalog.md)
+  : Print a catalog of available synthetic datasets and files
+- [`sim_reset()`](https://joris-klingen.github.io/simregdata/reference/sim_reset.md)
+  [`woonbase_reset()`](https://joris-klingen.github.io/simregdata/reference/sim_reset.md)
+  : Clear the cached spine
+- [`woonbase_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/woonbase_cbs_params.md)
+  : Load CBS population parameters for a given year
+- [`woonbase_init()`](https://joris-klingen.github.io/simregdata/reference/woonbase_init.md)
+  : Pre-build the Woonbase spine and cache it for the session
+- [`woonbase_update_params()`](https://joris-klingen.github.io/simregdata/reference/woonbase_update_params.md)
+  : Fetch CBS StatLine data and write to params.yaml and gem_weights.csv
+
+## StatLine parameters
+
+Load the bundled parameters, or refresh them from StatLine.
+
+- [`energieverbruik_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/energieverbruik_cbs_params.md)
+  : Load cached ENERGIEVERBRUIKTAB parameters for a given year
+- [`inhatab_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/inhatab_cbs_params.md)
+  : Load cached household income parameters for a given year
+- [`rdw_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/rdw_cbs_params.md)
+  : Load cached RDW parameters for a given year
+- [`spolis_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/spolis_cbs_params.md)
+  : Load cached SPOLIS parameters for a given year
+- [`vehtab_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/vehtab_cbs_params.md)
+  : Load cached VEHTAB parameters for a given year
+- [`woonbase_cbs_params()`](https://joris-klingen.github.io/simregdata/reference/woonbase_cbs_params.md)
+  : Load CBS population parameters for a given year
+- [`energieverbruik_update_params()`](https://joris-klingen.github.io/simregdata/reference/energieverbruik_update_params.md)
+  : Fetch CBS Kerncijfers wijken en buurten and update energieverbruik
+  params.yaml
+- [`inhatab_update_params()`](https://joris-klingen.github.io/simregdata/reference/inhatab_update_params.md)
+  : Fetch CBS StatLine household income data and write INHATAB
+  params.yaml
+- [`rdw_update_params()`](https://joris-klingen.github.io/simregdata/reference/rdw_update_params.md)
+  : Fetch CBS StatLine data and write RDW params.yaml
+- [`spolis_update_params()`](https://joris-klingen.github.io/simregdata/reference/spolis_update_params.md)
+  : Fetch CBS StatLine data and write SPOLIS params.yaml
+- [`vehtab_update_params()`](https://joris-klingen.github.io/simregdata/reference/vehtab_update_params.md)
+  : Fetch CBS StatLine wealth data and write VEHTAB params.yaml
+- [`woonbase_update_params()`](https://joris-klingen.github.io/simregdata/reference/woonbase_update_params.md)
+  : Fetch CBS StatLine data and write to params.yaml and gem_weights.csv
+- [`energieverbruik_update_structure()`](https://joris-klingen.github.io/simregdata/reference/energieverbruik_update_structure.md)
+  : Fetch the dwelling-level energy structure from StatLine
+
+## Building new datasets
+
+Tools for transcribing CBS variable documentation.
+
+- [`cbs_check_columns()`](https://joris-klingen.github.io/simregdata/reference/cbs_check_columns.md)
+  : Compare simulated columns against CBS PDF documentation
+- [`cbs_parse_pdf_columns()`](https://joris-klingen.github.io/simregdata/reference/cbs_parse_pdf_columns.md)
+  : Parse column definitions from extracted CBS PDF text
+- [`cbs_scaffold_dataset()`](https://joris-klingen.github.io/simregdata/reference/cbs_scaffold_dataset.md)
+  : Scaffold a new dataset from CBS PDF documentation
+
+# Articles
+
+### Simulation quality
+
+- [Simulation quality:
+  cars](https://joris-klingen.github.io/simregdata/articles/quality-cars.md):
+- [Simulation quality: household
+  income](https://joris-klingen.github.io/simregdata/articles/quality-income.md):
+- [Simulation quality: energy use of
+  dwellings](https://joris-klingen.github.io/simregdata/articles/quality-energy.md):
+
+### Reference
+
+- [Where the numbers come
+  from](https://joris-klingen.github.io/simregdata/articles/provenance.md):
+- [Column
+  overview](https://joris-klingen.github.io/simregdata/articles/column-overview.md):
+- [CBS variable
+  reference](https://joris-klingen.github.io/simregdata/articles/cbs-variable-reference.md):
