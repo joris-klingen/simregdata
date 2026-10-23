@@ -1,34 +1,37 @@
 # VERKEERSPRESTATIE - traffic performance of passenger cars
 # CBS name: VERKEERSPRESTATIE{YYYY}TABV{N}
-# One row per vehicle (license plate) per year
+# One row per active passenger car of a natural person per year
 # Calibrated from CBS StatLine 85404NED via rdw_update_params()
 entity: person
-spine_table: pers
+spine_table: vp
 
 columns:
   - name: RINKENTEKEN
-    source: spine.pers.RINKENTEKEN
+    source: spine.vp.RINKENTEKEN
 
   - name: RinpersoonsVP
-    random_categorical:
-      values: ["K", "R", "S"]
-      probs:  [0.02, 0.96, 0.02]
+    source: spine.vp.RINPERSOONS
     codelist: RINPERSOONS_RDW
     label: Oorsprong persoon-id
 
   - name: RinpersoonVP
-    source: spine.pers.RINPERSOON
+    source: spine.vp.RINPERSOON
 
-  # Post-2012 register data: most weights ~1.0 (full population)
+  # Weights vary around 1 (higher in 2010-2011, sample-based); must be applied
   - name: VPGEWICHT
-    random_categorical:
-      values: ["1.0", "1.0", "1.0", "1.1", "1.2", "1.5", "2.0"]
-      probs:  [0.85, 0.05, 0.03, 0.03, 0.02, 0.01, 0.01]
+    random_numeric:
+      distribution: normal
+      mean: 1.0
+      sd: 0.15
+      min: 0.5
+      max: 3.0
+      round: 5
 
   # Most vehicles active full year; ~10% new/scrapped mid-year
   - name: VPDGNWEG
     random_categorical:
-      values: ["365", "366", "180", "90", "30", "270", "330"]
+      numeric: true
+      values: [365, 366, 180, 90, 30, 270, 330]
       probs:  [0.82, 0.05, 0.04, 0.03, 0.02, 0.02, 0.02]
 
   # Year-specific mean annual km from 85404NED

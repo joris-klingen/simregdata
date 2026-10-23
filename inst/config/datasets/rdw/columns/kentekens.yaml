@@ -8,10 +8,10 @@ entity: person
 spine_table: pers
 
 columns:
+  # owner origin, owner id, vehicle type, owner type and colour are fixed
+  # per plate on the RDW spine (R/rdw_vehicles.R)
   - name: RINPERSOONS
-    random_categorical:
-      values: ["K", "R", "S"]
-      probs:  [0.02, 0.96, 0.02]
+    source: spine.pers.RINPERSOONS
     codelist: RINPERSOONS_RDW
     label: Oorsprong persoon-id
 
@@ -23,16 +23,10 @@ columns:
 
   # Year-specific color distribution from 85237NED
   - name: KLEURCODEVRTG
-    stable_per: RINKENTEKEN
-    random_categorical:
-      from_params: kleur_p
-      # Fallback if params not loaded:
-      values: ["--","00","01","02","03","04","05","06","07","08","09","10","11","12","13","99"]
-      probs:  [0.005, 0.003, 0.005, 0.072, 0.148, 0.086, 0.035, 0.012, 0.298, 0.018, 0.004, 0.005, 0.004, 0.238, 0.030, 0.037]
+    source: spine.pers.KLEURCODEVRTG
     codelist: KLEURCODE
     label: Kleur voertuig
 
-  # Year-specific construction year distribution from 85237NED
   - name: EERSTETOELDAT1VRTG
     stable_per: RINKENTEKEN
     random_categorical:
@@ -42,27 +36,16 @@ columns:
       probs:  [0.10, 0.15, 0.20, 0.30, 0.25]
 
   - name: SRTREFVRTG
-    stable_per: RINKENTEKEN
-    random_categorical:
-      values: ["B", "I", "N", "R", "H"]
-      probs:  [0.05, 0.02, 0.75, 0.15, 0.03]
+    source: spine.pers.SRTREFVRTG
     codelist: SRTREF
     label: Soort referentie
 
-  # Year-specific vehicle type distribution from 85236NED
+  # 85236NED type shares; part of the passenger cars dropped or in business stock
   - name: VRTGSOORT
-    stable_per: RINKENTEKEN
-    random_categorical:
-      from_params: vrtgsoort_p
-      # Fallback:
-      values: ["0","1","2","3","4","5","6","7","8","9"]
-      probs:  [0.038, 0.074, 0.012, 0.005, 0.004, 0.003, 0.720, 0.048, 0.073, 0.023]
+    source: spine.pers.VRTGSOORT
     codelist: VRTGSOORT
     label: Soort voertuig
 
-  # Year-specific fuel type distribution from 85237NED
-  # Codes: 1=Benzine, 2=Diesel, 3=LPG, 4=BEV, 5=CNG, A=PHEV, B=HEV
-  # PHEV/HEV split from Benzine using fleet estimates (85237NED lumps hybrids)
   - name: BRANDSTCODECORVRTG
     stable_per: RINKENTEKEN
     random_categorical:
@@ -76,6 +59,7 @@ columns:
   # Year-specific weight from 85237NED weight class distribution
   - name: MASSALEEGCORVRTG
     stable_per: RINKENTEKEN
+    not_for: {column: VRTGSOORT, values: ["7", "Q"]}
     random_numeric:
       distribution: normal
       mean: 1350
@@ -88,6 +72,7 @@ columns:
 
   - name: MAXLAADVERMCORVRTG
     stable_per: RINKENTEKEN
+    only_for: {column: VRTGSOORT, values: ["1", "2", "4", "8", "9"]}
     random_numeric:
       distribution: uniform
       min: 0
@@ -96,12 +81,15 @@ columns:
 
   - name: AANTALCYLCORVRTG
     stable_per: RINKENTEKEN
+    not_for: {column: VRTGSOORT, values: ["0", "8", "9"]}
     random_categorical:
+      numeric: true
       values: ["0", "1", "2", "3", "4", "5", "6", "8", "10", "12"]
       probs:  [0.10, 0.01, 0.02, 0.08, 0.55, 0.02, 0.12, 0.08, 0.01, 0.01]
 
   - name: CYLININHOUDCORVRTG
     stable_per: RINKENTEKEN
+    only_for: {column: VRTGSOORT, values: ["7", "Q"]}
     random_numeric:
       distribution: normal
       mean: 1600
@@ -112,8 +100,9 @@ columns:
 
   - name: SOORTBROMFIETSCOR
     stable_per: RINKENTEKEN
+    only_for: {column: VRTGSOORT, values: ["0"]}
     random_categorical:
-      values: ["--", "01", "02", "03", "04"]
-      probs:  [0.90, 0.04, 0.04, 0.01, 0.01]
+      values: ["01", "02", "03", "04"]
+      probs:  [0.40, 0.45, 0.05, 0.10]
     codelist: SOORTBROMFIETS
     label: Soort bromfiets

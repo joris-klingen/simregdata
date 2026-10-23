@@ -21,6 +21,7 @@ columns:
 
   # Household members with income
   - name: INHAHLMI
+    codes_for: {column: INC_STATUS, values: {U: 99}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -29,6 +30,7 @@ columns:
 
   # Income vs European poverty line (%)
   - name: INHARMEUR
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -37,6 +39,7 @@ columns:
 
   # Longitudinal European poverty
   - name: INHARMEURL
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -45,6 +48,7 @@ columns:
 
   # Income vs low-income threshold (%)
   - name: INHARMLAG
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -53,6 +57,7 @@ columns:
 
   # Longitudinal low-income
   - name: INHARMLAGL
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -61,6 +66,7 @@ columns:
 
   # Income vs social minimum (%)
   - name: INHARMSOC
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
@@ -69,20 +75,24 @@ columns:
 
   # Longitudinal social minimum
   - name: INHARMSOCL
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     random_numeric:
       distribution: uniform
       min: 1
       max: 300
       round: 0
 
-  # Social assistance type
+  # Main source of household income
   - name: INHBBIHJ
+    codes_for: {column: INC_STATUS, values: {U: "99"}}
+    # main income source: 11-14 work, 21-26 benefits and pensions, 30 wealth
     random_categorical:
-      values: ["00", "01", "02", "03", "04", "05", "99"]
-      probs:  [0.70, 0.05, 0.03, 0.02, 0.05, 0.10, 0.05]
+      values: ["11", "12", "13", "14", "21", "22", "23", "24", "25", "26", "30"]
+      probs:  [0.55, 0.02, 0.07, 0.01, 0.01, 0.04, 0.01, 0.03, 0.23, 0.02, 0.01]
 
   # Taxable household income (not calibrated)
   - name: INHBELIH
+    codes_for: {column: INC_STATUS, values: {U: 9999999999.0}}
     random_numeric:
       distribution: normal
       mean: 18000
@@ -92,38 +102,49 @@ columns:
 
   # Disposable household income (StatLine 83932NED, per household type)
   - name: INHBESTINKH
+    codes_for: {column: INC_STATUS, values: {U: 9999999999.0}}
     source: spine.pers.BESTINKH
 
   # Gross household income (derived from disposable income)
   - name: INHBRUTINKH
+    codes_for: {column: INC_STATUS, values: {U: 9999999999.0}}
     source: spine.pers.BRUTINKH
 
-  # Main income earner indicator
+  # Home ownership: 1 own, 2 rent, 3 rent with housing allowance,
+  # 8 institutional, 9 unknown
   - name: INHEHALGR
+    codes_for: {column: INC_STATUS, values: {I: "8", U: "9"}}
     random_categorical:
-      values: ["1", "2", "9"]
-      probs:  [0.85, 0.10, 0.05]
+      values: ["1", "2", "3"]
+      probs:  [0.57, 0.25, 0.18]
 
   # Standardized household income (disposable / equivalence factor)
   - name: INHGESTINKH
+    codes_for: {column: INC_STATUS, values: {U: 9999999999.0}}
     source: spine.pers.GESTINKH
 
   - name: INHP100HBEST
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HBEST
 
   - name: INHP100HBESTES
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HBEST
 
   - name: INHP100HBRUT
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HBRUT
 
   - name: INHP100HGEST
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HGEST
 
   - name: INHP100HGESTES
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HGEST
 
   - name: INHP100HPRIM
+    codes_for: {column: INC_STATUS, values: {I: -2, U: -1}}
     source: spine.pers.P100HPRIM
 
   # Population indicator
@@ -135,6 +156,7 @@ columns:
 
   # Primary household income (derived from disposable income)
   - name: INHPRIMINKH
+    codes_for: {column: INC_STATUS, values: {U: 9999999999.0}}
     source: spine.pers.PRIMINKH
 
   # AOW composition

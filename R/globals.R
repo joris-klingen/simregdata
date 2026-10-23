@@ -10,6 +10,8 @@ NULL
 # Suppress R CMD check NOTEs for data.table NSE variables
 globalVariables(c(
   ".N", ".I", ".SD",
+  # RDW vehicle structure and INHATAB income status
+  "slot", "VRTGSOORT", "SRTREFVRTG", "KLEURCODEVRTG", "INC_STATUS", "i.TYPHH",
   "RINOBJECTNUMMER", "SOORTOBJECTNUMMER", "RINPERSOON", "RINPERSOONS",
   "HUISHOUDNR", "TYPHH", "IMPUTATIECODEHH", "DATUMAANVANGHH",
   "HHSize", "NKids", "rank", "PLHH", "REFPERSOONHH",

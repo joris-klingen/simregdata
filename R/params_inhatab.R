@@ -138,6 +138,11 @@ inhatab_update_params <- function(years = 2011:2024,
 
 # Lognormal parameters from a mean and median: median = exp(mu),
 # mean = exp(mu + sigma^2 / 2)
+# Share of households with negative disposable income (assumption)
+.HH_INCOME_LOSS_SHARE <- 0.01
+# Share of private households whose income is unknown in INHATAB (assumption)
+.HH_INCOME_UNKNOWN_SHARE <- 0.01
+
 .lnorm_from_mean_median <- function(mean, median) {
   list(mu = log(median), sigma = sqrt(2 * log(pmax(mean / median, 1.001))))
 }
@@ -167,6 +172,10 @@ inhatab_update_params <- function(years = 2011:2024,
   ln_best <- .lnorm_from_mean_median(get("besteedbaar", "mean"),
                                      get("besteedbaar", "median"))
   best <- exp(ln_best$mu + ln_best$sigma * z)
+  # A small share of households (mostly self-employed) has a loss, so
+  # disposable income below zero (share assumed, not from StatLine)
+  loss <- stats::runif(n) < .HH_INCOME_LOSS_SHARE
+  best[loss] <- -exp(stats::rnorm(sum(loss), log(5000), 1))
 
   med_best <- get("besteedbaar", "median")
   bruto  <- best * get("bruto", "median") / med_best * exp(stats::rnorm(n, 0, 0.10))
@@ -184,7 +193,9 @@ inhatab_update_params <- function(years = 2011:2024,
 
 # One row per household for INHATAB: the first present member stands in as
 # RINPERSOON, RINPERSOONHKW is derived from HUISHOUDNR as for INPATAB, and the
-# income columns come from the household spine.
+# income columns come from the household spine. INC_STATUS marks
+# institutional households (I) and private households with unknown income
+# (U), which carry special codes in INHATAB (columns/inhatab.yaml).
 .build_inhatab_households <- function(spine) {
   pers <- spine$pers
   if (!is.null(spine$pers_present)) pers <- pers[spine$pers_present]
@@ -194,5 +205,9 @@ inhatab_update_params <- function(years = 2011:2024,
                 "P100HBEST", "P100HBRUT", "P100HPRIM", "P100HGEST")
   hh_pers[spine$hh, on = "HUISHOUDNR", (inc_cols) := mget(paste0("i.", inc_cols))]
   hh_pers[, RINPERSOONHKW := .deterministic_hkw_id(HUISHOUDNR)]
+  hh_pers[spine$hh, on = "HUISHOUDNR", TYPHH := i.TYPHH]
+  hh_pers[, INC_STATUS := fifelse(TYPHH %in% "8", "I", fifelse(
+    .hash_to_uniform(as.character(HUISHOUDNR), "income_unknown") <
+      .HH_INCOME_UNKNOWN_SHARE, "U", "P"))]
   hh_pers[]
 }

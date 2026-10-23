@@ -36,7 +36,7 @@ Similar pages: `vignette("quality-cars")` and `vignette("quality-income")`.
 | Percentiles of gas and electricity | yes | similar |
 | National means per year | trend yes, a few percent low | similar |
 | Combinations of characteristics (e.g. type by construction year) | not calibrated | can differ |
-| Heating type, gas-free dwellings | no | see below |
+| Heating type, gas-free dwellings | codes consistent, shares assumed | can differ |
 
 Gas and electricity are generated per dwelling from its characteristics and
 fitted to the one-way tables of 85140NED, so code for one-way breakdowns can
@@ -50,7 +50,9 @@ woonbase_init(year = 2023, n = 50000L, seed = 42L)
 sim_init("energieverbruik", year = 2023, seed = 43L)
 
 energie <- as.data.table(read_sav("ENERGIEVERBRUIK2023TABV1",
-  col_select = c(RINOBJECTNUMMER, GASSJV, ELEK, ELEKTERUG, ELEKNETTO, ZONPV)))
+  col_select = c(RINOBJECTNUMMER, GASSJV, ELEK, ELEKTERUG, ELEKNETTO, ZONPV, GASBRON)))
+# StatLine covers occupied dwellings: drop vacant ones (GASBRON LG)
+energie <- energie[cbs_code(GASBRON) != "LG"]
 woonr <- as.data.table(read_sav("WoonbasePopulatieWoonruimten2023V1",
   col_select = c(RINOBJECTNUMMER, VBOWoningType1Jan, AantalPersonenPerVSLKlasse1Jan)))
 kenm <- as.data.table(read_sav("WoonbaseKenmerkenWoonruimten2023V1",
@@ -214,7 +216,8 @@ sl_pct <- if (has_statline) {
 pct <- melt(rbindlist(list(sim_pct[, bron := "simulatie"], sl_pct[, bron := "StatLine"]),
                       use.names = TRUE),
             id.vars = c("percentiel", "bron"), variable.name = "drager", value.name = "verbruik")
-p <- cpb_line(pct, x = percentiel, y = verbruik, colour = bron, points = TRUE,
+p <- cpb_line(lines_bron(pct), x = percentiel, y = verbruik, colour = bron,
+  colour_index = c(6, 2), points = TRUE,
   facet = drager, facet_scales = "free_y",
   title = "Verdeling energieverbruik per woning, 2023",
   ylab = "m3 of kWh per woning per jaar", xlab = "percentiel")
@@ -224,7 +227,8 @@ trend_sim <- rbindlist(lapply(2015:2024, function(y) {
   sim_reset()
   woonbase_init(year = y, n = 10000L, seed = 42L)
   sim_init("energieverbruik", year = y, seed = 43L)
-  e <- as.data.table(read_sav(sprintf("ENERGIEVERBRUIK%dTABV1", y), col_select = c(GAS, ELEK)))
+  e <- as.data.table(read_sav(sprintf("ENERGIEVERBRUIK%dTABV1", y),
+                              col_select = c(GAS, ELEK, GASBRON)))[cbs_code(GASBRON) != "LG"]
   data.table(jaar = y, gas = mean(as.numeric(e$GAS), na.rm = TRUE),
              elek = mean(as.numeric(e$ELEK), na.rm = TRUE),
              bron = "simulatie")
@@ -238,7 +242,8 @@ trend_sl <- if (has_statline) {
 trend <- melt(rbindlist(list(trend_sim, trend_sl), use.names = TRUE),
               id.vars = c("jaar", "bron"), variable.name = "drager", value.name = "verbruik")
 trend[, drager := factor(fifelse(drager == "gas", "aardgas (m3)", "elektriciteit (kWh)"))]
-p <- cpb_line(trend, x = jaar, y = verbruik, colour = bron, points = TRUE,
+p <- cpb_line(lines_bron(trend), x = jaar, y = verbruik, colour = bron,
+  colour_index = c(6, 2), points = TRUE,
   facet = drager, facet_scales = "free_y",
   title = "Gemiddeld energieverbruik per woning", ylab = "per woning per jaar")
 show_cpb(p, "trend", page = "full")
@@ -252,19 +257,17 @@ simulated stock has relatively more small, low-use dwellings.
 
 ## Before you move to Remote Access
 
-- **Empty values.** `GAS` and `ELEK` are empty in the real file when there is
-  too little information, never in the simulated one. Every mean and quantile
-  above uses `na.rm = TRUE`; without it the real results are `NA`.
-- **Net electricity.** In the real file `ELEKNETTO` is `ELEK - ELEKTERUG`
-  capped at 0, and `ELEKTERUG` is capped at twice `ELEK`. The simulated values
-  break both caps for a few percent of dwellings, so code that recomputes net
-  demand will not reproduce the simulated `ELEKNETTO` exactly.
-- **Gas-free dwellings.** Zero gas use is spread evenly over all `GASBRON`
-  groups here; in reality it is concentrated in heat-pump, district-heating
-  and vacant dwellings. Code that uses `GASBRON` or `GAS == 0` to classify
-  dwellings runs, but its result here is meaningless.
-- **Heating type.** Only four of the nine `HOOFDVERWARMING31DEC` codes occur
-  in the simulation; tables by heating type get extra rows on the real data.
-- **Vacant dwellings.** Every simulated dwelling has a household. In reality
-  vacant dwellings exist, so joins from energy to households leave dwellings
-  without occupants.
+The simulated file follows the rules of the real one, so the code above
+already deals with them:
+
+- **Empty values.** `GAS` and `ELEK` are empty where delivery was not
+  assigned (`GASBRON` NT), so every mean and quantile uses `na.rm = TRUE`.
+- **Vacant dwellings** have no gas and no electricity (`GASBRON` LG) and are
+  dropped, as StatLine covers occupied dwellings.
+- **Net electricity** is `ELEK - ELEKTERUG` capped at 0, with feed-in capped
+  at twice delivery; recompute it the same way or use `ELEKNETTO`.
+- **Variables from 2022.** `ZONPVBRON` and `KBHOOFDVERWARMING31DEC` are empty
+  in earlier years.
+
+What still differs is content: combinations of characteristics that the
+one-way StatLine tables do not pin down.

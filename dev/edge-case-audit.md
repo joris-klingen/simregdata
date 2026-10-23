@@ -1,5 +1,12 @@
 # Edge-case audit: simulated vs real file structure
 
+**Status:** the gaps below were fixed after this audit (RDW vehicle
+structure, INHATAB special codes and losses, energy register rules, vacant
+dwellings and unknown classes). Tests in `test-rdw.R`, `test-energy.R`,
+`test-dwellings.R` and `test-new-datasets.R` keep them fixed. The INHATAB
+percentile codes (-1 unknown, -2 institutional) are confirmed in the INHATAB
+documentation.
+
 Checked 2023 files (woonbase n = 50,000) against the CBS variable
 documentation (`vignettes/articles/cbs-variable-reference.Rmd`). Focus: what
 makes code that runs on simulated data fail or silently differ on the real
