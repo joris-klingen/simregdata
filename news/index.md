@@ -4,8 +4,9 @@
 
 - Documentation moved to a pkgdown site; README and getting-started
   vignette shortened.
-- New quality articles comparing analyses on simulated data with
-  StatLine: cars, household income and energy use.
+- Worked examples (cars, household income, energy use) that develop
+  analysis code on simulated data, compare it with StatLine and list
+  what differs in Remote Access.
 - Dwelling characteristics (municipality, build year, floor area) are
   stable across years.
 - Energy use depends on dwelling type, floor area, build year and

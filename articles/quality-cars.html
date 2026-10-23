@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Simulation quality: cars • simregdata</title>
+<title>Developing a car-fleet analysis • simregdata</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Simulation quality: cars">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Developing a car-fleet analysis">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,8 +31,8 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/simregdata.html">Get started</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-quality" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Quality</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-quality">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
 <li><a class="dropdown-item" href="../articles/quality-cars.html">Cars</a></li>
     <li><a class="dropdown-item" href="../articles/quality-income.html">Household income</a></li>
     <li><a class="dropdown-item" href="../articles/quality-energy.html">Energy use</a></li>
@@ -42,9 +42,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/quality-cars.html">Simulation quality: cars</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-income.html">Simulation quality: household income</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-energy.html">Simulation quality: energy use of dwellings</a></li>
+<li><a class="dropdown-item" href="../articles/quality-cars.html">Developing a car-fleet analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-income.html">Developing a household income analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-energy.html">Developing an analysis of dwelling energy use</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
     <li><a class="dropdown-item" href="../articles/provenance.html">Where the numbers come from</a></li>
@@ -72,7 +72,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Simulation quality: cars</h1>
+      <h1>Developing a car-fleet analysis</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/joris-klingen/simregdata/blob/main/vignettes/quality-cars.Rmd" class="external-link"><code>vignettes/quality-cars.Rmd</code></a></small>
@@ -85,84 +85,78 @@
 <p><strong>How fast is the Dutch car fleet electrifying, and how does
 that differ by vehicle age, kilometres driven and region?</strong></p>
 </blockquote>
-<p>This vignette runs that question on simulated RDW data
-(<code>RDWNPACT</code>, <code>VERKEERSPRESTATIE</code>) linked to
-woonbase, and compares the answers with the published CBS StatLine
-figures. Part of a series with <code><a href="../articles/quality-income.html">vignette("quality-income")</a></code>
-and <code><a href="../articles/quality-energy.html">vignette("quality-energy")</a></code>.</p>
+<p>The analysis itself will run in CBS Remote Access. This page develops
+its code on simulated RDW files (<code>RDWNPACT</code>,
+<code>VERKEERSPRESTATIE</code>) and woonbase, and uses StatLine to show
+which simulated results look like the real ones and which will change
+when you switch to the real data. Similar pages:
+<code><a href="../articles/quality-income.html">vignette("quality-income")</a></code> and
+<code><a href="../articles/quality-energy.html">vignette("quality-energy")</a></code>.</p>
 <div class="section level2">
 <h2 id="at-a-glance">At a glance<a class="anchor" aria-label="anchor" href="#at-a-glance"></a>
 </h2>
 <table class="table">
 <colgroup>
 <col width="17%">
-<col width="40%">
-<col width="42%">
+<col width="44%">
+<col width="38%">
 </colgroup>
 <thead><tr class="header">
-<th>Moment</th>
-<th>Matches StatLine?</th>
-<th>Safe for research?</th>
+<th>Result</th>
+<th>Looks like reality?</th>
+<th>In Remote Access</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Cars per inhabitant</td>
+<td>Cars per inhabitant, fuel mix, age profile</td>
 <td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="even">
-<td>Fuel mix per year</td>
-<td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="odd">
-<td>Age profile of the fleet</td>
-<td>yes</td>
-<td>yes</td>
+<td>similar; a large gap means a bug</td>
 </tr>
 <tr class="even">
 <td>Average annual kilometres</td>
 <td>yes</td>
-<td>yes</td>
+<td>similar, once weighted with <code>VPGEWICHT</code>
+</td>
 </tr>
 <tr class="odd">
 <td>Car density per gemeente</td>
-<td>ranking yes, spread compressed</td>
-<td>relative only</td>
+<td>ranking only</td>
+<td>wider spread, lease-company outliers</td>
 </tr>
 <tr class="even">
 <td>Weight distribution</td>
 <td>mean and spread only</td>
-<td>marginal only</td>
+<td>different shape</td>
 </tr>
 <tr class="odd">
 <td>EV share by construction year</td>
 <td>no</td>
-<td>no</td>
+<td>concentrated in recent years</td>
 </tr>
 <tr class="even">
 <td>Kilometres by fuel</td>
 <td>no</td>
-<td>no</td>
+<td>diesel much higher</td>
 </tr>
 <tr class="odd">
 <td>Car ownership by income</td>
 <td>no</td>
-<td>no</td>
+<td>falls steeply with income</td>
 </tr>
 </tbody>
 </table>
-<p>Marginals calibrated to StatLine are reproduced, so the headline (how
-fast the fleet electrifies) can be developed on simulated data. Anything
-that depends on the <em>joint</em> distribution of vehicle
-characteristics is not: the simulator draws fuel, construction year,
-weight and mileage independently.</p>
+<p>Fuel, construction year, weight and mileage are drawn independently,
+so only results that depend on one of them at a time look realistic. The
+code runs unchanged either way; don’t tune thresholds, classes or figure
+scales to the simulated cross-tabulations.</p>
 </div>
 <div class="section level2">
 <h2 id="simulated-data">Simulated data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
 </h2>
-<p>One woonbase population and RDW fleet per year, keeping passenger
-cars.</p>
+<p>One woonbase population and RDW fleet per year, keeping active
+passenger cars. <code>RDWNPACT</code> also holds dropped and
+business-stock vehicles, so filter on the code for <em>active</em>
+passenger cars, not on the word “personenauto”.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">YEARS</span> <span class="op">&lt;-</span> <span class="fl">2019</span><span class="op">:</span><span class="fl">2025</span></span>
 <span></span>
@@ -177,14 +171,15 @@ cars.</p>
 <span>    col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINPERSOON</span>, <span class="va">RINKENTEKEN</span>, <span class="va">VRTGSOORT</span>, <span class="va">BRANDSTCODECORVRTG</span>,</span>
 <span>                   <span class="va">EERSTETOELDAT1VRTG</span>, <span class="va">MASSALEEGCORVRTG</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">vp</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"VERKEERSPRESTATIE%dTABV1"</span>, <span class="va">year</span><span class="op">)</span>,</span>
-<span>                               col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINKENTEKEN</span>, <span class="va">VPJAARKM</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>                               col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINKENTEKEN</span>, <span class="va">VPJAARKM</span>, <span class="va">VPGEWICHT</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">kent</span><span class="op">[</span><span class="va">vp</span>, on <span class="op">=</span> <span class="st">"RINKENTEKEN"</span>, <span class="va">jaarkm</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">i.VPJAARKM</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">kent</span><span class="op">[</span><span class="va">vp</span>, on <span class="op">=</span> <span class="st">"RINKENTEKEN"</span>, <span class="fu">`:=`</span><span class="op">(</span>jaarkm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">i.VPJAARKM</span><span class="op">)</span>,</span>
+<span>                                    vpgewicht <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">i.VPGEWICHT</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span>  <span class="va">kent</span><span class="op">[</span>, <span class="fu">`:=`</span><span class="op">(</span>year <span class="op">=</span> <span class="va">year</span>, n_pers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pers</span><span class="op">)</span>,</span>
 <span>              bouwjaar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">EERSTETOELDAT1VRTG</span><span class="op">)</span>,</span>
 <span>              gewicht <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">MASSALEEGCORVRTG</span><span class="op">)</span>,</span>
 <span>              fuelcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="../reference/cbs_code.html">cbs_code</a></span><span class="op">(</span><span class="va">BRANDSTCODECORVRTG</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span>  <span class="va">kent</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"personenauto"</span>, <span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">VRTGSOORT</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">kent</span><span class="op">[</span><span class="fu"><a href="../reference/cbs_code.html">cbs_code</a></span><span class="op">(</span><span class="va">VRTGSOORT</span><span class="op">)</span> <span class="op">==</span> <span class="st">"6"</span><span class="op">]</span>  <span class="co"># personenauto, actief park</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">cars</span> <span class="op">&lt;-</span> <span class="fu">rbindlist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">YEARS</span>, <span class="va">simulate_year</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -239,8 +234,8 @@ questions about hybrids specifically are less well grounded.</p>
 <p>The age profile matches, because construction years are drawn from
 85237NED. The EV share by construction year does not: in reality nearly
 all electric cars are recent, while the simulator gives every
-construction year the same EV share. Code that cross-tabulates fuel by
-vehicle age runs, but the result carries no information.</p>
+construction year the same EV share. The cross-tabulation code is fine;
+expect a completely different picture in Remote Access.</p>
 </div>
 <div class="section level2">
 <h2 id="kilometres-and-weight">Kilometres and weight<a class="anchor" aria-label="anchor" href="#kilometres-and-weight"></a>
@@ -249,14 +244,15 @@ vehicle age runs, but the result carries no information.</p>
 <code class="sourceCode R"><span><span class="va">cars23</span> <span class="op">&lt;-</span> <span class="va">cars</span><span class="op">[</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2023</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">jaarkm</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">cars23</span><span class="op">[</span>, <span class="va">groep</span> <span class="op">:=</span> <span class="fu">fcase</span><span class="op">(</span><span class="va">brandstof</span> <span class="op">==</span> <span class="st">"diesel"</span>, <span class="st">"diesel"</span>, <span class="va">brandstof</span> <span class="op">==</span> <span class="st">"lpg"</span>, <span class="st">"lpg"</span>,</span>
 <span>                        default <span class="op">=</span> <span class="st">"benzine/overige"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">sim_km</span> <span class="op">&lt;-</span> <span class="fu">rbindlist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">cars23</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>groep <span class="op">=</span> <span class="st">"totaal"</span>, km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">jaarkm</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>                         <span class="va">cars23</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">jaarkm</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">groep</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="va">bron</span> <span class="op">:=</span> <span class="st">"simulatie"</span><span class="op">]</span></span></code></pre></div>
+<span><span class="co"># VPGEWICHT is about 1 in the simulation but not in the real file</span></span>
+<span><span class="va">sim_km</span> <span class="op">&lt;-</span> <span class="fu">rbindlist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="va">cars23</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>groep <span class="op">=</span> <span class="st">"totaal"</span>, km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">jaarkm</span>, <span class="va">vpgewicht</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  <span class="va">cars23</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html" class="external-link">weighted.mean</a></span><span class="op">(</span><span class="va">jaarkm</span>, <span class="va">vpgewicht</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">groep</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="va">bron</span> <span class="op">:=</span> <span class="st">"simulatie"</span><span class="op">]</span></span></code></pre></div>
 <p><img src="quality-cars_files/figure-html/km.png" class="r-plt" alt="" width="350px"><img src="quality-cars_files/figure-html/weight.png" class="r-plt" alt="" width="350px"></p>
 <p>The fleet-wide mileage matches, but diesel cars are driven much
-further than petrol cars in reality and equally far in the simulator: a
-fuel-excise analysis gets the total right and the split wrong. Weight
-has the right mean and spread, not the right shape, and does not differ
-by fuel.</p>
+further than petrol cars in reality and equally far in the simulator.
+Weight has the right mean and spread, not the right shape, and does not
+differ by fuel.</p>
 </div>
 <div class="section level2">
 <h2 id="region">Region<a class="anchor" aria-label="anchor" href="#region"></a>
@@ -269,7 +265,7 @@ by fuel.</p>
 <span><span class="va">pers</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"WoonbasePopulatiePersonen2023V1"</span>,</span>
 <span>                               col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINPERSOON</span>, <span class="va">GemeenteCodeJJJJ1Jan</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">kent</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"RDWNPACT2023TABV1"</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINPERSOON</span>, <span class="va">VRTGSOORT</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">kent</span> <span class="op">&lt;-</span> <span class="va">kent</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"personenauto"</span>, <span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">VRTGSOORT</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">kent</span> <span class="op">&lt;-</span> <span class="va">kent</span><span class="op">[</span><span class="fu"><a href="../reference/cbs_code.html">cbs_code</a></span><span class="op">(</span><span class="va">VRTGSOORT</span><span class="op">)</span> <span class="op">==</span> <span class="st">"6"</span><span class="op">]</span></span>
 <span><span class="va">kent</span><span class="op">[</span><span class="va">pers</span>, on <span class="op">=</span> <span class="st">"RINPERSOON"</span>, <span class="va">gemeente</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">i.GemeenteCodeJJJJ1Jan</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">sim_gem</span> <span class="op">&lt;-</span> <span class="va">pers</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>inwoners <span class="op">=</span> <span class="va">.N</span><span class="op">)</span>, by <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>gemeente <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">GemeenteCodeJJJJ1Jan</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
@@ -297,7 +293,41 @@ companies register their cars, are missing.</p>
 <p><img src="quality-cars_files/figure-html/income.png" class="r-plt" alt="" width="350px"></p>
 <p>Car owners are drawn regardless of income, so the share of households
 without a car is flat across income deciles, while in reality it falls
-steeply with income. Combine RDW with income only to test code.</p>
+steeply with income. The join runs as on the real data; the result does
+not look like it.</p>
+</div>
+<div class="section level2">
+<h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
+</h2>
+<p>The real files differ from the simulated ones in ways that can break
+code or silently change results:</p>
+<ul>
+<li>
+<strong>Several vehicles per owner.</strong> Every simulated owner
+has one vehicle; in reality many own several. Count cars per person or
+household with <code>.N</code>, and check that joins from vehicles to
+persons do not assume one row per person.</li>
+<li>
+<strong>Owners outside the population.</strong> Vehicles of
+companies and of persons not in the GBA (<code>RINPERSOONS</code> K or
+S, <code>SRTREFVRTG</code> other than natural person) do not join to
+woonbase. Decide where they go before counting per gemeente.</li>
+<li>
+<strong><code>VERKEERSPRESTATIE</code> holds only passenger cars of
+natural persons.</strong> The simulated file has every vehicle, so a
+join from all vehicles finds kilometres for vans and trucks that have
+none in reality.</li>
+<li>
+<strong>Types.</strong> <code>VPGEWICHT</code>,
+<code>VPDGNWEG</code> and <code>AANTALCYLCORVRTG</code> are numeric in
+the real file and character here; wrap them in <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code>
+so both work.</li>
+<li>
+<strong>Codes not simulated.</strong> Dropped and business-stock
+vehicles, colour code 99 (not applicable) and the rarer fuel codes
+(hydrogen, pre-2016 hybrid) occur only in the real data. Tables over all
+codes get extra rows.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

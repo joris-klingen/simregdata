@@ -123,9 +123,10 @@ Persons have a deterministic life course (birth, death, migration), so
 the population changes between years while identifiers stay stable.
 Building the spine for one million persons takes about 10 seconds.
 
-See
-[`vignette("quality-cars")`](https://joris-klingen.github.io/simregdata/articles/quality-cars.md)
-and the other quality articles for how close analyses on simulated data
-come to published statistics, and the [provenance
+Results on simulated data are for checking code, not for interpretation.
+The worked examples, starting with
+[`vignette("quality-cars")`](https://joris-klingen.github.io/simregdata/articles/quality-cars.md),
+show which results look like the published statistics and what changes
+in Remote Access. See the [provenance
 article](https://joris-klingen.github.io/simregdata/articles/provenance.html)
 for where each parameter comes from.

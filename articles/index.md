@@ -1,13 +1,13 @@
 # Articles
 
-### Simulation quality
+### Worked examples
 
-- [Simulation quality:
-  cars](https://joris-klingen.github.io/simregdata/articles/quality-cars.md):
-- [Simulation quality: household
-  income](https://joris-klingen.github.io/simregdata/articles/quality-income.md):
-- [Simulation quality: energy use of
-  dwellings](https://joris-klingen.github.io/simregdata/articles/quality-energy.md):
+- [Developing a car-fleet
+  analysis](https://joris-klingen.github.io/simregdata/articles/quality-cars.md):
+- [Developing a household income
+  analysis](https://joris-klingen.github.io/simregdata/articles/quality-income.md):
+- [Developing an analysis of dwelling energy
+  use](https://joris-klingen.github.io/simregdata/articles/quality-energy.md):
 
 ### Reference
 

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Simulation quality: energy use of dwellings • simregdata</title>
+<title>Developing an analysis of dwelling energy use • simregdata</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Simulation quality: energy use of dwellings">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Developing an analysis of dwelling energy use">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,8 +31,8 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/simregdata.html">Get started</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-quality" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Quality</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-quality">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
 <li><a class="dropdown-item" href="../articles/quality-cars.html">Cars</a></li>
     <li><a class="dropdown-item" href="../articles/quality-income.html">Household income</a></li>
     <li><a class="dropdown-item" href="../articles/quality-energy.html">Energy use</a></li>
@@ -42,9 +42,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/quality-cars.html">Simulation quality: cars</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-income.html">Simulation quality: household income</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-energy.html">Simulation quality: energy use of dwellings</a></li>
+<li><a class="dropdown-item" href="../articles/quality-cars.html">Developing a car-fleet analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-income.html">Developing a household income analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-energy.html">Developing an analysis of dwelling energy use</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
     <li><a class="dropdown-item" href="../articles/provenance.html">Where the numbers come from</a></li>
@@ -72,7 +72,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Simulation quality: energy use of dwellings</h1>
+      <h1>Developing an analysis of dwelling energy use</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/joris-klingen/simregdata/blob/main/vignettes/quality-energy.Rmd" class="external-link"><code>vignettes/quality-energy.Rmd</code></a></small>
@@ -86,11 +86,11 @@
 much do solar panels reduce the net electricity demand of a
 household?</strong></p>
 </blockquote>
-<p>This vignette runs that question on simulated
-<code>ENERGIEVERBRUIK</code> linked to the woonbase dwellings, and
-compares the answers with StatLine 85140NED (energy use by dwelling
-type, construction year, floor area, occupants and solar panels) and
-81528NED (national averages). Part of a series with
+<p>The analysis itself will run in CBS Remote Access. This page develops
+its code on simulated <code>ENERGIEVERBRUIK</code> linked to the
+woonbase dwellings, and uses StatLine 85140NED (energy use by dwelling
+characteristics) and 81528NED (national averages) to show which
+simulated results look like the real ones. Similar pages:
 <code><a href="../articles/quality-cars.html">vignette("quality-cars")</a></code> and
 <code><a href="../articles/quality-income.html">vignette("quality-income")</a></code>.</p>
 <div class="section level2">
@@ -99,57 +99,57 @@ type, construction year, floor area, occupants and solar panels) and
 <table class="table">
 <colgroup>
 <col width="17%">
-<col width="40%">
-<col width="42%">
+<col width="44%">
+<col width="38%">
 </colgroup>
 <thead><tr class="header">
-<th>Moment</th>
-<th>Matches StatLine?</th>
-<th>Safe for research?</th>
+<th>Result</th>
+<th>Looks like reality?</th>
+<th>In Remote Access</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>Gas by dwelling type, construction year, floor area</td>
 <td>yes, within a few percent</td>
-<td>yes</td>
+<td>similar; a large gap means a bug</td>
 </tr>
 <tr class="even">
 <td>Electricity by number of occupants</td>
-<td>gradient yes, about 5% high</td>
-<td>yes</td>
+<td>yes, about 5% high</td>
+<td>similar</td>
 </tr>
 <tr class="odd">
-<td>Solar panels by dwelling type</td>
+<td>Solar panels by dwelling type; net electricity with and without</td>
 <td>yes</td>
-<td>yes</td>
+<td>similar</td>
 </tr>
 <tr class="even">
-<td>Net electricity with and without panels</td>
-<td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="odd">
 <td>Percentiles of gas and electricity</td>
 <td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="even">
-<td>National means per year</td>
-<td>trend yes, a few percent low</td>
-<td>yes</td>
+<td>similar</td>
 </tr>
 <tr class="odd">
-<td>Interactions not in the one-way tables</td>
+<td>National means per year</td>
+<td>trend yes, a few percent low</td>
+<td>similar</td>
+</tr>
+<tr class="even">
+<td>Combinations of characteristics (e.g. type by construction
+year)</td>
 <td>not calibrated</td>
+<td>can differ</td>
+</tr>
+<tr class="odd">
+<td>Heating type, gas-free dwellings</td>
 <td>no</td>
+<td>see below</td>
 </tr>
 </tbody>
 </table>
 <p>Gas and electricity are generated per dwelling from its
-characteristics and fitted to the one-way means and percentiles of
-85140NED. National averages are a few percent low because the simulated
-stock has more small dwellings and single-person households than the
-real one.</p>
+characteristics and fitted to the one-way tables of 85140NED, so code
+for one-way breakdowns can be checked against StatLine before it runs on
+the real data.</p>
 </div>
 <div class="section level2">
 <h2 id="simulated-data">Simulated data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
@@ -192,7 +192,8 @@ real one.</p>
 <span>  bewoners    <span class="op">=</span> <span class="fu">fifelse</span><span class="op">(</span><span class="va">bewoners</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"5"</span>, <span class="st">"6-9"</span>, <span class="st">"&gt;=10"</span><span class="op">)</span>, <span class="st">"5 of meer"</span>, <span class="va">bewoners</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">by_kenmerk</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">energie</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span>, <span class="fu">.</span><span class="op">(</span>gas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">gas</span><span class="op">)</span>, elek <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">elek</span><span class="op">)</span>, zon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">zon</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  <span class="va">energie</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span>, <span class="fu">.</span><span class="op">(</span>gas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">gas</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, elek <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">elek</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>                            zon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">zon</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>,</span>
 <span>          by <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>klasse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">[</span>, <span class="va">kenmerk</span> <span class="op">:=</span> <span class="va">k</span><span class="op">]</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">sim_by</span> <span class="op">&lt;-</span> <span class="fu">rbindlist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"woningtype"</span>, <span class="st">"bouwjaar"</span>, <span class="st">"oppervlakte"</span>, <span class="st">"bewoners"</span><span class="op">)</span>, <span class="va">by_kenmerk</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -209,7 +210,8 @@ smallest, and gas use falls steadily with the construction year.</p>
 <h2 id="electricity-and-solar-panels">Electricity and solar panels<a class="anchor" aria-label="anchor" href="#electricity-and-solar-panels"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">energie</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>netto <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">netto</span><span class="op">)</span>, teruglevering <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">terug</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>zonnepanelen <span class="op">=</span> <span class="va">zon</span><span class="op">)</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">energie</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>netto <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">netto</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, teruglevering <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">terug</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        by <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>zonnepanelen <span class="op">=</span> <span class="va">zon</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    zonnepanelen    netto teruglevering</span></span>
 <span><span class="co">#&gt;          &lt;lgcl&gt;    &lt;num&gt;         &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1:        FALSE 2203.572          0.00</span></span>
@@ -218,16 +220,15 @@ smallest, and gas use falls steadily with the construction year.</p>
 <p>Electricity rises with the number of occupants, a few percent high in
 every group. Solar panels follow the published shares per dwelling type,
 and net electricity of dwellings with panels is half that of dwellings
-without, as published. Feed-in exists only with panels, and
-<code>ELEKNETTO</code> equals <code>ELEK - ELEKTERUG</code>.</p>
+without, as published.</p>
 </div>
 <div class="section level2">
 <h2 id="distribution-and-trend">Distribution and trend<a class="anchor" aria-label="anchor" href="#distribution-and-trend"></a>
 </h2>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_pct</span> <span class="op">&lt;-</span> <span class="va">energie</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>percentiel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">90</span>, <span class="fl">10</span><span class="op">)</span>,</span>
-<span>                       aardgas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">gas</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                       elektriciteit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">elek</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<span>                       aardgas <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">gas</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>                       elektriciteit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">elek</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <p><img src="quality-energy_files/figure-html/percentielen.png" class="r-plt" alt="" width="700px"><img src="quality-energy_files/figure-html/trend.png" class="r-plt" alt="" width="700px"></p>
 <p>Both distributions follow the published percentiles, including the
 tenth of dwellings without gas (district heating, most new dwellings,
@@ -235,6 +236,39 @@ other all-electric homes). The national means follow the published trend
 a few percent low: the model matches the mean <em>within</em> each
 dwelling group, and the simulated stock has relatively more small,
 low-use dwellings.</p>
+</div>
+<div class="section level2">
+<h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
+</h2>
+<ul>
+<li>
+<strong>Empty values.</strong> <code>GAS</code> and
+<code>ELEK</code> are empty in the real file when there is too little
+information, never in the simulated one. Every mean and quantile above
+uses <code>na.rm = TRUE</code>; without it the real results are
+<code>NA</code>.</li>
+<li>
+<strong>Net electricity.</strong> In the real file
+<code>ELEKNETTO</code> is <code>ELEK - ELEKTERUG</code> capped at 0, and
+<code>ELEKTERUG</code> is capped at twice <code>ELEK</code>. The
+simulated values break both caps for a few percent of dwellings, so code
+that recomputes net demand will not reproduce the simulated
+<code>ELEKNETTO</code> exactly.</li>
+<li>
+<strong>Gas-free dwellings.</strong> Zero gas use is spread evenly
+over all <code>GASBRON</code> groups here; in reality it is concentrated
+in heat-pump, district-heating and vacant dwellings. Code that uses
+<code>GASBRON</code> or <code>GAS == 0</code> to classify dwellings
+runs, but its result here is meaningless.</li>
+<li>
+<strong>Heating type.</strong> Only four of the nine
+<code>HOOFDVERWARMING31DEC</code> codes occur in the simulation; tables
+by heating type get extra rows on the real data.</li>
+<li>
+<strong>Vacant dwellings.</strong> Every simulated dwelling has a
+household. In reality vacant dwellings exist, so joins from energy to
+households leave dwellings without occupants.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

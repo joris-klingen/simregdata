@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Simulation quality: household income • simregdata</title>
+<title>Developing a household income analysis • simregdata</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Simulation quality: household income">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Developing a household income analysis">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,8 +31,8 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/simregdata.html">Get started</a></li>
 <li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-quality" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Quality</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-quality">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
 <li><a class="dropdown-item" href="../articles/quality-cars.html">Cars</a></li>
     <li><a class="dropdown-item" href="../articles/quality-income.html">Household income</a></li>
     <li><a class="dropdown-item" href="../articles/quality-energy.html">Energy use</a></li>
@@ -42,9 +42,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/quality-cars.html">Simulation quality: cars</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-income.html">Simulation quality: household income</a></li>
-    <li><a class="dropdown-item" href="../articles/quality-energy.html">Simulation quality: energy use of dwellings</a></li>
+<li><a class="dropdown-item" href="../articles/quality-cars.html">Developing a car-fleet analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-income.html">Developing a household income analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/quality-energy.html">Developing an analysis of dwelling energy use</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
     <li><a class="dropdown-item" href="../articles/provenance.html">Where the numbers come from</a></li>
@@ -72,7 +72,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Simulation quality: household income</h1>
+      <h1>Developing a household income analysis</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/joris-klingen/simregdata/blob/main/vignettes/quality-income.Rmd" class="external-link"><code>vignettes/quality-income.Rmd</code></a></small>
@@ -86,10 +86,11 @@
 Netherlands, and how does it differ between household
 types?</strong></p>
 </blockquote>
-<p>This vignette runs that question on simulated <code>INHATAB</code>
-(household income) linked to woonbase household types, and compares the
-answers with StatLine 83932NED, the published aggregate of the same
-register. Part of a series with <code><a href="../articles/quality-cars.html">vignette("quality-cars")</a></code>
+<p>The analysis itself will run in CBS Remote Access. This page develops
+its code on simulated <code>INHATAB</code> (household income) linked to
+woonbase household types, and uses StatLine 83932NED, the published
+aggregate of the same register, to show which simulated results look
+like the real ones. Similar pages: <code><a href="../articles/quality-cars.html">vignette("quality-cars")</a></code>
 and <code><a href="../articles/quality-energy.html">vignette("quality-energy")</a></code>.</p>
 <div class="section level2">
 <h2 id="at-a-glance">At a glance<a class="anchor" aria-label="anchor" href="#at-a-glance"></a>
@@ -97,62 +98,55 @@ and <code><a href="../articles/quality-energy.html">vignette("quality-energy")</
 <table class="table">
 <colgroup>
 <col width="17%">
-<col width="40%">
-<col width="42%">
+<col width="44%">
+<col width="38%">
 </colgroup>
 <thead><tr class="header">
-<th>Moment</th>
-<th>Matches StatLine?</th>
-<th>Safe for research?</th>
+<th>Result</th>
+<th>Looks like reality?</th>
+<th>In Remote Access</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Mean and median income</td>
+<td>Mean and median income, overall and by household type</td>
 <td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="even">
-<td>Income by household type</td>
-<td>yes</td>
-<td>yes</td>
-</tr>
-<tr class="odd">
-<td>Distribution over income classes</td>
-<td>close; tails too thin</td>
-<td>yes, except the tails</td>
-</tr>
-<tr class="even">
-<td>Decile means (inequality)</td>
-<td>close up to decile 8; top too low</td>
-<td>with care at the top</td>
-</tr>
-<tr class="odd">
-<td>Percentile columns</td>
-<td>yes</td>
-<td>yes</td>
+<td>similar; a large gap means a bug</td>
 </tr>
 <tr class="even">
 <td>Gross and standardised income</td>
 <td>yes</td>
-<td>yes</td>
+<td>similar</td>
 </tr>
 <tr class="odd">
-<td>Primary income</td>
-<td>too high</td>
-<td>no</td>
+<td>Percentile columns</td>
+<td>yes</td>
+<td>similar, plus special codes</td>
 </tr>
 <tr class="even">
-<td>Persons add up to households</td>
+<td>Distribution over income classes</td>
+<td>bulk yes, tails too thin</td>
+<td>more households at both ends</td>
+</tr>
+<tr class="odd">
+<td>Decile means (inequality)</td>
+<td>up to decile 8</td>
+<td>top decile much higher</td>
+</tr>
+<tr class="even">
+<td>Primary income</td>
+<td>too high</td>
+<td>lower</td>
+</tr>
+<tr class="odd">
+<td>Personal incomes summing to household income</td>
 <td>no</td>
-<td>no</td>
+<td>consistent</td>
 </tr>
 </tbody>
 </table>
 <p>Household income is drawn per household type from the mean and median
-of 83932NED; woonbase (<code>BESTINKH1JAN</code>) and
-<code>INHATAB</code> hold the same value per household. The class
-distribution and decile means are not calibrated, so they are an
-out-of-sample check.</p>
+of 83932NED; the class distribution and decile means are not
+calibrated.</p>
 </div>
 <div class="section level2">
 <h2 id="simulated-data">Simulated data<a class="anchor" aria-label="anchor" href="#simulated-data"></a>
@@ -226,9 +220,9 @@ any household falls below 10,000 euro (self-employed with losses,
 students), and the top decile averages 164 thousand euro against 172
 thousand in reality, so inequality measures that weigh the very top come
 out too low.</p>
-<p><code>INHP100HBEST</code> is the rank of the household income, as on
-the real file (rank correlation 1.000), so grouping on it directly is
-equivalent to computing the ranks yourself.</p>
+<p><code>INHP100HBEST</code> is the rank of the household income (rank
+correlation 1.000), so grouping on it gives the same deciles as
+computing the ranks yourself.</p>
 </div>
 <div class="section level2">
 <h2 id="household-type">Household type<a class="anchor" aria-label="anchor" href="#household-type"></a>
@@ -254,9 +248,35 @@ single-person households, in the simulation as in reality.</p>
 <span><span class="va">pers_sum</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">som_personen</span>, <span class="va">huishouden</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 0.1828951</span></span></code></pre></div>
 <p>Personal incomes in <code>INPATAB</code> are drawn independently of
-the household, so they do not add up to the household income. Analyses
-that split household income over its members cannot be checked on
-simulated data yet.</p>
+the household, so they do not add up to the household income. Code that
+splits household income over its members runs, but a consistency check
+like the one above only passes on the real data.</p>
+</div>
+<div class="section level2">
+<h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
+</h2>
+<ul>
+<li>
+<strong>Negative and very low incomes.</strong> Simulated household
+income is at least a few thousand euro; in reality self-employed
+households can have negative disposable income. <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code>,
+ratios to income and classes starting at 0 need a rule for them.</li>
+<li>
+<strong>Special codes.</strong> In comparable CBS files (such as
+VEHTAB) percentile columns use negative codes for unknown income and
+institutional households. Check the INHATAB documentation and exclude
+those codes before averaging or ranking; the simulated percentiles are
+always 1 to 100.</li>
+<li>
+<strong>Losses of persons.</strong> Personal income in
+<code>INPATAB</code> is floored at exactly -50,000 euro here, with no
+floor in reality; don’t build classes around that value.</li>
+<li>
+<strong>Private households.</strong> StatLine covers private
+households only. The filter on <code>TYPHH1Jan</code> above does that
+for the woonbase link; on the real data also check how institutional
+households appear in <code>INHATAB</code> itself.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

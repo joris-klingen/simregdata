@@ -1,33 +1,31 @@
-# Simulation quality: household income
+# Developing a household income analysis
 
 > **How unequal is household disposable income in the Netherlands, and
 > how does it differ between household types?**
 
-This vignette runs that question on simulated `INHATAB` (household
-income) linked to woonbase household types, and compares the answers
-with StatLine 83932NED, the published aggregate of the same register.
-Part of a series with
+The analysis itself will run in CBS Remote Access. This page develops
+its code on simulated `INHATAB` (household income) linked to woonbase
+household types, and uses StatLine 83932NED, the published aggregate of
+the same register, to show which simulated results look like the real
+ones. Similar pages:
 [`vignette("quality-cars")`](https://joris-klingen.github.io/simregdata/articles/quality-cars.md)
 and
 [`vignette("quality-energy")`](https://joris-klingen.github.io/simregdata/articles/quality-energy.md).
 
 ## At a glance
 
-| Moment | Matches StatLine? | Safe for research? |
+| Result | Looks like reality? | In Remote Access |
 |----|----|----|
-| Mean and median income | yes | yes |
-| Income by household type | yes | yes |
-| Distribution over income classes | close; tails too thin | yes, except the tails |
-| Decile means (inequality) | close up to decile 8; top too low | with care at the top |
-| Percentile columns | yes | yes |
-| Gross and standardised income | yes | yes |
-| Primary income | too high | no |
-| Persons add up to households | no | no |
+| Mean and median income, overall and by household type | yes | similar; a large gap means a bug |
+| Gross and standardised income | yes | similar |
+| Percentile columns | yes | similar, plus special codes |
+| Distribution over income classes | bulk yes, tails too thin | more households at both ends |
+| Decile means (inequality) | up to decile 8 | top decile much higher |
+| Primary income | too high | lower |
+| Personal incomes summing to household income | no | consistent |
 
 Household income is drawn per household type from the mean and median of
-83932NED; woonbase (`BESTINKH1JAN`) and `INHATAB` hold the same value
-per household. The class distribution and decile means are not
-calibrated, so they are an out-of-sample check.
+83932NED; the class distribution and decile means are not calibrated.
 
 ## Simulated data
 
@@ -94,9 +92,9 @@ and the top decile averages 164 thousand euro against 172 thousand in
 reality, so inequality measures that weigh the very top come out too
 low.
 
-`INHP100HBEST` is the rank of the household income, as on the real file
-(rank correlation 1.000), so grouping on it directly is equivalent to
-computing the ranks yourself.
+`INHP100HBEST` is the rank of the household income (rank correlation
+1.000), so grouping on it gives the same deciles as computing the ranks
+yourself.
 
 ## Household type
 
@@ -127,6 +125,26 @@ pers_sum[, cor(som_personen, huishouden)]
 ```
 
 Personal incomes in `INPATAB` are drawn independently of the household,
-so they do not add up to the household income. Analyses that split
-household income over its members cannot be checked on simulated data
-yet.
+so they do not add up to the household income. Code that splits
+household income over its members runs, but a consistency check like the
+one above only passes on the real data.
+
+## Before you move to Remote Access
+
+- **Negative and very low incomes.** Simulated household income is at
+  least a few thousand euro; in reality self-employed households can
+  have negative disposable income.
+  [`log()`](https://rdrr.io/r/base/Log.html), ratios to income and
+  classes starting at 0 need a rule for them.
+- **Special codes.** In comparable CBS files (such as VEHTAB) percentile
+  columns use negative codes for unknown income and institutional
+  households. Check the INHATAB documentation and exclude those codes
+  before averaging or ranking; the simulated percentiles are always 1 to
+  100.
+- **Losses of persons.** Personal income in `INPATAB` is floored at
+  exactly -50,000 euro here, with no floor in reality; don’t build
+  classes around that value.
+- **Private households.** StatLine covers private households only. The
+  filter on `TYPHH1Jan` above does that for the woonbase link; on the
+  real data also check how institutional households appear in `INHATAB`
+  itself.
