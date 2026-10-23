@@ -60,22 +60,22 @@ Overview of all simulated columns
 | `RINOBJECTNUMMER` | spine-derived | gemeente |  |  |
 | `WONINGT` | value:   |  |  |  |
 | `WOONR` | value:   |  |  |  |
-| `STADSW` | params: stadsverwarming_categorical | NL |  | [STADSW](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `GAS` | params: gas_mean | NL |  |  |
-| `ELEK` | params: elek_mean | NL |  |  |
+| `STADSW` | spine-derived | NL |  | [STADSW](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `GAS` | spine-derived | NL |  |  |
+| `ELEK` | spine-derived | NL |  |  |
 | `GASBRON` | random: codelist: GASBRON |  |  | [GASBRON](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `ELEKBRON` | random: codelist: ELEKBRON |  |  | [ELEKBRON](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `ELEKTERUG` | random: normal (mean=500, sd=1200) |  |  |  |
-| `ELEKNETTO` | random: normal (mean=2400, sd=1200) |  |  |  |
-| `GASSJV` | random: normal (mean=1100, sd=620) |  |  |  |
-| `WARMTESCHATTING` | random: normal (mean=35, sd=20) |  |  |  |
-| `ZONPV` | params: solar_pv_categorical | NL |  | [ZONPV](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `ZONVERMOGEN1JAN` | random: normal (mean=2.5, sd=3) |  |  |  |
-| `ZONVERMOGEN31DEC` | random: normal (mean=2.8, sd=3.2) |  |  |  |
+| `ELEKTERUG` | spine-derived | NL |  |  |
+| `ELEKNETTO` | spine-derived | NL |  |  |
+| `GASSJV` | spine-derived | NL |  |  |
+| `WARMTESCHATTING` | spine-derived | NL |  |  |
+| `ZONPV` | spine-derived | NL |  | [ZONPV](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `ZONVERMOGEN1JAN` | spine-derived | NL |  |  |
+| `ZONVERMOGEN31DEC` | spine-derived | NL |  |  |
 | `ZONPVBRON` | random: codelist: ZONPVBRON |  |  | [ZONPVBRON](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `HOOFDVERWARMING31DEC` | random: codelist: HOOFDVERWARMING31DEC |  |  | [HOOFDVERWARMING31DEC](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `HOOFDVERWARMING31DEC` | spine-derived | NL |  | [HOOFDVERWARMING31DEC](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `WONINGBEWONING10PROFIELEN` | random: codelist: WONINGBEWONING10PROFIELEN |  |  | [WONINGBEWONING10PROFIELEN](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
-| `KBHOOFDVERWARMING31DEC` | random: codelist: KBHOOFDVERWARMING31DEC |  |  | [KBHOOFDVERWARMING31DEC](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
+| `KBHOOFDVERWARMING31DEC` | spine-derived | NL |  | [KBHOOFDVERWARMING31DEC](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 
 </details>
 
@@ -86,22 +86,22 @@ Overview of all simulated columns
 |--------|--------|---------|-------------|----------|
 | `SOORTOBJECTNUMMER` | spine-derived | gemeente |  | [SOORTOBJECTNUMMER](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/energieverbruik/codelists.yaml) |
 | `RINOBJECTNUMMER` | spine-derived | gemeente |  |  |
-| `GASLEV01` | random: normal (mean=200, sd=100) |  |  |  |
-| `GASLEV02` | random: normal (mean=180, sd=90) |  |  |  |
-| `GASLEV03` | random: normal (mean=140, sd=70) |  |  |  |
-| `GASLEV04` | random: normal (mean=70, sd=40) |  |  |  |
-| `GASLEV05` | random: normal (mean=25, sd=15) |  |  |  |
-| `GASLEV06` | random: normal (mean=15, sd=10) |  |  |  |
-| `GASLEV07` | random: normal (mean=10, sd=8) |  |  |  |
-| `GASLEV08` | random: normal (mean=10, sd=8) |  |  |  |
-| `GASLEV09` | random: normal (mean=20, sd=12) |  |  |  |
-| `GASLEV10` | random: normal (mean=60, sd=35) |  |  |  |
-| `GASLEV11` | random: normal (mean=140, sd=70) |  |  |  |
-| `GASLEV12` | random: normal (mean=190, sd=95) |  |  |  |
-| `ELKLEV01, ELKLEV02, ELKLEV03, ELKLEV04, ELKLEV05, ELKLEV06, ELKLEV07, ELKLEV08, ELKLEV09, ELKLEV10, ELKLEV11, ELKLEV12` | random: normal (mean=150, sd=80) |  |  |  |
-| `ELKTLV01, ELKTLV02, ELKTLV03, ELKTLV04, ELKTLV05, ELKTLV06, ELKTLV07, ELKTLV08, ELKTLV09, ELKTLV10, ELKTLV11, ELKTLV12` | random: normal (mean=30, sd=50) |  |  |  |
-| `ELKLEVLAAG01, ELKLEVLAAG02, ELKLEVLAAG03, ELKLEVLAAG04, ELKLEVLAAG05, ELKLEVLAAG06, ELKLEVLAAG07, ELKLEVLAAG08, ELKLEVLAAG09, ELKLEVLAAG10, ELKLEVLAAG11, ELKLEVLAAG12` | random: normal (mean=60, sd=35) |  |  |  |
-| `ELKTLVLAAG01, ELKTLVLAAG02, ELKTLVLAAG03, ELKTLVLAAG04, ELKTLVLAAG05, ELKTLVLAAG06, ELKTLVLAAG07, ELKTLVLAAG08, ELKTLVLAAG09, ELKTLVLAAG10, ELKTLVLAAG11, ELKTLVLAAG12` | random: normal (mean=5, sd=10) |  |  |  |
+| `GASLEV01` | spine-derived | NL |  |  |
+| `GASLEV02` | spine-derived | NL |  |  |
+| `GASLEV03` | spine-derived | NL |  |  |
+| `GASLEV04` | spine-derived | NL |  |  |
+| `GASLEV05` | spine-derived | NL |  |  |
+| `GASLEV06` | spine-derived | NL |  |  |
+| `GASLEV07` | spine-derived | NL |  |  |
+| `GASLEV08` | spine-derived | NL |  |  |
+| `GASLEV09` | spine-derived | NL |  |  |
+| `GASLEV10` | spine-derived | NL |  |  |
+| `GASLEV11` | spine-derived | NL |  |  |
+| `GASLEV12` | spine-derived | NL |  |  |
+| `ELKLEV01, ELKLEV02, ELKLEV03, ELKLEV04, ELKLEV05, ELKLEV06, ELKLEV07, ELKLEV08, ELKLEV09, ELKLEV10, ELKLEV11, ELKLEV12` | spine-derived | NL |  |  |
+| `ELKTLV01, ELKTLV02, ELKTLV03, ELKTLV04, ELKTLV05, ELKTLV06, ELKTLV07, ELKTLV08, ELKTLV09, ELKTLV10, ELKTLV11, ELKTLV12` | spine-derived | NL |  |  |
+| `ELKLEVLAAG01, ELKLEVLAAG02, ELKLEVLAAG03, ELKLEVLAAG04, ELKLEVLAAG05, ELKLEVLAAG06, ELKLEVLAAG07, ELKLEVLAAG08, ELKLEVLAAG09, ELKLEVLAAG10, ELKLEVLAAG11, ELKLEVLAAG12` | spine-derived | NL |  |  |
+| `ELKTLVLAAG01, ELKTLVLAAG02, ELKTLVLAAG03, ELKTLVLAAG04, ELKTLVLAAG05, ELKTLVLAAG06, ELKTLVLAAG07, ELKTLVLAAG08, ELKTLVLAAG09, ELKTLVLAAG10, ELKTLVLAAG11, ELKTLVLAAG12` | spine-derived | NL |  |  |
 
 </details>
 
@@ -203,7 +203,7 @@ Overview of all simulated columns
 |--------|--------|---------|-------------|----------|
 | `RINPERSOONSHKW` | value: R |  |  | [rinpersoons](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
 | `RINPERSOONHKW` | spine-derived | NL |  |  |
-| `INHAHL` | random: uniform [1, 6] |  |  |  |
+| `INHAHL` | spine-derived | NL |  |  |
 | `INHAHLMI` | random: uniform [1, 4] |  |  |  |
 | `INHARMEUR` | random: uniform [1, 300] |  |  |  |
 | `INHARMEURL` | random: uniform [1, 300] |  |  |  |
@@ -212,19 +212,19 @@ Overview of all simulated columns
 | `INHARMSOC` | random: uniform [1, 300] |  |  |  |
 | `INHARMSOCL` | random: uniform [1, 300] |  |  |  |
 | `INHBBIHJ` | random: hardcoded probs |  |  |  |
-| `INHBELIH` | params: mean_belih | NL |  |  |
-| `INHBESTINKH` | params: mean_bestinkh | NL |  |  |
-| `INHBRUTINKH` | params: mean_brutinkh | NL |  |  |
+| `INHBELIH` | random: normal (mean=18000, sd=20000) |  |  |  |
+| `INHBESTINKH` | spine-derived | NL |  |  |
+| `INHBRUTINKH` | spine-derived | NL |  |  |
 | `INHEHALGR` | random: hardcoded probs |  |  |  |
-| `INHGESTINKH` | params: mean_gestinkh | NL |  |  |
-| `INHP100HBEST` | random: uniform [1, 100] |  |  |  |
-| `INHP100HBESTES` | random: uniform [1, 100] |  |  |  |
-| `INHP100HBRUT` | random: uniform [1, 100] |  |  |  |
-| `INHP100HGEST` | random: uniform [1, 100] |  |  |  |
-| `INHP100HGESTES` | random: uniform [1, 100] |  |  |  |
-| `INHP100HPRIM` | random: uniform [1, 100] |  |  |  |
+| `INHGESTINKH` | spine-derived | NL |  |  |
+| `INHP100HBEST` | spine-derived | NL |  |  |
+| `INHP100HBESTES` | spine-derived | NL |  |  |
+| `INHP100HBRUT` | spine-derived | NL |  |  |
+| `INHP100HGEST` | spine-derived | NL |  |  |
+| `INHP100HGESTES` | spine-derived | NL |  |  |
+| `INHP100HPRIM` | spine-derived | NL |  |  |
 | `INHPOPIIV` | random: codelist: popiiv |  |  | [popiiv](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
-| `INHPRIMINKH` | params: mean_priminkh | NL |  |  |
+| `INHPRIMINKH` | spine-derived | NL |  |  |
 | `INHSAMAOW` | random: hardcoded probs |  |  |  |
 | `INHSAMHH` | random: codelist: samhh |  |  | [samhh](https://github.com/joris-klingen/simregdata/blob/main/inst/config/datasets/inhatab/codelists.yaml) |
 | `INHUAF` | random: uniform [0, 3] |  |  |  |

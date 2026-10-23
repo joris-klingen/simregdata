@@ -130,3 +130,32 @@ test_that("filtering does not disturb the full identity spine used for sampling"
   n2024 <- nrow(.sim_cache$spine$pers)
   expect_equal(n2020, n2024)
 })
+
+test_that("yearly registers only hold persons present in the year", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 8000L, seed = 2L)
+  sim_init("rdw", year = 2023L, seed = 3L)
+  sim_init("inpatab", year = 2023L, seed = 4L)
+  pop <- data.table::as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
+    col_select = c(RINPERSOON)))
+  kent <- data.table::as.data.table(read_sav("RDWNPACT2023TABV1",
+    col_select = c(RINPERSOON)))
+  inpa <- data.table::as.data.table(read_sav("INPA2023TABV1",
+    col_select = c(RINPERSOON)))
+
+  expect_true(all(kent$RINPERSOON %in% pop$RINPERSOON))
+  expect_true(all(inpa$RINPERSOON %in% pop$RINPERSOON))
+  expect_equal(nrow(inpa), nrow(pop))
+})
+
+test_that("RDW fleet is scaled to the population present in the year", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 20000L, seed = 2L)
+  sim_init("rdw", year = 2023L, seed = 3L)
+  n_pop <- nrow(read_sav("WoonbasePopulatiePersonen2023V1",
+    col_select = c(RINPERSOON)))
+  n_veh <- nrow(read_sav("RDWNPACT2023TABV1", col_select = c(RINPERSOON)))
+  p <- rdw_cbs_params(2023L)
+  expected <- p$n_vehicles / woonbase_cbs_params(2023L)$n_persons
+  expect_equal(n_veh / n_pop, expected, tolerance = 0.03)
+})

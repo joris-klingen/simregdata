@@ -15,13 +15,9 @@ columns:
   - name: RINPERSOONHKW
     source: spine.pers.RINPERSOONHKW
 
-  # Household size
+  # Household size (members present in the year)
   - name: INHAHL
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 6
-      round: 0
+    source: spine.pers.INHAHL
 
   # Household members with income
   - name: INHAHLMI
@@ -85,32 +81,22 @@ columns:
       values: ["00", "01", "02", "03", "04", "05", "99"]
       probs:  [0.70, 0.05, 0.03, 0.02, 0.05, 0.10, 0.05]
 
-  # Taxable household income
+  # Taxable household income (not calibrated)
   - name: INHBELIH
     random_numeric:
       distribution: normal
-      mean_from_params: mean_belih
-      sd_from_params: sd_belih
+      mean: 18000
+      sd: 20000
       min: 0
       round: 0
 
-  # Disposable household income
+  # Disposable household income (StatLine 83932NED, per household type)
   - name: INHBESTINKH
-    random_numeric:
-      distribution: normal
-      mean_from_params: mean_bestinkh
-      sd_from_params: sd_bestinkh
-      min: -50000
-      round: 0
+    source: spine.pers.BESTINKH
 
-  # Gross household income
+  # Gross household income (derived from disposable income)
   - name: INHBRUTINKH
-    random_numeric:
-      distribution: normal
-      mean_from_params: mean_brutinkh
-      sd_from_params: sd_brutinkh
-      min: -50000
-      round: 0
+    source: spine.pers.BRUTINKH
 
   # Main income earner indicator
   - name: INHEHALGR
@@ -118,57 +104,27 @@ columns:
       values: ["1", "2", "9"]
       probs:  [0.85, 0.10, 0.05]
 
-  # Standardized household income
+  # Standardized household income (disposable / equivalence factor)
   - name: INHGESTINKH
-    random_numeric:
-      distribution: normal
-      mean_from_params: mean_gestinkh
-      sd_from_params: sd_gestinkh
-      min: -50000
-      round: 0
+    source: spine.pers.GESTINKH
 
-  # Income percentiles
   - name: INHP100HBEST
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HBEST
 
   - name: INHP100HBESTES
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HBEST
 
   - name: INHP100HBRUT
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HBRUT
 
   - name: INHP100HGEST
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HGEST
 
   - name: INHP100HGESTES
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HGEST
 
   - name: INHP100HPRIM
-    random_numeric:
-      distribution: uniform
-      min: 1
-      max: 100
-      round: 0
+    source: spine.pers.P100HPRIM
 
   # Population indicator
   - name: INHPOPIIV
@@ -177,14 +133,9 @@ columns:
       probs:  [0.97, 0.03]
     codelist: popiiv
 
-  # Primary household income
+  # Primary household income (derived from disposable income)
   - name: INHPRIMINKH
-    random_numeric:
-      distribution: normal
-      mean_from_params: mean_priminkh
-      sd_from_params: sd_priminkh
-      min: -50000
-      round: 0
+    source: spine.pers.PRIMINKH
 
   # AOW composition
   - name: INHSAMAOW

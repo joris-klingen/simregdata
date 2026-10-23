@@ -26,12 +26,16 @@ Imports:
 Suggests:
     arrow,
     cbsodataR,
+    ggcpb,
     ggplot2,
     glue,
     knitr,
     profvis,
+    ragg,
     rmarkdown,
     sf,
     testthat (>= 3.0.0)
+Remotes:
+    joris-klingen/ggcpb
 Config/testthat/edition: 3
 VignetteBuilder: knitr

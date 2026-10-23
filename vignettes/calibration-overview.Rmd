@@ -49,12 +49,11 @@ The tables below classify every column across all 15 datasets.
 | Job count (`n_jobs`) | SPOLIS | 85275NED | Controls SPOLIS row count |
 | Household count (`n_households`) | VEHTAB | (woonbase) | Controls VEHTAB row count |
 | Dwelling count (`n_dwellings`) | Energieverbruik | (woonbase) | Controls row count |
-| Gas consumption (`gas_mean/sd`) | Energieverbruik | CBS energy stats | GAS |
-| Electricity (`elek_mean/sd`) | Energieverbruik | CBS energy stats | ELEK |
-| Solar PV share (`solar_pv_share`) | Energieverbruik | CBS energy stats | ZONPV |
+| National gas and electricity per dwelling (`gas_mean`, `elek_mean`) | Energieverbruik | 81528NED | GAS, ELEK |
+| Gas, electricity, solar, district heating per dwelling characteristic (`structuur`) | Energieverbruik | 85140NED | GAS, GASSJV, ELEK, ELEKTERUG, ELEKNETTO, ZONPV, STADSW |
 | Education level (`opl_niveau_hb/hg`) | HOOGSTEOPLTAB | 82275NED | OPLNIVSOI2021AGG4HBmetNIRWO, HG |
 | Personal income (`secj_dist`, income means) | INPATAB | 83931NED, 84493NED | INPSECJ, INPPERSINK, etc. |
-| Household income (income means) | INHATAB | 83932NED | INHBESTINKH, INHBRUTINKH, etc. |
+| Household income (mean, median per household type) | INHATAB, Woonbase | 83932NED | BESTINKH1JAN, INHBESTINKH, INHBRUTINKH, etc. |
 | SEC monthly (`secm_dist`) | SECMBUS | (implicit) | SECM |
 | SBI sector (`sbi2008_dist`) | BETAB | (implicit) | SBI2008VJJJJ |
 | Business size (`gksbs_dist`) | BETAB | (implicit) | GKSBS |
@@ -87,10 +86,17 @@ woonbase parameters.  Three things are StatLine-calibrated:
 - `AantalPersonenPerHuishouden1Jan` -- HH size (derived from TYPHH)
 - `GemeenteCodeJJJJ1Jan` -- municipality (**StatLine-calibrated**)
 - `VBOWoningType1Jan` -- dwelling type (fixed distribution)
-- `VBOBouwjaar1Jan` -- construction year (fixed distribution)
-- `VBOOppervlakte1Jan` -- floor area (fixed distribution)
+- `VBOBouwjaar1Jan` -- construction year (fixed class shares, never after the simulation year)
+- `VBOOppervlakte1Jan` -- floor area (fixed class shares)
 - `WOZWaardeObjectBAG1Jan` -- WOZ value (fixed distribution)
 - `TypeEigenaar1Jan` -- owner type (fixed distribution)
+
+Dwelling attributes are drawn per dwelling from a hash of `RINOBJECTNUMMER`,
+so they are identical on 1 January and 31 December and stay the same across
+simulation years as far as the yearly distributions allow (gemeente only
+changes where the shares change or gemeenten merge). The class columns
+(`VBOBouwJaarKlasse`, `VBOOppervlakteKlasse`, `WOZWaardeObjectBAGKlasse`) are
+derived from the values.
 
 **Codelist-labelled columns** (hardcoded probabilities):
 
@@ -100,10 +106,14 @@ woonbase parameters.  Three things are StatLine-calibrated:
 - `HHBWoonSit1Jan` -- living situation
 - All `*Klasse*` columns -- categorical class versions
 
+**StatLine-calibrated household income** (83932NED, see INHATAB below):
+
+- `BESTINKH1JAN`, `GESTINKH1JAN` -- disposable and standardised income
+- `P100HBEST1JAN`, `P100HGEST1JAN` -- national rank of those incomes
+
 **Random numeric / uniform** (NOT calibrated):
 
-- `BESTINKH1JAN`, `INKONTV1JAN`, etc. -- income components (EK files)
-- `P100HBEST1JAN` -- income percentile (uniform 1-100)
+- `INKONTV1JAN`, etc. -- other income components (EK files)
 - `VERMHH1JAN`, `SCHULDHH1JAN` -- wealth/debt (random normal)
 - `LeeftijdRefPersoon1Jan` -- ref person age (derived)
 - `AantalKinderenPerHuishouden1Jan` -- children count (derived)
@@ -244,19 +254,24 @@ Personal income register. Several income aggregates are StatLine-calibrated.
 
 ### INHATAB (1 file, 29 columns)
 
-Household income register. Five income aggregates are StatLine-calibrated.
+Household income register, one row per household. Disposable income is
+drawn on the shared spine from a lognormal per household type (and AOW age of
+the reference person), fitted to the mean and median of 83932NED and
+correlated with the WOZ value; woonbase `BESTINKH1JAN` holds the same value.
+Gross, primary and standardised income are derived from it per household.
 
 | Column | Level | Source |
 |--------|-------|--------|
 | RINPERSOONSHKW | Constant | Always `"R"` |
 | RINPERSOONHKW | Spine-derived | Ref person from spine HH |
-| INHBESTINKH | **StatLine** | Disposable income mean/sd (83932NED) |
-| INHBRUTINKH | **StatLine** | Gross income mean/sd |
-| INHGESTINKH | **StatLine** | Standardised income mean/sd |
-| INHPRIMINKH | **StatLine** | Primary income mean/sd |
-| INHBELIH | **StatLine** | Taxable income mean/sd |
-| INHP100HBEST, INHP100HBESTES, INHP100HBRUT, INHP100HGEST, INHP100HGESTES, INHP100HPRIM | Random uniform | Income percentiles 1-100 |
-| INHAHL, INHAHLMI | Random numeric | Hardcoded mean/sd |
+| INHBESTINKH | **StatLine** | Lognormal per household type (83932NED mean, median) |
+| INHBRUTINKH | **StatLine** | Disposable income x type ratio of medians, with noise |
+| INHGESTINKH | **StatLine** | Disposable income / type equivalence factor |
+| INHPRIMINKH | **StatLine** | Disposable income x type ratio of medians, with noise |
+| INHBELIH | Random numeric | Hardcoded mean/sd |
+| INHP100HBEST, INHP100HBESTES, INHP100HBRUT, INHP100HGEST, INHP100HGESTES, INHP100HPRIM | Spine-derived | National rank of the income (ES = same rank) |
+| INHAHL | Spine-derived | Members present in the year |
+| INHAHLMI | Random numeric | Hardcoded range |
 | INHARMEUR, INHARMEURL, INHARMLAG, INHARMLAGL, INHARMSOC, INHARMSOCL | Random numeric | Poverty thresholds |
 | INHPOPIIV, INHSAMHH, INHSAMAOW | Codelist | Hardcoded probs |
 | INHBBIHJ | Random categorical | Income class |
@@ -334,6 +349,16 @@ Business register. SBI sector and size class are StatLine-calibrated.
 
 ### Energieverbruik (2 files, ~38 columns)
 
+Gas and electricity are generated per dwelling from its characteristics
+(`R/energy.R`): dwelling type, construction year and floor area from
+woonbase, and the number of occupants present. The one-way means, shares and
+percentiles of StatLine 85140NED (2019 onwards; earlier years use the 2019
+structure scaled to the national level of 81528NED) are matched by raking:
+gas is additive in the characteristics with normal noise, electricity
+multiplicative with lognormal noise, solar panels and district heating are
+probabilities raked on the logit scale and assigned per dwelling with a
+stable hash, so panels stay installed as adoption grows.
+
 #### ENERGIEVERBRUIKTAB (annual totals, 20 columns)
 
 | Column | Level | Source |
@@ -342,27 +367,26 @@ Business register. SBI sector and size class are StatLine-calibrated.
 | RINOBJECTNUMMER | Spine-derived | From woonbase obj spine |
 | WONINGT | Constant | `" "` (empty since 2019) |
 | WOONR | Constant | `" "` (empty since 2019) |
-| STADSW | Codelist | Hardcoded 94%/6% |
-| GAS | **StatLine** | `gas_mean/sd` from params |
-| ELEK | **StatLine** | `elek_mean/sd` from params |
+| STADSW | **StatLine** | 85140NED share per dwelling type and construction year |
+| GAS | **StatLine** | GASSJV scaled to the actual national mean (81528NED) |
+| GASSJV | **StatLine** | 85140NED means per characteristic and percentiles; zero for district heating and all-electric dwellings |
+| ELEK | **StatLine** | 85140NED means per characteristic and by solar panels, percentiles |
+| ELEKTERUG | **StatLine** | Dwellings with panels only, proportional to capacity, mean from 85140NED |
+| ELEKNETTO | Derived | ELEK - ELEKTERUG |
 | GASBRON | Codelist | Hardcoded probs |
 | ELEKBRON | Codelist | Hardcoded probs |
-| ELEKTERUG | Random numeric | Hardcoded mean/sd |
-| ELEKNETTO | Random numeric | Hardcoded mean/sd |
-| GASSJV | Random numeric | Hardcoded mean/sd |
-| WARMTESCHATTING | Random numeric | Hardcoded mean/sd |
-| ZONPV | **StatLine** | `solar_pv_share` from params |
-| ZONVERMOGEN1JAN | Random numeric | Hardcoded mean/sd |
-| ZONVERMOGEN31DEC | Random numeric | Hardcoded mean/sd |
+| WARMTESCHATTING | Derived | Gas-equivalent heat of district-heating dwellings (GJ) |
+| ZONPV | **StatLine** | 85140NED share per dwelling type, floor area, occupants |
+| ZONVERMOGEN1JAN, ZONVERMOGEN31DEC | Derived | Lognormal around 4 kWp, larger on larger dwellings |
 | ZONPVBRON | Codelist | Hardcoded probs |
-| HOOFDVERWARMING31DEC | Codelist | Hardcoded probs |
+| HOOFDVERWARMING31DEC, KBHOOFDVERWARMING31DEC | Derived | District heating without gas, all-electric, block or individual CV |
 | WONINGBEWONING10PROFIELEN | Codelist | Hardcoded probs |
-| KBHOOFDVERWARMING31DEC | Codelist | Hardcoded probs |
 
 #### ENERGIEVERBRUIKMAAND (monthly smart meter, 18 columns)
 
-Monthly gas and electricity readings from smart meters, with delivery and
-return flows. All monthly columns are random numeric with hardcoded parameters.
+The annual gas, electricity delivery and feed-in of ENERGIEVERBRUIKTAB spread
+over the months with fixed seasonal profiles, and over the high and low
+tariff with fixed shares, so the months add up to the annual values.
 
 
 ### Zonnestroominstallaties (1 file, 28 columns)

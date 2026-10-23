@@ -215,33 +215,9 @@ rdw_update_params <- function(years = 2019:2025,
         yr_data$gewicht_sd <- round(sqrt(sum(wt_props * (wt_midpoints -
                                     yr_data$gewicht_mean)^2)))
 
-        # Construction year distribution from per-Bouwjaar rows
-        bj_rows <- t237[!grepl("^T|^A044145", trimws(t237$Bouwjaar)), ]
-        if (nrow(bj_rows) > 0L) {
-          bj_n <- as.numeric(bj_rows$TotaalNederland_1)
-          bj_n[is.na(bj_n)] <- 0
-          # Get bouwjaar labels from CBS metadata
-          bj_labels <- tryCatch({
-            meta <- cbsodataR::cbs_get_meta("85237NED")
-            bj_dim <- meta$Bouwjaar
-            codes <- trimws(bj_rows$Bouwjaar)
-            matched <- bj_dim$Title[match(codes, trimws(bj_dim$Key))]
-            # Extract 4-digit year from title like "Bouwjaar 2015"
-            yrs <- as.integer(gsub(".*?(\\d{4}).*", "\\1", matched))
-            yrs
-          }, error = function(e) NULL)
-
-          if (!is.null(bj_labels) && !all(is.na(bj_labels))) {
-            keep <- !is.na(bj_labels) & bj_n > 0
-            bj_n <- bj_n[keep]
-            bj_labels <- bj_labels[keep]
-            # Aggregate into 5-year bins for compact YAML
-            bins <- as.character(bj_labels - (bj_labels %% 5L))
-            agg <- tapply(bj_n, bins, sum)
-            agg_p <- round(agg / sum(agg), 4)
-            yr_data$bouwjaar_p <- as.list(agg_p)
-          }
-        }
+        # Construction year distribution (single years)
+        bj_p <- .rdw_bouwjaar_p(t237)
+        if (!is.null(bj_p)) yr_data$bouwjaar_p <- bj_p
 
         n_pers_auto <- as.integer(row$TotaalNederland_1)
       }
@@ -319,6 +295,7 @@ rdw_update_params <- function(years = 2019:2025,
 
   # Sort and write YAML
   all_params <- all_params[order(as.integer(names(all_params)))]
+  all_params <- .rdw_backcast_bouwjaar(all_params)
   dir.create(config_dir, recursive = TRUE, showWarnings = FALSE)
   yaml::write_yaml(all_params, yaml_path)
   cat(sprintf("Written rdw params.yaml (%d years)\n", length(all_params)))
@@ -385,4 +362,46 @@ rdw_update_params <- function(years = 2019:2025,
   cat(sprintf("Written gem_vehicle_weights.csv (%d rows)\n", nrow(gw_all)))
 
   invisible(all_params)
+}
+
+
+# Construction-year distribution from one period of 85237NED. The Bouwjaar
+# dimension holds the national total, decade groups ("Bouwjaren 2000 tot
+# 2010") and single years ("Bouwjaar 2015"); only the single years are used,
+# otherwise every car is counted twice. Returns a named list (year -> share)
+# or NULL when no single-year rows are found.
+.rdw_bouwjaar_p <- function(t237) {
+  meta <- cbsodataR::cbs_get_meta("85237NED")
+  bj_dim <- meta$Bouwjaar
+  titles <- trimws(bj_dim$Title[match(trimws(t237$Bouwjaar), trimws(bj_dim$Key))])
+  single <- grepl("^Bouwjaar \\d{4}$", titles)
+  if (!any(single)) return(NULL)
+
+  bj <- data.table::data.table(
+    jaar = as.integer(sub("Bouwjaar ", "", titles[single])),
+    n    = as.numeric(t237$Totaal_14[single])
+  )
+  bj <- bj[!is.na(n) & n > 0]
+  bj[, p := round(n / sum(n), 5)]
+  bj <- bj[p > 0]
+  stats::setNames(as.list(bj$p), as.character(bj$jaar))
+}
+
+# 85237NED starts in 2019. Years without a construction-year distribution get
+# the one of the earliest year that has it, restricted to construction years
+# before that year and renormalised. This ignores scrappage between the two
+# years, so older cars are slightly underrepresented.
+.rdw_backcast_bouwjaar <- function(all_params) {
+  has_bj <- names(all_params)[vapply(all_params,
+    function(x) !is.null(x$bouwjaar_p), logical(1L))]
+  if (length(has_bj) == 0L) return(all_params)
+  ref_year <- min(as.integer(has_bj))
+  ref_p <- unlist(all_params[[as.character(ref_year)]]$bouwjaar_p)
+
+  for (yr in setdiff(names(all_params), has_bj)) {
+    if (as.integer(yr) > ref_year) next
+    p <- ref_p[as.integer(names(ref_p)) < as.integer(yr)]
+    all_params[[yr]]$bouwjaar_p <- as.list(round(p / sum(p), 5))
+  }
+  all_params
 }

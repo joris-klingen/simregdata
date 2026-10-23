@@ -138,6 +138,12 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         ds_spine$pers <- .build_secm_periods(
           sampled_pers, year = year, seed = seed, params = ds_params)
 
+      } else if (identical(dataset, "inhatab")) {
+        # INHATAB: one row per household (key RINPERSOONHKW) with at least
+        # one member present in the year, carrying the household income
+        # drawn on the spine so it matches woonbase (R/params_inhatab.R)
+        ds_spine$pers <- .build_inhatab_households(spine)
+
       } else if (identical(dataset, "betab")) {
         # BETAB: generate unique business IDs
         # Try to reuse BEIDs from SPOLIS if available
@@ -287,6 +293,20 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           ds_spine$pers[, RINPERSOONHKW := .rand_id(nrow(ds_spine$pers), 9L)]
         }
       }
+
+      # Yearly registers only hold persons who belong to this year's
+      # population. The shared spine also carries persons who are born,
+      # immigrate, die or emigrate in other years (R/demographics.R). Records
+      # are drawn from the full spine, so draws stay stable across years, and
+      # records of absent persons are dropped afterwards; this also scales the
+      # record count to the population present. Network datasets keep their
+      # year-invariant relations and BETAB has no person sample.
+      if (!is.null(spine$pers_present) &&
+          !(dataset %in% c(.NETWERK_DATASETS, "betab")) &&
+          "RINPERSOON" %in% names(ds_spine$pers)) {
+        present_ids <- spine$pers$RINPERSOON[spine$pers_present]
+        ds_spine$pers <- ds_spine$pers[RINPERSOON %in% present_ids]
+      }
     }
 
     # Household-level spine: copy shared HH table directly
@@ -304,6 +324,13 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
       if (length(obj_cols) == 0L) obj_cols <- "RINOBJECTNUMMER"
       obj_tbl <- spine$obj_raw %||% spine$obj
       ds_spine$obj <- obj_tbl[, ..obj_cols]
+      if (!"RINOBJECTNUMMER" %in% obj_cols) {
+        ds_spine$obj[, RINOBJECTNUMMER := obj_tbl$RINOBJECTNUMMER]
+      }
+      # Energy use per dwelling from its characteristics (R/energy.R)
+      if (identical(dataset, "energieverbruik")) {
+        ds_spine$obj <- .build_energy(ds_spine$obj, spine, year)
+      }
     }
 
     .sim_cache[[paste0("spine_", dataset)]] <- ds_spine

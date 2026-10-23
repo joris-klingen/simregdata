@@ -48,7 +48,7 @@ test_that("HOOGSTEOPLTAB generates valid education data", {
   sim_init("hoogsteopltab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("HOOGSTEOPL2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 16L)
+  check_tibble(dt, min_rows = 150L, min_cols = 16L)
 
   # Required columns present
   expect_true("RINPERSOON" %in% names(dt))
@@ -78,7 +78,7 @@ test_that("INPATAB generates valid personal income data", {
   sim_init("inpatab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("INPA2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+  check_tibble(dt, min_rows = 150L, min_cols = 25L)
 
   # Key columns
   expect_true("RINPERSOON" %in% names(dt))
@@ -141,7 +141,9 @@ test_that("INHATAB generates valid household income data", {
   sim_init("inhatab", year = 2023L, n = 200L, seed = 42L)
   dt <- read_sav("INHA2023TABV1")
 
-  check_tibble(dt, min_rows = 200L, min_cols = 25L)
+  # one row per household
+  check_tibble(dt, min_rows = 50L, min_cols = 25L)
+  expect_equal(anyDuplicated(dt$RINPERSOONHKW), 0L)
 
   # Key columns
   expect_true("RINPERSOONSHKW" %in% names(dt))
@@ -156,6 +158,40 @@ test_that("INHATAB generates valid household income data", {
   # All HKW prefixes are "R"
   hkw_vals <- as.integer(dt$RINPERSOONSHKW)
   expect_true(all(hkw_vals == 1L, na.rm = TRUE))
+})
+
+test_that("INHATAB income matches woonbase and its percentiles", {
+  sim_reset()
+  sim_init("woonbase", year = 2023L, n = 5000L, seed = 42L)
+  sim_init("inhatab", year = 2023L, seed = 43L)
+  sim_init("inpatab", year = 2023L, seed = 44L)
+  inha <- data.table::as.data.table(read_sav("INHA2023TABV1"))
+  inpa <- data.table::as.data.table(read_sav("INPA2023TABV1",
+    col_select = c(RINPERSOON, RINPERSOONHKW)))
+  pers <- data.table::as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
+    col_select = c(RINPERSOON, HUISHOUDNR1Jan)))
+  hh <- data.table::as.data.table(read_sav("WoonbasePopulatieHuishoudens2023V1",
+    col_select = c(RINPERSOON, HUISHOUDNR1Jan)))
+  wv <- data.table::as.data.table(read_sav("WOONBASEEKHuishoudensWV2023V1",
+    col_select = c(RINPERSOON, BESTINKH1JAN)))
+
+  # every INPATAB household key is in INHATAB
+  expect_true(all(inpa$RINPERSOONHKW %in% inha$RINPERSOONHKW))
+
+  # same disposable income as woonbase for the same household
+  inpa[pers, on = "RINPERSOON", HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
+  hh[wv, on = "RINPERSOON", BESTINKH := as.numeric(i.BESTINKH1JAN)]
+  inha[unique(inpa, by = "RINPERSOONHKW"), on = "RINPERSOONHKW",
+       HUISHOUDNR1Jan := i.HUISHOUDNR1Jan]
+  inha[hh, on = "HUISHOUDNR1Jan", wb := i.BESTINKH]
+  expect_equal(as.numeric(inha$INHBESTINKH[!is.na(inha$wb)]),
+               inha$wb[!is.na(inha$wb)])
+
+  # percentile is the rank of the income
+  expect_gt(stats::cor(as.numeric(inha$INHP100HBEST),
+                       as.numeric(inha$INHBESTINKH), method = "spearman"), 0.99)
+  # gross income is never below disposable income
+  expect_true(all(inha$INHBRUTINKH >= inha$INHBESTINKH))
 })
 
 
@@ -724,7 +760,7 @@ test_that("sim_register creates a working person-keyed dataset", {
   sim_init("test_survey", year = 2023L, n = 100L, seed = 42L)
   dt <- read_sav("test_survey2023V1")
 
-  check_tibble(dt, min_rows = 100L, min_cols = 6L)
+  check_tibble(dt, min_rows = 75L, min_cols = 6L)
 
   # Key columns auto-added
   expect_true("RINPERSOON" %in% names(dt))

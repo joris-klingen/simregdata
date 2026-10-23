@@ -21,37 +21,20 @@ columns:
   - name: WOONR
     value: " "
 
-  # ---- District heating ----
+  # ---- District heating (85140NED share per dwelling type and construction year) ----
   - name: STADSW
-    random_categorical:
-      values: ["0", "1"]
-      probs:  [0.94, 0.06]
-      from_params: stadsverwarming_categorical
+    source: spine.obj.STADSW
     codelist: STADSW
     label: Stadsverwarming aanwezig
 
-  # ---- Gas consumption (m3) ----
+  # ---- Gas delivery in m3 (dwelling characteristics, 85140NED; level 81528NED) ----
   - name: GAS
-    random_numeric:
-      distribution: normal
-      mean: 1050
-      sd: 600
-      mean_from_params: gas_mean
-      sd_from_params: gas_sd
-      min: 0
-      round: 0
+    source: spine.obj.GAS
     label: Gaslevering in m3
 
-  # ---- Electricity consumption (kWh) ----
+  # ---- Electricity delivery in kWh (dwelling characteristics and solar panels, 85140NED) ----
   - name: ELEK
-    random_numeric:
-      distribution: normal
-      mean: 2850
-      sd: 1300
-      mean_from_params: elek_mean
-      sd_from_params: elek_sd
-      min: 0
-      round: 0
+    source: spine.obj.ELEK
     label: Elektriciteitsverbruik in kWh
 
   # ---- Gas determination method ----
@@ -70,72 +53,39 @@ columns:
     codelist: ELEKBRON
     label: Bepalingsmethode elektriciteitslevering
 
-  # ---- Electricity fed back to grid (kWh) ----
+  # ---- Electricity fed back to the grid in kWh (dwellings with solar panels only) ----
   - name: ELEKTERUG
-    random_numeric:
-      distribution: normal
-      mean: 500
-      sd: 1200
-      min: 0
-      round: 0
+    source: spine.obj.ELEKTERUG
     label: Teruglevering elektriciteit in kWh
 
-  # ---- Net electricity (kWh) ----
+  # ---- Net electricity in kWh (ELEK - ELEKTERUG) ----
   - name: ELEKNETTO
-    random_numeric:
-      distribution: normal
-      mean: 2400
-      sd: 1200
-      min: 0
-      round: 0
+    source: spine.obj.ELEKNETTO
     label: Netto elektriciteitslevering in kWh
 
-  # ---- Standard annual gas consumption (temp-corrected, m3) ----
+  # ---- Standard annual gas use, temperature corrected, in m3 ----
   - name: GASSJV
-    random_numeric:
-      distribution: normal
-      mean: 1100
-      sd: 620
-      min: 0
-      round: 0
+    source: spine.obj.GASSJV
     label: Standaard jaarverbruik aardgas in m3
 
-  # ---- Estimated heat supply (GJ) ----
+  # ---- Estimated heat supply in GJ (district heating only) ----
   - name: WARMTESCHATTING
-    random_numeric:
-      distribution: normal
-      mean: 35
-      sd: 20
-      min: 0
-      round: 0
+    source: spine.obj.WARMTESCHATTING
     label: Inschatting warmtelevering in GJ
 
-  # ---- Solar PV present ----
+  # ---- Solar panels present (85140NED share per dwelling type, floor area, occupants) ----
   - name: ZONPV
-    random_categorical:
-      values: ["0", "1"]
-      probs:  [0.68, 0.32]
-      from_params: solar_pv_categorical
+    source: spine.obj.ZONPV
     codelist: ZONPV
     label: Aanwezigheid zonnestroominstallatie
 
   # ---- Solar PV capacity (kWp) ----
   - name: ZONVERMOGEN1JAN
-    random_numeric:
-      distribution: normal
-      mean: 2.5
-      sd: 3.0
-      min: 0
-      round: 3
+    source: spine.obj.ZONVERMOGEN1JAN
     label: Zonvermogen op 1 januari in kWp
 
   - name: ZONVERMOGEN31DEC
-    random_numeric:
-      distribution: normal
-      mean: 2.8
-      sd: 3.2
-      min: 0
-      round: 3
+    source: spine.obj.ZONVERMOGEN31DEC
     label: Zonvermogen op 31 december in kWp
 
   # ---- Solar PV source ----
@@ -146,11 +96,9 @@ columns:
     codelist: ZONPVBRON
     label: Bron waarop ZONPV is gebaseerd
 
-  # ---- Main heating type ----
+  # ---- Main heating type (district heating, all-electric or central heating) ----
   - name: HOOFDVERWARMING31DEC
-    random_categorical:
-      values: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-      probs:  [0.82, 0.02, 0.02, 0.01, 0.02, 0.01, 0.02, 0.04, 0.04]
+    source: spine.obj.HOOFDVERWARMING31DEC
     codelist: HOOFDVERWARMING31DEC
     label: Hoofdverwarmingstype
 
@@ -162,10 +110,8 @@ columns:
     codelist: WONINGBEWONING10PROFIELEN
     label: Woningbewoning 10 profielen
 
-  # ---- Main heating type (new method, from 2022) ----
   - name: KBHOOFDVERWARMING31DEC
-    random_categorical:
-      values: ["01", "02", "03", "04", "05", "06", "07", "08", "09"]
-      probs:  [0.80, 0.02, 0.01, 0.02, 0.02, 0.01, 0.02, 0.05, 0.05]
+    source: spine.obj.KBHOOFDVERWARMING31DEC
     codelist: KBHOOFDVERWARMING31DEC
     label: Hoofdverwarmingstype (KB-methode)
+

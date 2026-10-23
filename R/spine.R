@@ -16,40 +16,136 @@
 # Minimum observations per gemeente ----
 .MIN_PER_GEM <- 10L
 
-# Stratified gemeente assignment: guarantee a floor per gemeente, then
-# distribute remaining objects proportionally.
-.rcat_gem_floor <- function(n, codes, probs, floor = .MIN_PER_GEM) {
-  n_gem <- length(codes)
-  total_floor <- as.integer(n_gem) * floor
-  if (total_floor >= n) {
-    # Not enough objects: allocate proportionally but at least 1 each
-    counts <- pmax(1L, round(probs * n))
-    # Adjust to hit exactly n
-    diff <- n - sum(counts)
-    if (diff != 0L) {
-      idx <- order(probs, decreasing = (diff > 0L))
-      for (i in idx) {
-        counts[i] <- counts[i] + sign(diff)
-        if (sum(counts) == n) break
-      }
-    }
-  } else {
-    # Floor per gemeente + proportional remainder
-    remainder <- n - total_floor
-    extra <- round(probs * remainder)
-    diff <- remainder - sum(extra)
-    if (diff != 0L) {
-      idx <- order(probs, decreasing = (diff > 0L))
-      for (i in idx) {
-        extra[i] <- extra[i] + sign(diff)
-        if (sum(extra) == remainder) break
-      }
-    }
-    counts <- floor + extra
-  }
-  rep(codes, times = counts)[sample.int(n)]
+# Categorical by inverse CDF of per-object uniforms `u` (stable counterpart of
+# .rcat)
+.qcat <- function(u, cats, probs) {
+  cum <- cumsum(probs / sum(probs))
+  cats[pmin(findInterval(u, cum) + 1L, length(cats))]
 }
 
+# Construction-year classes (BOUWJAARKLASSE codes 1-15) and their year
+# bounds; the open first and last classes are closed at 1850 and 2040
+.BOUWJAAR_LOWER <- c(1850L, 1905L, 1925L, 1945L, 1955L, 1965L, 1975L, 1985L,
+                     1995L, 2005L, 2015L, 2020L, 2025L, 2030L, 2035L)
+.BOUWJAAR_UPPER <- c(.BOUWJAAR_LOWER[-1L], 2040L)
+
+# Floor-area classes (OPPKLASSE codes 1-6) and their bounds in m2; the open
+# classes are closed at 15 and 400 m2
+.OPP_LOWER <- c(15L, 50L, 75L, 100L, 150L, 250L)
+.OPP_UPPER <- c(.OPP_LOWER[-1L], 400L)
+
+# Floor-area class shares per dwelling type (rows: VBOWoningType codes,
+# columns: OPPKLASSE 1-6). A starting pattern only: .opp_given_type() adjusts
+# it so that, combined with the dwelling-type shares, the national floor-area
+# shares (opp_p) are reproduced.
+.OPP_BY_TYPE <- rbind(
+  "00" = c(0.01, 0.05, 0.25, 0.48, 0.18, 0.03),
+  "01" = c(0.00, 0.02, 0.06, 0.30, 0.45, 0.17),
+  "02" = c(0.00, 0.02, 0.10, 0.45, 0.38, 0.05),
+  "03" = c(0.01, 0.05, 0.25, 0.50, 0.17, 0.02),
+  "04" = c(0.01, 0.06, 0.30, 0.50, 0.12, 0.01),
+  "05" = c(0.20, 0.40, 0.28, 0.10, 0.02, 0.00),
+  "99" = c(0.08, 0.23, 0.26, 0.22, 0.15, 0.06)
+)
+
+# Floor-area class probabilities given dwelling type: iterative proportional
+# fitting of the joint table (type share x .OPP_BY_TYPE) to the type shares
+# and the national floor-area shares
+.opp_given_type <- function(type_p, opp_p, iter = 100L) {
+  types <- intersect(names(type_p), rownames(.OPP_BY_TYPE))
+  joint <- .OPP_BY_TYPE[types, , drop = FALSE] * as.numeric(type_p[types]) + 1e-6
+  type_t <- as.numeric(type_p[types]) / sum(type_p[types])
+  opp_t <- as.numeric(opp_p) / sum(opp_p)
+  for (it in seq_len(iter)) {
+    joint <- joint * (type_t / rowSums(joint))
+    joint <- t(t(joint) * (opp_t / colSums(joint)))
+  }
+  joint / rowSums(joint)
+}
+
+# Value by inverse CDF of a piecewise-uniform distribution over classes with
+# shares `p` and bounds `lower`/`upper`
+.qclass_value <- function(u, p, lower, upper) {
+  p <- p / sum(p)
+  cum <- c(0, cumsum(p))
+  k <- pmin(findInterval(u, cum), length(p))
+  frac <- (u - cum[k]) / p[k]
+  as.integer(floor(lower[k] + frac * (upper[k] - lower[k])))
+}
+
+# Construction year per dwelling, stable across simulation years: drawn from
+# the stock distribution over the construction-year classes (bouwjaar_p). The
+# objects are the same in every simulation year, so a dwelling whose year lies
+# after the simulation year stands in for an older one: it gets a year from
+# the stock built up to .BOUWJAAR_REMAP_YEAR (same uniform, rescaled), which
+# keeps its year identical in every simulation year from then on. For earlier
+# simulation years the cut-off is the simulation year itself.
+.BOUWJAAR_REMAP_YEAR <- 2010L
+
+.stable_bouwjaar <- function(u, p, year) {
+  p <- p / sum(p)
+  b <- .qclass_value(u, p, .BOUWJAAR_LOWER, .BOUWJAAR_UPPER)
+  late <- b > year
+  if (any(late)) {
+    # share of the stock built up to and including `cutoff`
+    cutoff <- min(year, .BOUWJAAR_REMAP_YEAR)
+    cum <- c(0, cumsum(p))
+    k <- findInterval(cutoff + 1L, .BOUWJAAR_LOWER)
+    f_cut <- cum[k] + p[k] * (cutoff + 1L - .BOUWJAAR_LOWER[k]) /
+      (.BOUWJAAR_UPPER[k] - .BOUWJAAR_LOWER[k])
+    b[late] <- pmin(.qclass_value(u[late] * f_cut, p, .BOUWJAAR_LOWER, .BOUWJAAR_UPPER),
+                    cutoff)
+  }
+  b
+}
+
+# Gemeente per object, stable across simulation years: weighted rendezvous
+# hashing. Each object takes the gemeente with the lowest -log(h) / p, where
+# h hashes the (object, gemeente) pair, which draws gemeenten in proportion to
+# p. A change in the shares or a gemeente merger only moves objects into or
+# out of the gemeenten concerned; a cumulative (inverse-CDF) allocation would
+# shift every gemeente after the change. To keep the cost at about
+# N x (32 + G / 32) hashes, gemeenten are grouped into 32 fixed buckets by
+# their code and the same rendezvous picks the bucket first. Shares are raised
+# to at least min_n / N so small gemeenten keep about `min_n` objects in
+# small samples.
+.stable_gemeente <- function(obj_id, codes, probs, min_n = .MIN_PER_GEM,
+                             n_buckets = 32L) {
+  n <- length(obj_id)
+  probs <- pmax(probs / sum(probs), min_n / n)
+  probs <- probs / sum(probs)
+  bucket <- 1L + as.integer(floor(.hash_to_uniform(codes, "gem_bucket") * n_buckets))
+  w_bucket <- vapply(seq_len(n_buckets), function(b) sum(probs[bucket == b]), numeric(1L))
+  obj_bucket <- .rendezvous(obj_id, seq_len(n_buckets), w_bucket, "obj_gem_bucket")
+
+  code_num <- .hash_id_num(codes)
+  out <- character(n)
+  for (b in unique(obj_bucket)) {
+    idx <- which(obj_bucket == b)
+    g <- which(bucket == b)
+    out[idx] <- codes[g][.rendezvous(obj_id[idx], code_num[g], probs[g], "obj_gem")]
+  }
+  out
+}
+
+# Weighted rendezvous: for each object the index of the candidate with the
+# lowest -log(h) / weight, h hashing the (object, candidate key) pair
+.rendezvous <- function(obj_id, keys, weights, salt) {
+  mod <- 2147483647
+  obj_h <- floor(.hash_mix(obj_id, salt) * mod)
+  key_h <- floor(.hash_mix(as.double(keys), paste0(salt, "_key")) * mod)
+  best <- rep(Inf, length(obj_id))
+  pick <- integer(length(obj_id))
+  for (j in seq_along(keys)) {
+    if (weights[j] <= 0) next
+    h <- .hash_pair(obj_h, key_h[j])
+    score <- -log(h) / weights[j]
+    better <- score < best
+    best[better] <- score[better]
+    pick[better] <- j
+  }
+  pick
+}
 
 # Gemeente-conditional categorical sampling ----
 # Adjusts one target category's probability per gemeente while preserving
@@ -61,9 +157,12 @@
 #   (e.g., apartment share per gemeente). NULL falls back to national i.i.d.
 # @param target_cat Name of the category to adjust (e.g., "05" for apartments).
 # @return Character vector of length n.
-.rcat_gem_adjusted <- function(n, gem, base_p, gem_target, target_cat) {
+.rcat_gem_adjusted <- function(n, gem, base_p, gem_target, target_cat, u = NULL) {
+  draw <- function(idx, p) {
+    if (is.null(u)) .rcat(length(idx), names(p), p) else .qcat(u[idx], names(p), p)
+  }
   if (is.null(gem_target)) {
-    return(.rcat(n, names(base_p), base_p))
+    return(draw(seq_len(n), base_p))
   }
 
   cat_names <- names(base_p)
@@ -82,7 +181,7 @@
     local_p <- base_p
     local_p[[target_cat]] <- local_share
     local_p[cat_names != target_cat] <- nat_other * ((1 - local_share) / other_sum)
-    result[mask] <- .rcat(n_g, cat_names, local_p)
+    result[mask] <- draw(mask, local_p)
   }
   result
 }
@@ -214,55 +313,82 @@
   # each simulation year, but persons themselves are stable.
   set.seed(seed + year * 1000L)
 
-  # ---- Object attributes (year-varying) ----
+  # ---- Object attributes (stable per dwelling) ----
   woz_sd <- 0.45
 
-  for (sfx in c("1Jan","31Dec")) {
-    gem <- .rcat_gem_floor(N_OBJ, params$gem_codes, params$gem_probs)
-    data.table::set(dt_obj, j = paste0("GemeenteCodeJJJJ",       sfx), value = gem)
-    data.table::set(dt_obj, j = paste0("WijkCodeJJJJ",           sfx), value = paste0(gem, sprintf("%02d", sample(1:20, N_OBJ, replace=TRUE))))
-    data.table::set(dt_obj, j = paste0("BuurtCodeJJJJ",          sfx), value = paste0(gem, sprintf("%04d", sample(1:200,N_OBJ, replace=TRUE))))
-    data.table::set(dt_obj, j = paste0("VSLSoort",               sfx), value = .rcat(N_OBJ, names(params$vslsoort_p),  params$vslsoort_p))
-    data.table::set(dt_obj, j = paste0("VBOBouwJaarKlasse",      sfx), value = .rcat(N_OBJ, as.character(1:15),        params$bouwjaar_p))
-    data.table::set(dt_obj, j = paste0("VBOOppervlakteKlasse",   sfx), value = .rcat(N_OBJ, names(params$opp_p),       params$opp_p))
+  # Dwelling attributes are drawn from per-dwelling uniforms (hashes of
+  # RINOBJECTNUMMER) through this year's distributions, so a dwelling keeps its
+  # attributes on 1 January and 31 December and, as far as the distributions
+  # allow, across simulation years. Classes are derived from the values.
+  obj_id <- .hash_id_num(dt_obj$RINOBJECTNUMMER)
+  u_obj <- function(salt) .hash_mix(obj_id, paste0("obj_", salt))
 
-    # VBOWoningType: gemeente-conditional apartment share
-    data.table::set(dt_obj, j = paste0("VBOWoningType", sfx),
-      value = .rcat_gem_adjusted(N_OBJ, gem, params$woningtype_p,
-                                 params$gem_pct_apartment, "05"))
+  gem <- .stable_gemeente(obj_id, params$gem_codes, params$gem_probs)
+  wijk <- paste0(gem, sprintf("%02d", 1L + floor(u_obj("wijk") * 20)))
+  buurt <- paste0(gem, sprintf("%04d", 1L + floor(u_obj("buurt") * 200)))
+  vslsoort <- .qcat(u_obj("vslsoort"), names(params$vslsoort_p), params$vslsoort_p)
 
-    # TypeEigenaar: gemeente-conditional owner-occupied share
-    data.table::set(dt_obj, j = paste0("TypeEigenaar", sfx),
-      value = .rcat_gem_adjusted(N_OBJ, gem, params$eigenaar_p,
-                                 params$gem_pct_owner, "E"))
-    data.table::set(dt_obj, j = paste0("VBOBouwjaar",            sfx), value = sample(1850L:year, N_OBJ, replace=TRUE))
-    opp_vec <- as.integer(pmax(15L, round(stats::rlnorm(N_OBJ, log(85), 0.45))))
-    data.table::set(dt_obj, j = paste0("VBOOppervlakte",         sfx), value = opp_vec)
+  # VBOWoningType and TypeEigenaar: gemeente-conditional apartment and
+  # owner-occupied shares
+  woningtype <- .rcat_gem_adjusted(N_OBJ, gem, params$woningtype_p,
+    params$gem_pct_apartment, "05", u = u_obj("woningtype"))
+  eigenaar <- .rcat_gem_adjusted(N_OBJ, gem, params$eigenaar_p,
+    params$gem_pct_owner, "E", u = u_obj("eigenaar"))
 
-    # WOZ: per-municipality mean from StatLine, conditional on dwelling size
-    if (!is.null(params$woz_gem_means)) {
-      woz_mean <- params$woz_gem_means[gem]
-      woz_mean[is.na(woz_mean)] <- params$woz_national_mean
-      woz_mu <- log(woz_mean) - woz_sd^2 / 2
-    } else {
-      woz_mu <- rep(log(params$woz_national_mean) - woz_sd^2 / 2, N_OBJ)
-    }
-    woz_mu <- woz_mu + 0.8 * log(opp_vec / 85)
-    woz_val <- round(stats::rlnorm(N_OBJ, woz_mu, woz_sd * 0.7), -3L)
-    data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAG",      sfx), value = woz_val)
-    data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAGKlasse", sfx), value = .woz_to_klasse(woz_val))
+  bouwjaar <- .stable_bouwjaar(u_obj("bouwjaar"), params$bouwjaar_p, year)
+  bouwjaar_klasse <- as.character(findInterval(bouwjaar, .BOUWJAAR_LOWER))
+  # floor area conditional on dwelling type (apartments smaller, detached
+  # houses larger), national class shares as in opp_p
+  opp_p <- params$opp_p[names(params$opp_p) != "9"]
+  opp_cond <- .opp_given_type(params$woningtype_p, opp_p)
+  u_opp <- u_obj("oppervlakte")
+  opp_vec <- integer(N_OBJ)
+  for (tp in unique(woningtype)) {
+    idx <- which(woningtype == tp)
+    p_tp <- if (tp %in% rownames(opp_cond)) opp_cond[tp, ] else opp_p
+    opp_vec[idx] <- .qclass_value(u_opp[idx], p_tp, .OPP_LOWER, .OPP_UPPER)
+  }
+  opp_klasse <- as.character(findInterval(opp_vec, .OPP_LOWER))
 
-    data.table::set(dt_obj, j = paste0("VBOStatus",              sfx), value = .rcat(N_OBJ, c("3","4","6"), c(0.10,0.85,0.05)))
-    data.table::set(dt_obj, j = paste0("Indicator_VBOIsNieuwbouw",sfx),value = .rcat(N_OBJ, c("-","0","1"), c(0.01,0.96,0.03)))
-    data.table::set(dt_obj, j = paste0("Indicator_VBOIsAanwezig", sfx),value = .rcat(N_OBJ, c("0","1"), c(0.02,0.98)))
-    data.table::set(dt_obj, j = paste0("Indicator_VSLIsAanwezig", sfx),value = "1")
+  # WOZ: per-municipality mean from StatLine, conditional on dwelling size
+  if (!is.null(params$woz_gem_means)) {
+    woz_mean <- params$woz_gem_means[gem]
+    woz_mean[is.na(woz_mean)] <- params$woz_national_mean
+    woz_mu <- log(woz_mean) - woz_sd^2 / 2
+  } else {
+    woz_mu <- rep(log(params$woz_national_mean) - woz_sd^2 / 2, N_OBJ)
+  }
+  woz_mu <- woz_mu + 0.8 * log(opp_vec / 85)
+  woz_val <- round(stats::qlnorm(u_obj("woz"), woz_mu, woz_sd * 0.7), -3L)
+
+  vbostatus <- .qcat(u_obj("vbostatus"), c("3", "4", "6"), c(0.10, 0.85, 0.05))
+  aanwezig <- .qcat(u_obj("aanwezig"), c("0", "1"), c(0.02, 0.98))
+  nieuwbouw <- data.table::fifelse(bouwjaar == year, "1", "0")
+
+  for (sfx in c("1Jan", "31Dec")) {
+    data.table::set(dt_obj, j = paste0("GemeenteCodeJJJJ",          sfx), value = gem)
+    data.table::set(dt_obj, j = paste0("WijkCodeJJJJ",              sfx), value = wijk)
+    data.table::set(dt_obj, j = paste0("BuurtCodeJJJJ",             sfx), value = buurt)
+    data.table::set(dt_obj, j = paste0("VSLSoort",                  sfx), value = vslsoort)
+    data.table::set(dt_obj, j = paste0("VBOBouwJaarKlasse",         sfx), value = bouwjaar_klasse)
+    data.table::set(dt_obj, j = paste0("VBOOppervlakteKlasse",      sfx), value = opp_klasse)
+    data.table::set(dt_obj, j = paste0("VBOWoningType",             sfx), value = woningtype)
+    data.table::set(dt_obj, j = paste0("TypeEigenaar",              sfx), value = eigenaar)
+    data.table::set(dt_obj, j = paste0("VBOBouwjaar",               sfx), value = bouwjaar)
+    data.table::set(dt_obj, j = paste0("VBOOppervlakte",            sfx), value = opp_vec)
+    data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAG",        sfx), value = woz_val)
+    data.table::set(dt_obj, j = paste0("WOZWaardeObjectBAGKlasse",  sfx), value = .woz_to_klasse(woz_val))
+    data.table::set(dt_obj, j = paste0("VBOStatus",                 sfx), value = vbostatus)
+    data.table::set(dt_obj, j = paste0("Indicator_VBOIsNieuwbouw",  sfx), value = nieuwbouw)
+    data.table::set(dt_obj, j = paste0("Indicator_VBOIsAanwezig",   sfx), value = aanwezig)
+    data.table::set(dt_obj, j = paste0("Indicator_VSLIsAanwezig",   sfx), value = "1")
   }
   dt_obj[, PandID1Jan := strrep("9", 16L)]
   dt_obj[VBOWoningType1Jan == "05", PandID1Jan := .rand_id(.N, 16L)]
   dt_obj[, PandID31Dec := PandID1Jan]
   dt_obj[, Indicator_VBOIsGesloopt      := .rcat(.N, c("-","0","1"), c(0.01,0.98,0.01))]
   dt_obj[, Indicator_VBOIsTransformatie := .rcat(.N, c("-","0","1"), c(0.01,0.985,0.005))]
-  dt_obj[, Indicator_VBOIsNieuwbouw     := .rcat(.N, c("-","0","1"), c(0.01,0.96,0.03))]
+  dt_obj[, Indicator_VBOIsNieuwbouw     := nieuwbouw]
   dt_obj[, Indicator_VSLIsOntrokken     := .rcat(.N, c("-","0","1"), c(0.01,0.985,0.005))]
   dt_obj[, Indicator_VSLIsNieuw         := .rcat(.N, c("-","0","1"), c(0.01,0.97,0.02))]
   data.table::setkey(dt_obj, RINOBJECTNUMMER)
@@ -323,17 +449,18 @@
   woz <- dt_obj$WOZWaardeObjectBAG1Jan
   woz_rank <- data.table::frank(woz, ties.method = "random") / (N_HH + 1)
 
-  # BESTINKH: disposable income
-  dt_hh[, BESTINKH := as.integer(pmax(5000L, pmin(250000L, round(
-    stats::qlnorm(woz_rank, meanlog = 10.45, sdlog = 0.45) *
-    exp(stats::rnorm(.N, 0, 0.25)), -2L))))]
+  # Disposable, gross, primary and standardised income: lognormal per
+  # household type (and AOW age of the reference person), calibrated to
+  # StatLine 83932NED and correlated with WOZ (R/params_inhatab.R)
+  ref_age <- dt_pers[dt_pers[, .I[1L], by = HUISHOUDNR]$V1,
+                     .(HUISHOUDNR, age = year - GBAGeboorteJaar)]
+  hh_age <- ref_age$age[match(dt_hh$HUISHOUDNR, ref_age$HUISHOUDNR)]
+  hh_age[is.na(hh_age)] <- 45L
+  inc <- .simulate_hh_income(dt_hh$TYPHH, hh_age, woz_rank, year)
+  for (nm in names(inc)) data.table::set(dt_hh, j = nm, value = inc[[nm]])
 
   # BELIH: taxable income (higher than disposable)
   dt_hh[, BELIH := as.integer(round(BESTINKH * stats::runif(.N, 1.1, 1.4), -2L))]
-
-  # GESTINKH: standardized income (equivalized by HH size)
-  dt_hh[, GESTINKH := as.integer(round(
-    BESTINKH / sqrt(pmax(1L, AantalPersonenPerHuishouden)), -2L))]
 
   # VERMHH: household wealth — correlated with WOZ rank, wider distribution
   verm_rank <- pmax(0.001, pmin(0.999, woz_rank + stats::rnorm(N_HH, 0, 0.15)))
@@ -348,6 +475,10 @@
     data.table::frank(BESTINKH, ties.method = "random") / .N * 100))]
   dt_hh[, P100HGEST := as.integer(ceiling(
     data.table::frank(GESTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HBRUT := as.integer(ceiling(
+    data.table::frank(BRUTINKH, ties.method = "random") / .N * 100))]
+  dt_hh[, P100HPRIM := as.integer(ceiling(
+    data.table::frank(PRIMINKH, ties.method = "random") / .N * 100))]
   dt_hh[, P100HVERM := as.integer(ceiling(
     data.table::frank(VERMHH, ties.method = "random") / .N * 100))]
   dt_hh[, P100WELVAART := as.integer(ceiling(data.table::frank(
