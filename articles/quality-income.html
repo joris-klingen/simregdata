@@ -118,19 +118,19 @@ and <code><a href="../articles/quality-energy.html">vignette("quality-energy")</
 <td>similar</td>
 </tr>
 <tr class="odd">
-<td>Percentile columns</td>
+<td>Percentile columns, including special codes</td>
 <td>yes</td>
-<td>similar, plus special codes</td>
+<td>similar</td>
 </tr>
 <tr class="even">
 <td>Distribution over income classes</td>
-<td>bulk yes, tails too thin</td>
-<td>more households at both ends</td>
+<td>too wide</td>
+<td>more concentrated in the middle</td>
 </tr>
 <tr class="odd">
 <td>Decile means (inequality)</td>
-<td>up to decile 8</td>
-<td>top decile much higher</td>
+<td>deciles 1 to 7</td>
+<td>lower in deciles 8 and 9</td>
 </tr>
 <tr class="even">
 <td>Primary income</td>
@@ -164,6 +164,9 @@ calibrated.</p>
 <span><span class="va">inpa</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"INPA2023TABV1"</span>,</span>
 <span>                               col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINPERSOON</span>, <span class="va">RINPERSOONHKW</span>, <span class="va">INPPERSBESTINK</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">inha</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"INHA2023TABV1"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># percentile codes -1 (unknown income, money fields 9999999999) and</span></span>
+<span><span class="co"># -2 (institutional household) are outside the StatLine population</span></span>
+<span><span class="va">inha</span> <span class="op">&lt;-</span> <span class="va">inha</span><span class="op">[</span><span class="va">INHP100HBEST</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># INHATAB is keyed on RINPERSOONHKW; INPATAB links it to persons, woonbase</span></span>
 <span><span class="co"># links persons to households</span></span>
@@ -192,12 +195,12 @@ calibrated.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Mean disposable income</td>
-<td align="right">59,900</td>
+<td align="right">59,200</td>
 <td align="right">57,600</td>
 </tr>
 <tr class="even">
 <td align="left">Median disposable income</td>
-<td align="right">47,100</td>
+<td align="right">46,700</td>
 <td align="right">44,700</td>
 </tr>
 </tbody>
@@ -215,11 +218,11 @@ capture.</p>
 <code class="sourceCode R"><span><span class="va">sim_dec</span> <span class="op">&lt;-</span> <span class="va">hh</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">inkomen</span><span class="op">)</span>, <span class="fu">.</span><span class="op">(</span>deciel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">.N</span><span class="op">)</span> <span class="op">/</span> <span class="va">.N</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="va">inkomen</span><span class="op">)</span><span class="op">]</span><span class="op">[</span></span>
 <span>  , <span class="fu">.</span><span class="op">(</span>gemiddeld <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">inkomen</span><span class="op">)</span>, bron <span class="op">=</span> <span class="st">"simulatie"</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">deciel</span><span class="op">]</span></span></code></pre></div>
 <p><img src="quality-income_files/figure-html/classes.png" class="r-plt" alt="" width="350px"><img src="quality-income_files/figure-html/deciles.png" class="r-plt" alt="" width="350px"></p>
-<p>The bulk of the distribution matches. The tails are too thin: hardly
-any household falls below 10,000 euro (self-employed with losses,
-students), and the top decile averages 164 thousand euro against 172
-thousand in reality, so inequality measures that weigh the very top come
-out too low.</p>
+<p>The simulated distribution is wider than the real one: too many
+households between 10 and 20 thousand euro and between 100 and 200
+thousand, too few in the middle. The top decile averages 164 thousand
+euro against 172 thousand in reality. Code for classes and deciles runs
+unchanged; expect a more concentrated distribution in Remote Access.</p>
 <p><code>INHP100HBEST</code> is the rank of the household income (rank
 correlation 1.000), so grouping on it gives the same deciles as
 computing the ranks yourself.</p>
@@ -245,8 +248,8 @@ single-person households, in the simulation as in reality.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pers_sum</span> <span class="op">&lt;-</span> <span class="va">inpa</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span>som_personen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">INPPERSBESTINK</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">RINPERSOONHKW</span><span class="op">]</span></span>
 <span><span class="va">pers_sum</span><span class="op">[</span><span class="va">inha</span>, on <span class="op">=</span> <span class="st">"RINPERSOONHKW"</span>, <span class="va">huishouden</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">i.INHBESTINKH</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">pers_sum</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">som_personen</span>, <span class="va">huishouden</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] 0.1828951</span></span></code></pre></div>
+<span><span class="va">pers_sum</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">som_personen</span>, <span class="va">huishouden</span>, use <span class="op">=</span> <span class="st">"complete.obs"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] 0.2755623</span></span></code></pre></div>
 <p>Personal incomes in <code>INPATAB</code> are drawn independently of
 the household, so they do not add up to the household income. Code that
 splits household income over its members runs, but a consistency check
@@ -255,28 +258,15 @@ like the one above only passes on the real data.</p>
 <div class="section level2">
 <h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
 </h2>
-<ul>
-<li>
-<strong>Negative and very low incomes.</strong> Simulated household
-income is at least a few thousand euro; in reality self-employed
-households can have negative disposable income. <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code>,
-ratios to income and classes starting at 0 need a rule for them.</li>
-<li>
-<strong>Special codes.</strong> In comparable CBS files (such as
-VEHTAB) percentile columns use negative codes for unknown income and
-institutional households. Check the INHATAB documentation and exclude
-those codes before averaging or ranking; the simulated percentiles are
-always 1 to 100.</li>
-<li>
-<strong>Losses of persons.</strong> Personal income in
-<code>INPATAB</code> is floored at exactly -50,000 euro here, with no
-floor in reality; don’t build classes around that value.</li>
-<li>
-<strong>Private households.</strong> StatLine covers private
-households only. The filter on <code>TYPHH1Jan</code> above does that
-for the woonbase link; on the real data also check how institutional
-households appear in <code>INHATAB</code> itself.</li>
-</ul>
+<p>The simulated <code>INHATAB</code> has the special values of the real
+file: unknown incomes (9999999999 in money fields, -1 in percentiles),
+institutional households (-2) and negative incomes. The filter on
+<code>INHP100HBEST</code> above removes the first two; without it the
+mean income is off by orders of magnitude. Negative incomes stay in, as
+in StatLine, so <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> or ratios to income need a rule for
+them.</p>
+<p>What still differs is content: the spread of the distribution,
+primary income and the link between personal and household income.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

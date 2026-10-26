@@ -60,7 +60,7 @@ table(as_factor(pers$TYPHH1Jan))
 sim_init("rdw", year = 2023)
 rdw <- read_sav("RDWNPACT2023TABV1", n_max = 5)
 cbs_code(rdw$BRANDSTCODECORVRTG)
-#> [1] "1" "1" "1" "2" "1"
+#> [1] "1" "1" "1" "1" "2"
 ```
 
 ## Joins across files

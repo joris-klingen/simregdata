@@ -442,6 +442,35 @@ all-electric share in new dwellings, block-heating share</td>
 <td>modelling choice</td>
 </tr>
 <tr class="odd">
+<td>Structural shares: vehicles per owner, dropped (3%) and
+business-stock (2%) cars, owner types, non-GBA owners (2%)</td>
+<td><code>R/rdw_vehicles.R</code></td>
+<td>vehicle structure of RDWNPACT and VERKEERSPRESTATIE</td>
+<td>modelling choice</td>
+</tr>
+<tr class="even">
+<td>Households with a loss (1%) or unknown income (1%)</td>
+<td><code>R/params_inhatab.R</code></td>
+<td>negative incomes and special codes in INHATAB (codes from the
+INHATAB documentation)</td>
+<td>modelling choice</td>
+</tr>
+<tr class="odd">
+<td>Vacant dwellings (1.5%), unknown floor area (0.5%) and WOZ (1%)</td>
+<td><code>R/dwellings_vacant.R</code></td>
+<td>dwellings without residents, class 9</td>
+<td>modelling choice</td>
+</tr>
+<tr class="even">
+<td>Heating-type, determination-method and empty-value shares</td>
+<td><code>R/energy.R</code></td>
+<td>
+<code>HOOFDVERWARMING31DEC</code>, <code>GASBRON</code>,
+<code>ELEKBRON</code>, empty <code>GAS</code>/<code>ELEK</code>
+</td>
+<td>modelling choice</td>
+</tr>
+<tr class="odd">
 <td>PHEV/HEV fleet shares by year</td>
 <td><code>R/params_rdw.R</code></td>
 <td>split of hybrids from petrol</td>

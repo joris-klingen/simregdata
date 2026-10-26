@@ -121,7 +121,7 @@ when you switch to the real data. Similar pages:
 <tr class="odd">
 <td>Car density per gemeente</td>
 <td>ranking only</td>
-<td>wider spread, lease-company outliers</td>
+<td>wider spread; company cars have no gemeente there either</td>
 </tr>
 <tr class="even">
 <td>Weight distribution</td>
@@ -204,7 +204,7 @@ passenger cars, not on the word “personenauto”.</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">Passenger cars per 1,000 inhabitants, 2023</td>
-<td align="right">497</td>
+<td align="right">491</td>
 <td align="right">501</td>
 </tr></tbody>
 </table>
@@ -272,9 +272,11 @@ differ by fuel.</p>
 <span><span class="va">sim_gem</span><span class="op">[</span><span class="va">kent</span><span class="op">[</span>, <span class="va">.N</span>, by <span class="op">=</span> <span class="va">gemeente</span><span class="op">]</span>, on <span class="op">=</span> <span class="st">"gemeente"</span>, <span class="va">autos</span> <span class="op">:=</span> <span class="va">i.N</span><span class="op">]</span></span>
 <span><span class="va">sim_gem</span><span class="op">[</span>, <span class="va">sim</span> <span class="op">:=</span> <span class="fu">fcoalesce</span><span class="op">(</span><span class="va">autos</span>, <span class="fl">0L</span><span class="op">)</span> <span class="op">/</span> <span class="va">inwoners</span> <span class="op">*</span> <span class="fl">1000</span><span class="op">]</span></span></code></pre></div>
 <p><img src="quality-cars_files/figure-html/region.png" class="r-plt" alt="" width="350px"></p>
-<p>The ranking of gemeenten is reproduced (correlation 0.86), but the
-spread is compressed, and the outliers on the right, where lease
-companies register their cars, are missing.</p>
+<p>The ranking of gemeenten is reproduced (correlation 0.88). The
+simulated densities are lower because company cars have no owner in the
+population, while StatLine counts them at the company’s address; the
+outliers where lease companies are registered are missing for the same
+reason.</p>
 </div>
 <div class="section level2">
 <h2 id="income">Income<a class="anchor" aria-label="anchor" href="#income"></a>
@@ -299,35 +301,30 @@ not look like it.</p>
 <div class="section level2">
 <h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
 </h2>
-<p>The real files differ from the simulated ones in ways that can break
-code or silently change results:</p>
+<p>The simulated files already have the structure that trips up code on
+the real data, so the code above handles it:</p>
 <ul>
 <li>
-<strong>Several vehicles per owner.</strong> Every simulated owner
-has one vehicle; in reality many own several. Count cars per person or
-household with <code>.N</code>, and check that joins from vehicles to
-persons do not assume one row per person.</li>
+<strong>Vehicle status.</strong> <code>RDWNPACT</code> holds dropped
+and business-stock cars; the filter on code 6 keeps active passenger
+cars only.</li>
 <li>
-<strong>Owners outside the population.</strong> Vehicles of
-companies and of persons not in the GBA (<code>RINPERSOONS</code> K or
-S, <code>SRTREFVRTG</code> other than natural person) do not join to
-woonbase. Decide where they go before counting per gemeente.</li>
+<strong>Several vehicles per owner.</strong> Counts per person or
+household use <code>.N</code> and <code>%in%</code>, not one row per
+person.</li>
 <li>
-<strong><code>VERKEERSPRESTATIE</code> holds only passenger cars of
-natural persons.</strong> The simulated file has every vehicle, so a
-join from all vehicles finds kilometres for vans and trucks that have
-none in reality.</li>
+<strong>Owners outside the population.</strong> Company cars and
+owners not in the GBA (<code>RINPERSOONS</code> K or S) do not join to
+woonbase, so they are missing from the gemeente and income breakdowns,
+as they will be in Remote Access.</li>
 <li>
-<strong>Types.</strong> <code>VPGEWICHT</code>,
-<code>VPDGNWEG</code> and <code>AANTALCYLCORVRTG</code> are numeric in
-the real file and character here; wrap them in <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code>
-so both work.</li>
-<li>
-<strong>Codes not simulated.</strong> Dropped and business-stock
-vehicles, colour code 99 (not applicable) and the rarer fuel codes
-(hydrogen, pre-2016 hybrid) occur only in the real data. Tables over all
-codes get extra rows.</li>
+<strong><code>VERKEERSPRESTATIE</code></strong> holds active
+passenger cars of natural persons only, and <code>VPGEWICHT</code>
+varies, so the kilometres are weighted.</li>
 </ul>
+<p>What still differs is content, not structure: the combinations of
+fuel, construction year, weight, mileage and income listed at the
+top.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

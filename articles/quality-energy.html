@@ -141,8 +141,8 @@ year)</td>
 </tr>
 <tr class="odd">
 <td>Heating type, gas-free dwellings</td>
-<td>no</td>
-<td>see below</td>
+<td>codes consistent, shares assumed</td>
+<td>can differ</td>
 </tr>
 </tbody>
 </table>
@@ -160,7 +160,9 @@ the real data.</p>
 <span><span class="fu"><a href="../reference/sim_init.html">sim_init</a></span><span class="op">(</span><span class="st">"energieverbruik"</span>, year <span class="op">=</span> <span class="fl">2023</span>, seed <span class="op">=</span> <span class="fl">43L</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">energie</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"ENERGIEVERBRUIK2023TABV1"</span>,</span>
-<span>  col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINOBJECTNUMMER</span>, <span class="va">GASSJV</span>, <span class="va">ELEK</span>, <span class="va">ELEKTERUG</span>, <span class="va">ELEKNETTO</span>, <span class="va">ZONPV</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINOBJECTNUMMER</span>, <span class="va">GASSJV</span>, <span class="va">ELEK</span>, <span class="va">ELEKTERUG</span>, <span class="va">ELEKNETTO</span>, <span class="va">ZONPV</span>, <span class="va">GASBRON</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># StatLine covers occupied dwellings: drop vacant ones (GASBRON LG)</span></span>
+<span><span class="va">energie</span> <span class="op">&lt;-</span> <span class="va">energie</span><span class="op">[</span><span class="fu"><a href="../reference/cbs_code.html">cbs_code</a></span><span class="op">(</span><span class="va">GASBRON</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"LG"</span><span class="op">]</span></span>
 <span><span class="va">woonr</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"WoonbasePopulatieWoonruimten2023V1"</span>,</span>
 <span>  col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">RINOBJECTNUMMER</span>, <span class="va">VBOWoningType1Jan</span>, <span class="va">AantalPersonenPerVSLKlasse1Jan</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">kenm</span> <span class="op">&lt;-</span> <span class="fu">as.data.table</span><span class="op">(</span><span class="fu"><a href="../reference/read_sav.html">read_sav</a></span><span class="op">(</span><span class="st">"WoonbaseKenmerkenWoonruimten2023V1"</span>,</span>
@@ -214,8 +216,8 @@ smallest, and gas use falls steadily with the construction year.</p>
 <span>        by <span class="op">=</span> <span class="fu">.</span><span class="op">(</span>zonnepanelen <span class="op">=</span> <span class="va">zon</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;    zonnepanelen    netto teruglevering</span></span>
 <span><span class="co">#&gt;          &lt;lgcl&gt;    &lt;num&gt;         &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:        FALSE 2203.572          0.00</span></span>
-<span><span class="co">#&gt; 2:         TRUE 1102.415       1750.33</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:        FALSE 2248.487         0.000</span></span>
+<span><span class="co">#&gt; 2:         TRUE 1269.798      1712.911</span></span></code></pre></div>
 <p><img src="quality-energy_files/figure-html/elek-bewoners.png" class="r-plt" alt="" width="350px"><img src="quality-energy_files/figure-html/zon-type.png" class="r-plt" alt="" width="350px"><img src="quality-energy_files/figure-html/netto.png" class="r-plt" alt="" width="350px"></p>
 <p>Electricity rises with the number of occupants, a few percent high in
 every group. Solar panels follow the published shares per dwelling type,
@@ -240,35 +242,28 @@ low-use dwellings.</p>
 <div class="section level2">
 <h2 id="before-you-move-to-remote-access">Before you move to Remote Access<a class="anchor" aria-label="anchor" href="#before-you-move-to-remote-access"></a>
 </h2>
+<p>The simulated file follows the rules of the real one, so the code
+above already deals with them:</p>
 <ul>
 <li>
 <strong>Empty values.</strong> <code>GAS</code> and
-<code>ELEK</code> are empty in the real file when there is too little
-information, never in the simulated one. Every mean and quantile above
-uses <code>na.rm = TRUE</code>; without it the real results are
-<code>NA</code>.</li>
+<code>ELEK</code> are empty where delivery was not assigned
+(<code>GASBRON</code> NT), so every mean and quantile uses
+<code>na.rm = TRUE</code>.</li>
 <li>
-<strong>Net electricity.</strong> In the real file
-<code>ELEKNETTO</code> is <code>ELEK - ELEKTERUG</code> capped at 0, and
-<code>ELEKTERUG</code> is capped at twice <code>ELEK</code>. The
-simulated values break both caps for a few percent of dwellings, so code
-that recomputes net demand will not reproduce the simulated
-<code>ELEKNETTO</code> exactly.</li>
+<strong>Vacant dwellings</strong> have no gas and no electricity
+(<code>GASBRON</code> LG) and are dropped, as StatLine covers occupied
+dwellings.</li>
 <li>
-<strong>Gas-free dwellings.</strong> Zero gas use is spread evenly
-over all <code>GASBRON</code> groups here; in reality it is concentrated
-in heat-pump, district-heating and vacant dwellings. Code that uses
-<code>GASBRON</code> or <code>GAS == 0</code> to classify dwellings
-runs, but its result here is meaningless.</li>
+<strong>Net electricity</strong> is <code>ELEK - ELEKTERUG</code>
+capped at 0, with feed-in capped at twice delivery; recompute it the
+same way or use <code>ELEKNETTO</code>.</li>
 <li>
-<strong>Heating type.</strong> Only four of the nine
-<code>HOOFDVERWARMING31DEC</code> codes occur in the simulation; tables
-by heating type get extra rows on the real data.</li>
-<li>
-<strong>Vacant dwellings.</strong> Every simulated dwelling has a
-household. In reality vacant dwellings exist, so joins from energy to
-households leave dwellings without occupants.</li>
+<strong>Variables from 2022.</strong> <code>ZONPVBRON</code> and
+<code>KBHOOFDVERWARMING31DEC</code> are empty in earlier years.</li>
 </ul>
+<p>What still differs is content: combinations of characteristics that
+the one-way StatLine tables do not pin down.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

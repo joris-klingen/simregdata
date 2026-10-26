@@ -52,7 +52,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="simregdata-040">simregdata 0.4.0<a class="anchor" aria-label="anchor" href="#simregdata-040"></a></h2>
-<ul><li>Documentation moved to a pkgdown site; README and getting-started vignette shortened.</li>
+<ul><li>Simulated files now have the structure of the real ones where it breaks code: owners with several vehicles, dropped and business-stock cars, company owners outside the population, <code>VERKEERSPRESTATIE</code> limited to active cars of natural persons, numeric RDW columns; INHATAB codes for unknown income and institutional households and negative incomes; empty <code>GAS</code>/<code>ELEK</code>, capped <code>ELEKNETTO</code>, consistent heating and determination codes; vacant dwellings and unknown floor area and WOZ classes.</li>
+<li>New column rules in the YAML specs: <code>only_for</code>, <code>not_for</code>, <code>codes_for</code> and <code>numeric: true</code>.</li>
+<li>Documentation moved to a pkgdown site; README and getting-started vignette shortened.</li>
 <li>Worked examples (cars, household income, energy use) that develop analysis code on simulated data, compare it with StatLine and list what differs in Remote Access.</li>
 <li>Dwelling characteristics (municipality, build year, floor area) are stable across years.</li>
 <li>Energy use depends on dwelling type, floor area, build year and household size, calibrated to StatLine 81528NED and 85140NED.</li>

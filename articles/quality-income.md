@@ -18,9 +18,9 @@ and
 |----|----|----|
 | Mean and median income, overall and by household type | yes | similar; a large gap means a bug |
 | Gross and standardised income | yes | similar |
-| Percentile columns | yes | similar, plus special codes |
-| Distribution over income classes | bulk yes, tails too thin | more households at both ends |
-| Decile means (inequality) | up to decile 8 | top decile much higher |
+| Percentile columns, including special codes | yes | similar |
+| Distribution over income classes | too wide | more concentrated in the middle |
+| Decile means (inequality) | deciles 1 to 7 | lower in deciles 8 and 9 |
 | Primary income | too high | lower |
 | Personal incomes summing to household income | no | consistent |
 
@@ -43,6 +43,9 @@ hh <- as.data.table(read_sav("WoonbasePopulatieHuishoudens2023V1",
 inpa <- as.data.table(read_sav("INPA2023TABV1",
                                col_select = c(RINPERSOON, RINPERSOONHKW, INPPERSBESTINK)))
 inha <- as.data.table(read_sav("INHA2023TABV1"))
+# percentile codes -1 (unknown income, money fields 9999999999) and
+# -2 (institutional household) are outside the StatLine population
+inha <- inha[INHP100HBEST > 0]
 
 # INHATAB is keyed on RINPERSOONHKW; INPATAB links it to persons, woonbase
 # links persons to households
@@ -67,8 +70,8 @@ sim_level <- hh[, .(gemiddeld = mean(inkomen), mediaan = median(inkomen))]
 
 |                          | simulatie | StatLine |
 |:-------------------------|----------:|---------:|
-| Mean disposable income   |    59,900 |   57,600 |
-| Median disposable income |    47,100 |   44,700 |
+| Mean disposable income   |    59,200 |   57,600 |
+| Median disposable income |    46,700 |   44,700 |
 
 ![](quality-income_files/figure-html/concepts.png)
 
@@ -86,11 +89,11 @@ sim_dec <- hh[order(inkomen), .(deciel = ceiling(seq_len(.N) / .N * 10), inkomen
 
 ![](quality-income_files/figure-html/classes.png)![](quality-income_files/figure-html/deciles.png)
 
-The bulk of the distribution matches. The tails are too thin: hardly any
-household falls below 10,000 euro (self-employed with losses, students),
-and the top decile averages 164 thousand euro against 172 thousand in
-reality, so inequality measures that weigh the very top come out too
-low.
+The simulated distribution is wider than the real one: too many
+households between 10 and 20 thousand euro and between 100 and 200
+thousand, too few in the middle. The top decile averages 164 thousand
+euro against 172 thousand in reality. Code for classes and deciles runs
+unchanged; expect a more concentrated distribution in Remote Access.
 
 `INHP100HBEST` is the rank of the household income (rank correlation
 1.000), so grouping on it gives the same deciles as computing the ranks
@@ -120,8 +123,8 @@ households, in the simulation as in reality.
 
 pers_sum <- inpa[, .(som_personen = sum(as.numeric(INPPERSBESTINK))), by = RINPERSOONHKW]
 pers_sum[inha, on = "RINPERSOONHKW", huishouden := as.numeric(i.INHBESTINKH)]
-pers_sum[, cor(som_personen, huishouden)]
-#> [1] 0.1828951
+pers_sum[, cor(som_personen, huishouden, use = "complete.obs")]
+#> [1] 0.2755623
 ```
 
 Personal incomes in `INPATAB` are drawn independently of the household,
@@ -131,20 +134,13 @@ one above only passes on the real data.
 
 ## Before you move to Remote Access
 
-- **Negative and very low incomes.** Simulated household income is at
-  least a few thousand euro; in reality self-employed households can
-  have negative disposable income.
-  [`log()`](https://rdrr.io/r/base/Log.html), ratios to income and
-  classes starting at 0 need a rule for them.
-- **Special codes.** In comparable CBS files (such as VEHTAB) percentile
-  columns use negative codes for unknown income and institutional
-  households. Check the INHATAB documentation and exclude those codes
-  before averaging or ranking; the simulated percentiles are always 1 to
-  100.
-- **Losses of persons.** Personal income in `INPATAB` is floored at
-  exactly -50,000 euro here, with no floor in reality; don’t build
-  classes around that value.
-- **Private households.** StatLine covers private households only. The
-  filter on `TYPHH1Jan` above does that for the woonbase link; on the
-  real data also check how institutional households appear in `INHATAB`
-  itself.
+The simulated `INHATAB` has the special values of the real file: unknown
+incomes (9999999999 in money fields, -1 in percentiles), institutional
+households (-2) and negative incomes. The filter on `INHP100HBEST` above
+removes the first two; without it the mean income is off by orders of
+magnitude. Negative incomes stay in, as in StatLine, so
+[`log()`](https://rdrr.io/r/base/Log.html) or ratios to income need a
+rule for them.
+
+What still differs is content: the spread of the distribution, primary
+income and the link between personal and household income.

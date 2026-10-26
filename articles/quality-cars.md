@@ -18,7 +18,7 @@ and
 |----|----|----|
 | Cars per inhabitant, fuel mix, age profile | yes | similar; a large gap means a bug |
 | Average annual kilometres | yes | similar, once weighted with `VPGEWICHT` |
-| Car density per gemeente | ranking only | wider spread, lease-company outliers |
+| Car density per gemeente | ranking only | wider spread; company cars have no gemeente there either |
 | Weight distribution | mean and spread only | different shape |
 | EV share by construction year | no | concentrated in recent years |
 | Kilometres by fuel | no | diesel much higher |
@@ -82,7 +82,7 @@ sim_fleet <- cars[year == 2023, .N / n_pers[1] * 1000]
 
 |                                            | simulatie | StatLine |
 |:-------------------------------------------|----------:|---------:|
-| Passenger cars per 1,000 inhabitants, 2023 |       497 |      501 |
+| Passenger cars per 1,000 inhabitants, 2023 |       491 |      501 |
 
 ``` r
 
@@ -161,9 +161,11 @@ sim_gem[, sim := fcoalesce(autos, 0L) / inwoners * 1000]
 
 ![](quality-cars_files/figure-html/region.png)
 
-The ranking of gemeenten is reproduced (correlation 0.86), but the
-spread is compressed, and the outliers on the right, where lease
-companies register their cars, are missing.
+The ranking of gemeenten is reproduced (correlation 0.88). The simulated
+densities are lower because company cars have no owner in the
+population, while StatLine counts them at the company’s address; the
+outliers where lease companies are registered are missing for the same
+reason.
 
 ## Income
 
@@ -190,24 +192,19 @@ not look like it.
 
 ## Before you move to Remote Access
 
-The real files differ from the simulated ones in ways that can break
-code or silently change results:
+The simulated files already have the structure that trips up code on the
+real data, so the code above handles it:
 
-- **Several vehicles per owner.** Every simulated owner has one vehicle;
-  in reality many own several. Count cars per person or household with
-  `.N`, and check that joins from vehicles to persons do not assume one
-  row per person.
-- **Owners outside the population.** Vehicles of companies and of
-  persons not in the GBA (`RINPERSOONS` K or S, `SRTREFVRTG` other than
-  natural person) do not join to woonbase. Decide where they go before
-  counting per gemeente.
-- **`VERKEERSPRESTATIE` holds only passenger cars of natural persons.**
-  The simulated file has every vehicle, so a join from all vehicles
-  finds kilometres for vans and trucks that have none in reality.
-- **Types.** `VPGEWICHT`, `VPDGNWEG` and `AANTALCYLCORVRTG` are numeric
-  in the real file and character here; wrap them in
-  [`as.numeric()`](https://rdrr.io/r/base/numeric.html) so both work.
-- **Codes not simulated.** Dropped and business-stock vehicles, colour
-  code 99 (not applicable) and the rarer fuel codes (hydrogen, pre-2016
-  hybrid) occur only in the real data. Tables over all codes get extra
-  rows.
+- **Vehicle status.** `RDWNPACT` holds dropped and business-stock cars;
+  the filter on code 6 keeps active passenger cars only.
+- **Several vehicles per owner.** Counts per person or household use
+  `.N` and `%in%`, not one row per person.
+- **Owners outside the population.** Company cars and owners not in the
+  GBA (`RINPERSOONS` K or S) do not join to woonbase, so they are
+  missing from the gemeente and income breakdowns, as they will be in
+  Remote Access.
+- **`VERKEERSPRESTATIE`** holds active passenger cars of natural persons
+  only, and `VPGEWICHT` varies, so the kilometres are weighted.
+
+What still differs is content, not structure: the combinations of fuel,
+construction year, weight, mileage and income listed at the top.
