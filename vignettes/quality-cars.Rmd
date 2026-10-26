@@ -28,8 +28,9 @@ which will change when you switch to the real data. Similar pages:
 
 ## At a glance
 
+::: {.glance}
 | Result | Looks like reality? | In Remote Access |
-|--------|---------------------|------------------|
+|--------------------|----------|--------------|
 | Cars per inhabitant, fuel mix, age profile | yes | similar; a large gap means a bug |
 | Average annual kilometres | yes | similar, once weighted with `VPGEWICHT` |
 | Car density per gemeente | ranking only | wider spread; company cars have no gemeente there either |
@@ -37,6 +38,7 @@ which will change when you switch to the real data. Similar pages:
 | EV share by construction year | no | concentrated in recent years |
 | Kilometres by fuel | no | diesel much higher |
 | Car ownership by income | no | falls steeply with income |
+:::
 
 Fuel, construction year, weight and mileage are drawn independently, so only
 results that depend on one of them at a time look realistic. The code runs
