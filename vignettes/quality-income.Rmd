@@ -28,8 +28,9 @@ pages: `vignette("quality-cars")` and `vignette("quality-energy")`.
 
 ## At a glance
 
+::: {.glance}
 | Result | Looks like reality? | In Remote Access |
-|--------|---------------------|------------------|
+|--------------------|----------|--------------|
 | Mean and median income, overall and by household type | yes | similar; a large gap means a bug |
 | Gross and standardised income | yes | similar |
 | Percentile columns, including special codes | yes | similar |
@@ -37,6 +38,7 @@ pages: `vignette("quality-cars")` and `vignette("quality-energy")`.
 | Decile means (inequality) | deciles 1 to 7 | lower in deciles 8 and 9 |
 | Primary income | too high | lower |
 | Personal incomes summing to household income | no | consistent |
+:::
 
 Household income is drawn per household type from the mean and median of
 83932NED; the class distribution and decile means are not calibrated.

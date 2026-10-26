@@ -28,8 +28,9 @@ Similar pages: `vignette("quality-cars")` and `vignette("quality-income")`.
 
 ## At a glance
 
+::: {.glance}
 | Result | Looks like reality? | In Remote Access |
-|--------|---------------------|------------------|
+|--------------------|----------|--------------|
 | Gas by dwelling type, construction year, floor area | yes, within a few percent | similar; a large gap means a bug |
 | Electricity by number of occupants | yes, about 5% high | similar |
 | Solar panels by dwelling type; net electricity with and without | yes | similar |
@@ -37,6 +38,7 @@ Similar pages: `vignette("quality-cars")` and `vignette("quality-income")`.
 | National means per year | trend yes, a few percent low | similar |
 | Combinations of characteristics (e.g. type by construction year) | not calibrated | can differ |
 | Heating type, gas-free dwellings | codes consistent, shares assumed | can differ |
+:::
 
 Gas and electricity are generated per dwelling from its characteristics and
 fitted to the one-way tables of 85140NED, so code for one-way breakdowns can
