@@ -3,8 +3,8 @@
 #' @importFrom rlang enquo quo_is_null quo_get_expr "%||%"
 #' @importFrom tidyselect eval_select
 #' @importFrom tibble as_tibble
-#' @importFrom stats rbinom rlnorm rnorm runif setNames
-#' @importFrom utils globalVariables
+#' @importFrom stats rbinom rlnorm rnorm rpois runif setNames
+#' @importFrom utils flush.console globalVariables
 NULL
 
 # Suppress R CMD check NOTEs for data.table NSE variables
@@ -60,7 +60,8 @@ globalVariables(c(
   "RINPERSOONHKW", "RINPERSOONSHKW", "HUISHOUDNR",
   "SECM", "period_group", "n_periods", "BEID",
   "BRANDSTCODECORVRTG", "pct_apartment", "pct_owner",
-  "RINPERSOONRELATIE", "RINPERSOONSRELATIE", "RELATIE"
+  "RINPERSOONRELATIE", "RINPERSOONSRELATIE", "RELATIE",
+  "gem", "i.SBEID", "BRUTINKH", "PRIMINKH", "P100HBRUT", "P100HPRIM"
 ))
 
 # Session cache environment — per-dataset spine + config caches

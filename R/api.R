@@ -58,7 +58,7 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
   builder <- ds$spine_builder
 
   if (identical(builder, "woonbase")) {
-    # Woonbase reads directly from the shared spine — no extra work
+    # Woonbase reads directly from the shared spine; no extra work
     .sim_cache$spine_woonbase  <- spine
     .sim_cache$params_woonbase <- .sim_cache$params
     .sim_cache$year_woonbase   <- year
@@ -969,7 +969,7 @@ sim_export <- function(output_dir, dataset = NULL, year = 2023L,
       # suffixes in the actual output, so comparing them causes false mismatches)
       if (!.file_needs_sim(meta, cbs_name, year, user_cols, n, seed)) {
         files_skipped <- c(files_skipped, out_path)
-        message(sprintf("  %s  (skipped — already simulated)", out_path))
+        message(sprintf("  %s  (skipped, already simulated)", out_path))
         next
       }
 
