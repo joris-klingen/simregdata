@@ -177,10 +177,13 @@
   # most common type, rather than left without a dwelling-type effect
   woningtype <- all_obj$VBOWoningType1Jan[i]
   woningtype[!woningtype %in% names(.ENERGY_DIMS$woningtype)] <- "04"
+  # unknown floor area is treated as an average dwelling (90 m2)
+  opp <- all_obj$VBOOppervlakte1Jan[i]
+  opp[is.na(opp)] <- 90L
   groups <- list(
     woningtype  = woningtype,
     bouwjaar    = cls(bouwjaar, bj_lower),
-    oppervlakte = cls(all_obj$VBOOppervlakte1Jan[i], opp_lower),
+    oppervlakte = cls(opp, opp_lower),
     bewoners    = as.character(pmin(pmax(occ, 1L), 5L))
   )
   target <- function(measure, dims) {
@@ -232,34 +235,88 @@
   # solar capacity (kWp, lognormal around 4 kWp, larger on larger dwellings)
   # and feed-in proportional to it, scaled so that net delivery is the
   # published share of delivery for dwellings with panels
-  opp <- all_obj$VBOOppervlakte1Jan[i]
   kwp <- ifelse(zon, round(exp(log(4) + 0.3 * log(opp / 100) +
     0.35 * stats::qnorm(.hash_mix(obj_num, "energy_kwp"))), 3), 0)
   netto_share <- s$zonnestroom$met$netto / s$zonnestroom$met$elek
   terug_target <- if (any(zon)) (1 - netto_share) * mean(elek[zon]) else 0
   terug <- if (any(zon)) kwp * terug_target / mean(kwp[zon]) else rep(0, n)
-  netto <- elek - terug
+  # as in the register: feed-in at most twice delivery, net delivery not below 0
+  elek <- round(elek)
+  terug <- pmin(round(terug), 2 * elek)
 
-  # main heating: district heating without gas, all-electric, or individual
-  # central heating (block heating for a share of apartments)
+  # main heating: district heating (part with gas for hot water or cooking),
+  # all-electric (part with gas, e.g. hybrid heat pumps), block heating for a
+  # share of apartments, otherwise individual central heating; a few unknown
+  u_hv <- .hash_mix(obj_num, "energy_hoofdverw")
   blok <- groups$woningtype %in% "05" & .hash_mix(obj_num, "energy_blok") < 0.15
-  hoofdverw <- data.table::fifelse(stadsw, "5",
-               data.table::fifelse(gasloos, "8", data.table::fifelse(blok, "2", "1")))
+  hoofdverw <- data.table::fcase(
+    stadsw & u_hv < 0.05,                     "3",
+    stadsw & u_hv < 0.30,                     "4",
+    stadsw,                                   "5",
+    gasloos,                                  "8",
+    u_hv < 0.005,                             "9",
+    !is.na(bouwjaar) & bouwjaar >= 2006 & u_hv < 0.06, "7",
+    u_hv < 0.015,                             "6",
+    blok,                                     "2",
+    default =                                 "1")
+  # district heating with gas for hot water or cooking uses a little gas
+  kook <- hoofdverw %in% c("3", "4")
+  gassjv[kook] <- 100 + 200 * .hash_mix(obj_num[kook], "energy_kookgas")
+  gas[kook] <- gassjv[kook] * s$gas_actual_ratio
+  gasloos[kook] <- FALSE
+
+  # how delivery was determined; GAS and ELEK are empty when there was too
+  # little information (not assigned)
+  u_bron <- .hash_mix(obj_num, "energy_bron")
+  gasbron <- data.table::fcase(
+    stadsw,                     "SW",
+    gasloos,                    "WP",
+    u_bron < 0.002,             "NT",
+    u_bron < 0.052,             "IM",
+    u_bron < 0.072,             "TP",
+    u_bron < 0.082,             "BW",
+    u_bron < 0.091,             "ZW",
+    default =                   "WG")
+  elekbron <- data.table::fcase(
+    u_bron < 0.052,             "IM",
+    u_bron < 0.082,             "BW",
+    u_bron < 0.091,             "ZW",
+    default =                   "WG")
+  # vacant dwellings (no residents): no gas, no electricity, no panels
+  leeg <- occ == 0L
+  gasbron[leeg] <- "LG"
+  elekbron[leeg] <- "LG"
+  gas[leeg] <- 0; gassjv[leeg] <- 0; elek[leeg] <- 0; terug[leeg] <- 0
+  zon[leeg] <- FALSE; kwp[leeg] <- 0
+  gas_na <- gasbron == "NT"
+  elek_na <- .hash_mix(obj_num, "energy_elek_na") < 0.002 & !leeg
+
+  # source of the solar indication; the variable and the new heating
+  # classification exist from 2022
+  u_zb <- .hash_mix(obj_num, "energy_zonpvbron")
+  zonpvbron <- data.table::fifelse(!zon, "4", data.table::fifelse(
+    u_zb < 0.55, "1", data.table::fifelse(u_zb < 0.70, "2", "3")))
+  vanaf_2022 <- function(x) if (year >= 2022L) x else rep(NA_character_, n)
 
   out <- data.table::copy(obj)
   cols <- list(
     STADSW           = as.character(as.integer(stadsw)),
-    GAS              = round(gas),
-    GASSJV           = round(gassjv),
-    ELEK             = round(elek),
-    ELEKTERUG        = round(terug),
-    ELEKNETTO        = round(elek) - round(terug),
+    GAS              = data.table::fifelse(gas_na, NA_real_, round(gas)),
+    GASSJV           = data.table::fifelse(gas_na, NA_real_, round(gassjv)),
+    ELEK             = data.table::fifelse(elek_na, NA_real_, round(elek)),
+    ELEKTERUG        = terug,
+    ELEKNETTO        = data.table::fifelse(elek_na, NA_real_,
+                                           pmax(elek - terug, 0)),
+    GASBRON          = gasbron,
+    ELEKBRON         = elekbron,
+    GASWONING        = as.character(as.integer(!gasloos)),
     ZONPV            = as.character(as.integer(zon)),
+    ZONPVBRON        = vanaf_2022(zonpvbron),
     ZONVERMOGEN1JAN  = kwp,
     ZONVERMOGEN31DEC = kwp,
     WARMTESCHATTING  = round(ifelse(stadsw, f_gas * 0.0317, 0), 1),
     HOOFDVERWARMING31DEC   = hoofdverw,
-    KBHOOFDVERWARMING31DEC = sprintf("%02d", as.integer(hoofdverw))
+    KBHOOFDVERWARMING31DEC = vanaf_2022(sprintf("%02d", as.integer(hoofdverw)))
   )
   for (m in 1:12) {
     mm <- sprintf("%02d", m)

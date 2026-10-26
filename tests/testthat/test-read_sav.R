@@ -18,7 +18,9 @@ test_that("spine initialisation works", {
 
   expect_gte(n_pers, 4500L)
   expect_gte(n_hh,   1500L)
-  expect_equal(n_obj, n_hh)
+  # dwellings: one per household plus vacant ones
+  expect_gt(n_obj, n_hh)
+  expect_lt(n_obj, 1.05 * n_hh)
 })
 
 

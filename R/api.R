@@ -221,14 +221,23 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         # Only sample with replacement when we genuinely need more records than
         # there are persons; weighted-without-replacement still respects the
         # gemeente weights while keeping RINPERSOON/RINKENTEKEN unique.
-        need_replace <- n_records > nrow(spine$pers)
+        # RDW: draw owners, each with one or more vehicles (R/rdw_vehicles.R).
+        # Dropped and business-stock cars come on top of the active fleet.
+        n_draw <- n_records
+        if (identical(dataset, "rdw")) {
+          p_car <- .load_rdw_params(year)$vrtgsoort_p[["6"]] %||% 0.7
+          n_records <- as.integer(round(n_records / (1 - p_car *
+            (.RDW_CAR_UITVAL + .RDW_CAR_BEDRIJFSVOORRAAD))))
+          n_draw <- as.integer(ceiling(n_records / .RDW_MEAN_VEHICLES * 1.05))
+        }
+        need_replace <- n_draw > nrow(spine$pers)
         if (!is.null(gem_col)) {
           pw <- gem_wt$veh_weight[match(gem_col, gem_wt$gem_code)]
           pw[is.na(pw)] <- 1.0
-          idx <- sample.int(nrow(spine$pers), n_records,
+          idx <- sample.int(nrow(spine$pers), n_draw,
             replace = need_replace, prob = pw)
         } else {
-          idx <- sample.int(nrow(spine$pers), n_records,
+          idx <- sample.int(nrow(spine$pers), n_draw,
             replace = need_replace)
         }
 
@@ -237,13 +246,17 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
         pers_cols <- intersect(pers_cols, names(spine$pers))
         if (length(pers_cols) == 0L) pers_cols <- "RINPERSOON"
         ds_spine$pers <- spine$pers[idx, ..pers_cols]
+        if (identical(dataset, "rdw")) {
+          ds_spine$pers <- .rdw_expand_owners(ds_spine$pers, n_records)
+        }
       }
 
       # Generate deterministic RINKENTEKEN from RINPERSOON
       # ~12% annual car turnover: persons who "buy a new car" get a different
       # kenteken derived from RINPERSOON + year (deterministic per person-year)
       if ("RINKENTEKEN" %in% needed$pers && !("RINKENTEKEN" %in% names(ds_spine$pers))) {
-        rp <- ds_spine$pers$RINPERSOON
+        # one key per vehicle: owners can have several (R/rdw_vehicles.R)
+        rp <- .rdw_vehicle_key(ds_spine$pers$RINPERSOON, ds_spine$pers$slot)
         base_kt <- .deterministic_kenteken(rp)
         # Deterministic turnover: hash RINPERSOON to a "car birth year"
         # that is stable per person. ~12% chance of new car each year.
@@ -306,6 +319,11 @@ sim_init <- function(dataset = "woonbase", year = 2023L, n = NULL, seed = 42L) {
           "RINPERSOON" %in% names(ds_spine$pers)) {
         present_ids <- spine$pers$RINPERSOON[spine$pers_present]
         ds_spine$pers <- ds_spine$pers[RINPERSOON %in% present_ids]
+      }
+
+      if (identical(dataset, "rdw")) {
+        ds_spine$pers <- .rdw_vehicle_structure(ds_spine$pers, .load_rdw_params(year))
+        ds_spine$vp <- .rdw_verkeersprestatie(ds_spine$pers)
       }
     }
 

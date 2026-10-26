@@ -60,3 +60,11 @@ flip <- function(d, x) {
   d[, bron := factor(bron, levels = c("StatLine", "simulatie"))]
   d
 }
+
+# Lines: simulatie blue, StatLine magenta, as in the bar charts; pass
+# colour_index = c(6, 2)
+lines_bron <- function(d) {
+  d <- copy(d)
+  d[, bron := factor(bron, levels = c("simulatie", "StatLine"))]
+  d
+}

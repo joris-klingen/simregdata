@@ -139,7 +139,8 @@ test_that("yearly registers only hold persons present in the year", {
   pop <- data.table::as.data.table(read_sav("WoonbasePopulatiePersonen2023V1",
     col_select = c(RINPERSOON)))
   kent <- data.table::as.data.table(read_sav("RDWNPACT2023TABV1",
-    col_select = c(RINPERSOON)))
+    col_select = c(RINPERSOONS, RINPERSOON)))
+  kent <- kent[as.character(cbs_code(RINPERSOONS)) == "R"]
   inpa <- data.table::as.data.table(read_sav("INPA2023TABV1",
     col_select = c(RINPERSOON)))
 
@@ -154,7 +155,9 @@ test_that("RDW fleet is scaled to the population present in the year", {
   sim_init("rdw", year = 2023L, seed = 3L)
   n_pop <- nrow(read_sav("WoonbasePopulatiePersonen2023V1",
     col_select = c(RINPERSOON)))
-  n_veh <- nrow(read_sav("RDWNPACT2023TABV1", col_select = c(RINPERSOON)))
+  # active fleet: dropped and business-stock cars come on top
+  soort <- read_sav("RDWNPACT2023TABV1", col_select = c(VRTGSOORT))$VRTGSOORT
+  n_veh <- sum(!as.character(cbs_code(soort)) %in% c("F", "P"))
   p <- rdw_cbs_params(2023L)
   expected <- p$n_vehicles / woonbase_cbs_params(2023L)$n_persons
   expect_equal(n_veh / n_pop, expected, tolerance = 0.03)

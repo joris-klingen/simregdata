@@ -39,17 +39,13 @@ columns:
 
   # ---- Gas determination method ----
   - name: GASBRON
-    random_categorical:
-      values: ["BW", "IM", "LG", "NT", "SW", "TP", "WG", "WP", "ZW"]
-      probs:  [0.01, 0.05, 0.02, 0.001, 0.05, 0.02, 0.82, 0.02, 0.009]
+    source: spine.obj.GASBRON
     codelist: GASBRON
     label: Bepalingsmethode aardgaslevering
 
   # ---- Electricity determination method ----
   - name: ELEKBRON
-    random_categorical:
-      values: ["BW", "IM", "LG", "WG", "ZW"]
-      probs:  [0.01, 0.05, 0.02, 0.91, 0.01]
+    source: spine.obj.ELEKBRON
     codelist: ELEKBRON
     label: Bepalingsmethode elektriciteitslevering
 
@@ -90,9 +86,7 @@ columns:
 
   # ---- Solar PV source ----
   - name: ZONPVBRON
-    random_categorical:
-      values: ["1", "2", "3", "4"]
-      probs:  [0.20, 0.05, 0.10, 0.65]
+    source: spine.obj.ZONPVBRON
     codelist: ZONPVBRON
     label: Bron waarop ZONPV is gebaseerd
 
@@ -103,10 +97,12 @@ columns:
     label: Hoofdverwarmingstype
 
   # ---- Dwelling occupancy profiles ----
+  # -1 for dwellings without natural gas
   - name: WONINGBEWONING10PROFIELEN
+    codes_for: {column: GASWONING, values: {"0": "-1"}}
     random_categorical:
-      values: ["-1", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "19"]
-      probs:  [0.08, 0.02, 0.08, 0.10, 0.08, 0.06, 0.08, 0.10, 0.10, 0.12, 0.08, 0.06, 0.04]
+      values: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "19"]
+      probs:  [0.02, 0.09, 0.11, 0.09, 0.07, 0.09, 0.11, 0.11, 0.13, 0.08, 0.06, 0.04]
     codelist: WONINGBEWONING10PROFIELEN
     label: Woningbewoning 10 profielen
 

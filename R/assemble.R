@@ -133,6 +133,41 @@
   stop("Cannot resolve column spec: ", paste(names(col_spec), collapse = ", "))
 }
 
+# Column rules applied after resolving: `numeric: true` on a categorical
+# returns numbers; `only_for` / `not_for` ({column, values}) leave the value
+# empty for rows whose spine `column` is outside / inside `values`;
+.apply_column_rules <- function(val, col_spec, spine_tbl) {
+  if (isTRUE(col_spec$random_categorical$numeric)) val <- as.numeric(val)
+  for (rule in c("only_for", "not_for")) {
+    r <- col_spec[[rule]]
+    if (is.null(r) || !(r$column %in% names(spine_tbl))) next
+    ref <- as.character(spine_tbl[[r$column]])
+    if (length(ref) != length(val)) next
+    hit <- ref %in% as.character(r$values)
+    val[if (rule == "only_for") !hit else hit] <- NA
+  }
+  # `codes_for: {column, values: {key: code}}` sets a special code for rows
+  # whose spine `column` equals `key` (e.g. unknown income)
+  r <- col_spec$codes_for
+  if (!is.null(r) && r$column %in% names(spine_tbl)) {
+    ref <- as.character(spine_tbl[[r$column]])
+    if (length(ref) == length(val)) {
+      for (k in names(r$values)) {
+        hit <- ref == k
+        if (!any(hit)) next
+        code <- r$values[[k]]
+        if (is.character(val)) {
+          code <- as.character(code)
+        } else if (is.integer(val) && abs(code) > .Machine$integer.max) {
+          val <- as.numeric(val)
+        }
+        val[hit] <- code
+      }
+    }
+  }
+  val
+}
+
 # Apply codelist labelling to a column value
 .apply_codelist <- function(val, col_spec, codelists) {
   if (is.null(col_spec$codelist)) {
@@ -382,6 +417,7 @@
 
         val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
                                computed, params, base_tbl = base_tbl)
+        val <- .apply_column_rules(val, cs2, spine[[tbl_name]])
         val <- .apply_codelist(val, cs2, codelists)
         idx <- idx + 1L
         result_cols[[idx]] <- val
@@ -402,6 +438,7 @@
 
         val <- .resolve_column(cs2, spine, n_rows, codelists, jan1, dec31,
                                computed, params, base_tbl = base_tbl)
+        val <- .apply_column_rules(val, cs2, spine[[tbl_name]])
         val <- .apply_codelist(val, cs2, codelists)
         idx <- idx + 1L
         result_cols[[idx]] <- val
@@ -421,6 +458,7 @@
       } else {
         val <- .resolve_column(cs, spine, n_rows, codelists, jan1, dec31,
                                computed, params, base_tbl = base_tbl)
+        val <- .apply_column_rules(val, cs, spine[[tbl_name]])
         val <- .apply_codelist(val, cs, codelists)
       }
       idx <- idx + 1L
